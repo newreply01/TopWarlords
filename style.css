@@ -3224,45 +3224,77 @@ body:has(.battle:not([hidden])) .command-deck,
 [data-theme="light"] .team-style-badge:hover{background:rgba(2,132,199,.06);border-color:var(--cyan)}
 [data-theme="light"] kbd{background:rgba(15,23,42,.06);border-color:var(--line);color:var(--muted)}
 /* ---------- 真實感軍武照片代表、Tooltip 寬屏寫真與戰術即時鏡頭 (Combat Cam) ---------- */
+/* ---------- 三國志風格名將肖像框與立體卡片結構 ---------- */
 .m-card {
   position: relative;
   overflow: hidden;
+  padding: 6px 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
 }
-.m-card-photo {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.m-card-main-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.m-avatar-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid var(--c);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  background: #0f172a;
+}
+.m-avatar-img {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover;
-  object-position: center 32%;
-  opacity: 0.24;
-  mask-image: linear-gradient(90deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,1) 100%);
-  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,1) 100%);
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-  z-index: 0;
+  object-fit: cover !important;
+  object-position: center !important; /* 精準聚焦在名將頭像與題名 */
+  display: block;
 }
-.m-card:hover .m-card-photo {
-  opacity: 0.62;
-  transform: scale(1.04);
+.m-avatar-cost {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-family: var(--head);
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 0 4px;
+  border-top-left-radius: 4px;
+  line-height: 13px;
+  border-left: 1px solid var(--c);
+  border-top: 1px solid var(--c);
 }
-.m-card.sel .m-card-photo {
-  opacity: 0.35 !important;
+.m-card-info-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-[data-theme="light"] .m-card-photo {
-  opacity: 0.38;
-  mask-image: linear-gradient(90deg, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.75) 50%, rgba(0,0,0,1) 100%);
-  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.75) 50%, rgba(0,0,0,1) 100%);
+.m-weapon-strip {
+  font-size: 10px;
+  color: var(--amber);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
 }
-[data-theme="light"] .m-card:hover .m-card-photo {
-  opacity: 0.68;
+.m-card:hover .m-avatar-wrap {
+  transform: scale(1.08);
+  box-shadow: 0 0 12px var(--c);
+  transition: all .2s ease;
 }
-[data-theme="light"] .m-card.sel .m-card-photo {
-  opacity: 0.25 !important;
-  filter: saturate(1.1) contrast(1.05);
+.m-card.sel .m-avatar-wrap {
+  border-color: #22d3ee !important;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.6) !important;
 }
 .m-top, .m-bot {
   position: relative;

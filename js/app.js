@@ -1180,15 +1180,22 @@ function renderMatrix() {
 
       return `<div class="m-card ${isEquipped ? 'sel' : ''} ${showWhy ? 'dis' : ''} ${isBanned ? 'banned' : ''}"
                    style="--c:${c}" data-id="${u.id}" data-cat="${cat}" data-cost="${u.cost}">
-        ${u.img ? `<img class="m-card-photo" src="${u.img}" width="640" height="360" loading="lazy" decoding="async" alt="${esc(u.name)}" onerror="this.style.display='none'" />` : ''}
-        <div class="m-top">
-          <span class="m-cost">$${u.cost}</span>
-          <div class="m-name-group">
-            <div class="m-name" title="${esc(u.name)}"><span class="m-flag" style="margin-right:2px">${u.flag || ''}</span> ${esc(u.name)}</div>
-            <div class="m-tag">${esc(u.tag)}</div>
+        <div class="m-card-main-row">
+          <div class="m-avatar-wrap">
+            <img class="m-avatar-img" src="${u.img || ''}" width="48" height="48" loading="lazy" decoding="async" alt="${esc(u.name)}" onerror="this.style.display='none'" />
+            <span class="m-avatar-cost">$${u.cost}</span>
           </div>
-          <div class="m-actions">
-            <button class="m-info-btn" data-info-id="${u.id}" title="查看裝備詳細情報">ℹ</button>
+          <div class="m-card-info-col">
+            <div class="m-top">
+              <div class="m-name-group">
+                <div class="m-name" title="${esc(u.name)}"><span class="m-flag" style="margin-right:2px">${u.flag || ''}</span> ${esc(u.name)}</div>
+                <div class="m-tag">${esc(u.tag)}</div>
+              </div>
+              <div class="m-actions">
+                <button class="m-info-btn" data-info-id="${u.id}" title="查看名將傳記與實戰數值">ℹ</button>
+              </div>
+            </div>
+            <div class="m-weapon-strip">⚔️ ${esc((u.weapon || '').split(' ')[0])}</div>
           </div>
         </div>
         <div class="m-mobile-intel">${u.weapon ? `<span class="m-mob-wpn">🎯 ${esc(u.weapon)}</span>` : ''}${(u.traits && u.traits.length) ? `<div class="m-mob-traits">${u.traits.map(t => `<span class="m-mob-trait-pill">${M_TRAIT_SHORT[t] || t}</span>`).join('')}</div>` : ''}</div>
@@ -4163,14 +4170,14 @@ async function showBattle(res, opts = {}) {
   // 初始化左右全景大圖（預設各取第一順位旗艦裝備）
   const firstA = res.final.A[0], firstB = res.final.B[0];
   const uA = firstA ? UNIT_MAP[firstA.id] : null, uB = firstB ? UNIT_MAP[firstB.id] : null;
-  if (uA) setSideHero('A', uA, 'patrol', uA.weapon || '主力戰備部署');
-  if (uB) setSideHero('B', uB, 'patrol', uB.weapon || '敵前沿雷達戒備');
+  if (uA) setSideHero('A', uA, 'patrol', uA.weapon || '主力戰備列陣');
+  if (uB) setSideHero('B', uB, 'patrol', uB.weapon || '敵前沿列陣戒備');
 
   // 初始化中央火控態勢橫幅
   const sAtk = $('#stripAttacker'), sTgt = $('#stripTarget'), sVec = $('#stripVector');
   if (sAtk && uA) sAtk.textContent = `${uA.flag} ${uA.name}`;
   if (sTgt && uB) sTgt.textContent = `${uB.flag} ${uB.name}`;
-  if (sVec) sVec.textContent = '⚡ 雷達對峙掃描 ➔';
+  if (sVec) sVec.textContent = '⚡ 兩軍對峙列陣 ➔';
 
   const maxHp = {}; [...T.A, ...T.B].forEach(u => { maxHp[u.uid] = u.hpMax; });
   $('#battleLog').innerHTML = '';
@@ -4422,30 +4429,36 @@ function playFx(ln) {
     }
   }
 
-  // 2. 判定武器視覺與聲學類型 (7 大名將專屬類型，支援三階彈藥動態切換武器特效與聲效)
-  let wType = 'missile';
-  const effSfx = ln.sfxOverride || (aUnit && aUnit.sfx) || 'missile';
+  // 2. 判定古代兵團打擊與聲學類型 (三國志古戰場刀槍/箭陣/戰鼓/火攻/軍師鑼)
+  let wType = 'melee';
+  let sfxToPlay = ln.sfxOverride || (aUnit && aUnit.sfx) || 'blade_clash';
+
   if (aUnit) {
-    if ((ln.brevity && ln.brevity.startsWith('SEAD')) || effSfx === 'emp_pulse' || (!ln.sfxOverride && aUnit.cat === 'support' && /預警|電戰|咆哮者|干擾/.test(aUnit.name + (aUnit.weapon || '')))) {
-      wType = 'ew';
-    } else if ((ln.brevity && ln.brevity.startsWith('SABOT')) || effSfx === 'heavy_cannon') {
-      wType = 'sabot';
-    } else if (effSfx === 'cannon' || effSfx === 'flak') {
-      wType = 'autocannon';
-    } else if (effSfx === 'rocket_salvo') {
-      wType = 'salvo';
-    } else if (effSfx === 'torpedo' || (!ln.sfxOverride && aUnit.cat === 'naval' && /潛艦|魚雷/.test(aUnit.role + (aUnit.weapon || '')))) {
-      wType = 'torpedo';
-    } else if (effSfx === 'swarm') {
-      wType = 'swarm';
-    } else {
-      wType = 'missile';
+    if (aUnit.cat === 'air_defense' || (ln.text && ln.text.includes('箭'))) {
+      wType = 'arrow';
+      sfxToPlay = 'arrow_volley';
+    } else if (aUnit.cat === 'air') {
+      wType = 'cavalry';
+      sfxToPlay = 'cavalry_charge';
+    } else if (aUnit.cat === 'support') {
+      if (ln.text && (ln.text.includes('砲') || ln.text.includes('火'))) {
+        wType = 'fire';
+        sfxToPlay = 'fire_attack';
+      } else {
+        wType = 'strategy';
+        sfxToPlay = 'strategy_gong';
+      }
+    } else if (aUnit.cat === 'armor') {
+      wType = 'shield';
+      sfxToPlay = 'blade_clash';
+    } else if (aUnit.cat === 'naval') {
+      wType = 'vanguard';
+      sfxToPlay = 'war_drum';
     }
   }
 
-  // 觸發開火音效 (帶陣營立體聲方位與戶外戰場殘響)與行動端戰術微震動回饋
+  // 觸發古代戰場音效 (帶陣營立體聲方位與戶外戰場殘響)
   if (aUnit) {
-    const sfxToPlay = wType === 'ew' ? 'emp_pulse' : effSfx;
     if (typeof SoundEngine !== 'undefined' && typeof SoundEngine.play === 'function') {
       SoundEngine.play(sfxToPlay, ln.side);
     }
@@ -4863,8 +4876,8 @@ function playFx(ln) {
       void tEl.offsetWidth;
       tEl.classList.add('kill-blast', 'destroyed-badge');
       spawnExplosion(tx, ty, true, wType, 1.0);
-      spawnFloater(tx, ty, '💥 擊毀!', 'kill');
-      SoundEngine.play('explosion', targetSide);
+      spawnFloater(tx, ty, '⚔️ 陣亡潰敗!', 'kill');
+      SoundEngine.play('warlord_fall', targetSide);
 
       // 擊毀大型目標時觸發戰場畫面微震動 (Micro Screen Shake)
       const vb = $('#viewBattle');
@@ -4881,11 +4894,11 @@ function playFx(ln) {
       spawnExplosion(tx, ty, false, wType, 1.0);
       const dmgText = ln.dmg ? `−${ln.dmg}` : `命中!`;
       spawnFloater(tx, ty, dmgText, 'hit');
-      if (wType !== 'ew') SoundEngine.play('hit_impact', targetSide);
+      SoundEngine.play('metal_clash', targetSide);
     } else if (ln.kind === 'block') {
       spawnShield(tx, ty);
-      spawnFloater(tx, ty, '🛡️ APS 攔截', 'block');
-      SoundEngine.play('block', targetSide);
+      spawnFloater(tx, ty, '🛡️ 重盾格擋!', 'block');
+      SoundEngine.play('shield_block', targetSide);
     } else if (ln.kind === 'miss') {
       spawnFloater(tx, ty, 'MISS', 'miss');
     }

@@ -1,5 +1,5 @@
 const APP_VERSION = '5.9.139';
-const CACHE_NAME = `topclash-v${APP_VERSION}`;
+const CACHE_NAME = `topwarlords-v${APP_VERSION}`;
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -22,6 +22,8 @@ const CORE_ASSETS = [
   `./js/telemetry.js?v=${APP_VERSION}`,
   `./js/sound.js?v=${APP_VERSION}`,
   `./js/poster-help.js?v=${APP_VERSION}`,
+  `./js/libs/three.min.js`,
+  `./js/battle-3d.js?v=1.0.0`,
   `./js/app.js?v=${APP_VERSION}`,
   `./js/armory.js?v=${APP_VERSION}`
 ];

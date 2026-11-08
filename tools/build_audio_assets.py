@@ -225,3 +225,4 @@ All background music and battlefield sound effects in **TopWarlords** are master
 (OUT / 'CREDITS.md').write_text(credits, encoding='utf-8')
 total_kb = sum(p.stat().st_size for p in OUT.glob('*.mp3')) // 1024
 print(f'\nTotal audio assets size: {total_kb} KB ({total_kb/1024:.2f} MB)')
+

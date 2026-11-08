@@ -32,3 +32,4 @@ for p in sorted(MODELS_DIR.glob('*.glb')):
     anims = [a.get('name', '') for a in j.get('animations', [])]
     root_rot = [ (n.get('name'), n.get('rotation'), n.get('scale')) for n in j.get('nodes', [])[:4] ]
     print(f"{p.name:18s} | dims(X,Y,Z)={dims} | min={[round(x,2) for x in mins]} max={[round(x,2) for x in maxs]} | anims={anims[:8]}")
+

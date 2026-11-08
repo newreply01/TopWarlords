@@ -12,23 +12,23 @@ const Battle3DEngine = (function () {
 
   const MODEL_MANIFEST = {
     horse_armored: 'horse_armored.glb',
-    horse:         'horse.glb',
-    infantry:      'infantry.glb',
-    strategist:    'strategist.glb',
-    spear:         'spear.glb',
-    pike:          'pike.glb',
-    katana:        'katana.glb',
-    sword:         'sword.glb',
-    bow:           'bow.glb',
-    arrow:         'arrow.glb',
-    shield_tower:  'shield_tower.glb',
-    shield_round:  'shield_round.glb',
-    banner:        'banner.glb',
-    flag:          'flag.glb',
-    tent:          'tent.glb',
-    watchtower:    'watchtower.glb',
-    rock_a:        'rock_a.glb',
-    rock_b:        'rock_b.glb'
+    horse: 'horse.glb',
+    infantry: 'infantry.glb',
+    strategist: 'strategist.glb',
+    spear: 'spear.glb',
+    pike: 'pike.glb',
+    katana: 'katana.glb',
+    sword: 'sword.glb',
+    bow: 'bow.glb',
+    arrow: 'arrow.glb',
+    shield_tower: 'shield_tower.glb',
+    shield_round: 'shield_round.glb',
+    banner: 'banner.glb',
+    flag: 'flag.glb',
+    tent: 'tent.glb',
+    watchtower: 'watchtower.glb',
+    rock_a: 'rock_a.glb',
+    rock_b: 'rock_b.glb'
   };
 
   let isEnabled = true;
@@ -74,27 +74,27 @@ const Battle3DEngine = (function () {
   // 五大兵種方陣托盤陣位 (A軍在西岸 X<0 朝東，B軍在東岸 X>0 朝西)
   const SLOT_COORDS = {
     A: {
-      armor:       { x: -4.4, z:  0.0 }, // 中軍前鋒：重甲陷陣
-      naval:       { x: -5.1, z:  3.8 }, // 南翼奇襲：先登奇兵
-      air:         { x: -7.4, z: -3.8 }, // 北翼鐵騎：奔雷突騎
-      air_defense: { x: -8.3, z:  2.7 }, // 南翼高地：神射強弩
-      support:     { x: -9.8, z: -0.3 }  // 中軍本陣：軍師奇謀
+      armor: { x: -4.4, z: 0.0 }, // 中軍前鋒：重甲陷陣
+      naval: { x: -5.1, z: 3.8 }, // 南翼奇襲：先登奇兵
+      air: { x: -7.4, z: -3.8 }, // 北翼鐵騎：奔雷突騎
+      air_defense: { x: -8.3, z: 2.7 }, // 南翼高地：神射強弩
+      support: { x: -9.8, z: -0.3 }  // 中軍本陣：軍師奇謀
     },
     B: {
-      armor:       { x:  4.4, z:  0.0 },
-      naval:       { x:  5.1, z: -3.8 },
-      air:         { x:  7.4, z:  3.8 },
-      air_defense: { x:  8.3, z: -2.7 },
-      support:     { x:  9.8, z:  0.3 }
+      armor: { x: 4.4, z: 0.0 },
+      naval: { x: 5.1, z: -3.8 },
+      air: { x: 7.4, z: 3.8 },
+      air_defense: { x: 8.3, z: -2.7 },
+      support: { x: 9.8, z: 0.3 }
     }
   };
 
   const CAT_META = {
-    air:         { label: '奔雷突騎', badge: '騎', color: 0x38bdf8, hex: '#38bdf8' },
-    armor:       { label: '重甲陷陣', badge: '盾', color: 0xfbbf24, hex: '#fbbf24' },
+    air: { label: '奔雷突騎', badge: '騎', color: 0x38bdf8, hex: '#38bdf8' },
+    armor: { label: '重甲陷陣', badge: '盾', color: 0xfbbf24, hex: '#fbbf24' },
     air_defense: { label: '神射強弩', badge: '弓', color: 0xa78bfa, hex: '#a78bfa' },
-    naval:       { label: '先登奇兵', badge: '鋒', color: 0x2dd4bf, hex: '#2dd4bf' },
-    support:     { label: '軍師奇謀', badge: '謀', color: 0x4ade80, hex: '#4ade80' }
+    naval: { label: '先登奇兵', badge: '鋒', color: 0x2dd4bf, hex: '#2dd4bf' },
+    support: { label: '軍師奇謀', badge: '謀', color: 0x4ade80, hex: '#4ade80' }
   };
 
   /* ----------------------------------------------------
@@ -256,11 +256,11 @@ const Battle3DEngine = (function () {
     if (registerAnim && gltf.animations && gltf.animations.length > 0) {
       const mixer = new THREE.AnimationMixer(rawClone);
       const clips = {
-        idle:   findClip(gltf.animations, ['idle_sword', 'attacking_idle', 'idle_2', 'idle']),
-        move:   findClip(gltf.animations, ['gallop', 'run', 'walk']),
+        idle: findClip(gltf.animations, ['idle_sword', 'attacking_idle', 'idle_2', 'idle']),
+        move: findClip(gltf.animations, ['gallop', 'run', 'walk']),
         attack: findClip(gltf.animations, ['sword_slash', 'dagger_attack', 'attack_headbutt', 'attack_kick', 'jump', 'punch_right']),
-        hit:    findClip(gltf.animations, ['hitrecieve', 'recievehit', 'idle_hitreact_left']),
-        death:  findClip(gltf.animations, ['death'])
+        hit: findClip(gltf.animations, ['hitrecieve', 'recievehit', 'idle_hitreact_left']),
+        death: findClip(gltf.animations, ['death'])
       };
 
       const actions = {};
@@ -551,9 +551,9 @@ const Battle3DEngine = (function () {
     // 4. 東西大營篝火火盆
     const campBraziers = [
       { x: -12.4, z: -2.8, c: 0x38bdf8 },
-      { x: -12.4, z:  2.8, c: 0xf97316 },
-      { x:  12.4, z: -2.8, c: 0xf97316 },
-      { x:  12.4, z:  2.8, c: 0xf59e0b }
+      { x: -12.4, z: 2.8, c: 0xf97316 },
+      { x: 12.4, z: -2.8, c: 0xf97316 },
+      { x: 12.4, z: 2.8, c: 0xf59e0b }
     ];
     const ironMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.5, metalness: 0.7 });
     campBraziers.forEach((bp) => {
@@ -725,7 +725,7 @@ const Battle3DEngine = (function () {
     // 東西雙方本陣營帳與箭樓
     [
       { side: 'A', sx: -1, tint: 0x2563eb },
-      { side: 'B', sx:  1, tint: 0xdc2626 }
+      { side: 'B', sx: 1, tint: 0xdc2626 }
     ].forEach(({ sx, tint }) => {
       const faceY = sx < 0 ? Math.PI / 2 : -Math.PI / 2;
 
@@ -768,7 +768,7 @@ const Battle3DEngine = (function () {
     // 南北山崖巨石群
     const rockSpots = [
       [-11, -9.5, 2.6, 'rock_a'], [-5, -10.2, 3.1, 'rock_b'], [2, -9.8, 2.8, 'rock_a'], [9, -10.0, 3.2, 'rock_b'],
-      [-10,  9.6, 2.8, 'rock_b'], [-3,  10.1, 2.5, 'rock_a'], [4,  9.9, 3.0, 'rock_b'], [11,  9.5, 2.7, 'rock_a']
+      [-10, 9.6, 2.8, 'rock_b'], [-3, 10.1, 2.5, 'rock_a'], [4, 9.9, 3.0, 'rock_b'], [11, 9.5, 2.7, 'rock_a']
     ];
     rockSpots.forEach(([rx, rz, rh, rkey], i) => {
       const rk = spawnModelInstance(rkey, { targetHeight: rh, castShadow: true });
@@ -969,9 +969,9 @@ const Battle3DEngine = (function () {
     if (cat === 'air') {
       // 【⚡ 奔雷突騎】：3 騎全骨骼動畫具裝戰馬 + 挺立披甲騎將 + 水平前指長槊楔形陣
       const cavSpots = [
-        { x:  0.00, z:  0.42, lead: true },
+        { x: 0.00, z: 0.42, lead: true },
         { x: -0.68, z: -0.32, lead: false },
-        { x:  0.68, z: -0.32, lead: false }
+        { x: 0.68, z: -0.32, lead: false }
       ];
       cavSpots.forEach((sp) => {
         const mountUnit = new THREE.Group();
@@ -1085,10 +1085,10 @@ const Battle3DEngine = (function () {
       // 【⚔️ 先登奇兵】：4 名玄甲死士鋒矢突擊陣 (持太刀＋圓盾，頭頂鍬形前立與突擊纓冠)
       const vanguardTint = isSideA ? 0x0f766e : 0x7f1d1d;
       const vanSpots = [
-        { x:  0.00, z:  0.60, h: 1.04, lead: true },
-        { x: -0.66, z:  0.02, h: 0.95, lead: false },
-        { x:  0.66, z:  0.02, h: 0.95, lead: false },
-        { x:  0.00, z: -0.52, h: 0.95, lead: false }
+        { x: 0.00, z: 0.60, h: 1.04, lead: true },
+        { x: -0.66, z: 0.02, h: 0.95, lead: false },
+        { x: 0.66, z: 0.02, h: 0.95, lead: false },
+        { x: 0.00, z: -0.52, h: 0.95, lead: false }
       ];
       vanSpots.forEach((sp) => {
         const van = new THREE.Group();

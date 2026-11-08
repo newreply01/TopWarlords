@@ -394,3 +394,4 @@ for r in REPLACEMENTS:
     assert r['id'] not in seen_ids, f"Duplicate new ID: {r['id']}"
     seen_ids.add(r['id'])
 print("All replacement IDs are unique!")
+

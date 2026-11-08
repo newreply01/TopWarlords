@@ -230,3 +230,4 @@ if __name__ == '__main__':
     update_json_files()
     update_armory_html()
     print("\nALL 47 REPLACEMENTS APPLIED SUCCESSFULLY!")
+

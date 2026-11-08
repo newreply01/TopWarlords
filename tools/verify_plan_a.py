@@ -43,3 +43,4 @@ for p in presets:
         assert uid in unit_dict, f"Unknown uid {uid} in preset {p['id']}"
 
 print("All integrity checks passed! 0 legacy IDs, 100% legal presets, 165 bona-fide generals.")
+

@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>TopWarlords 頂尖對戰：15元名將聯合作戰 | 東亞歷史名將策決</title>
+<meta name="description" content="TopClash 頂尖對戰：用 $15 預算組建五大兵團聯合作戰陣容，挑戰電腦、精選對戰與沙盒模擬。三階段推演、戰場事件與戰術教條，一分鐘一局。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TopWarlords 頂尖對戰：15元名將聯合作戰">
+<meta property="og:title" content="TopWarlords 頂尖對戰：15元名將聯合作戰 | 現代軍武預算決策推演">
+<meta property="og:description" content="用 $15 預算從 200 位日韓中純歷史名將組建五大兵團聯合特遣隊！三階段電磁壓制、高空反導、真實彈艙遞減與線上即時對決，一分鐘一局。">
+<meta property="og:url" content="https://topclash.vercel.app/">
+<meta property="og:image" content="https://topclash.vercel.app/assets/units/B21.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TopWarlords 頂尖對戰：15元名將聯合作戰">
+<meta name="twitter:description" content="用 $15 預算從 200 位日韓中純歷史名將組建五大兵團聯合特遣隊，一分鐘一局現代聯合作戰推演！">
+<meta name="twitter:image" content="https://topclash.vercel.app/assets/units/B21.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=5.9.139">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="頂尖對戰">
+<meta name="application-name" content="頂尖對戰">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- Google Analytics 4 (GA4) 測量管線初始化 (可透過介面或設定動態掛載 G- ID) -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>
+</head>
+<body>
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 12l6-6" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
+    <div>
+      <div class="brand-title-wrap">
+        <h1 class="brand-title">頂尖對戰</h1>
+        <span class="brand-badge">15元聯合作戰</span>
+      </div>
+      <p class="sub">TOP WARLORDS 15 · COMBINED WARLORDS</p>
+    </div>
+  </div>
+  <nav class="modes" id="modeTabs" aria-label="遊戲模式">
+    <button class="mode-btn active" data-mode="quick" id="tabQuick">
+      <svg class="mode-icon mode-icon-drill" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <div class="mode-label-wrap">
+        <span class="mode-title">戰術演習</span>
+        <span class="mode-sub">DRILL</span>
+      </div>
+    </button>
+    <button class="mode-btn" data-mode="bo3" id="tabBo3">
+      <svg class="mode-icon mode-icon-series" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/><path d="m14.5 6.5 3.5-3.5H21v3l-3.5 3.5"/><path d="m5 14 4 4"/><path d="m7 17-3 3"/><path d="m3 19 2 2"/></svg>
+      <div class="mode-label-wrap">
+        <span class="mode-title">多局鏖戰</span>
+        <span class="mode-sub">SERIES</span>
+      </div>
+    </button>
+    <button class="mode-btn" data-mode="ladder" id="tabLadder">
+      <svg class="mode-icon mode-icon-ladder" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7"/><path d="M14 14.66V17c0 .55.45 1 1 1h2"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      <div class="mode-label-wrap">
+        <span class="mode-title">天梯挑戰</span>
+        <span class="mode-sub">LADDER</span>
+      </div>
+    </button>
+    <button class="mode-btn" data-mode="tournament" id="tabTournament">
+      <svg class="mode-icon mode-icon-cup" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+      <div class="mode-label-wrap">
+        <span class="mode-title">群雄爭霸</span>
+        <span class="mode-sub">AWARD</span>
+      </div>
+    </button>
+  </nav>
+  <div class="hud-right">
+    <!-- 全服 C4ISR 即時戰況/到訪人次膠囊 (固定寬度防彈跳，初始立即掛載全服快取次數避免抖動與跳動) -->
+    <div class="hud-stats" id="hudStats">
+      <span class="chip-stat chip-telemetry" id="btnOpenTelemetry" style="cursor:pointer" title="📡 全服 C4ISR 即時戰況大盤 (點擊查看在線人數與對戰數據)">
+        <span class="live-pulse-dot"></span>
+        <span>到訪 <b id="telemetryVisitsVal">1,002</b> 人次</span>
+      </span>
+      <script>
+        (function(){
+          try {
+            var cached = localStorage.getItem('topwarlords_cached_global_visits');
+            if (cached) {
+              var n = parseInt(cached, 10);
+              if (!isNaN(n) && n > 0) {
+                var el = document.getElementById('telemetryVisitsVal');
+                if (el) el.textContent = n.toLocaleString();
+              }
+            }
+          } catch(e){}
+        })();
+      </script>
+    </div>
+    <!-- 👤 使用者 Google 式圓形頭像 (中顯名稱首字) -->
+    <button class="nav-google-avatar" id="btnCommanderCapsule" type="button" aria-label="指揮官中心" title="指揮官中心：暱稱、Google 登入與存檔狀態">
+      <span class="avatar-letter" id="navAvatarCircle" hidden></span>
+    </button>
+    <a href="armory.html" class="nav-armory-btn" id="btnArmory" title="瀏覽 200 位日韓中純歷史名將點將錄" target="_blank">📜 名將點將錄</a>
+    <div class="hud-icon-group" id="hudUtilityGroup">
+      <button class="icon-btn" id="btnAudio" aria-label="切換戰場音效" title="開啟/關閉真實戰場音效"><span id="audioIcon">🔊</span></button>
+      <button class="icon-btn" id="btnTheme" aria-label="切換深淺色主題" title="切換為深色模式 (夜間指揮所)"><span id="themeIcon">🌙</span></button>
+      <button class="icon-btn" id="btnHelp" aria-label="遊戲說明">?</button>
+    </div>
+  </div>
+</header>
+
+<!-- 緊湊戰情橫幅 (Mission & Context Bar) -->
+<section class="mission-bar" id="missionBar">
+  <div class="mission-content" id="missionContent"></div>
+  <div class="mission-right-tools" id="missionRightTools">
+    <button class="btn-reroll-top" id="btnRerollMarket" title="隨機調撥 5 大兵種戰區軍火庫 (注意：將清空當前選取)">
+      <span class="reroll-icon">🎲</span>
+      <div class="reroll-texts">
+        <span class="reroll-title">點將調撥兵符</span>
+        <span class="reroll-sub">重新洗牌</span>
+      </div>
+    </button>
+  </div>
+</section>
+
+<!-- 核心 5x5 全景矩陣看板 (Classic 5x5 Matrix Board) -->
+<main id="viewBuild" class="matrix-layout">
+  <div class="onboard-coach-bar" id="onboardCoachBar" hidden role="region" aria-label="新手30秒戰術速成引導"></div>
+  <nav class="mobile-cat-nav" id="mobileCatNav" aria-label="兵種切換分頁"></nav>
+  <div class="matrix-board" id="matrixBoard"></div>
+</main>
+
+<!-- 懸浮詳細情報 Tooltip (桌機滑鼠懸停) -->
+<div class="unit-tooltip" id="unitTooltip" hidden></div>
+
+<!-- 底部常駐作戰指揮台 (Fixed Bottom Command Deck) -->
+<footer class="command-deck" id="commandDeck">
+  <!-- 1. 左側區塊：部隊體系與羈絆情報艙 -->
+  <div class="deck-left">
+    <div class="deck-section-label"><span>戰術</span><span>加成</span></div>
+    <div class="deck-synergy-bar" id="deckSynergyBar" aria-live="polite"></div>
+  </div>
+
+  <!-- 2. 中間區塊：戰術教條指導艙 (僅專注三色教條，杜絕臃腫) -->
+  <div class="deck-mid">
+    <div class="doc-group" id="docGroup">
+      <div class="deck-label-split">
+        <span>戰術</span>
+        <span>教條</span>
+      </div>
+      <div class="doc-toggles" id="docToggles"></div>
+    </div>
+  </div>
+
+  <!-- 3. 右側區塊：決策出擊整合島 (工具組 + 分隔線 + 預算儀表 + 發動大鈕，同流排列永不重疊) -->
+  <div class="deck-right">
+    <div class="deck-tools" id="deckTools">
+      <div class="tools-btn-group">
+        <button class="tool-btn" id="btnRand" title="隨機組建剩餘或全部槽位"><span class="tool-btn-icon">🎲</span> <span class="tool-btn-text">隨機補滿</span></button>
+        <button class="tool-btn" id="btnClear" title="清空全部槽位"><span class="tool-btn-icon">🗑️</span> <span class="tool-btn-text">清空</span></button>
+      </div>
+      <button class="mobile-more-btn" id="btnDeckMore" title="展開戰術司令部配置 (教條/編制/代碼/清空)">戰術 ☰</button>
+    </div>
+
+    <div class="deck-island-divider"></div>
+
+    <div class="budget-badge" id="budgetBadge">
+      <b class="budget-hero-num" id="budgetUsed">0</b>
+      <div class="budget-meta-col">
+        <span class="budget-meta-lbl">預算</span>
+        <span class="budget-meta-sub"><span class="budget-slash">/</span><span id="budgetMax">15</span></span>
+      </div>
+    </div>
+
+    <button class="btn primary launch-btn mega-launch-btn" id="btnGo" disabled title="發起戰鬥">
+      <span class="launch-icon" id="launchIcon">⏳</span>
+      <div class="launch-texts">
+        <span class="launch-title" id="launchTitle">尚缺 5 個槽位</span>
+        <span class="launch-sub" id="launchSub">點擊上方槽位選取 · 或隨機補滿</span>
+      </div>
+      <span class="launch-arrow">➔</span>
+    </button>
+  </div>
+</footer>
+
+<section id="viewBattle" class="battle" hidden>
+  <div class="combat-fx-layer" id="combatFxLayer"></div>
+  <div class="battle-top">
+    <div class="battle-meta" id="battleMeta"></div>
+    <div class="battle-ctl" id="battleCtl">
+      <button class="btn ghost sm" id="btnPause" title="暫停或繼續戰場推演">⏸ 暫停</button>
+      <button class="btn ghost sm" id="btnSpeed">速度 ×1</button>
+      <button class="btn ghost sm" id="btnSkip">跳過動畫 ⏭</button>
+      <button class="btn amber sm" id="btnBattleBack" title="隨時一鍵返回所屬戰術模式">
+        <span id="btnBattleBackTxt">🏆 返回錦標賽</span>
+      </button>
+      <button class="btn-battle-replay" id="btnBattleReplay" hidden title="原場重新播放本局三階段完整交火動畫">
+        <span class="replay-icon">🔄</span>
+        <span class="replay-txt">戰場重播</span>
+      </button>
+      <button class="btn-battle-reopen" id="btnReopenResult" hidden title="重新開啟本場 C4ISR 戰略結算報告">
+        <span class="reopen-icon">📊</span>
+        <span class="reopen-txt">查看結算報告</span>
+      </button>
+      <button class="btn-battle-exit" id="btnBattleExit" hidden title="結束本場戰鬥，返回所屬戰術模式">
+        <span class="exit-icon">✕</span>
+        <span class="exit-txt" id="btnBattleExitTxt">返回陣容編組</span>
+      </button>
+    </div>
+  </div>
+    <!-- 3D 古戰場推演沙盤 (Three.js WebGL Diorama) -->
+  <div class="battle-3d-wrapper" id="battle3DWrapper">
+    <div class="battle-3d-canvas-container" id="battle3DCanvas"></div>
+    <div class="battle-3d-overlay-hud">
+      <span class="badge-3d-title">🏛️ 3D 古戰場沙盤推演台</span>
+      <button class="btn-view-toggle" id="btnToggle3DView" type="button" title="切換 3D 沙盤與 2D 卡片視圖">切換 3D/2D</button>
+    </div>
+  </div>
+
+  <div class="battle-grid">
+    <!-- 左半邊：我方戰術區域（全景大背景 + 卡片層） -->
+    <div class="team-col a" id="teamA">
+      <div class="team-bg-layer" id="teamBgLayerA">
+        <img class="team-bg-img" id="teamBgImgA" alt="" />
+        <div class="team-bg-gradient"></div>
+      </div>
+      <div class="team-units-box" id="teamUnitsA">
+        <div class="units-card-list" id="unitsCardListA"></div>
+      </div>
+    </div>
+
+    <!-- 中間：中央火控態勢與整合戰況日誌 -->
+    <div class="log-col">
+      <div class="log-integrated-box">
+        <div class="log-header-bar log-header-hud">
+          <!-- 第一列：3階段膠囊 (左) + 天候環境 (右) -->
+          <div class="log-header-row log-header-row1">
+            <div class="phase-steps" id="phaseSteps">
+              <div class="ph" data-p="1"><i>1</i><span>電子戰</span></div>
+              <div class="ph" data-p="2"><i>2</i><span>空防·制海</span></div>
+              <div class="ph" data-p="3"><i>3</i><span>殲滅死鬥</span></div>
+            </div>
+            <div class="log-env-badge chip-weather" id="logEnvBadge" title="戰場氣候環境">
+              <span class="env-icon" id="logEnvIcon">🌐</span>
+              <span class="env-name" id="logEnvName">戰場就緒</span>
+            </div>
+          </div>
+
+          <!-- 第二列：作戰階段說明 (左) + REC 00 (右) -->
+          <div class="log-header-row log-header-row2">
+            <div class="log-phase-desc">
+              <span class="phase-bullet">▌</span>
+              <span class="log-phase-title" id="phaseTitle">戰 場 就 緒</span>
+            </div>
+            <div class="log-rec-tag">● REC <b id="camTimer">00:00</b></div>
+          </div>
+        </div>
+
+        <!-- 全息多域作戰態勢帶 (Holo Radar Strip) -->
+        <div class="holo-radar-strip" id="holoRadarStrip">
+          <div class="holo-sweep-line"></div>
+          <div class="holo-domains">
+            <span class="holo-domain" id="domain-air"><i class="dot"></i>✈️ 制空</span>
+            <span class="holo-domain" id="domain-aa"><i class="dot"></i>🚀 防空</span>
+            <span class="holo-domain" id="domain-armor"><i class="dot"></i>🛡️ 裝甲</span>
+            <span class="holo-domain" id="domain-sea"><i class="dot"></i>⚓ 制海</span>
+            <span class="holo-domain" id="domain-ew"><i class="dot"></i>📡 電戰</span>
+          </div>
+        </div>
+
+        <div class="log-action-ticker" id="stripAction">
+          <span class="strip-who a" id="stripAttacker">友軍戰鬥群</span>
+          <span class="strip-vector" id="stripVector">⚡ 戰術交鋒 ➔</span>
+          <span class="strip-who b" id="stripTarget">敵方特遣部隊</span>
+        </div>
+        <div class="log" id="battleLog" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- 右半邊：敵方戰術區域（全景大背景 + 卡片層） -->
+    <div class="team-col b" id="teamB">
+      <div class="team-bg-layer" id="teamBgLayerB">
+        <img class="team-bg-img" id="teamBgImgB" alt="" />
+        <div class="team-bg-gradient"></div>
+      </div>
+      <div class="team-units-box" id="teamUnitsB">
+        <div class="units-card-list" id="unitsCardListB"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     🏆 天梯競技場主介面 (Tactical Ladder Arena)
+     ===================================================== -->
+<section id="viewLadder" class="ladder-layout" hidden>
+  <div class="ladder-full-container">
+    <!-- 🔝 頂部指揮官戰情 HUD (滿寬 100% 橫幅前線作戰指揮中心) -->
+    <div class="ladder-hud-top" id="ladderMyCard">
+      <!-- 區塊 1：指揮官身分與階梯戰力指標 (Profile & Metrics) -->
+      <div class="hud-col hud-profile-col">
+        <div class="my-header-top">
+          <div class="my-tier-badge" id="myTierBadge">🎖️</div>
+          <div class="my-name-row">
+            <span class="my-flag" id="myFlag">🇹🇼</span>
+            <strong class="my-callsign" id="myCallsign">我方聯合戰術作戰群</strong>
+            <span class="my-tier-name" id="myTierName">戰區上校</span>
+            <span class="my-streak-badge" id="myStreakBadge">🛡️ 駐榜 1 天</span>
+          </div>
+        </div>
+        <div class="my-stats-pills">
+          <div class="stat-pill">
+            <span class="lbl">當前排名</span>
+            <strong class="val gold" id="myRankVal">#25</strong>
+            <span class="trend" id="myRankTrend">▲ +2 (昨日 #27)</span>
+          </div>
+          <div class="stat-pill">
+            <span class="lbl">戰略勝點 (RP)</span>
+            <strong class="val cyan" id="myRPVal">2,055</strong>
+            <span class="rp-sub" id="myRPSub">昨日 2,010</span>
+          </div>
+          <div class="stat-pill">
+            <span class="lbl">作戰派遣令</span>
+            <strong class="val green" id="myOrdersVal">⚡ 30 / 30</strong>
+            <span class="order-sub">整點自動補滿 30 令</span>
+          </div>
+        </div>
+        <!-- 📊 個人生涯戰報 (攻防戰績與歷史巔峰) -->
+        <div class="hud-intel-strip" id="hudLadderIntelStrip">
+          <div class="intel-grid-2">
+            <div class="intel-chip" title="天梯累計對決戰績與勝率">
+              <span class="i-chip-title">📊 攻防戰績</span>
+              <span class="i-chip-val" id="myLadderRecordVal">--</span>
+            </div>
+            <div class="intel-chip" title="天梯生涯最高席位與最高戰略勝點 (RP)">
+              <span class="i-chip-title">🎖️ 歷史巔峰</span>
+              <span class="i-chip-val gold" id="myLadderPeakVal">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 區塊 2：當前戰鬥部隊陣容 (5款軍武展開 + 戰術流派與預算) -->
+      <div class="hud-col hud-fleet-col">
+        <div class="defense-title">
+          <span class="def-title-main">🛡️ 當前戰鬥部隊</span>
+          <div class="defense-eval-inline" id="defenseEvalRow"></div>
+        </div>
+        <div class="defense-deck-preview" id="defenseDeckPreview"></div>
+        <div class="hud-fleet-actions">
+          <button class="btn-ladder-build-full" id="btnGoBuildFromLadder" type="button" title="一鍵跳轉至戰備指揮所調整出征與防守軍武">
+            🛠️ 調配出征與防守陣容
+          </button>
+        </div>
+      </div>
+
+      <!-- 區塊 3：駐防 AI 戰術教條、今日天梯戰區與天梯戰況情資 (Doctrine, Weather & Live Intel) -->
+      <div class="hud-col hud-tactics-col">
+        <div class="doc-segmented-head" id="tacticsDocHead">
+          <span class="doc-seg-label" style="white-space:nowrap">駐防 AI 戰術教條</span>
+          <span class="doc-seg-hint">（防守時自動執行）</span>
+        </div>
+        
+        <div class="tactics-middle-box">
+          <div class="doc-segmented-grid" id="defenseDocGrid"></div>
+          <!-- 🌍 今日天梯戰區天候 -->
+          <div class="ladder-theater-strip" id="ladderTheaterStrip">
+            <div class="theater-icon-box" id="theaterIcon">⚡</div>
+            <div class="theater-main-col">
+              <div class="theater-top-row">
+                <div class="theater-title-inline">
+                  <span class="theater-tag">今日天梯戰區</span>
+                  <strong class="theater-name" id="theaterName">--</strong>
+                </div>
+                <span class="theater-meta-tag">📡 每日 00:00 輪替</span>
+              </div>
+              <div class="theater-desc" id="theaterDesc">讀取天梯戰區作戰環境中...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🎖️ 階梯交戰守則 (精準推進與終結功勳) -->
+        <div class="hud-rules-strip">
+          <div class="rules-grid-2">
+            <div class="rule-chip" title="八席交戰：開放前方 8 席自由挑戰，分強攻（前1-2名 +30RP）、進取（前3-4名 +22RP）、穩健（前5-8名 +15RP）">
+              <span class="r-chip-title">⚔️ 八席交戰</span>
+              <span class="r-chip-val">強攻/進取/穩健</span>
+            </div>
+            <div class="rule-chip" title="終結功勳：擊破守位≥3天對手額外獲得 +15 RP 終結者加成獎勵">
+              <span class="r-chip-title">💥 終結功勳</span>
+              <span class="r-chip-val">連霸≥3天 +15RP</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 🔽 下方：我的戰區席位 (即時挑戰) 與全球名冊大廳 (全景滿寬 100%) -->
+    <div class="ladder-roster-full">
+      <div class="ladder-roster-section">
+        <div class="roster-tabs-header">
+          <div class="roster-tabs">
+            <button class="roster-tab active" id="tabRosterZone">⚔️ 我的戰區席位<span class="tab-extra"> (即時挑戰)</span></button>
+            <button class="roster-tab" id="tabRosterLive">🏆 全球 TOP 10<span class="tab-extra"> 頂尖指揮官</span></button>
+            <button class="roster-tab" id="tabRosterYesterday">📜 昨日榮譽殿堂</button>
+          </div>
+          <button class="btn-micro" id="btnScrollToMe" type="button" style="border-color:var(--cyan);color:var(--cyan);font-weight:800;white-space:nowrap">📍 定位我 (#<span id="btnScrollMyRank">--</span>)</button>
+        </div>
+        <div class="roster-table-box" id="rosterTableBox"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     🥇 4/8/16/32 強世界盃淘汰錦標賽主介面 (Tournament Arena)
+     ===================================================== -->
+<section id="viewTournament" class="tournament-layout" hidden>
+  <!-- 錦標賽頂部抬頭 HUD (賽程進度、生存狀態、出擊操作，正式開賽後展示) -->
+  <div class="tourney-header" id="tourneyHeader" hidden>
+    <div class="tourney-status-box">
+      <div class="tourney-title-row">
+        <span class="tourney-badge" id="tourneyBadge">🏆 2026 軍武世界盃淘汰錦標賽</span>
+        <span class="tourney-status-tag" id="tourneyStatusTag">🟢 激戰進行中</span>
+        <span class="tourney-round-pill" id="tourneyRoundPill">第 1 輪 · 淘汰賽</span>
+        <span class="tourney-weather-pill" id="tourneyRoundWeather" title="當前輪次全場統一作戰環境">🌪️ 戰區環境：載入中</span>
+        <span class="tourney-armory-pill" id="tourneyArmoryPill" title="軍火配給規則">🔒 開戰鎖定</span>
+        
+      </div>
+      <div class="tourney-meta-row">
+        <span class="muted">你的狀態：</span>
+        <strong id="tourneyMyState" style="color:var(--cyan)">🟢 晉級爭霸中</strong>
+        <span class="muted" style="margin-left:12px">賽制：</span>
+        <strong id="tourneyFormatName" style="color:var(--amber)">四強前 BO1 · 決賽圈 BO3</strong>
+        <span class="muted" style="margin-left:12px">軍備配給：</span>
+        <strong id="tourneyArmoryName" style="color:var(--cyan)">開戰鎖定 (陣容教條一套到底)</strong>
+        <span class="tourney-remaining-wrap" id="tourneyRemainingWrap" style="display:inline-flex;align-items:center">
+          <span class="muted" style="margin-left:12px">剩餘爭冠隊伍：</span>
+          <strong id="tourneyRemainingCount" style="color:var(--text)">16 隊</strong>
+        </span>
+      </div>
+    </div>
+    <div class="tourney-action-box" id="tourneyActionBox">
+      <!-- 動態插入操作按鈕 -->
+    </div>
+  </div>
+
+  <!-- 錦標賽大廳 (建房/選人/AI補位，未開賽備戰時展示，與 HUD 完全整併) -->
+  <div class="tourney-lobby-card" id="tourneyLobbyCard" hidden>
+    <div class="lobby-head">
+      <div class="lobby-title-strip">
+        <h2 class="lobby-main-title">🏆 2026 軍武世界盃淘汰錦標賽 (Tournament Arena)</h2>
+        <span class="badge tourney-lobby-badge" id="tourneyLobbyModeBadge">👤 單人闖關 · 🌐 16 強 全域聯合 (⭐ 決賽升級制)</span>
+      </div>
+      <p class="muted lobby-desc">支援純單機世界盃闖關、私人好友開房連線（專屬房間碼 / 邀請連結），以及公開大廳 300 秒 (5分鐘) 自動湊桌隨機排隊！</p>
+    </div>
+
+    <!-- 模式選籤列 -->
+    <div class="tourney-mode-tabs" id="tourneyModeTabs">
+      <button class="t-mode-tab active" data-tab="solo">👤 單人世界盃闖關</button>
+      <button class="t-mode-tab" data-tab="private">👥 私人好友開房</button>
+      <button class="t-mode-tab" data-tab="public">🌐 公開大廳開房或隨機匹配</button>
+    </div>
+
+    <!-- 我方出征陣容整備條 (Player Deck Readiness) -->
+    <div class="tourney-my-deck-bar" id="tourneyMyDeckBar"></div>
+
+    <!-- 【面板 1：單人闖關模式】 -->
+    <div class="tourney-panel" id="panelTourneySolo">
+      <div class="lobby-settings-grid">
+        <div class="setting-group">
+          <label class="setting-lbl">賽事規模 (BRACKET SIZE)</label>
+          <div class="btn-group-pill" id="tourneySizeSelector">
+            <button class="pill-btn" data-size="4">⚡ 4 強 前哨突擊 (2 輪)</button>
+            <button class="pill-btn" data-size="8">🎯 8 強 戰區爭端 (3 輪)</button>
+            <button class="pill-btn active" data-size="16">🌐 16 強 全域聯合 (4 輪)</button>
+            <button class="pill-btn" data-size="32">🏆 32 強 巔峰會戰 (5 輪)</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-lbl">淘汰對決賽制 (MATCH FORMAT)</label>
+          <div class="btn-group-pill" id="tourneyFormatSelector">
+            <button class="pill-btn" data-format="bo1">⚡ 極速單淘汰 (全程BO1·決賽BO3)</button>
+            <button class="pill-btn active" data-format="hybrid">⭐ 決賽升級制 (四強BO3·決賽BO5)</button>
+            <button class="pill-btn" data-format="bo3">⚔️ 大師征服 (全程BO5)</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-lbl">軍火配給規則 (ARMORY RULE)</label>
+          <div class="btn-group-pill" id="tourneyArmorySelector">
+            <button class="pill-btn active" data-armory="locked">🔒 開戰鎖定 (陣容教條一套到底)</button>
+            <button class="pill-btn" data-armory="free">🎲 自由調撥 (每輪可調整軍武)</button>
+          </div>
+        </div>
+      </div>
+      <!-- 精緻單行部隊摘要條 (方案 C：預設收合，可隨時展開預覽席位) -->
+      <div class="solo-roster-bar" id="soloSlimRosterBar">
+        <div class="solo-roster-info">
+          <span class="solo-roster-title">👥 世界盃參賽部隊預覽</span>
+          <span class="solo-roster-desc muted" id="soloRosterDesc">（已就位 <span id="lobbyFilledCountShort">1</span> / <span id="lobbyTotalCountShort">16</span> 隊 · 開賽自動隨機抽籤補齊）</span>
+        </div>
+        <div class="solo-roster-actions">
+          <button class="btn ghost sm" id="btnTourneyFillAI" title="手動立即隨機抽籤補滿剩餘各強席位">🤖 隨機抽籤補齊</button>
+          <button class="btn ghost sm" id="btnTourneyResetLobby" title="清空 AI 席位，重置為僅自己 1 隊">重置 ✕</button>
+          <button class="btn-toggle-roster" id="btnToggleSoloRoster" type="button" title="點擊展開或收起部隊席位明細">📋 展開席位預覽 ▾</button>
+        </div>
+      </div>
+
+      <!-- 可摺疊的名冊網格 (預設隱藏，點擊上方按鈕展開) -->
+      <div class="lobby-participants-box" id="soloParticipantsCollapsible" hidden>
+        <div class="participants-head">
+          <span id="soloParticipantsHeadTxt">參賽席位預覽 (你 + 待抽籤各強代表隊：<span id="lobbyFilledCount">1</span> / <span id="lobbyTotalCount">16</span> 隊)</span>
+        </div>
+        <div class="participants-grid" id="lobbyParticipantsGrid"></div>
+      </div>
+      <div class="lobby-actions">
+        <button class="btn amber lg block" id="btnTourneyStart" style="font-weight:900;letter-spacing:.05em">⚔️ 正式開賽 · 率隊出征世界盃 (START TOURNAMENT)</button>
+      </div>
+    </div>
+
+    <!-- 【面板 2：私人好友開房模式】 -->
+    <div class="tourney-panel" id="panelTourneyPrivate" hidden>
+      <!-- 未在房間內：建房或輸入代碼 -->
+      <div id="privateLobbyEntrance">
+        <div class="lobby-settings-grid">
+          <div class="setting-group">
+            <label class="setting-lbl">賽事規模 (BRACKET SIZE)</label>
+            <div class="btn-group-pill" id="privateSizeSelector">
+              <button class="pill-btn active" data-size="4">⚡ 4 強 前哨突擊 (2 輪)</button>
+              <button class="pill-btn" data-size="8">🎯 8 強 戰區爭端 (3 輪)</button>
+              <button class="pill-btn" data-size="16">🌐 16 強 全域聯合 (4 輪)</button>
+              <button class="pill-btn" data-size="32">🏆 32 強 巔峰會戰 (5 輪)</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-lbl">淘汰對決賽制 (MATCH FORMAT)</label>
+            <div class="btn-group-pill" id="privateFormatSelector">
+              <button class="pill-btn" data-format="bo1">⚡ 極速單淘汰 (全程BO1·決賽BO3)</button>
+              <button class="pill-btn active" data-format="hybrid">⭐ 決賽升級制 (四強BO3·決賽BO5)</button>
+              <button class="pill-btn" data-format="bo3">⚔️ 大師征服 (全程BO5)</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-lbl">軍火配給規則 (ARMORY RULE)</label>
+            <div class="btn-group-pill" id="privateArmorySelector">
+              <button class="pill-btn active" data-armory="locked">🔒 開戰鎖定 (陣容教條一套到底)</button>
+              <button class="pill-btn" data-armory="free">🎲 自由調撥 (每輪可調整軍武)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="private-portals-grid">
+          <!-- 1. 左操作卡：建立專屬戰局 (我是房主 Host) -->
+          <div class="portal-card portal-create">
+            <div class="portal-card-head">
+              <span class="portal-badge badge-host">HOST · 房主開房</span>
+              <span class="portal-title">👑 建立私人對戰房間</span>
+            </div>
+            <p class="portal-desc">依照上方規模與賽制生成專屬房間代碼與分享連結</p>
+            <button class="portal-btn btn-portal-create" id="btnCreatePrivateRoom">
+              <span>立即建立房間</span>
+              <span class="btn-arrow">➔</span>
+            </button>
+          </div>
+
+          <!-- 2. 右操作卡：輸入代碼參賽 (我有代碼 Join) -->
+          <div class="portal-card portal-join">
+            <div class="portal-card-head">
+              <span class="portal-badge badge-join">JOIN · 代碼加入</span>
+              <span class="portal-title">🔑 加入現有好友房間</span>
+            </div>
+            <p class="portal-desc">輸入好友提供的 6 位專屬代碼即刻入隊共同參賽</p>
+            <div class="portal-input-group">
+              <input type="text" id="inputJoinTourneyCode" class="portal-input-code" placeholder="6 位房間碼" maxlength="8" autocomplete="off" spellcheck="false" title="輸入好友提供的 6 位房間代碼">
+              <button class="portal-btn btn-portal-join" id="btnJoinTourneyRoom">
+                <span>加入房間</span>
+                <span class="btn-arrow">➔</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 已在房間內：展示席位與即時等待名單 -->
+      <div id="privateRoomActiveView" hidden>
+        <div class="private-room-topbar">
+          <div class="room-code-col">
+            <span class="room-code-label">專屬私人房間代碼</span>
+            <div class="room-code-badge" id="privateRoomCodeDisplay">------</div>
+          </div>
+          <div class="private-room-btns">
+            <button class="btn btn-tourney-code" id="btnCopyTourneyCode">複製代碼 📋</button>
+            <button class="btn btn-tourney-link" id="btnCopyTourneyLink">複製邀請連結 🔗</button>
+            <button class="btn btn-tourney-leave" id="btnLeaveTourneyRoom">退出房間 ✕</button>
+          </div>
+        </div>
+
+        <div class="lobby-participants-box">
+          <div class="participants-head">
+            <span>房間選手名冊 (<span id="privateFilledCount">1</span> / <span id="privateTotalCount">4</span> 席位)</span>
+            <div class="row" style="gap:8px">
+              <button class="btn ghost sm" id="btnPrivateFillAI">🤖 AI 補齊剩餘名額</button>
+            </div>
+          </div>
+          <div class="participants-grid" id="privateParticipantsGrid"></div>
+        </div>
+
+        <div class="lobby-actions">
+          <button class="btn amber lg block" id="btnPrivateStart" style="font-weight:900;letter-spacing:.05em">⚔️ 正式開賽 · 啟動多人錦標賽 (START TOURNAMENT)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 【面板 3：公開大廳開房或隨機匹配模式】 -->
+    <div class="tourney-panel" id="panelTourneyPublic" hidden>
+      <div class="lobby-settings-grid">
+        <div class="setting-group">
+          <label class="setting-lbl">賽事規模 (BRACKET SIZE)</label>
+          <div class="btn-group-pill" id="publicSizeSelector">
+            <button class="pill-btn active" data-size="4">⚡ 4 強 前哨突擊 (2 輪)</button>
+            <button class="pill-btn" data-size="8">🎯 8 強 戰區爭端 (3 輪)</button>
+            <button class="pill-btn" data-size="16">🌐 16 強 全域聯合 (4 輪)</button>
+            <button class="pill-btn" data-size="32">🏆 32 強 巔峰會戰 (5 輪)</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-lbl">淘汰對決賽制 (MATCH FORMAT)</label>
+          <div class="btn-group-pill" id="publicFormatSelector">
+            <button class="pill-btn" data-format="bo1">⚡ 極速單淘汰 (全程BO1·決賽BO3)</button>
+            <button class="pill-btn active" data-format="hybrid">⭐ 決賽升級制 (四強BO3·決賽BO5)</button>
+            <button class="pill-btn" data-format="bo3">⚔️ 大師征服 (全程BO5)</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label class="setting-lbl">軍火配給規則 (ARMORY RULE)</label>
+          <div class="btn-group-pill" id="publicArmorySelector">
+            <button class="pill-btn active" data-armory="locked">🔒 開戰鎖定 (陣容教條一套到底)</button>
+            <button class="pill-btn" data-armory="free">🎲 自由調撥 (每輪可調整軍武)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="public-queue-banner">
+        <div>
+          <div style="font-weight:800;font-size:14px;color:var(--cyan)">⚡ 公開快速排隊或發起開房 (300 秒熔斷必開賽)</div>
+          <div class="muted" style="font-size:11.5px;margin-top:2px">依上方所選規模與賽制優先匹配進行中房間；若無相符空房則自動建立公開新房並啟動 300 秒倒數！</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" id="btnQuickMatchTourney" style="font-weight:900">⚡ 一鍵快速匹配出擊</button>
+          <button class="btn amber" id="btnCreatePublicRoom" style="font-weight:900">👑 主動建立公開房間</button>
+        </div>
+      </div>
+
+      <div class="participants-head">
+        <span>🌐 即時在線公開房間列表</span>
+        <button class="btn ghost sm" id="btnRefreshPublicRooms">刷新列表 🔄</button>
+      </div>
+      <div class="public-rooms-grid" id="tourneyPublicRoomsList">
+        <div class="muted" style="grid-column:1/-1;text-align:center;padding:20px">正在連接雲端即時大廳...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 世界盃 2026 左右雙翼樹狀對抗面板 (FIFA World Cup Bracket) -->
+  <div class="tourney-bracket-viewport" id="tourneyBracketViewport">
+    <div class="bracket-container" id="bracketContainer"></div>
+  </div>
+</section>
+
+<!-- 錦標賽觀戰與戰報彈窗 (Tournament Spectator Modal) -->
+<div class="modal" id="tourneySpectatorModal" hidden>
+  <div class="modal-card tourney-spectator-card" id="tourneySpectatorCard"></div>
+</div>
+
+<!-- 錦標賽世界冠軍頒獎與海報下載 Modal -->
+<div class="modal" id="tourneyChampionModal" hidden>
+  <div class="modal-card tourney-champion-card" id="tourneyChampionCard"></div>
+</div>
+
+<div class="modal" id="resultModal" hidden>
+  <div class="modal-card result-card" id="resultCard">
+    <button class="modal-x" id="rCloseX" onclick="document.getElementById('resultModal').hidden=true">✕</button>
+    <div style="padding:28px 20px;text-align:center">
+      <h3 style="font-family:var(--head);font-size:20px;margin-bottom:8px">📊 戰況推演結算報告</h3>
+      <p class="muted" style="font-size:14px;margin-bottom:18px">正在載入 C4ISR 作戰詳細數據...</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn primary" onclick="document.getElementById('resultModal').hidden=true;if(typeof handleExitBattleToCurrentMode==='function')handleExitBattleToCurrentMode();">⚔️ 返回指揮中心</button>
+        <button class="btn ghost" onclick="document.getElementById('resultModal').hidden=true;">關閉</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 沙盒 300 場大數據模擬報告 Modal -->
+<div class="modal" id="sandboxModal" hidden>
+  <div class="modal-card sandbox-modal-card" id="sandboxCard"></div>
+</div>
+
+<!-- 天梯戰功勝點結算 Modal -->
+<div class="modal" id="ladderResultModal" hidden>
+  <div class="modal-card ladder-result-card" id="ladderResultCard"></div>
+</div>
+<div class="modal" id="helpModal" hidden>
+  <div class="modal-card help-card" id="helpCard"></div>
+</div>
+
+
+<!-- 雲端指揮官中心 Modal (A+C 跨電腦存檔與專屬免密書籤) -->
+<div class="modal" id="cloudSyncModal" hidden>
+  <div class="modal-card cloud-sync-card">
+    <div class="cloud-modal-header" style="margin-bottom:12px">
+      <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:var(--cyan);background:rgba(56,189,248,0.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.4);">🎖️ 指揮官戰情檔案與雲端連動中心</div>
+      <h2 style="font-size:18px;margin:4px 0 6px;">指揮官中心</h2>
+      <p class="muted" style="font-size:12px;line-height:1.5;">使用 Google 帳號登入，將場次、勝率、天梯軍階與主力卡組同步至雲端，跨裝置延續戰績。</p>
+    </div>
+
+    <!-- 指揮官個人戰情簡報卡片 -->
+    <div class="cmd-profile-card" id="cloudModalProfileCard" style="background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.28);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:26px" id="cloudModalFlag">🇹🇼</span>
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <strong style="font-size:15px;color:var(--text)" id="cloudModalName">我方聯合戰術作戰群</strong>
+            <span class="my-uid-pill" id="cloudModalUid" title="終身軍籍識別編號" style="font-family:var(--mono);font-size:11px;font-weight:800;color:var(--cyan);background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.35);padding:1.5px 6px;border-radius:4px">CMD-7392</span>
+            <span class="badge" id="cloudModalTier" style="font-size:11px;font-weight:700;padding:1.5px 6px">作戰少尉</span>
+          </div>
+          <div class="muted" style="font-size:11.5px;margin-top:2px" id="cloudModalStats">天梯 2055 RP ｜ 累計 0 場 · 勝率 0% · 0 連勝</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn ghost sm" id="btnEditProfileFromCloud" type="button" style="font-size:12px;font-weight:800;border-color:var(--cyan);color:var(--cyan)" title="修改個人作戰名稱與代表旗幟">✏️ 修改名稱</button>
+        <button class="btn ghost sm" id="btnGoLadderFromCloud" type="button" style="font-size:12px;font-weight:700" title="前往天梯競技場查看排名與榮譽榜">🏆 前往天梯 ➔</button>
+      </div>
+    </div>
+
+    <div id="cloudSaveChoice" hidden role="group" aria-labelledby="cloudChoiceTitle">
+      <h3 id="cloudChoiceTitle">選擇存檔</h3>
+      <p id="cloudChoiceLocal"></p>
+      <p id="cloudChoiceRemote"></p>
+      <p class="muted">使用本機會上傳此份進度；使用雲端會載入雲端進度。兩份資料不會加總，覆蓋前會保留本機備份。</p>
+      <div class="row">
+        <button class="btn primary" id="btnChooseLocalSave">使用本機並備份至雲端</button>
+        <button class="btn primary" id="btnChooseCloudSave">使用雲端存檔</button>
+        <button class="btn ghost" id="btnCancelSaveChoice">取消</button>
+      </div>
+    </div>
+
+    <p id="cloudSaveStatus" class="muted" role="status" style="font-size:12px;line-height:1.5"></p>
+    <!-- 未登入介面 -->
+    <div id="cloudAuthViewUnlogged">
+      <div style="margin:10px 0 14px">
+        <p class="muted" style="font-size:12px;line-height:1.5;margin:0 0 12px">
+          首次登入先確認備份來源；同一個 Google 帳號可跨裝置載入存檔。遊戲暱稱與 Google 姓名分開保存。
+        </p>
+        <button class="btn primary lg block" id="btnGoogleCloudLogin" type="button" style="font-weight:900">🌐 使用 Google 帳號登入／建立雲端存檔</button>
+      </div>
+    </div>
+
+    <!-- 已登入管理面板 -->
+    <div id="cloudAuthViewLogged" hidden>
+      <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div id="cloudConnectionLabel" style="font-size:11px;color:#34d399;font-weight:700">Google 已登入</div>
+          <div style="font-size:16px;font-weight:900;color:var(--text);font-family:var(--mono);margin-top:2px" id="loggedCommanderIdDisplay">COMMANDER</div>
+          <div class="muted" style="font-size:11.5px;margin-top:2px" id="loggedSyncTimeDisplay">戰績即時背景自動備份中</div>
+        </div>
+        <button class="btn ghost sm" id="btnManualSyncCloud">🔄 立即手動同步</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+        <button class="btn ghost sm" id="btnSwitchGoogleAccount">切換帳號／比較存檔</button>
+        <button class="btn ghost sm" id="btnLogoutCloud" style="color:var(--red);border-color:rgba(255,93,110,0.3)">登出此裝置 ✕</button>
+      </div>
+    </div>
+
+    <div style="text-align:right;margin-top:12px" id="cloudCloseRow">
+      <button class="btn ghost sm" id="btnCloudCancel">關閉</button>
+    </div>
+  </div>
+</div>
+<!-- 指揮官暱稱與旗幟自訂 Modal -->
+<div class="modal" id="commanderModal" hidden>
+  <div class="modal-card commander-card">
+    <div class="commander-modal-header">
+      <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:#38bdf8;background:rgba(56,189,248,0.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.4);">🎖️ 戰術任命狀</div>
+      <h2 style="font-size:18px;margin:4px 0 8px;">指揮官代號授權登記 (NICKNAME)</h2>
+      <p class="muted" style="font-size:12.5px;line-height:1.5;">設定您的軍事作戰暱稱與代表旗幟，將永久登錄於全球 TOP 30 天梯殿堂與作戰報告中！</p>
+    </div>
+
+    <!-- 軍籍指戰編號 (UID) 與暱稱永久對應 -->
+    <div class="commander-id-tag-box">
+      <div class="cid-header">
+        <span class="cid-label">🪖 遊戲展示編號（非登入憑證）</span>
+        <button type="button" class="btn-micro" id="btnCopyCommanderId" title="複製專屬軍籍編號">📋 複製編號</button>
+      </div>
+      <div class="cid-val-row">
+        <span class="cid-chip" id="commanderIdDisplay">CMD-7392</span>
+        <span class="cid-status">帳號身分由 Google 登入確認</span>
+      </div>
+      <div class="cid-hint">展示編號與 Google 帳號 UID 不同；登入後，私人存檔由 Firebase UID 保護，修改暱稱不會改變帳號。</div>
+    </div>
+
+    <div class="form-group" style="margin-top:14px">
+      <label class="label" style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:6px;">
+        <span>作戰暱稱 (Nickname，2~16 字元，不可與現役席次重複)</span>
+        <button class="btn-micro" id="btnRandomCallsign" type="button">🎲 隨機暱稱</button>
+      </label>
+      <input id="commanderNameInput" class="input" placeholder="例如：蒼鷹特遣隊・李少校" maxlength="16" autocomplete="off">
+      <div id="callsignFeedback" class="callsign-feedback"></div>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+      <label class="label" style="font-size:12px;margin-bottom:6px;display:block;">代表軍徽 / 旗幟</label>
+      <div class="flag-picker-row" id="flagPickerRow" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button type="button" class="flag-opt active" data-flag="🇹🇼">🇹🇼</button>
+        <button type="button" class="flag-opt" data-flag="🇺🇸">🇺🇸</button>
+        <button type="button" class="flag-opt" data-flag="🇯🇵">🇯🇵</button>
+        <button type="button" class="flag-opt" data-flag="🇺🇦">🇺🇦</button>
+        <button type="button" class="flag-opt" data-flag="🇩🇪">🇩🇪</button>
+        <button type="button" class="flag-opt" data-flag="🇬🇧">🇬🇧</button>
+        <button type="button" class="flag-opt" data-flag="🇫🇷">🇫🇷</button>
+        <button type="button" class="flag-opt" data-flag="🇪🇺">🇪🇺</button>
+        <button type="button" class="flag-opt" data-flag="🌐">🌐</button>
+        <button type="button" class="flag-opt" data-flag="🏴‍☠️">🏴‍☠️</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:20px;">
+      <button class="btn ghost" id="commanderCancel">稍後再設</button>
+      <button class="btn primary" id="commanderSave">正式進駐戰區 (CONFIRM)</button>
+    </div>
+  </div>
+</div>
+
+<!-- 部署防衛幽靈部隊 Modal -->
+<div class="modal" id="ghostDeployModal" hidden>
+  <div class="modal-card ghost-deploy-card">
+    <h2>部署防守幽靈部隊 🌐</h2>
+    <p class="muted">將你目前的 5 槽陣容上傳至全球防衛庫，其他真人玩家將能在天梯挑戰你的影子部隊！</p>
+    <div class="form-group" style="margin-top:12px">
+      <label class="label">指揮官代號 (Callsign)</label>
+      <input id="ghostCallsignInput" class="input" placeholder="例如：蒼鷹指揮官" maxlength="16">
+    </div>
+    <div class="form-group" style="margin-top:10px">
+      <label class="label">防守戰術格言 (Motto)</label>
+      <input id="ghostMottoInput" class="input" placeholder="例如：我的天空容不下任何敵機！" maxlength="32">
+    </div>
+    <div id="ghostDeployPreview" style="margin:14px 0"></div>
+    <div class="row">
+      <button class="btn ghost" id="ghostDeployCancel">取消</button>
+      <button class="btn primary" id="ghostDeployOk">確認部署至天梯防衛庫</button>
+    </div>
+  </div>
+</div>
+
+<!-- BO3 敗方戰術反制 / 禁用 Modal -->
+<div class="modal" id="bo3CounterModal" hidden>
+  <div class="modal-card bo3-counter-card">
+    <div class="bo3-head">
+      <span class="tag">TACTICAL COUNTER PHASE · 戰術反制</span>
+      <h2 id="bo3CounterTitle">戰局失利：啟動緊急戰術反制</h2>
+      <p class="muted" id="bo3CounterDesc">敗方獲得戰術反制特權：指定禁用勝方 1 件關鍵裝備，逼迫對手於下一局替換！</p>
+    </div>
+    <div class="bo3-ban-section">
+      <div class="label" style="margin-bottom:8px">請點選要禁用的敵方裝備 (BAN UNIT)：</div>
+      <div class="bo3-ban-grid" id="bo3BanGrid"></div>
+    </div>
+    <div class="bo3-next-info" id="bo3NextInfo" style="margin-top:14px"></div>
+    <div class="row" style="margin-top:18px;justify-content:flex-end">
+      <button class="btn primary block" id="bo3CounterConfirm">確認禁用並進入陣容反制調整</button>
+    </div>
+  </div>
+</div>
+
+<!-- BO3 系列賽終局結算 Modal -->
+<div class="modal" id="bo3SeriesModal" hidden>
+  <div class="modal-card bo3-series-card" id="bo3SeriesCard"></div>
+</div>
+
+<!-- 線上真人雙人對戰 (Online PvP Room) Modal -->
+<div class="modal" id="onlinePvpModal" hidden>
+  <div class="modal-card pvp-modal-card">
+    <div class="pvp-modal-header">
+      <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:#f59e0b;background:rgba(245,158,11,0.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.4);">⚔️ P2P 零伺服器極速連線</div>
+      <h2 style="font-size:18px;margin:4px 0 6px;">多局鏖戰 · 線上真人雙人房</h2>
+      <p class="muted" style="font-size:12.5px;line-height:1.4;">透過 WebRTC 即時直連好友，進行五局三勝雙盲 Ban & Pick 頂尖對戰！</p>
+    </div>
+
+    <!-- 模式分頁開關：建立房間 / 加入房間 -->
+    <div class="pvp-tabs-row" id="pvpTabsRow">
+      <button class="pvp-tab active" data-tab="host" id="tabPvpHost">👑 本部特遣隊 (建立房間)</button>
+      <button class="pvp-tab" data-tab="join" id="tabPvpJoin">🎯 挑戰突擊隊 (加入房間)</button>
+    </div>
+
+    <!-- 房主面板 -->
+    <div class="pvp-panel" id="pvpPanelHost">
+      <div class="pvp-room-code-box">
+        <span class="pvp-code-lbl">軍事連線房間代碼 (ROOM CODE)</span>
+        <div class="pvp-code-display" id="pvpRoomCodeDisplay">連線初始化中...</div>
+        <div class="row" style="margin-top:8px;gap:8px;">
+          <button class="btn ghost sm" id="btnCopyRoomCode">📋 複製代碼</button>
+          <button class="btn ghost sm" id="btnCopyShareUrl">🔗 複製邀請網址</button>
+        </div>
+      </div>
+      <div class="pvp-waiting-status" id="pvpWaitingStatus">
+        <span class="radar-dot"></span>
+        <span>等待對手連線加入中...（請將代碼或網址分享給好友）</span>
+      </div>
+    </div>
+
+    <!-- 挑戰者面板 -->
+    <div class="pvp-panel" id="pvpPanelJoin" hidden>
+      <div class="form-group" style="margin-top:8px;">
+        <label class="label" style="font-size:12px;margin-bottom:6px;display:block;">輸入 6 位房間代碼 (或直接開啟好友邀請網址)</label>
+        <div class="row" style="gap:8px;">
+          <input id="pvpJoinCodeInput" class="input" placeholder="例如：7X92BA" maxlength="8" style="font-family:var(--mono);font-size:16px;letter-spacing:0.1em;text-transform:uppercase;">
+          <button class="btn primary" id="btnSubmitJoinRoom" style="white-space:nowrap;">立即加入 ➔</button>
+        </div>
+      </div>
+      <div class="pvp-waiting-status" id="pvpJoinWaitingStatus" hidden>
+        <span class="radar-dot"></span>
+        <span id="pvpJoinWaitingText">正在與房主建立連線...</span>
+      </div>
+    </div>
+
+    <!-- 連線就緒對峙席位 (Connected Matchup Box) -->
+    <div class="pvp-versus-box" id="pvpVersusBox" hidden>
+      <div class="pvp-v-player me">
+        <div class="v-flag" id="pvpMyFlag">🇹🇼</div>
+        <div class="v-name" id="pvpMyName">我方指揮官</div>
+        <span class="v-uid" id="pvpMyUid">CMD-7392</span>
+      </div>
+      <div class="pvp-vs-badge">
+        <span>VS</span>
+        <div class="pvp-ping" id="pvpPingVal">⚡ P2P 直連</div>
+      </div>
+      <div class="pvp-v-player enemy">
+        <div class="v-flag" id="pvpEnemyFlag">🌐</div>
+        <div class="v-name" id="pvpEnemyName">對手就緒中</div>
+        <span class="v-uid" id="pvpEnemyUid">CMD-????</span>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:18px;">
+      <button class="btn ghost" id="btnPvpCancel">關閉房間 ✕</button>
+      <button class="btn amber" id="btnPvpStartBattle" hidden style="font-weight:700;">⚔️ 正式開戰 (START BO5)</button>
+    </div>
+  </div>
+</div>
+
+<!-- 手機版裝備詳細情報 Bottom Sheet Modal -->
+<div class="modal mobile-sheet-modal" id="unitDetailModal" hidden>
+  <div class="modal-card unit-sheet-card" id="unitSheetCard"></div>
+</div>
+
+<!-- 手機版戰術司令部配置 Bottom Sheet Modal -->
+<div class="modal mobile-sheet-modal" id="deckMoreModal" hidden>
+  <div class="modal-card deck-sheet-card" id="deckSheetCard">
+    <div class="sheet-head">
+      <h3>戰術司令部配置</h3>
+      <button class="sheet-close" id="btnDeckSheetClose">✕</button>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-label">聯合作戰羈絆與戰術診斷 (點擊標籤查看詳情)</div>
+      <div id="sheetSynergyBox" class="deck-synergy-bar" style="flex-wrap:wrap;max-width:100%;gap:6px"></div>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-label">選擇戰術教條</div>
+      <div class="doc-sheet-list" id="docSheetList"></div>
+    </div>
+    <div class="sheet-actions" style="margin-top:16px">
+      <button class="btn ghost block" id="sheetBtnClear" style="color:var(--red);border-color:rgba(255,93,110,.3)">🗑️ 清空所有槽位</button>
+    </div>
+  </div>
+</div>
+
+<!-- C4ISR 全域戰情報告與大數據大盤 (Global Telemetry & Analytics Modal) -->
+<div class="modal" id="globalTelemetryModal" hidden>
+  <div class="modal-card telemetry-modal-card">
+    <div class="cloud-modal-header" style="margin-bottom:12px">
+      <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:#10b981;background:rgba(16,185,129,0.12);padding:2px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.35);">📡 C4ISR 全域戰情報告 · 即時遙測大盤</div>
+      <h2 style="font-size:18px;margin:4px 0 6px;">全服作戰數據大盤 (GLOBAL C4ISR TELEMETRY)</h2>
+      <p class="muted" style="font-size:12px;line-height:1.5;">雙軌統計架構：整合 Firebase Realtime Database 實時連線戰況 與 Google Analytics 4 (GA4) 訪客事件分析。</p>
+    </div>
+
+    <!-- 4 大核心全域即時戰情指標 -->
+    <div class="tel-grid">
+      <div class="tel-stat-card live-card">
+        <div class="lbl"><span class="live-pulse-dot"></span> 即時在線人數</div>
+        <div class="val text-green" id="modalTelOnline">--</div>
+        <div class="sub">目前正處於戰情室／戰場之實時連線指揮官</div>
+      </div>
+      <div class="tel-stat-card">
+        <div class="lbl">⚔️ 全服累計對戰局數</div>
+        <div class="val text-cyan"><span id="modalTelBattles">--</span> <small style="font-size:13px;font-weight:700;opacity:0.8">局</small></div>
+        <div class="sub">今日全服已接戰 <b id="modalTelToday" style="color:var(--text)">0</b> 局</div>
+      </div>
+      <div class="tel-stat-card">
+        <div class="lbl">🌐 累計到訪網站人次</div>
+        <div class="val text-amber"><span id="modalTelVisits">--</span> <small style="font-size:13px;font-weight:700;opacity:0.8">人次</small></div>
+        <div class="sub">今日到訪 <b id="modalTelTodayVisits" style="color:var(--text)">1</b> 人次</div>
+      </div>
+      <div class="tel-stat-card">
+        <div class="lbl">🎖️ 全服列編指揮官部隊</div>
+        <div class="val text-purple"><span id="modalTelPlayers">--</span> <small style="font-size:13px;font-weight:700;opacity:0.8">隊</small></div>
+        <div class="sub">已完成編號列裝之不重複特遣隊數</div>
+      </div>
+    </div>
+
+    <!-- 我方個人戰績摘要列 -->
+    <div class="tel-personal-bar" id="modalPersonalRecord" style="margin-bottom:12px;padding:9px 12px;border-radius:8px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.28);font-size:12.5px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+      <span>🎖️ 我方個人戰績載入中...</span>
+    </div>
+
+    <!-- 軌道 2：Google Analytics 4 (GA4) 站長配置區 -->
+    <div class="ga4-config-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <strong style="font-size:13px;color:var(--text);display:flex;align-items:center;gap:6px">
+          <span>🌐 Google Analytics 4 (GA4) 流量與事件分析</span>
+        </strong>
+        <span class="muted" style="font-size:10.5px">雙軌架構 · 官方報表後台</span>
+      </div>
+      <p class="muted" style="font-size:11.5px;line-height:1.45;margin-bottom:8px">
+        免動程式碼！輸入你的 GA4 評估 ID（格式為 <code>G-XXXXXXXXXX</code>），系統將自動啟動追蹤碼並上報訪客來源、留存率與 <code>battle_finish</code> 等作戰事件。
+      </p>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="inputGA4MeasurementId" class="input" placeholder="例如: G-XXXXXXXXXX (留空則停用)" style="font-family:var(--mono);font-size:12px;flex:1" maxlength="24">
+        <button class="btn primary sm" id="btnSaveGA4" type="button" style="white-space:nowrap;font-weight:700">💾 儲存並啟用</button>
+        <button class="btn ghost sm" id="btnTestGAEvent" type="button" style="white-space:nowrap" title="向 GA4 發送一筆測試信號 (c4isr_ping)">📡 測試信號</button>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;display:flex;justify-content:flex-end">
+      <button class="btn secondary" id="btnCloseTelemetryModal" type="button">關閉戰情報告</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script defer src="js/data.js?v=5.9.139"></script>
+<script defer src="js/ladder-data.js?v=5.9.139"></script>
+<script defer src="js/ladder.js?v=5.9.139"></script>
+<script defer src="js/engine.js?v=5.9.139"></script>
+<!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
+<script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script defer src="js/firebase-config.js?v=5.9.139"></script>
+<script defer src="js/firebase-tourney.js?v=5.9.139"></script>
+<script defer src="js/tournament.js?v=5.9.139"></script>
+<script defer src="js/online-pvp.js?v=5.9.139"></script>
+<script defer src="js/telemetry.js?v=5.9.139"></script>
+<script defer src="js/cloud-sync.js?v=5.9.139"></script>
+<script defer src="js/sound.js?v=5.9.139"></script>
+<script defer src="js/poster-help.js?v=5.9.139"></script>
+<script defer src="js/libs/three.min.js"></script>
+<script defer src="js/battle-3d.js?v=1.0.0"></script>
+<script defer src="js/app.js?v=5.9.139"></script>
+<script>
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js?v=5.9.139').then(r => r.update()).catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

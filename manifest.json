@@ -1,0 +1,33 @@
+{
+  "id": "topclash-game-app",
+  "name": "頂尖對戰：15元聯合作戰",
+  "short_name": "頂尖對戰",
+  "description": "15元預算制現代海陸空聯合作戰兵棋與世界盃淘汰錦標賽",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b111e",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "categories": ["games", "strategy"],
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

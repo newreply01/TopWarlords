@@ -137,3 +137,4 @@ if old_block:
     print('Successfully patched poster-help.js with authentic ancient warlord text!')
 else:
     print('Could not find old_block in poster-help.js')
+

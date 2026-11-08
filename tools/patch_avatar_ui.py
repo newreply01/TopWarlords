@@ -171,3 +171,4 @@ assert old_photo_block in text_css, "old_photo_block not found in style.css"
 text_css = text_css.replace(old_photo_block, new_avatar_block, 1)
 p_css.write_text(text_css, encoding="utf-8")
 print("Successfully updated style.css for avatar window!")
+

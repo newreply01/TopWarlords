@@ -85,3 +85,4 @@ text = text.replace("if (wType !== 'ew') SoundEngine.play('hit_impact', targetSi
 
 p.write_text(text, encoding="utf-8")
 print("Successfully patched ancient sfx triggers in app.js!")
+

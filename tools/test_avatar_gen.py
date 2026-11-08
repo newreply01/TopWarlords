@@ -147,3 +147,4 @@ def generate_warlord_avatar(name, cat, cost, origin, weapon, flag, out_path):
 generate_warlord_avatar('霍去病', 'air', 5, '中國·西漢', '漢軍玄甲鐵騎', '🇨🇳', 'D:/TopWarlords/assets/warlords/test_HUO.jpg')
 generate_warlord_avatar('諸葛亮', 'support', 5, '中國·三國', '八陣奇謀羽扇', '🇨🇳', 'D:/TopWarlords/assets/warlords/test_ZG.jpg')
 generate_warlord_avatar('上杉謙信', 'air', 4, '日本·戰國', '車懸之陣薙刀', '🇯🇵', 'D:/TopWarlords/assets/warlords/test_KENSHIN.jpg')
+

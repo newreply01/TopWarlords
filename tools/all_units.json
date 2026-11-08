@@ -1,0 +1,2002 @@
+[
+  {
+    "id": "HUO",
+    "name": "霍去病",
+    "cat": "air",
+    "cost": 5,
+    "tag": "封狼居胥·千里奔襲",
+    "flag": "🇨🇳",
+    "origin": "中國 · 西漢",
+    "weapon": "漢軍玄甲鐵騎 + 環首刀"
+  },
+  {
+    "id": "WEI",
+    "name": "衛青",
+    "cat": "air",
+    "cost": 5,
+    "tag": "車騎並進·七戰七捷",
+    "flag": "🇨🇳",
+    "origin": "中國 · 西漢",
+    "weapon": "武剛突騎大陣 + 漢劍"
+  },
+  {
+    "id": "LUBU",
+    "name": "呂布",
+    "cat": "air",
+    "cost": 5,
+    "tag": "人中呂布·馬中赤兔",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "方天畫戟 + 赤兔馬"
+  },
+  {
+    "id": "YUEYUN",
+    "name": "岳雲",
+    "cat": "air",
+    "cost": 5,
+    "tag": "背嵬重騎·突陣碎甲",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南宋",
+    "weapon": "雙鐵椎 + 背嵬重甲"
+  },
+  {
+    "id": "LISHIMIN",
+    "name": "李世民",
+    "cat": "air",
+    "cost": 5,
+    "tag": "天策上將·玄甲衝陣",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "天策黑槊 + 玄甲良駒"
+  },
+  {
+    "id": "YOSHITSUNE",
+    "name": "源義經",
+    "cat": "air",
+    "cost": 5,
+    "tag": "鵯越絕壁·戰神逆落",
+    "flag": "🇯🇵",
+    "origin": "日本 · 源平",
+    "weapon": "薄綠太刀 + 黑葦威鎧"
+  },
+  {
+    "id": "SHINGEN",
+    "name": "武田信玄",
+    "cat": "air",
+    "cost": 5,
+    "tag": "甲斐之虎·風林火山",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "軍配團扇 + 諏訪法性兜"
+  },
+  {
+    "id": "GAISUWEN",
+    "name": "淵蓋蘇文",
+    "cat": "air",
+    "cost": 5,
+    "tag": "身佩五刀·高句麗雄霸",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高句麗",
+    "weapon": "五口寶刀 + 鐵騎長矛"
+  },
+  {
+    "id": "ZHAOYUN",
+    "name": "趙雲",
+    "cat": "air",
+    "cost": 4,
+    "tag": "渾身是膽·七進七出",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "青釭劍 + 亮銀龍膽槍"
+  },
+  {
+    "id": "MACHO",
+    "name": "馬超",
+    "cat": "air",
+    "cost": 4,
+    "tag": "錦馬超·西涼鐵騎突陣",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "虎頭湛金槍 + 白袍銀鎧"
+  },
+  {
+    "id": "ZHANGLIAO",
+    "name": "張遼",
+    "cat": "air",
+    "cost": 4,
+    "tag": "逍遙津突襲·威震江東",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "問天青龍雙戟 + 塞外駿馬"
+  },
+  {
+    "id": "LIXU",
+    "name": "李愬",
+    "cat": "air",
+    "cost": 4,
+    "tag": "雪夜入蔡州·奇襲生擒",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "唐橫刀 + 風雪踏蹄長矛"
+  },
+  {
+    "id": "CHENQINGZHI",
+    "name": "陳慶之",
+    "cat": "air",
+    "cost": 4,
+    "tag": "白袍神兵·名師莫敢前",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南北朝",
+    "weapon": "白袍麾旗 + 輕騎快槍"
+  },
+  {
+    "id": "KENSHIN",
+    "name": "上杉謙信",
+    "cat": "air",
+    "cost": 4,
+    "tag": "越後之龍·車懸奔流",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "順慶手太刀 + 毘字旗"
+  },
+  {
+    "id": "YUKIMURA",
+    "name": "真田幸村",
+    "cat": "air",
+    "cost": 4,
+    "tag": "日本第一兵·直衝本陣",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "十文字槍 + 六文錢赤備"
+  },
+  {
+    "id": "KIMYUSHIN",
+    "name": "金庾信",
+    "cat": "air",
+    "cost": 4,
+    "tag": "新羅太大角干·風火神騎",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 新羅",
+    "weapon": "龍鳳環首刀 + 金花官服戰鎧"
+  },
+  {
+    "id": "DENGAI",
+    "name": "鄧艾",
+    "cat": "air",
+    "cost": 3,
+    "tag": "涉險越嶺·陰平天降",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "登山步稍 + 奇襲輕甲"
+  },
+  {
+    "id": "XIAHOUYUAN",
+    "name": "夏侯淵",
+    "cat": "air",
+    "cost": 3,
+    "tag": "虎步關右·三日五百",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "精鋼長矛 + 快馬大黃弓"
+  },
+  {
+    "id": "GONGSUNDU",
+    "name": "公孫瓚",
+    "cat": "air",
+    "cost": 3,
+    "tag": "白馬義從·塞外破胡",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "白馬長槊 + 雕花角弓"
+  },
+  {
+    "id": "XUETOU",
+    "name": "薛仁貴",
+    "cat": "air",
+    "cost": 3,
+    "tag": "將軍三箭·白衣馳突",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "方天戟 + 震天弓"
+  },
+  {
+    "id": "CHANGYUCHUN",
+    "name": "常遇春",
+    "cat": "air",
+    "cost": 3,
+    "tag": "摧鋒陷陣·百萬常勝",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明朝",
+    "weapon": "狼牙長槊 + 明光鐵鎧"
+  },
+  {
+    "id": "DATE",
+    "name": "伊達政宗",
+    "cat": "air",
+    "cost": 3,
+    "tag": "獨眼龍·騎鐵先驅",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "黑漆弦月盔 + 騎鐵火繩槍"
+  },
+  {
+    "id": "KEIJI",
+    "name": "前田慶次",
+    "cat": "air",
+    "cost": 3,
+    "tag": "天下傾奇·朱槍突擊",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "朱柄槍 + 南蠻具足"
+  },
+  {
+    "id": "EULJI",
+    "name": "乙支文德",
+    "cat": "air",
+    "cost": 3,
+    "tag": "神算佯敗·薩水奇襲",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高句麗",
+    "weapon": "高句麗環刀 + 輕步快騎"
+  },
+  {
+    "id": "CAOZHANG",
+    "name": "曹彰",
+    "cat": "air",
+    "cost": 2,
+    "tag": "黃鬚少俠·勇手格獸",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "重鋼長矛 + 雕翎弓"
+  },
+  {
+    "id": "LINGTONG",
+    "name": "凌統",
+    "cat": "air",
+    "cost": 2,
+    "tag": "國士先鋒·親率死戰",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "烈火大刀 + 隨身精短劍"
+  },
+  {
+    "id": "WENPING",
+    "name": "文聘",
+    "cat": "air",
+    "cost": 2,
+    "tag": "江夏鎮守·突騎襲壘",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "宣花長斧 + 精鐵兜鍪"
+  },
+  {
+    "id": "HULU",
+    "name": "斛律羨",
+    "cat": "air",
+    "cost": 2,
+    "tag": "幽州飛騎·馳射如神",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南北朝",
+    "weapon": "角端長弓 + 馬槊"
+  },
+  {
+    "id": "YUWENTAI",
+    "name": "宇文泰",
+    "cat": "air",
+    "cost": 2,
+    "tag": "八柱國雄·沙苑銳騎",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南北朝",
+    "weapon": "金絲馬槊 + 柱國印綬"
+  },
+  {
+    "id": "YAMAGATA",
+    "name": "山縣昌景",
+    "cat": "air",
+    "cost": 2,
+    "tag": "赤備猛將·長驅衝鋒",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "長柄槍 + 赤漆塗胴具足"
+  },
+  {
+    "id": "TACHIBANA",
+    "name": "立花宗茂",
+    "cat": "air",
+    "cost": 2,
+    "tag": "西國無雙·勇猛無匹",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "雷切脇差 + 栗色鎧甲"
+  },
+  {
+    "id": "ONDAL",
+    "name": "溫達",
+    "cat": "air",
+    "cost": 2,
+    "tag": "平岡將軍·突陣破周",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高句麗",
+    "weapon": "高句麗重劍 + 大弓"
+  },
+  {
+    "id": "PANGDE",
+    "name": "龐德",
+    "cat": "air",
+    "cost": 1,
+    "tag": "抬櫬出陣·白馬射關",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "截頭大刀 + 白馬重鐵鞍"
+  },
+  {
+    "id": "QUYI",
+    "name": "麴義",
+    "cat": "air",
+    "cost": 1,
+    "tag": "先登弩騎·破白馬義",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "先登強弩 + 衝鋒短盾"
+  },
+  {
+    "id": "CAOZHEN",
+    "name": "曹真",
+    "cat": "air",
+    "cost": 1,
+    "tag": "拒蜀名將·大破趙雲",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "百煉長刀 + 鐵鱗甲"
+  },
+  {
+    "id": "CAOCHUN",
+    "name": "曹純",
+    "cat": "air",
+    "cost": 1,
+    "tag": "虎豹統帥·南皮長驅",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "虎豹精鋼槊 + 輕騎快鞍"
+  },
+  {
+    "id": "FUMA",
+    "name": "風魔小太郎",
+    "cat": "air",
+    "cost": 1,
+    "tag": "暗夜騎襲·風魔黑影",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "忍者苦無 + 漆黑忍馬"
+  },
+  {
+    "id": "OBATA",
+    "name": "飯富虎昌",
+    "cat": "air",
+    "cost": 1,
+    "tag": "赤備元祖·烈火陣亡",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "大身槍 + 赤色大兜"
+  },
+  {
+    "id": "KOGURYOTIE",
+    "name": "高句麗鐵騎斥候",
+    "cat": "air",
+    "cost": 1,
+    "tag": "具裝鎧馬·前線游動",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高句麗",
+    "weapon": "馬甲鐵矛 + 哨角"
+  },
+  {
+    "id": "BAEKJEO",
+    "name": "百濟驍騎偏師",
+    "cat": "air",
+    "cost": 1,
+    "tag": "輕裝游擊·側翼牽制",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 百濟",
+    "weapon": "百濟短刀 + 游擊角弓"
+  },
+  {
+    "id": "BAIQI",
+    "name": "白起",
+    "cat": "armor",
+    "cost": 5,
+    "tag": "武安君·長平殲滅",
+    "flag": "🇨🇳",
+    "origin": "中國 · 戰國",
+    "weapon": "武安君銅劍 + 戰國玄甲"
+  },
+  {
+    "id": "XIANGYU",
+    "name": "項羽",
+    "cat": "armor",
+    "cost": 5,
+    "tag": "霸王破釜·以一當百",
+    "flag": "🇨🇳",
+    "origin": "中國 · 楚漢",
+    "weapon": "霸王楚戟 + 烏騅馬鎧"
+  },
+  {
+    "id": "YUEFEI",
+    "name": "岳飛",
+    "cat": "armor",
+    "cost": 5,
+    "tag": "撼山易·撼岳家軍難",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南宋",
+    "weapon": "瀝泉神槍 + 岳字白旄大旗"
+  },
+  {
+    "id": "WANGJIAN",
+    "name": "王翦",
+    "cat": "armor",
+    "cost": 5,
+    "tag": "秦滅六國·穩若泰山",
+    "flag": "🇨🇳",
+    "origin": "中國 · 秦朝",
+    "weapon": "大秦青銅長戈 + 重甲鐵盾"
+  },
+  {
+    "id": "LIJING",
+    "name": "李靖",
+    "cat": "armor",
+    "cost": 5,
+    "tag": "衛國公·六花大陣",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "六花陣法旗 + 唐陌刀"
+  },
+  {
+    "id": "HONDA",
+    "name": "本多忠勝",
+    "cat": "armor",
+    "cost": 5,
+    "tag": "戰國第一槍·五十七戰無傷",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "蜻蛉切神槍 + 鹿角脇立兜"
+  },
+  {
+    "id": "SHIBATA",
+    "name": "柴田勝家",
+    "cat": "armor",
+    "cost": 5,
+    "tag": "破瓶柴田·萬夫莫當",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "瓶割刀 + 漆黑重甲具足"
+  },
+  {
+    "id": "YISEONGGYE",
+    "name": "李成桂",
+    "cat": "armor",
+    "cost": 5,
+    "tag": "開國太祖·荒山大捷",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮/高麗",
+    "weapon": "太祖御用角弓 + 鐵環重甲"
+  },
+  {
+    "id": "LIANPO",
+    "name": "廉頗",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "負荊善守·長平堅壁",
+    "flag": "🇨🇳",
+    "origin": "中國 · 戰國",
+    "weapon": "青銅重戟 + 戰國大盾"
+  },
+  {
+    "id": "MENGTIAN",
+    "name": "蒙恬",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "中華第一勇·築長城禦胡",
+    "flag": "🇨🇳",
+    "origin": "中國 · 秦朝",
+    "weapon": "秦軍重弩 + 狼毫筆"
+  },
+  {
+    "id": "GUANYU",
+    "name": "關羽",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "威震華夏·萬人敵重將",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "青龍偃月刀 + 美髯綠袍鎧"
+  },
+  {
+    "id": "ZHANGFEI",
+    "name": "張飛",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "據水斷橋·萬人敵猛張飛",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "丈八蛇矛 + 烏金鐵環甲"
+  },
+  {
+    "id": "GUOZIYI",
+    "name": "郭子儀",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "再造唐室·單騎退吐蕃",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "唐儀刀 + 紫金戰鎧"
+  },
+  {
+    "id": "XUDA",
+    "name": "徐達",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "萬里長城·開國第一將",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明朝",
+    "weapon": "明初長刀 + 魚鱗精鐵甲"
+  },
+  {
+    "id": "TACHIBANAD",
+    "name": "立花道雪",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "雷神化身·斬雷鐵壁",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "名刀雷切 + 轎載鐵盾"
+  },
+  {
+    "id": "CHOIYOUNG",
+    "name": "崔瑩",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "黃金如石·高麗柱石",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "高麗大刀 + 頭頂鐵胄"
+  },
+  {
+    "id": "DIANWEI",
+    "name": "典韋",
+    "cat": "armor",
+    "cost": 3,
+    "tag": "古之惡來·重雙鐵戟",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "雙鐵戟 + 重裝近衛鎧"
+  },
+  {
+    "id": "XUCHU",
+    "name": "許褚",
+    "cat": "armor",
+    "cost": 3,
+    "tag": "虎癡勇悍·倒拖雙牛",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "虎頭大金刀 + 粗鐵皮甲"
+  },
+  {
+    "id": "GAOSHUN",
+    "name": "高順",
+    "cat": "armor",
+    "cost": 3,
+    "tag": "陷陣營·鎧甲精整每戰必破",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "陷陣大盾 + 破甲長矛"
+  },
+  {
+    "id": "QINSHUBAO",
+    "name": "秦叔寶",
+    "cat": "armor",
+    "cost": 3,
+    "tag": "雙鐧重裝·百萬軍中取將",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "熟銅雙鐧 + 步戰明光甲"
+  },
+  {
+    "id": "YUCHIGONG",
+    "name": "尉遲恭",
+    "cat": "armor",
+    "cost": 3,
+    "tag": "奪槊陷陣·黑甲門神",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "單雄丈二矛 + 烏金甲"
+  },
+  {
+    "id": "DIQING",
+    "name": "狄青",
+    "cat": "armor",
+    "cost": 3,
+    "tag": "面涅將軍·銅面浴血",
+    "flag": "🇨🇳",
+    "origin": "中國 · 北宋",
+    "weapon": "青銅鬼臉面具 + 神機長刀"
+  },
+  {
+    "id": "SHIMAZUY",
+    "name": "島津義弘",
+    "cat": "armor",
+    "cost": 3,
+    "tag": "鬼石曼子·重甲死戰",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "野太刀 + 黑漆塗二枚胴"
+  },
+  {
+    "id": "GYEBAEK",
+    "name": "階伯",
+    "cat": "armor",
+    "cost": 3,
+    "tag": "黃山伐決死·五千烈士",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 百濟",
+    "weapon": "百濟環首大刀 + 鐵鱗背心"
+  },
+  {
+    "id": "MENGGONG",
+    "name": "孟珙",
+    "cat": "armor",
+    "cost": 2,
+    "tag": "機動防禦大師·襄陽抗蒙",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南宋",
+    "weapon": "荊襄重步盾 + 鎢鋼長槍"
+  },
+  {
+    "id": "YANGYE",
+    "name": "楊業",
+    "cat": "armor",
+    "cost": 2,
+    "tag": "金刀楊無敵·雁門破遼",
+    "flag": "🇨🇳",
+    "origin": "中國 · 北宋",
+    "weapon": "九環金刀 + 雁門重甲"
+  },
+  {
+    "id": "CAOREN",
+    "name": "曹仁",
+    "cat": "armor",
+    "cost": 2,
+    "tag": "鐵壁天人·固守樊城",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "重鋼大盾 + 短刃佩刀"
+  },
+  {
+    "id": "ZHOUTAI",
+    "name": "周泰",
+    "cat": "armor",
+    "cost": 2,
+    "tag": "滿身傷疤·身如鐵石",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "截頭厚刃刀 + 肉盾鐵軀"
+  },
+  {
+    "id": "LANYU",
+    "name": "藍玉",
+    "cat": "armor",
+    "cost": 2,
+    "tag": "大將軍·捕魚兒海重裝",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明朝",
+    "weapon": "明光三眼長矛 + 鎖子甲"
+  },
+  {
+    "id": "IINAOMASA",
+    "name": "井伊直政",
+    "cat": "armor",
+    "cost": 2,
+    "tag": "井伊赤鬼·赤備先鋒",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "朱漆大槍 + 金箔天衝脇立"
+  },
+  {
+    "id": "KATOKIYOMASA",
+    "name": "加藤清正",
+    "cat": "armor",
+    "cost": 2,
+    "tag": "賤岳七本槍·築城重將",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "片鎌槍 + 長烏帽子形兜"
+  },
+  {
+    "id": "JEONGMUNBU",
+    "name": "鄭文孚",
+    "cat": "armor",
+    "cost": 2,
+    "tag": "北關大捷·義兵鐵壁",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "朝鮮長劍 + 義兵粗鐵盾"
+  },
+  {
+    "id": "YUJIN",
+    "name": "于禁",
+    "cat": "armor",
+    "cost": 1,
+    "tag": "毅重治軍·持節抗敵",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "鐵環長刀 + 堅木大盾"
+  },
+  {
+    "id": "LIDIAN",
+    "name": "李典",
+    "cat": "armor",
+    "cost": 1,
+    "tag": "長者好學·步陣拒敵",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "環首刀 + 督戰令旗"
+  },
+  {
+    "id": "HAOMENG",
+    "name": "郝萌",
+    "cat": "armor",
+    "cost": 1,
+    "tag": "前沿甲士·肉盾肉搏",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "鐵葉皮甲 + 鈍刃長斧"
+  },
+  {
+    "id": "BAIERBING",
+    "name": "白毦精兵隊",
+    "cat": "armor",
+    "cost": 1,
+    "tag": "西方上兵·蜀漢親衛",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "白毦鐵矛 + 短刃佩劍"
+  },
+  {
+    "id": "ONIKOJIMA",
+    "name": "鬼小島彌太郎",
+    "cat": "armor",
+    "cost": 1,
+    "tag": "大鎧猛者·鬼神力氣",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "粗鐵金棒 + 古式大鎧"
+  },
+  {
+    "id": "KANISAIZO",
+    "name": "可兒才藏",
+    "cat": "armor",
+    "cost": 1,
+    "tag": "笹之才藏·插竹取首",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "長槍 + 笹葉符號背旗"
+  },
+  {
+    "id": "BYEOLMUBAN",
+    "name": "高麗別武班重卒",
+    "cat": "armor",
+    "cost": 1,
+    "tag": "尹瓘編軍·破胡重步",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "重裝長盾 + 闊刃大斧"
+  },
+  {
+    "id": "GAPSABO",
+    "name": "朝鮮甲士重卒",
+    "cat": "armor",
+    "cost": 1,
+    "tag": "禁軍甲士·鐵葉戰袍",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "布面甲 + 環刀大盾"
+  },
+  {
+    "id": "LIGUANG",
+    "name": "李廣",
+    "cat": "air_defense",
+    "cost": 5,
+    "tag": "漢之飛將·射石沒羽",
+    "flag": "🇨🇳",
+    "origin": "中國 · 西漢",
+    "weapon": "漢家雕弓 + 白羽穿甲箭"
+  },
+  {
+    "id": "YANGYOUJI",
+    "name": "養由基",
+    "cat": "air_defense",
+    "cost": 5,
+    "tag": "百步穿楊·一矢斃命",
+    "flag": "🇨🇳",
+    "origin": "中國 · 春秋",
+    "weapon": "穿楊神弓 + 七札破甲箭"
+  },
+  {
+    "id": "QIJIGUANG",
+    "name": "戚繼光",
+    "cat": "air_defense",
+    "cost": 5,
+    "tag": "鴛鴦火陣·鳥銃遮天",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明朝",
+    "weapon": "虎蹲砲 + 鳥銃陣列"
+  },
+  {
+    "id": "NOBUNAGA",
+    "name": "織田信長",
+    "cat": "air_defense",
+    "cost": 5,
+    "tag": "長篠三段·鐵砲破雷",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "南蠻鐵砲火銃 + 織田木瓜旗"
+  },
+  {
+    "id": "YOICHI",
+    "name": "那須與一",
+    "cat": "air_defense",
+    "cost": 5,
+    "tag": "扇之的·神弓定浪",
+    "flag": "🇯🇵",
+    "origin": "日本 · 源平",
+    "weapon": "滋野籐弓 + 白羽神箭"
+  },
+  {
+    "id": "JUMONG",
+    "name": "朱蒙",
+    "cat": "air_defense",
+    "cost": 5,
+    "tag": "東明神王·百發百中",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高句麗",
+    "weapon": "高句麗神弓 + 鹿角箭"
+  },
+  {
+    "id": "GWONYUL",
+    "name": "權慄",
+    "cat": "air_defense",
+    "cost": 5,
+    "tag": "幸州大捷·神機破軍",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "幸州火車 + 神機箭筒"
+  },
+  {
+    "id": "XUERENARROW",
+    "name": "薛仁貴射雕營",
+    "cat": "air_defense",
+    "cost": 5,
+    "tag": "三箭定天山·射雕破騎",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "天山鵰翎破甲箭 + 唐代角弓"
+  },
+  {
+    "id": "HUANGZHONG",
+    "name": "黃忠",
+    "cat": "air_defense",
+    "cost": 4,
+    "tag": "老當益壯·定軍神弦",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "鐵胎寶弓 + 鳳嘴刀"
+  },
+  {
+    "id": "TAISHICI",
+    "name": "太史慈",
+    "cat": "air_defense",
+    "cost": 4,
+    "tag": "猿臂善射·搴旗斬將",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "狂歌戟 + 穿甲大黃弓"
+  },
+  {
+    "id": "HANSHIZHONG",
+    "name": "韓世忠",
+    "cat": "air_defense",
+    "cost": 4,
+    "tag": "克敵神弓·大破鐵浮",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南宋",
+    "weapon": "克敵勁弩 + 倒馬長槍"
+  },
+  {
+    "id": "HAOZHAO",
+    "name": "郝昭",
+    "cat": "air_defense",
+    "cost": 4,
+    "tag": "陳倉箭石·拒諸葛二十萬",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "陳倉火箭 + 拒馬盾陣"
+  },
+  {
+    "id": "AKECHI",
+    "name": "明智光秀",
+    "cat": "air_defense",
+    "cost": 4,
+    "tag": "鐵砲名手·本能寺雷火",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "名銃備前鐵砲 + 桔梗紋旗"
+  },
+  {
+    "id": "SAIKA",
+    "name": "雜賀孫市",
+    "cat": "air_defense",
+    "cost": 4,
+    "tag": "紀伊鐵砲·八咫烏之王",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "三連發火繩銃 + 八咫烏標記"
+  },
+  {
+    "id": "YANGMANCHUN",
+    "name": "楊萬春",
+    "cat": "air_defense",
+    "cost": 4,
+    "tag": "安市神弓·射退太宗",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高句麗",
+    "weapon": "高句麗城防硬角弓 + 火弩"
+  },
+  {
+    "id": "PARKJESANG",
+    "name": "朴齊上",
+    "cat": "air_defense",
+    "cost": 4,
+    "tag": "忠臣射聲·鎮衛海關",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 新羅",
+    "weapon": "新羅步戰弓 + 佩刀"
+  },
+  {
+    "id": "ZHANGHE",
+    "name": "張郃",
+    "cat": "air_defense",
+    "cost": 3,
+    "tag": "木門伏射·巧變良將",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "巧變長弓 + 綠沉槍"
+  },
+  {
+    "id": "ZHANGXUN",
+    "name": "張巡",
+    "cat": "air_defense",
+    "cost": 3,
+    "tag": "睢陽堅守·以矢抗賊",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "草人借箭 + 睢陽斷竹箭"
+  },
+  {
+    "id": "YANYAN",
+    "name": "嚴顏",
+    "cat": "air_defense",
+    "cost": 3,
+    "tag": "巴郡老將·斷頭將軍",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "烏金硬木弓 + 寬刃長刀"
+  },
+  {
+    "id": "ZONGZE",
+    "name": "宗澤",
+    "cat": "air_defense",
+    "cost": 3,
+    "tag": "汴京連弩·過河名將",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南宋",
+    "weapon": "連弩機樓 + 宣慰刀"
+  },
+  {
+    "id": "INABA",
+    "name": "稻葉一鐵",
+    "cat": "air_defense",
+    "cost": 3,
+    "tag": "頑固鐵壁·美濃鐵砲隊",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "美濃鐵砲 + 堅固丸木盾"
+  },
+  {
+    "id": "SUZUKI",
+    "name": "鈴木重朝",
+    "cat": "air_defense",
+    "cost": 3,
+    "tag": "紀州狙擊·伏擊破敵",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "狙擊用短火繩槍 + 芒草偽裝"
+  },
+  {
+    "id": "CHOIMUSEON",
+    "name": "崔茂宣",
+    "cat": "air_defense",
+    "cost": 3,
+    "tag": "高麗火砲之父·鎮海轟雷",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "走火火箭 + 鎮浦銅砲"
+  },
+  {
+    "id": "SHINRIP",
+    "name": "申砬",
+    "cat": "air_defense",
+    "cost": 3,
+    "tag": "北邊神射·忠州背水",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "朝鮮長身角弓 + 鐵羽矢"
+  },
+  {
+    "id": "LUSUARCH",
+    "name": "魯肅引弓",
+    "cat": "air_defense",
+    "cost": 2,
+    "tag": "敦厚武勇·單手貫盾",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "三石硬弓 + 破甲箭"
+  },
+  {
+    "id": "WENCHOU",
+    "name": "文醜射聲",
+    "cat": "air_defense",
+    "cost": 2,
+    "tag": "冀州勁弩·延津射張",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "冀州拓木弓 + 開山大刀"
+  },
+  {
+    "id": "CAOPICROSS",
+    "name": "曹丕親射組",
+    "cat": "air_defense",
+    "cost": 2,
+    "tag": "步射精嫻·連珠百發",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "文帝雕弓 + 金翎羽"
+  },
+  {
+    "id": "YUANCHONGHUAN",
+    "name": "袁崇煥紅夷砲組",
+    "cat": "air_defense",
+    "cost": 2,
+    "tag": "寧遠重砲·以銃制騎",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明朝",
+    "weapon": "紅夷大砲 + 火藥引信"
+  },
+  {
+    "id": "NAGASHINO",
+    "name": "長篠足輕鐵砲組",
+    "cat": "air_defense",
+    "cost": 2,
+    "tag": "竹束馬防·三段連響",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "長篠足輕銃 + 防馬柵欄"
+  },
+  {
+    "id": "TANEGASHIMA",
+    "name": "種子島火銃隊",
+    "cat": "air_defense",
+    "cost": 2,
+    "tag": "傳來初火·百步穿鎧",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "種子島筒 + 火繩引藥"
+  },
+  {
+    "id": "SINGIJEON",
+    "name": "朝鮮神機箭營",
+    "cat": "air_defense",
+    "cost": 2,
+    "tag": "百箭連發·火車震天",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "文宗火車 + 神機箭槽"
+  },
+  {
+    "id": "KIMSIMIN",
+    "name": "金時敏",
+    "cat": "air_defense",
+    "cost": 2,
+    "tag": "晉州守城·萬矢穿鎧",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "晉州大弓 + 火藥砲管"
+  },
+  {
+    "id": "ZHUGELIAN",
+    "name": "諸葛連弩隊",
+    "cat": "air_defense",
+    "cost": 1,
+    "tag": "元戎十矢·連發神機",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "諸葛元戎連弩 + 鐵矢匣"
+  },
+  {
+    "id": "SHENBI",
+    "name": "宋軍神臂弓營",
+    "cat": "air_defense",
+    "cost": 1,
+    "tag": "踏張神弩·遠貫重鎧",
+    "flag": "🇨🇳",
+    "origin": "中國 · 北宋",
+    "weapon": "神臂踏張弓 + 鐵鏃巨矢"
+  },
+  {
+    "id": "SHESHENG",
+    "name": "漢朝射聲營",
+    "cat": "air_defense",
+    "cost": 1,
+    "tag": "聽聲辨位·盲射鎖魂",
+    "flag": "🇨🇳",
+    "origin": "中國 · 漢朝",
+    "weapon": "射聲官弓 + 暗夜鳴鑊"
+  },
+  {
+    "id": "CHUBEE",
+    "name": "楚國連珠弩手",
+    "cat": "air_defense",
+    "cost": 1,
+    "tag": "機巧連發·矢如飛蝗",
+    "flag": "🇨🇳",
+    "origin": "中國 · 戰國",
+    "weapon": "楚地銅弩機 + 淬毒短矢"
+  },
+  {
+    "id": "KUNITOMO",
+    "name": "國友村鍛銃隊",
+    "cat": "air_defense",
+    "cost": 1,
+    "tag": "鐵砲之里·散彈火網",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "國友鍛火繩銃 + 粗鉛彈丸"
+  },
+  {
+    "id": "NEGORO",
+    "name": "根來眾僧兵槍手",
+    "cat": "air_defense",
+    "cost": 1,
+    "tag": "紀州鐵砲僧·神準狙射",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "根來寺銃 + 僧兵袈裟"
+  },
+  {
+    "id": "KOGURYOBOW",
+    "name": "高句麗林地伏弩組",
+    "cat": "air_defense",
+    "cost": 1,
+    "tag": "密林偽裝·破甲伏殺",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高句麗",
+    "weapon": "山林角弓 + 鹿皮偽裝網"
+  },
+  {
+    "id": "JUKRIM",
+    "name": "竹林民兵伏射組",
+    "cat": "air_defense",
+    "cost": 1,
+    "tag": "竹弓埋伏·近距疾射",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "竹製獵弓 + 塗毒箭鏃"
+  },
+  {
+    "id": "ZHOUYU",
+    "name": "周瑜",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "雅量江東·赤壁連環火",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "赤壁督軍劍 + 樓船令旗"
+  },
+  {
+    "id": "ZHENGCHENG",
+    "name": "鄭成功",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "國姓爺·鐵人水陸克荷",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明末",
+    "weapon": "延平寶劍 + 鐵人軍魚鱗甲"
+  },
+  {
+    "id": "SHILANG",
+    "name": "施琅",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "靖海將軍·澎湖海決",
+    "flag": "🇨🇳",
+    "origin": "中國 · 清朝",
+    "weapon": "靖海長刀 + 水師大纛旗"
+  },
+  {
+    "id": "YISUNSIN",
+    "name": "李舜臣",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "忠武公·鳴梁神話龜船",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "忠武公三尺寶劍 + 龜甲船"
+  },
+  {
+    "id": "KUKI",
+    "name": "九鬼嘉隆",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "海賊大名·鐵甲船破水",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "海賊大太刀 + 安宅鐵甲船"
+  },
+  {
+    "id": "DENGAI_V",
+    "name": "鄧艾奇兵隊",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "陰平天降·奇兵直搗",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "陰平攀絕繩索 + 破陣短刃"
+  },
+  {
+    "id": "SHIMAZU_V",
+    "name": "島津釣野伏組",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "釣野伏·敵中突破先登",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "示現流大刀 + 誘敵朱旗"
+  },
+  {
+    "id": "JANGPOGO",
+    "name": "張保皐",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "清海鎮霸·東亞海王",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 新羅",
+    "weapon": "清海鎮寶刀 + 大海船樓舵"
+  },
+  {
+    "id": "LUMENG",
+    "name": "呂蒙",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "白衣渡江·神速襲南郡",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "白衣偽裝袍 + 吳地雙手劍"
+  },
+  {
+    "id": "GANNING",
+    "name": "甘寧",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "百騎夜襲·錦帆鈴聲",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "短戟飛刀 + 銅鈴錦帆"
+  },
+  {
+    "id": "HUANGGAI",
+    "name": "黃蓋",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "苦肉火船·赤壁烈焰",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "火攻燃引火箭 + 艨艟衝角"
+  },
+  {
+    "id": "WANGJUN",
+    "name": "王濬",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "樓船下蜀·千尋鐵鎖沉",
+    "flag": "🇨🇳",
+    "origin": "中國 · 晉朝",
+    "weapon": "連環大樓船 + 破鎖巨斧"
+  },
+  {
+    "id": "YANGSU",
+    "name": "楊素",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "五牙巨艦·威平江南",
+    "flag": "🇨🇳",
+    "origin": "中國 · 隋朝",
+    "weapon": "五牙大艦拍竿 + 隋軍重劍"
+  },
+  {
+    "id": "YOSHITSUN_V",
+    "name": "源義經屋島先鋒",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "暴風渡海·急襲屋島",
+    "flag": "🇯🇵",
+    "origin": "日本 · 源平",
+    "weapon": "騎馬薙刀 + 渡海戰楫"
+  },
+  {
+    "id": "MURAKAMI",
+    "name": "村上武吉",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "能島水軍·焙烙玉焚艦",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "焙烙火玉 + 鯨船快櫓"
+  },
+  {
+    "id": "LEEOKGI",
+    "name": "李億祺",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "全羅右水使·並肩禦侮",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "板屋戰船長銃 + 右水使令牌"
+  },
+  {
+    "id": "ZHANGLIAO_V",
+    "name": "張遼先登組",
+    "cat": "naval",
+    "cost": 3,
+    "tag": "披甲持戟·首登破城",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "短柄短戟 + 先登皮索"
+  },
+  {
+    "id": "HANSHIZHONG_V",
+    "name": "韓世忠水軍營",
+    "cat": "naval",
+    "cost": 3,
+    "tag": "黃天蕩阻擊·鐵索截江",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南宋",
+    "weapon": "鐵綯沉鎖 + 樓船快弩"
+  },
+  {
+    "id": "WEIYAN",
+    "name": "魏延",
+    "cat": "naval",
+    "cost": 3,
+    "tag": "子午奇略·勇略先登",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "狂骨環刀 + 伏兵令旗"
+  },
+  {
+    "id": "LIXU_V",
+    "name": "李愬蔡州夜襲隊",
+    "cat": "naval",
+    "cost": 3,
+    "tag": "風雪無聲·鵝鴨遮聲",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐朝",
+    "weapon": "鵝鴨羽偽裝 + 破鎖長匕"
+  },
+  {
+    "id": "MOURI_V",
+    "name": "毛利嚴島奇兵",
+    "cat": "naval",
+    "cost": 3,
+    "tag": "大雨嚴島·夜度奇襲",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "嚴島夜襲丸竹 + 薙刀"
+  },
+  {
+    "id": "HATTORI",
+    "name": "服部半藏",
+    "cat": "naval",
+    "cost": 3,
+    "tag": "鬼半藏·伊賀忍軍統領",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "伊賀鎖鎌 + 漆黑忍衣"
+  },
+  {
+    "id": "JEONGJI",
+    "name": "鄭地",
+    "cat": "naval",
+    "cost": 3,
+    "tag": "鎮浦火砲·水師斬寇",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "高麗火銃銅管 + 海上長矛"
+  },
+  {
+    "id": "GWAKJAEWOO",
+    "name": "郭再祐",
+    "cat": "naval",
+    "cost": 3,
+    "tag": "紅衣將軍·宜寧奇兵",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "大紅戰袍 + 白木角弓"
+  },
+  {
+    "id": "JIANGQIN",
+    "name": "蔣欽",
+    "cat": "naval",
+    "cost": 2,
+    "tag": "濡須遏浪·先登力戰",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "吳水師重矛 + 護手短刀"
+  },
+  {
+    "id": "DONGXI",
+    "name": "董襲",
+    "cat": "naval",
+    "cost": 2,
+    "tag": "濡須斷鎖·死守巨艦",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "斬索雙斧 + 樓船重甲"
+  },
+  {
+    "id": "DINGFENG",
+    "name": "丁奉",
+    "cat": "naval",
+    "cost": 2,
+    "tag": "雪中奮短兵·東興破敵",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "雪夜白刃 + 短皮小盾"
+  },
+  {
+    "id": "MENGCHONG",
+    "name": "水陸艨艟衝角隊",
+    "cat": "naval",
+    "cost": 2,
+    "tag": "生牛皮蒙衝·破浪撞擊",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "生牛皮衝角 + 側舷長矛"
+  },
+  {
+    "id": "FUMASUB",
+    "name": "風魔忍軍水鬼組",
+    "cat": "naval",
+    "cost": 2,
+    "tag": "水遁暗殺·鑿穿舟底",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "水遁竹管 + 鑿木錐短忍刀"
+  },
+  {
+    "id": "KONISHI",
+    "name": "小西行長先遣軍",
+    "cat": "naval",
+    "cost": 2,
+    "tag": "一番隊先登·神速登陸",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "洋槍隊佩刀 + 登陸浮橋"
+  },
+  {
+    "id": "PANOKSEON",
+    "name": "朝鮮板屋快艚隊",
+    "cat": "naval",
+    "cost": 2,
+    "tag": "多槳快船·靈活游動",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "多槳搖櫓 + 火矢投射筒"
+  },
+  {
+    "id": "KWONJUN",
+    "name": "權俊",
+    "cat": "naval",
+    "cost": 2,
+    "tag": "前鋒都事·截敵斷道",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "右水營官刀 + 板屋巨銃"
+  },
+  {
+    "id": "SHUIGUI",
+    "name": "水陸潛泳水鬼營",
+    "cat": "naval",
+    "cost": 1,
+    "tag": "水底無聲·龍骨鑿穿",
+    "flag": "🇨🇳",
+    "origin": "中國 · 歷代",
+    "weapon": "水鬼長匕 + 破木鑿槌"
+  },
+  {
+    "id": "XIANDENG",
+    "name": "先登跳蕩死士組",
+    "cat": "naval",
+    "cost": 1,
+    "tag": "短兵相接·首登奪旗",
+    "flag": "🇨🇳",
+    "origin": "中國 · 漢/唐",
+    "weapon": "跳蕩短刀 + 圓藤牌"
+  },
+  {
+    "id": "JINGKE",
+    "name": "荊軻",
+    "cat": "naval",
+    "cost": 1,
+    "tag": "風蕭蕭兮·圖窮匕見",
+    "flag": "🇨🇳",
+    "origin": "中國 · 戰國",
+    "weapon": "督亢地圖 + 徐夫人匕首"
+  },
+  {
+    "id": "ZHUANZHU",
+    "name": "專諸",
+    "cat": "naval",
+    "cost": 1,
+    "tag": "魚腸古劍·近身暗刺",
+    "flag": "🇨🇳",
+    "origin": "中國 · 春秋",
+    "weapon": "魚腸短劍 + 獻魚銅盤"
+  },
+  {
+    "id": "KUMANO",
+    "name": "熊野水軍輕快艇",
+    "cat": "naval",
+    "cost": 1,
+    "tag": "紀州小艇·狼群蜂擁",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "熊野短槳 + 狼牙鉤矛"
+  },
+  {
+    "id": "KOGA_SUB",
+    "name": "甲賀暗夜突襲隊",
+    "cat": "naval",
+    "cost": 1,
+    "tag": "密林潛伏·毒刃夜襲",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "甲賀手裏劍 + 忍杖匕首"
+  },
+  {
+    "id": "TAMNA",
+    "name": "耽羅水手義勇隊",
+    "cat": "naval",
+    "cost": 1,
+    "tag": "濟州健兒·弄潮搏殺",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "海民叉槍 + 沉石索"
+  },
+  {
+    "id": "MOKBAE",
+    "name": "義兵連環木筏火攻組",
+    "cat": "naval",
+    "cost": 1,
+    "tag": "浮木引火·順流焚營",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "松油火把 + 衝流連環木排"
+  },
+  {
+    "id": "ZHUGELIANG",
+    "name": "諸葛亮",
+    "cat": "support",
+    "cost": 5,
+    "tag": "臥龍智聖·八陣通神",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "羽扇綸巾 + 諸葛八陣圖"
+  },
+  {
+    "id": "HANXIN",
+    "name": "韓信",
+    "cat": "support",
+    "cost": 5,
+    "tag": "兵仙神算·十面埋伏",
+    "flag": "🇨🇳",
+    "origin": "中國 · 楚漢",
+    "weapon": "兵仙令劍 + 十面埋伏陣"
+  },
+  {
+    "id": "ZHANGLIANG",
+    "name": "張良",
+    "cat": "support",
+    "cost": 5,
+    "tag": "運籌帷幄·決勝千里",
+    "flag": "🇨🇳",
+    "origin": "中國 · 漢朝",
+    "weapon": "太公兵法卷軸 + 漢印佩玉"
+  },
+  {
+    "id": "SIMAYI",
+    "name": "司馬懿",
+    "cat": "support",
+    "cost": 5,
+    "tag": "鷹視狼顧·深謀待時",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "宣帝佩劍 + 陣列令旗"
+  },
+  {
+    "id": "LIUBOWEN",
+    "name": "劉伯溫",
+    "cat": "support",
+    "cost": 5,
+    "tag": "一統江山·神算軍師",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明朝",
+    "weapon": "郁離子竹簡 + 太極籌算"
+  },
+  {
+    "id": "HANBEI",
+    "name": "竹中半兵衛",
+    "cat": "support",
+    "cost": 5,
+    "tag": "今孔明·十人奪城",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "竹中軍配 + 一之谷形兜"
+  },
+  {
+    "id": "KANBEI",
+    "name": "黑田官兵衛",
+    "cat": "support",
+    "cost": 5,
+    "tag": "如水大謀·天下二兵衛",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "合子形兜 + 水攻策圖卷"
+  },
+  {
+    "id": "GANGGAMCHAN",
+    "name": "姜邯贊",
+    "cat": "support",
+    "cost": 5,
+    "tag": "龜州大捷·以水代兵",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "高麗宰相笏板 + 水攻令旗"
+  },
+  {
+    "id": "SUNBIN",
+    "name": "孫臏",
+    "cat": "support",
+    "cost": 4,
+    "tag": "圍魏救趙·馬陵道伏兵",
+    "flag": "🇨🇳",
+    "origin": "中國 · 戰國",
+    "weapon": "孫臏兵法木牘 + 獨輪戰車"
+  },
+  {
+    "id": "WUQI",
+    "name": "吳起",
+    "cat": "support",
+    "cost": 4,
+    "tag": "吳子治軍·兼併無敵",
+    "flag": "🇨🇳",
+    "origin": "中國 · 戰國",
+    "weapon": "吳子兵書 + 魏武卒精矛"
+  },
+  {
+    "id": "GUOJIA",
+    "name": "郭嘉",
+    "cat": "support",
+    "cost": 4,
+    "tag": "十勝十敗·鬼謀奇策",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "十勝十敗論卷 + 謀士羽扇"
+  },
+  {
+    "id": "XUNYU",
+    "name": "荀彧",
+    "cat": "support",
+    "cost": 4,
+    "tag": "王佐之才·深謀遠猷",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "王佐印信 + 荀氏家傳竹簡"
+  },
+  {
+    "id": "JIAXU",
+    "name": "賈詡",
+    "cat": "support",
+    "cost": 4,
+    "tag": "算無遺策·毒士洞察",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "離間策書 + 毒士算籌"
+  },
+  {
+    "id": "LUXUN",
+    "name": "陸遜",
+    "cat": "support",
+    "cost": 4,
+    "tag": "火燒連營·夷陵破蜀",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "夷陵火計箭符 + 吳都督佩劍"
+  },
+  {
+    "id": "MASASHIGE",
+    "name": "楠木正成",
+    "cat": "support",
+    "cost": 4,
+    "tag": "軍神大謀·千早城智守",
+    "flag": "🇯🇵",
+    "origin": "日本 · 南北朝",
+    "weapon": "菊水紋旗 + 守城落石機巧"
+  },
+  {
+    "id": "SEOHUI",
+    "name": "徐熙",
+    "cat": "support",
+    "cost": 4,
+    "tag": "唇槍舌劍·不戰屈兵",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "高麗國書 + 談判舌鋒卷軸"
+  },
+  {
+    "id": "PANGTONG",
+    "name": "龐統",
+    "cat": "support",
+    "cost": 3,
+    "tag": "鳳雛奇策·連環上策",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "鳳雛連環策 + 青銅短劍"
+  },
+  {
+    "id": "FAZHENG",
+    "name": "法正",
+    "cat": "support",
+    "cost": 3,
+    "tag": "定軍奇畫·斬將夏侯",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "定軍指旗 + 蜀川圖誌"
+  },
+  {
+    "id": "CHENGONG",
+    "name": "陳宮",
+    "cat": "support",
+    "cost": 3,
+    "tag": "剛直智計·下邳奇計",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "下邳布防圖 + 智囊拂塵"
+  },
+  {
+    "id": "WEIXIAOKUAN",
+    "name": "韋孝寬",
+    "cat": "support",
+    "cost": 3,
+    "tag": "玉璧守城·地道神算",
+    "flag": "🇨🇳",
+    "origin": "中國 · 南北朝",
+    "weapon": "玉璧守備圖 + 掘地聽甕"
+  },
+  {
+    "id": "SESSAI",
+    "name": "太原雪齋",
+    "cat": "support",
+    "cost": 3,
+    "tag": "今川黑衣宰相·三國同盟",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "臨濟宗念珠 + 三國同盟盟約"
+  },
+  {
+    "id": "SANADAMASA",
+    "name": "真田昌幸",
+    "cat": "support",
+    "cost": 3,
+    "tag": "表裏比興·上田鬼謀",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "上田城地圖 + 誘敵令旗"
+  },
+  {
+    "id": "TAKAKAGE",
+    "name": "小早川隆景",
+    "cat": "support",
+    "cost": 3,
+    "tag": "毛利兩川·智慮深沉",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "毛利三箭令 + 陣羽織"
+  },
+  {
+    "id": "JOHON",
+    "name": "趙憲",
+    "cat": "support",
+    "cost": 3,
+    "tag": "錦山忠烈·義兵軍師",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "義兵檄文 + 忠烈令箭"
+  },
+  {
+    "id": "LUSU",
+    "name": "魯肅",
+    "cat": "support",
+    "cost": 2,
+    "tag": "榻上大策·三分雄圖",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "榻上策竹簡 + 結盟令劍"
+  },
+  {
+    "id": "CHENGYU",
+    "name": "程昱",
+    "cat": "support",
+    "cost": 2,
+    "tag": "剛戾深謀·十面設伏",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "十面埋伏符 + 籌糧算盤"
+  },
+  {
+    "id": "ZHUGUKE",
+    "name": "諸葛恪",
+    "cat": "support",
+    "cost": 2,
+    "tag": "東興大捷·乘雪大破",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "東興布防圖 + 破魏短戟"
+  },
+  {
+    "id": "YUAN_STRAT",
+    "name": "袁崇煥督師中樞",
+    "cat": "support",
+    "cost": 2,
+    "tag": "五年平遼·寧遠指揮",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明朝",
+    "weapon": "尚方寶劍 + 關寧防禦圖"
+  },
+  {
+    "id": "NAOIE",
+    "name": "宇喜多直家",
+    "cat": "support",
+    "cost": 2,
+    "tag": "暗殺暗略·備前梟雄",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "毒匕暗器 + 離間密函"
+  },
+  {
+    "id": "EKEI",
+    "name": "安國寺惠瓊",
+    "cat": "support",
+    "cost": 2,
+    "tag": "外交僧侶·精準斷命",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "僧袍袈裟 + 各國密卷"
+  },
+  {
+    "id": "KIMJONGSEO",
+    "name": "金宗瑞",
+    "cat": "support",
+    "cost": 2,
+    "tag": "大虎相公·拓地六鎮",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "大虎令箭 + 六鎮地界圖"
+  },
+  {
+    "id": "RYUSEONGRYONG",
+    "name": "柳成龍",
+    "cat": "support",
+    "cost": 2,
+    "tag": "懲毖深思·調度全軍",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "懲毖錄手稿 + 宰相調度印"
+  },
+  {
+    "id": "TIANDAN",
+    "name": "田單",
+    "cat": "support",
+    "cost": 1,
+    "tag": "火牛奇陣·齊國破燕",
+    "flag": "🇨🇳",
+    "origin": "中國 · 戰國",
+    "weapon": "火牛蘆葦火把 + 衝角雙刃"
+  },
+  {
+    "id": "GUANDU_CAT",
+    "name": "官渡發石霹靂車",
+    "cat": "support",
+    "cost": 1,
+    "tag": "劉曄神算·巨石破樓",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "官渡霹靂車 + 巨石砲彈"
+  },
+  {
+    "id": "XIAOSHI_SCOUT",
+    "name": "前鋒烽火斥候隊",
+    "cat": "support",
+    "cost": 1,
+    "tag": "狼煙四起·火控標定",
+    "flag": "🇨🇳",
+    "origin": "中國 · 漢/唐",
+    "weapon": "狼煙烽火台 + 測距令旗"
+  },
+  {
+    "id": "CHENTANG",
+    "name": "陳湯",
+    "cat": "support",
+    "cost": 1,
+    "tag": "犯強漢者·假節出奇",
+    "flag": "🇨🇳",
+    "origin": "中國 · 西漢",
+    "weapon": "漢節虎符 + 西域長戈"
+  },
+  {
+    "id": "MASANOBU",
+    "name": "本多正信",
+    "cat": "support",
+    "cost": 1,
+    "tag": "德川智囊·佐渡守陰謀",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "佐渡守印信 + 密謀折扇"
+  },
+  {
+    "id": "KOGA_SCOUT",
+    "name": "甲賀忍探情報組",
+    "cat": "support",
+    "cost": 1,
+    "tag": "密林潛聽·敵情盡收",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "忍具百寶囊 + 竊聽地筒"
+  },
+  {
+    "id": "KORYO_CAT",
+    "name": "高麗破甲拋石砲",
+    "cat": "support",
+    "cost": 1,
+    "tag": "巨石破壘·摧枯拉朽",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "高麗配重拋石機 + 砲石"
+  },
+  {
+    "id": "HOGAK_DRUM",
+    "name": "號角戰鼓激勵營",
+    "cat": "support",
+    "cost": 1,
+    "tag": "金鼓齊鳴·三軍奮勇",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 歷代",
+    "weapon": "三軍震天大鼓 + 銅製號角"
+  }
+]

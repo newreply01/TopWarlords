@@ -50,7 +50,7 @@ const SEED_GHOSTS = [
   { id: 'g_falcon', callsign: '冠軍侯・驃騎營', title: '驃騎將軍', rating: 1420, wins: 58, losses: 19, deck: ['HUO','ZHOUTAI','NASU','GANNING','CHENPING'], doctrine: 'strike', motto: '疾如風千里奔襲，閃擊直取中軍帥帳！', isUser: false },
   { id: 'g_iron', callsign: '武安君・鐵壁陣', title: '鎮國大將軍', rating: 1310, wins: 41, losses: 22, deck: ['SHINGEN','BAIQI','ZONGZE','ZHANGLIAO','WEIXIAOKUAN'], doctrine: 'defense', motto: '不動如山大盾重甲，長平鐵壁固若金湯。', isUser: false },
   { id: 'g_shadow', callsign: '臥龍崗・八陣圖', title: '軍師祭酒', rating: 1490, wins: 64, losses: 14, deck: ['ZHAOYUN','YUEFEI','HUANGZHONG','KUMANO','ZHUGELIANG'], doctrine: 'deception', motto: '奇門八陣迷霧困敵，未戰而廟算先勝。', isUser: false },
-  { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['GONGSUN','GYEBAEK','SAIGA','YISUNSIN','LIUCHENG'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
+  { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['GONGSUNDU','KATOKIYOMASA','NAGASHINO','YISUNSIN','PANGTONG'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
   { id: 'g_viper', callsign: '毘沙門天・車懸陣', title: '越後守護', rating: 1610, wins: 88, losses: 21, deck: ['KENSHIN','ZHANGFEI','INABA','WEIYAN','GUOJIA'], doctrine: 'strike', motto: '車懸輪番急襲破陣，白刃一騎討斬將奪旗。', isUser: false },
   { id: 'g_aegis', callsign: '天策府・玄甲精騎', title: '天策上將', rating: 1720, wins: 104, losses: 25, deck: ['LISHIMIN','LIANPO','LIGUANG','YANGSU','XUNYU'], doctrine: 'strike', motto: '玄甲鐵騎貫陣而入，神射強弩萬箭齊發。', isUser: false }
 ];

@@ -10,7 +10,7 @@
 
 ## 🏛️ 遊戲核心特色
 
-1. **200 位日韓中純歷史名將全鑑**：
+1. **175 位日韓中純歷史名將全鑑**：
    - 涵蓋春秋戰國、秦漢、三國、隋唐、宋明、日本戰國／源平合戰、韓國三國／高麗／朝鮮王朝。
    - 嚴格限定純歷史真實名將（排除民間演義杜撰角色）。
    - 國別分布：🇨🇳 中國 114 位、🇯🇵 日本 48 位、🇰🇷 韓國 38 位。
@@ -68,9 +68,9 @@ python -m http.server 8080
 ```
 TopWarlords/
 ├── index.html              # 主指揮所介面 (5x5 名將徵召看板、3D 戰場推演台)
-├── armory.html             # 東亞名將點將錄全鑑 (200 位名將傳記與兵法辭典)
+├── armory.html             # 東亞名將點將錄全鑑 (175 位名將傳記與兵法辭典)
 ├── style.css               # 主題樣式 (含 3D 沙盤、水墨古風與 RWD 自適應)
-├── all_warlords.json       # 200 位日韓中純歷史名將資料庫
+├── all_warlords.json       # 175 位日韓中純歷史名將資料庫
 ├── js/
 │   ├── app.js              # 主前端互動與對戰流程中樞
 │   ├── battle-3d.js        # 3D 古戰場推演引擎 (Three.js WebGL Diorama)
@@ -82,7 +82,7 @@ TopWarlords/
 │   └── poster-help.js      # Canvas 戰報海報繪製與遊戲說明
 ├── assets/
 │   ├── icons/              # PWA 應用圖示
-│   └── warlords/           # 200 位名將專屬古典水墨卡牌圖資 (*.jpg)
+│   └── warlords/           # 175 位名將專屬古典水墨卡牌圖資 (*.jpg)
 └── test/                   # Playwright 自動化 E2E 驗證套件
 ```
 

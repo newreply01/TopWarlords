@@ -487,28 +487,6 @@
     "sfx": "arrow_volley"
   },
   {
-    "id": "CHANGYUCHUN",
-    "name": "常遇春",
-    "cat": "air",
-    "cost": 3,
-    "v": "E",
-    "tag": "摧鋒陷陣·百萬常勝",
-    "desc": "明初開國大將，每戰必先親率銳騎衝鋒陷陣，自謂十萬大軍可橫行天下。",
-    "st": 42,
-    "ew": 8,
-    "traits": [
-      "CAS"
-    ],
-    "roleFlags": [],
-    "hp": 160,
-    "atk": 88,
-    "def": 0,
-    "flag": "🇨🇳",
-    "origin": "中國 · 明朝",
-    "weapon": "狼牙長槊 + 明光鐵鎧",
-    "sfx": "blade_clash"
-  },
-  {
     "id": "DATE",
     "name": "伊達政宗",
     "cat": "air",
@@ -1108,31 +1086,6 @@
     "sfx": "blade_clash"
   },
   {
-    "id": "YISEONGGYE",
-    "name": "李成桂",
-    "cat": "armor",
-    "cost": 5,
-    "v": "H",
-    "tag": "開國太祖·荒山大捷",
-    "desc": "朝鮮王朝開國太祖，高麗末期以重甲步卒與神準弓箭於荒山大捷全殲倭寇主力。",
-    "st": 12,
-    "ew": 12,
-    "traits": [
-      "APS",
-      "HEAVY"
-    ],
-    "roleFlags": [
-      "STAMINA_DEEP"
-    ],
-    "hp": 356,
-    "atk": 122,
-    "def": 0.26,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮/高麗",
-    "weapon": "太祖御用角弓 + 鐵環重甲",
-    "sfx": "war_drum"
-  },
-  {
     "id": "LIANPO",
     "name": "廉頗",
     "cat": "armor",
@@ -1249,29 +1202,6 @@
     "origin": "中國 · 唐朝",
     "weapon": "唐儀刀 + 紫金戰鎧",
     "sfx": "strategy_gong"
-  },
-  {
-    "id": "XUDA",
-    "name": "徐達",
-    "cat": "armor",
-    "cost": 4,
-    "v": "F",
-    "tag": "萬里長城·開國第一將",
-    "desc": "明朝開國第一功臣，統率重甲步兵大陣北伐滅元，治軍嚴明算無遺策。",
-    "st": 10,
-    "ew": 12,
-    "traits": [
-      "HEAVY",
-      "SPOT"
-    ],
-    "roleFlags": [],
-    "hp": 288,
-    "atk": 95,
-    "def": 0.22,
-    "flag": "🇨🇳",
-    "origin": "中國 · 明朝",
-    "weapon": "明初長刀 + 魚鱗精鐵甲",
-    "sfx": "war_drum"
   },
   {
     "id": "TACHIBANAD",
@@ -1591,28 +1521,6 @@
     "sfx": "blade_clash"
   },
   {
-    "id": "LANYU",
-    "name": "藍玉",
-    "cat": "armor",
-    "cost": 2,
-    "v": "E",
-    "tag": "大將軍·捕魚兒海重裝",
-    "desc": "明初名將，率重甲大軍冒風沙直搗捕魚兒海，大破北元王廷俘獲萬眾。",
-    "st": 12,
-    "ew": 0,
-    "traits": [
-      "TRUE_AT"
-    ],
-    "roleFlags": [],
-    "hp": 190,
-    "atk": 68,
-    "def": 0.16,
-    "flag": "🇨🇳",
-    "origin": "中國 · 明朝",
-    "weapon": "明光三眼長矛 + 鎖子甲",
-    "sfx": "blade_clash"
-  },
-  {
     "id": "IINAOMASA",
     "name": "井伊直政",
     "cat": "armor",
@@ -1655,28 +1563,6 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "片鎌槍 + 長烏帽子形兜",
-    "sfx": "blade_clash"
-  },
-  {
-    "id": "JEONGMUNBU",
-    "name": "鄭文孚",
-    "cat": "armor",
-    "cost": 2,
-    "v": "H",
-    "tag": "北關大捷·義兵鐵壁",
-    "desc": "朝鮮名將，組織咸鏡道義兵建立重甲防線，連克加藤清正大軍收復失地。",
-    "st": 10,
-    "ew": 0,
-    "traits": [
-      "HEAVY"
-    ],
-    "roleFlags": [],
-    "hp": 202,
-    "atk": 64,
-    "def": 0.21,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "朝鮮長劍 + 義兵粗鐵盾",
     "sfx": "blade_clash"
   },
   {
@@ -1834,28 +1720,6 @@
     "sfx": "war_drum"
   },
   {
-    "id": "GAPSABO",
-    "name": "朝鮮甲士重卒",
-    "cat": "armor",
-    "cost": 1,
-    "v": "H",
-    "tag": "禁軍甲士·鐵葉戰袍",
-    "desc": "朝鮮王朝正規世襲步軍，身披布面鐵葉甲，結成陣列以拒外侮。",
-    "st": 12,
-    "ew": 0,
-    "traits": [
-      "TRUE_AT"
-    ],
-    "roleFlags": [],
-    "hp": 144,
-    "atk": 46,
-    "def": 0.14,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "布面甲 + 環刀大盾",
-    "sfx": "blade_clash"
-  },
-  {
     "id": "LIGUANG",
     "name": "李廣",
     "cat": "air_defense",
@@ -1903,31 +1767,6 @@
     "origin": "中國 · 春秋",
     "weapon": "穿楊神弓 + 七札破甲箭",
     "sfx": "arrow_volley"
-  },
-  {
-    "id": "QIJIGUANG",
-    "name": "戚繼光",
-    "cat": "air_defense",
-    "cost": 5,
-    "v": "C",
-    "tag": "鴛鴦火陣·鳥銃遮天",
-    "desc": "明代軍事巨擘，創鴛鴦陣、虎蹲砲與鳥銃交替輪射，大破東南倭寇威震薊北。",
-    "st": 12,
-    "ew": 10,
-    "traits": [
-      "AA_LONG",
-      "CIWS"
-    ],
-    "roleFlags": [
-      "FORMATION_SHIELD"
-    ],
-    "hp": 248,
-    "atk": 122,
-    "def": 0.06,
-    "flag": "🇨🇳",
-    "origin": "中國 · 明朝",
-    "weapon": "虎蹲砲 + 鳥銃陣列",
-    "sfx": "fire_attack"
   },
   {
     "id": "NOBUNAGA",
@@ -2002,31 +1841,6 @@
     "origin": "韓國 · 高句麗",
     "weapon": "高句麗神弓 + 鹿角箭",
     "sfx": "arrow_volley"
-  },
-  {
-    "id": "GWONYUL",
-    "name": "權慄",
-    "cat": "air_defense",
-    "cost": 5,
-    "v": "G",
-    "tag": "幸州大捷·神機破軍",
-    "desc": "朝鮮都元帥，幸州山城戰役以神機箭、火車與灰石大破日本宇喜多秀家三萬大軍。",
-    "st": 16,
-    "ew": 20,
-    "traits": [
-      "AA_LONG",
-      "CIWS"
-    ],
-    "roleFlags": [
-      "FORMATION_SHIELD"
-    ],
-    "hp": 246,
-    "atk": 126,
-    "def": 0.08,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "幸州火車 + 神機箭筒",
-    "sfx": "fire_attack"
   },
   {
     "id": "XUERENARROW",
@@ -2394,28 +2208,6 @@
     "sfx": "fire_attack"
   },
   {
-    "id": "SHINRIP",
-    "name": "申砬",
-    "cat": "air_defense",
-    "cost": 3,
-    "v": "H",
-    "tag": "北邊神射·忠州背水",
-    "desc": "朝鮮北邊猛將，曾以神準弓術威震北方女真，忠州彈琴台力戰不屈。",
-    "st": 16,
-    "ew": 8,
-    "traits": [
-      "AA_LONG"
-    ],
-    "roleFlags": [],
-    "hp": 164,
-    "atk": 84,
-    "def": 0.05,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "朝鮮長身角弓 + 鐵羽矢",
-    "sfx": "arrow_volley"
-  },
-  {
     "id": "LUSUARCH",
     "name": "魯肅引弓",
     "cat": "air_defense",
@@ -2482,28 +2274,6 @@
     "sfx": "arrow_volley"
   },
   {
-    "id": "YUANCHONGHUAN",
-    "name": "袁崇煥紅夷砲組",
-    "cat": "air_defense",
-    "cost": 2,
-    "v": "D",
-    "tag": "寧遠重砲·以銃制騎",
-    "desc": "明末薊遼督師，於寧遠城牆架設西洋紅夷大砲，擊退後金八旗騎兵衝鋒。",
-    "st": 15,
-    "ew": 8,
-    "traits": [
-      "AA_LONG"
-    ],
-    "roleFlags": [],
-    "hp": 126,
-    "atk": 66,
-    "def": 0.1,
-    "flag": "🇨🇳",
-    "origin": "中國 · 明朝",
-    "weapon": "紅夷大砲 + 火藥引信",
-    "sfx": "fire_attack"
-  },
-  {
     "id": "NAGASHINO",
     "name": "長篠足輕鐵砲組",
     "cat": "air_defense",
@@ -2546,50 +2316,6 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "種子島筒 + 火繩引藥",
-    "sfx": "arrow_volley"
-  },
-  {
-    "id": "SINGIJEON",
-    "name": "朝鮮神機箭營",
-    "cat": "air_defense",
-    "cost": 2,
-    "v": "G",
-    "tag": "百箭連發·火車震天",
-    "desc": "朝鮮王朝劃時代連發火箭武器，推車搭載百枚帶炸藥火箭瞬間齊射。",
-    "st": 18,
-    "ew": 8,
-    "traits": [
-      "CIWS"
-    ],
-    "roleFlags": [],
-    "hp": 124,
-    "atk": 66,
-    "def": 0.06,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "文宗火車 + 神機箭槽",
-    "sfx": "fire_attack"
-  },
-  {
-    "id": "KIMSIMIN",
-    "name": "金時敏",
-    "cat": "air_defense",
-    "cost": 2,
-    "v": "H",
-    "tag": "晉州守城·萬矢穿鎧",
-    "desc": "朝鮮名將，第一次晉州城之戰率三千軍民以神準射術擊退兩萬敵軍。",
-    "st": 16,
-    "ew": 6,
-    "traits": [
-      "AA_LONG"
-    ],
-    "roleFlags": [],
-    "hp": 128,
-    "atk": 62,
-    "def": 0.06,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "晉州大弓 + 火藥砲管",
     "sfx": "arrow_volley"
   },
   {
@@ -2747,28 +2473,6 @@
     "sfx": "arrow_volley"
   },
   {
-    "id": "JUKRIM",
-    "name": "竹林民兵伏射組",
-    "cat": "air_defense",
-    "cost": 1,
-    "v": "H",
-    "tag": "竹弓埋伏·近距疾射",
-    "desc": "朝鮮半島民間義兵，以彈性極佳之竹弓在隘道兩側展開短距急射。",
-    "st": 22,
-    "ew": 0,
-    "traits": [
-      "CIWS"
-    ],
-    "roleFlags": [],
-    "hp": 98,
-    "atk": 46,
-    "def": 0.06,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "竹製獵弓 + 塗毒箭鏃",
-    "sfx": "arrow_volley"
-  },
-  {
     "id": "ZHOUYU",
     "name": "周瑜",
     "cat": "naval",
@@ -2792,55 +2496,6 @@
     "origin": "中國 · 三國",
     "weapon": "赤壁督軍劍 + 樓船令旗",
     "sfx": "fire_attack"
-  },
-  {
-    "id": "ZHENGCHENG",
-    "name": "鄭成功",
-    "cat": "naval",
-    "cost": 5,
-    "v": "B",
-    "tag": "國姓爺·鐵人水陸克荷",
-    "desc": "延平王鄭成功，統率龐大海上艦隊與重甲「鐵人軍」，橫渡海峽擊潰荷蘭艦隊收復台灣。",
-    "st": 24,
-    "ew": 20,
-    "traits": [
-      "AEGIS",
-      "ASW"
-    ],
-    "roleFlags": [
-      "STAMINA_DEEP"
-    ],
-    "hp": 368,
-    "atk": 128,
-    "def": 0.12,
-    "flag": "🇨🇳",
-    "origin": "中國 · 明末",
-    "weapon": "延平寶劍 + 鐵人軍魚鱗甲",
-    "sfx": "blade_clash"
-  },
-  {
-    "id": "SHILANG",
-    "name": "施琅",
-    "cat": "naval",
-    "cost": 5,
-    "v": "C",
-    "tag": "靖海將軍·澎湖海決",
-    "desc": "清初水師提督，深諳海潮風信，率三百艘巨艦於澎湖海戰大破明鄭水師主力。",
-    "st": 20,
-    "ew": 18,
-    "traits": [
-      "AEGIS"
-    ],
-    "roleFlags": [
-      "STAMINA_DEEP"
-    ],
-    "hp": 370,
-    "atk": 126,
-    "def": 0.1,
-    "flag": "🇨🇳",
-    "origin": "中國 · 清朝",
-    "weapon": "靖海長刀 + 水師大纛旗",
-    "sfx": "war_drum"
   },
   {
     "id": "YISUNSIN",
@@ -3134,29 +2789,6 @@
     "sfx": "fire_attack"
   },
   {
-    "id": "LEEOKGI",
-    "name": "李億祺",
-    "cat": "naval",
-    "cost": 4,
-    "v": "H",
-    "tag": "全羅右水使·並肩禦侮",
-    "desc": "朝鮮名將，李舜臣最親密之戰友，數度率艦隊協同作戰，最後血戰殉國。",
-    "st": 25,
-    "ew": 10,
-    "traits": [
-      "ASW",
-      "AEGIS"
-    ],
-    "roleFlags": [],
-    "hp": 276,
-    "atk": 96,
-    "def": 0.12,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "板屋戰船長銃 + 右水使令牌",
-    "sfx": "blade_clash"
-  },
-  {
     "id": "ZHANGLIAO_V",
     "name": "張遼先登組",
     "cat": "naval",
@@ -3315,29 +2947,6 @@
     "sfx": "fire_attack"
   },
   {
-    "id": "GWAKJAEWOO",
-    "name": "郭再祐",
-    "cat": "naval",
-    "cost": 3,
-    "v": "H",
-    "tag": "紅衣將軍·宜寧奇兵",
-    "desc": "朝鮮宣祖年間抗倭義兵將領，身穿紅衣騎白馬神出鬼沒，游擊殲敵。",
-    "st": 68,
-    "ew": 8,
-    "traits": [
-      "SUB",
-      "AMBUSH"
-    ],
-    "roleFlags": [],
-    "hp": 216,
-    "atk": 78,
-    "def": 0.1,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "大紅戰袍 + 白木角弓",
-    "sfx": "blade_clash"
-  },
-  {
     "id": "JIANGQIN",
     "name": "蔣欽",
     "cat": "naval",
@@ -3470,51 +3079,6 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "洋槍隊佩刀 + 登陸浮橋",
-    "sfx": "blade_clash"
-  },
-  {
-    "id": "PANOKSEON",
-    "name": "朝鮮板屋快艚隊",
-    "cat": "naval",
-    "cost": 2,
-    "v": "G",
-    "tag": "多槳快船·靈活游動",
-    "desc": "朝鮮沿海靈活機動之多槳小型板屋船組，專事斥候與狼群穿插。",
-    "st": 26,
-    "ew": 6,
-    "traits": [
-      "ASW"
-    ],
-    "roleFlags": [],
-    "hp": 186,
-    "atk": 66,
-    "def": 0.1,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "多槳搖櫓 + 火矢投射筒",
-    "sfx": "arrow_volley"
-  },
-  {
-    "id": "KWONJUN",
-    "name": "權俊",
-    "cat": "naval",
-    "cost": 2,
-    "v": "H",
-    "tag": "前鋒都事·截敵斷道",
-    "desc": "李舜臣麾下第一戰將，歷次海戰均為前鋒，勇悍機敏戰功最著。",
-    "st": 24,
-    "ew": 8,
-    "traits": [
-      "AMBUSH",
-      "ASW"
-    ],
-    "roleFlags": [],
-    "hp": 188,
-    "atk": 68,
-    "def": 0.1,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "右水營官刀 + 板屋巨銃",
     "sfx": "blade_clash"
   },
   {
@@ -3676,29 +3240,6 @@
     "sfx": "blade_clash"
   },
   {
-    "id": "MOKBAE",
-    "name": "義兵連環木筏火攻組",
-    "cat": "naval",
-    "cost": 1,
-    "v": "H",
-    "tag": "浮木引火·順流焚營",
-    "desc": "朝鮮民間義兵以粗木紮成大型火筏，順著水流撞擊敵軍糧道與船隊。",
-    "st": 46,
-    "ew": 0,
-    "traits": [
-      "AMBUSH",
-      "SWARM"
-    ],
-    "roleFlags": [],
-    "hp": 128,
-    "atk": 54,
-    "def": 0.06,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "松油火把 + 衝流連環木排",
-    "sfx": "fire_attack"
-  },
-  {
     "id": "ZHUGELIANG",
     "name": "諸葛亮",
     "cat": "support",
@@ -3798,31 +3339,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "宣帝佩劍 + 陣列令旗",
-    "sfx": "strategy_gong"
-  },
-  {
-    "id": "LIUBOWEN",
-    "name": "劉伯溫",
-    "cat": "support",
-    "cost": 5,
-    "v": "E",
-    "tag": "一統江山·神算軍師",
-    "desc": "明代開國謀臣，「三分天下諸葛亮，一統江山劉伯溫」，鄱陽湖大戰規劃奇謀全殲陳友諒。",
-    "st": 12,
-    "ew": 74,
-    "traits": [
-      "EW",
-      "SPOT"
-    ],
-    "roleFlags": [
-      "STRATEGIST"
-    ],
-    "hp": 215,
-    "atk": 90,
-    "def": 0,
-    "flag": "🇨🇳",
-    "origin": "中國 · 明朝",
-    "weapon": "郁離子竹簡 + 太極籌算",
     "sfx": "strategy_gong"
   },
   {
@@ -4256,29 +3772,6 @@
     "sfx": "war_drum"
   },
   {
-    "id": "JOHON",
-    "name": "趙憲",
-    "cat": "support",
-    "cost": 3,
-    "v": "H",
-    "tag": "錦山忠烈·義兵軍師",
-    "desc": "朝鮮儒者兼抗倭義兵將領，於錦山之戰以死明志，力拒小早川隆景主力。",
-    "st": 12,
-    "ew": 10,
-    "traits": [
-      "ARTY",
-      "HEAVY"
-    ],
-    "roleFlags": [],
-    "hp": 140,
-    "atk": 84,
-    "def": 0.14,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "義兵檄文 + 忠烈令箭",
-    "sfx": "blade_clash"
-  },
-  {
     "id": "LUSU",
     "name": "魯肅",
     "cat": "support",
@@ -4345,29 +3838,6 @@
     "sfx": "blade_clash"
   },
   {
-    "id": "YUAN_STRAT",
-    "name": "袁崇煥督師中樞",
-    "cat": "support",
-    "cost": 2,
-    "v": "D",
-    "tag": "五年平遼·寧遠指揮",
-    "desc": "明末薊遼督師，指揮修築關寧錦防線，以重砲與步騎協調多次擊破八旗。",
-    "st": 42,
-    "ew": 10,
-    "traits": [
-      "DEEP",
-      "ARTY"
-    ],
-    "roleFlags": [],
-    "hp": 104,
-    "atk": 64,
-    "def": 0,
-    "flag": "🇨🇳",
-    "origin": "中國 · 明朝",
-    "weapon": "尚方寶劍 + 關寧防禦圖",
-    "sfx": "fire_attack"
-  },
-  {
     "id": "NAOIE",
     "name": "宇喜多直家",
     "cat": "support",
@@ -4409,50 +3879,6 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "僧袍袈裟 + 各國密卷",
-    "sfx": "strategy_gong"
-  },
-  {
-    "id": "KIMJONGSEO",
-    "name": "金宗瑞",
-    "cat": "support",
-    "cost": 2,
-    "v": "G",
-    "tag": "大虎相公·拓地六鎮",
-    "desc": "朝鮮世宗名臣將領，勇猛善斷號稱大虎，親赴北邊拓地設立六鎮，安定鴨綠江。",
-    "st": 36,
-    "ew": 14,
-    "traits": [
-      "ARTY"
-    ],
-    "roleFlags": [],
-    "hp": 106,
-    "atk": 60,
-    "def": 0,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "大虎令箭 + 六鎮地界圖",
-    "sfx": "war_drum"
-  },
-  {
-    "id": "RYUSEONGRYONG",
-    "name": "柳成龍",
-    "cat": "support",
-    "cost": 2,
-    "v": "H",
-    "tag": "懲毖深思·調度全軍",
-    "desc": "朝鮮領議政，著《懲毖錄》，在壬辰倭亂中舉薦李舜臣與權慄，調度中朝聯軍。",
-    "st": 42,
-    "ew": 18,
-    "traits": [
-      "EW"
-    ],
-    "roleFlags": [],
-    "hp": 102,
-    "atk": 54,
-    "def": 0,
-    "flag": "🇰🇷",
-    "origin": "韓國 · 朝鮮",
-    "weapon": "懲毖錄手稿 + 宰相調度印",
     "sfx": "strategy_gong"
   },
   {

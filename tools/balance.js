@@ -24,7 +24,7 @@ E.ARCHETYPES.forEach((a, i) => {
 });
 
 // 3. 單位勝率（隨機合法陣容對戰）
-console.log('\n=== 單位勝率（隨機陣容 N=15000 場 · 200 位日韓中純歷史名將全鑑）===');
+console.log('\n=== 單位勝率（隨機陣容 N=15000 場 · 175 位日韓中純歷史名將全鑑）===');
 const stat = {}; E.UNITS.forEach(u => stat[u.id] = { w: 0, n: 0 });
 let draws = 0, wipes = 0, winchesters = 0, total = 15000;
 for (let i = 0; i < total; i++) {

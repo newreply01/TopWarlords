@@ -32,13 +32,13 @@
 <meta property="og:site_name" content="TopClash 頂尖對戰：15元聯合作戰">
 <meta property="og:title" content="TopWarlords 東亞名將點將錄全鑑 | 200 位日韓中純歷史名將實戰參數">
 <meta property="og:description" content="收錄 TopWarlords 全部 200 位日韓中純歷史名將點將錄，涵蓋五大兵團、五階軍令費用、古典水墨戰將圖、五維數值與孫子兵法招牌戰術特性。">
-<meta property="og:url" content="https://topclash.vercel.app/armory.html">
-<meta property="og:image" content="https://topclash.vercel.app/assets/units/F22.jpg">
+<meta property="og:url" content="https://newreply01.github.io/TopWarlords/armory.html">
+<meta property="og:image" content="https://newreply01.github.io/TopWarlords/assets/warlords/GUANYU.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=5.9.139">
+<link rel="stylesheet" href="style.css?v=7.0.1">
 <link rel="manifest" href="manifest.json">
 <style>
 /* =====================================================
@@ -369,7 +369,7 @@ body {
 /* 卡片圖片容器 */
 .card-media-box {
   width: 100%;
-  height: 190px;
+  height: 224px;
   position: relative;
   overflow: hidden;
   background: #080d15;
@@ -378,7 +378,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 42%;
   transition: transform .4s ease;
   filter: contrast(1.05);
 }
@@ -689,7 +689,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 16%;
 }
 .intel-hero-overlay {
   position: absolute;
@@ -985,10 +985,10 @@ body {
         <select id="sortSelect" class="armory-select">
           <option value="cost_desc">費用：高至低 ($5 → $1)</option>
           <option value="cost_asc">費用：低至高 ($1 → $5)</option>
-          <option value="hp_desc">生命值 HP：高至低</option>
-          <option value="atk_desc">火力 ATK：高至低</option>
-          <option value="sth_desc">隱匿 STH：高至低</option>
-          <option value="ew_desc">謀略 EW：高至低</option>
+          <option value="hp_desc">部隊兵力 HP：高至低</option>
+          <option value="atk_desc">武勇殺傷 ATK：高至低</option>
+          <option value="sth_desc">奇襲隱匿 STH：高至低</option>
+          <option value="ew_desc">軍師謀略 STR：高至低</option>
           <option value="name_asc">名稱字母 A-Z</option>
         </select>
       </div>
@@ -1067,8 +1067,8 @@ body {
 </div>
 
 <!-- 腳本引入 -->
-<script defer src="js/data.js?v=5.9.139"></script>
-<script defer src="js/armory.js?v=5.9.139"></script>
+<script defer src="js/data.js?v=7.0.1"></script>
+<script defer src="js/armory.js?v=7.0.1"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let refreshing = false;
@@ -1079,7 +1079,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=5.9.139').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.0.1').then(r => r.update()).catch(() => {});
   });
 }
 </script>

@@ -35,3 +35,4 @@ with open('D:/TopWarlords/tools/all_units.json', 'w', encoding='utf-8') as f:
     json.dump(units_data, f, ensure_ascii=False, indent=2)
 
 print(f"Exported {len(units_data)} units to all_units.json")
+

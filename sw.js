@@ -1,4 +1,4 @@
-const APP_VERSION = '6.0.0';
+const APP_VERSION = '7.0.1';
 const CACHE_NAME = `topwarlords-v${APP_VERSION}`;
 const CORE_ASSETS = [
   './',
@@ -22,8 +22,10 @@ const CORE_ASSETS = [
   `./js/telemetry.js?v=${APP_VERSION}`,
   `./js/sound.js?v=${APP_VERSION}`,
   `./js/poster-help.js?v=${APP_VERSION}`,
-  `./js/libs/three.min.js`,
-  `./js/battle-3d.js?v=1.0.0`,
+  `./js/libs/three.min.js?v=${APP_VERSION}`,
+  `./js/libs/GLTFLoader.js?v=${APP_VERSION}`,
+  `./js/libs/SkeletonUtils.js?v=${APP_VERSION}`,
+  `./js/battle-3d.js?v=${APP_VERSION}`,
   `./js/app.js?v=${APP_VERSION}`,
   `./js/armory.js?v=${APP_VERSION}`
 ];
@@ -50,25 +52,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // 1. 軍武圖資與圖示：Cache-First (忽略查詢參數，永久快取避免重複下載)
-  if (url.pathname.includes('/assets/units/') || url.pathname.includes('/assets/icons/')) {
-    event.respondWith(
-      caches.match(req, { ignoreSearch: true }).then((cached) => {
-        if (cached) return cached;
-        return fetch(req).then((res) => {
-          if (res && res.status === 200) {
-            const copy = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-          }
-          return res;
-        });
-      })
-    );
-    return;
-  }
-
-  // 2. 具明確版本號 (?v=...) 的靜態樣式與腳本：精確版本號比對 Cache-First (同版本極速秒開，升版即刻更新)
-  if (url.searchParams.has('v') && (url.pathname.endsWith('.css') || url.pathname.endsWith('.js'))) {
+  // 1. 具明確版本號 (?v=...) 的靜態樣式、腳本、名將肖像、3D模型與真實音效：依版本號精準快取，升版立即更新！
+  if (url.searchParams.has('v')) {
     event.respondWith(
       caches.match(req, { ignoreSearch: false }).then((cached) => {
         if (cached) return cached;
@@ -79,6 +64,23 @@ self.addEventListener('fetch', (event) => {
           }
           return res;
         }).catch(() => caches.match(req, { ignoreSearch: true }));
+      })
+    );
+    return;
+  }
+
+  // 2. 圖示資源：Cache-First
+  if (url.pathname.includes('/assets/icons/')) {
+    event.respondWith(
+      caches.match(req, { ignoreSearch: true }).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          }
+          return res;
+        });
       })
     );
     return;

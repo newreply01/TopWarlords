@@ -69,6 +69,12 @@
     view: 'grid'
   };
 
+  // 取得戰術特性四字古典中文名
+  function traitTitle(code) {
+    const raw = (typeof TRAITS !== 'undefined' && TRAITS[code]) ? TRAITS[code] : code;
+    return String(raw).split('：')[0] || code;
+  }
+
   // 初始化戰術特性選單與底部辭典
   function initCodexAndFilters() {
     const traitSelect = $('#traitSelect');
@@ -78,7 +84,7 @@
       Object.keys(TRAITS).forEach(k => {
         const opt = document.createElement('option');
         opt.value = k;
-        opt.textContent = `[${k}] ${TRAITS[k].split('：')[0]}`;
+        opt.textContent = `【${traitTitle(k)}】`;
         traitSelect.appendChild(opt);
       });
     }
@@ -86,7 +92,7 @@
     if (codexGrid) {
       codexGrid.innerHTML = Object.keys(TRAITS).map(k => `
         <div class="trait-codex-card">
-          <b>[${k}] ${TRAITS[k].split('：')[0]}</b>
+          <b>【${traitTitle(k)}】</b>
           <p>${TRAITS[k].split('：')[1] || TRAITS[k]}</p>
         </div>
       `).join('');
@@ -153,13 +159,13 @@
       const traitsHtml = u.traits.map(t => {
         const cls = t.toLowerCase();
         const hint = (TRAITS[t] || t).replace(/"/g, '&quot;');
-        return `<span class="trait-chip ${cls}" title="${hint}">${esc(t)}</span>`;
+        return `<span class="trait-chip ${cls}" title="${hint}">${esc(traitTitle(t))}</span>`;
       }).join('');
 
       return `
         <article class="unit-card" style="--c: ${cat.color}" data-unit-id="${esc(u.id)}">
           <div class="card-media-box">
-            <img class="card-img" src="${imgSrc}" alt="${esc(u.name)}" width="640" height="360" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${fallbackImg}'">
+            <img class="card-img" src="${imgSrc}" alt="${esc(u.name)}" width="384" height="384" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${fallbackImg}'">
             <div class="card-media-overlay"></div>
             <span class="badge-cost">$${u.cost}</span>
             <span class="badge-cat" style="--c: ${cat.color}">${cat.label}</span>
@@ -169,7 +175,7 @@
           <div class="card-body">
             <div class="card-head-title">
               <h3 class="card-name">${u.name}</h3>
-              <span class="card-id">${u.id}</span>
+              <span class="card-id">${u.origin}</span>
             </div>
             <div class="card-tagline">🎯 ${u.tag}</div>
             <div class="card-weapon">⚔️ ${u.weapon}</div>
@@ -177,27 +183,27 @@
             <div class="card-traits">${traitsHtml}</div>
             <div class="card-stats">
               <div class="stat-row">
-                <span class="stat-name">HP</span>
+                <span class="stat-name">兵力</span>
                 <div class="stat-bar-track"><div class="stat-bar-fill hp" style="width: ${Math.min(100, (u.hp / 380) * 100)}%"></div></div>
                 <span class="stat-val">${u.hp}</span>
               </div>
               <div class="stat-row">
-                <span class="stat-name">ATK</span>
+                <span class="stat-name">武勇</span>
                 <div class="stat-bar-track"><div class="stat-bar-fill atk" style="width: ${Math.min(100, (u.atk / 150) * 100)}%"></div></div>
                 <span class="stat-val">${u.atk}</span>
               </div>
               <div class="stat-row">
-                <span class="stat-name">DEF</span>
+                <span class="stat-name">厚鎧</span>
                 <div class="stat-bar-track"><div class="stat-bar-fill def" style="width: ${u.def * 100}%"></div></div>
                 <span class="stat-val">${Math.round(u.def * 100)}%</span>
               </div>
               <div class="stat-row">
-                <span class="stat-name">STH</span>
+                <span class="stat-name">奇襲</span>
                 <div class="stat-bar-track"><div class="stat-bar-fill sth" style="width: ${u.st}%"></div></div>
                 <span class="stat-val">${u.st}</span>
               </div>
               <div class="stat-row">
-                <span class="stat-name">EW</span>
+                <span class="stat-name">謀略</span>
                 <div class="stat-bar-track"><div class="stat-bar-fill ew" style="width: ${Math.min(100, (u.ew / 50) * 100)}%"></div></div>
                 <span class="stat-val">${u.ew}</span>
               </div>
@@ -231,7 +237,7 @@
       const fallbackImg = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="58" height="38" viewBox="0 0 58 38"><rect width="100%" height="100%" fill="%230c1420"/><text x="50%" y="50%" fill="%233de0ff" font-size="10" text-anchor="middle" dy=".3em">${u.id}</text></svg>`;
       const imgSrc = u.img || fallbackImg;
 
-      const traitsHtml = u.traits.map(t => `<span class="trait-chip" style="font-size:10px; padding:1px 5px;">${t}</span>`).join(' ');
+      const traitsHtml = u.traits.map(t => `<span class="trait-chip" style="font-size:10px; padding:1px 5px;">${traitTitle(t)}</span>`).join(' ');
 
       return `
         <tr style="cursor:pointer;" data-unit-id="${u.id}">
@@ -299,42 +305,42 @@
 
     $('#intelSpecs').innerHTML = `
       <div class="spec-card">
-        <div class="k">生命值 (HP)</div>
+        <div class="k">部隊兵力 (HP)</div>
         <div class="v">${u.hp}</div>
       </div>
       <div class="spec-card">
-        <div class="k">戰術火力 (ATK)</div>
+        <div class="k">武勇殺傷 (ATK)</div>
         <div class="v" style="color:var(--amber);">${u.atk}</div>
       </div>
       <div class="spec-card">
-        <div class="k">裝甲減傷 (DEF)</div>
+        <div class="k">重鎧減傷 (DEF)</div>
         <div class="v" style="color:var(--green);">${Math.round(u.def * 100)}%</div>
       </div>
       <div class="spec-card">
-        <div class="k">雷達隱匿 (STH)</div>
+        <div class="k">奇襲隱匿 (STH)</div>
         <div class="v" style="color:var(--violet);">${u.st}</div>
       </div>
       <div class="spec-card">
-        <div class="k">電戰干擾 (EW)</div>
+        <div class="k">軍師謀略 (STR)</div>
         <div class="v" style="color:#6366f1;">${u.ew}</div>
       </div>
       <div class="spec-card">
-        <div class="k">戰術特性 (Traits)</div>
-        <div class="v" style="font-size:13px; font-family:var(--mono);">${u.traits.join(', ') || '無特殊特性'}</div>
+        <div class="k">專屬兵法特性</div>
+        <div class="v" style="font-size:13px;">${u.traits.map(traitTitle).join(' · ') || '標準軍制'}</div>
       </div>
     `;
 
     // 戰術建議
     const catHint = CAT_HINT[u.cat] || '';
-    const traitHints = u.traits.map(t => `【${t}】${TRAITS[t] || ''}`).join('；');
+    const traitHints = u.traits.map(t => `【${traitTitle(t)}】${(TRAITS[t] || '').split('：')[1] || TRAITS[t] || ''}`).join('；');
     const realism = typeof getUnitRealismBadges === 'function' ? getUnitRealismBadges(u) : { magLabel: '', specials: [] };
     const realismHtml = realism.specials.map(s => `<div style="margin-top:4px;color:var(--amber)"><b>${s.icon} ${s.title}：</b>${s.desc}</div>`).join('');
     const mb = typeof getUnitMasteryBadge === 'function' ? getUnitMasteryBadge(u.id) : null;
     const masteryHtml = mb ? `<div style="margin-top:6px;padding:6px 10px;border-radius:6px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.28);color:${mb.color}"><div><b>${mb.icon} ${mb.title}：</b><span style="color:var(--text)">${mb.summary}</span></div>${mb.nextHint ? `<div style="margin-top:3px;font-size:11.5px;color:var(--muted)">▸ ${mb.nextHint}</div>` : ''}</div>` : '';
     $('#intelTacticalTips').innerHTML = `
       <b>兵種作戰機制：</b>${catHint}<br>
-      ${realism.magLabel ? `<b>彈艙配置：</b>${realism.magLabel}<br>` : ''}
-      ${traitHints ? `<b>特性加成效果：</b>${traitHints}` : ''}
+      ${realism.magLabel ? `<b>兵符器械配置：</b>${realism.magLabel}<br>` : ''}
+      ${traitHints ? `<b>兵法特性效果：</b>${traitHints}` : ''}
       ${realismHtml}
       ${masteryHtml}
     `;

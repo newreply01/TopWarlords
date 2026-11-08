@@ -50,3 +50,4 @@ for uid, name, cat, cost, variant, tag in sample_units[:25]:
         print(f"❌ {name} ({uid}): not found directly")
 
 print(f"\nFound {len(results)} portraits from first 25!")
+

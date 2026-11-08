@@ -61,3 +61,4 @@ for uid, qlist in WARLORD_QUERIES.items():
     search_and_download(uid, qlist)
 
 print("\nDone initial test fetch!")
+

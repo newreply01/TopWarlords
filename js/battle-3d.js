@@ -1,1669 +1,1933 @@
 /* =====================================================
-   TopWarlords 3D 古戰場推演引擎 (Three.js r128)
-   光榮特庫摩《三國志》風格 · 立體部隊方陣托盤 · 真實名將立牌
+   TopWarlords 3D 古戰場全模型合戰引擎 v7.0 (Three.js r128 + GLTFLoader + SkeletonUtils)
+   光榮特庫摩《三國志14》／《信長之野望・新生》風格
+   全 3D 骨骼動畫兵種方陣托盤 (Unit Formation Plinth) · 寫實名將軍徽 · 山河渡口古戰場地形
    ===================================================== */
 'use strict';
 
 const Battle3DEngine = (function () {
+  const ASSET_VER = '7.0.1';
+  const MODEL_DIR = 'assets/models/';
+  const PORTRAIT_DIR = 'assets/warlords/';
+
+  const MODEL_MANIFEST = {
+    horse_armored: 'horse_armored.glb',
+    horse:         'horse.glb',
+    infantry:      'infantry.glb',
+    strategist:    'strategist.glb',
+    spear:         'spear.glb',
+    pike:          'pike.glb',
+    katana:        'katana.glb',
+    sword:         'sword.glb',
+    bow:           'bow.glb',
+    arrow:         'arrow.glb',
+    shield_tower:  'shield_tower.glb',
+    shield_round:  'shield_round.glb',
+    banner:        'banner.glb',
+    flag:          'flag.glb',
+    tent:          'tent.glb',
+    watchtower:    'watchtower.glb',
+    rock_a:        'rock_a.glb',
+    rock_b:        'rock_b.glb'
+  };
+
   let isEnabled = true;
   let container = null;
-  let scene, camera, renderer;
+  let scene = null;
+  let camera = null;
+  let renderer = null;
   let animFrameId = null;
   let isInitialized = false;
+  let lastTimestamp = 0;
+  let battleEpoch = 0;
 
-  // 戰場單位網格與狀態 Map
-  const unitsMap = new Map(); // uid -> PlinthTokenData
-  let projectiles = [];       // 拋物線火箭與法術飛彈
-  let particleSystems = [];   // 火星、塵土、光環粒子
-  let brazierLights = [];     // 四角烽火台火光 (動態跳動)
+  // GLTF 快取與預計算正規化參數
+  const gltfCache = new Map();     // key -> { gltf, norm: { scale, ox, oy, oz } }
+  let modelsLoadPromise = null;
+  let modelsLoadedCount = 0;
+
+  // 戰場場景群組與動畫清單
+  let envPropsGroup = null;
+  let weatherParticles = null;
+  let currentWeatherKey = 'plain';
+  let sunLightRef = null;
+  let hemiLightRef = null;
+  let riverMeshRef = null;
+
+  const unitsMap = new Map();      // uid -> UnitPlinthToken
+  let activeMixers = [];           // { mixer, actions, currentState }
+  let projectiles = [];            // 3D 箭雨與火彈
+  let particleSystems = [];        // 塵土、刀光火花、衝擊波
+  let floatingPopups = [];         // 3D 浮動兵力傷害數字 (-3,200 / 格擋)
+  let brazierLights = [];          // 營寨篝火動態光源
   let cutinTimeout = null;
+  let lastCutinAt = 0;
 
-  // 視角互動控制
+  // 相機軌道控制與動態微聚焦
   let isDragging = false;
   let prevMouseX = 0, prevMouseY = 0;
-  let camTheta = 0, camPhi = 0.62, camRadius = 27;
-  const CAM_TARGET = new THREE.Vector3(0, 0.4, 0);
+  let camTheta = 0.0, camPhi = 0.64, camRadius = 25.5;
+  const CAM_BASE_TARGET = new THREE.Vector3(0, 0.55, 0.35);
+  const camFocusOffset = new THREE.Vector3(0, 0, 0);
+  const camShakeOffset = new THREE.Vector3(0, 0, 0);
 
-  // 槽位陣列標準座標 (五大部隊方陣托盤站位)
-  // A軍 (左側 X < 0)，B軍 (右側 X > 0)
+  // 五大兵種方陣托盤陣位 (A軍在西岸 X<0 朝東，B軍在東岸 X>0 朝西)
   const SLOT_COORDS = {
     A: {
-      armor:       { x: -4.5, z:  0.0 }, // 中軍前鋒：重甲陷陣 (盾牆托盤)
-      naval:       { x: -5.0, z:  3.6 }, // 左翼前鋒：先登奇兵 (鋒矢托盤)
-      air:         { x: -7.8, z: -3.6 }, // 右翼游弋：奔雷突騎 (戰馬托盤)
-      air_defense: { x: -8.2, z:  2.8 }, // 左翼中衛：神射強弩 (弓弩托盤)
-      support:     { x: -9.6, z:  0.0 }  // 中軍帥帳：軍師奇謀 (點將亭台托盤)
+      armor:       { x: -4.4, z:  0.0 }, // 中軍前鋒：重甲陷陣
+      naval:       { x: -5.1, z:  3.8 }, // 南翼奇襲：先登奇兵
+      air:         { x: -7.4, z: -3.8 }, // 北翼鐵騎：奔雷突騎
+      air_defense: { x: -8.3, z:  2.7 }, // 南翼高地：神射強弩
+      support:     { x: -9.8, z: -0.3 }  // 中軍本陣：軍師奇謀
     },
     B: {
-      armor:       { x:  4.5, z:  0.0 },
-      naval:       { x:  5.0, z: -3.6 },
-      air:         { x:  7.8, z:  3.6 },
-      air_defense: { x:  8.2, z: -2.8 },
-      support:     { x:  9.6, z:  0.0 }
+      armor:       { x:  4.4, z:  0.0 },
+      naval:       { x:  5.1, z: -3.8 },
+      air:         { x:  7.4, z:  3.8 },
+      air_defense: { x:  8.3, z: -2.7 },
+      support:     { x:  9.8, z:  0.3 }
     }
   };
 
-  const CAT_NAMES = {
-    air: '⚡ 奔雷突騎',
-    armor: '🛡️ 重甲陷陣',
-    air_defense: '🏹 神射強弩',
-    naval: '⚔️ 先登奇兵',
-    support: '📜 軍師奇謀'
+  const CAT_META = {
+    air:         { label: '奔雷突騎', badge: '騎', color: 0x38bdf8, hex: '#38bdf8' },
+    armor:       { label: '重甲陷陣', badge: '盾', color: 0xfbbf24, hex: '#fbbf24' },
+    air_defense: { label: '神射強弩', badge: '弓', color: 0xa78bfa, hex: '#a78bfa' },
+    naval:       { label: '先登奇兵', badge: '鋒', color: 0x2dd4bf, hex: '#2dd4bf' },
+    support:     { label: '軍師奇謀', badge: '謀', color: 0x4ade80, hex: '#4ade80' }
   };
-
-  const CAT_COLORS = {
-    air:         0x38bdf8,
-    armor:       0xfbbf24,
-    air_defense: 0xa78bfa,
-    naval:       0x22d3ee,
-    support:     0x4ade80
-  };
-
-  const textureLoader = new THREE.TextureLoader();
 
   /* ----------------------------------------------------
-     初始化 3D 沙盤場景
+     1. GLTF 模型預載與骨骼邊界精準正規化
      ---------------------------------------------------- */
+  function findClip(animations, patterns) {
+    if (!animations || !animations.length) return null;
+    for (const pat of patterns) {
+      const lower = pat.toLowerCase();
+      const exact = animations.find((a) => a.name.toLowerCase() === lower || a.name.toLowerCase().endsWith('|' + lower));
+      if (exact) return exact;
+    }
+    for (const pat of patterns) {
+      const lower = pat.toLowerCase();
+      const partial = animations.find((a) => a.name.toLowerCase().includes(lower));
+      if (partial) return partial;
+    }
+    return null;
+  }
+
+  function computeTrueWorldBox(root, animations) {
+    const clone = (typeof THREE.SkeletonUtils !== 'undefined')
+      ? THREE.SkeletonUtils.clone(root)
+      : root.clone(true);
+
+    const idleClip = findClip(animations, ['idle_sword', 'attacking_idle', 'idle']);
+    if (idleClip) {
+      const tmpMixer = new THREE.AnimationMixer(clone);
+      const act = tmpMixer.clipAction(idleClip);
+      act.play();
+      tmpMixer.update(0.016);
+    }
+    clone.updateMatrixWorld(true);
+
+    const box = new THREE.Box3();
+    const v = new THREE.Vector3();
+    let sampled = 0;
+
+    clone.traverse((child) => {
+      if (!child.isMesh || !child.geometry || !child.geometry.attributes.position) return;
+      if (child.isSkinnedMesh && child.skeleton) {
+        child.skeleton.update();
+      }
+      const pos = child.geometry.attributes.position;
+      const step = Math.max(1, Math.floor(pos.count / 250));
+      for (let i = 0; i < pos.count; i += step) {
+        v.fromBufferAttribute(pos, i);
+        if (child.isSkinnedMesh && typeof child.boneTransform === 'function') {
+          child.boneTransform(i, v);
+        }
+        v.applyMatrix4(child.matrixWorld);
+        if (isFinite(v.x) && isFinite(v.y) && isFinite(v.z)) {
+          box.expandByPoint(v);
+          sampled++;
+        }
+      }
+    });
+
+    if (sampled === 0 || box.isEmpty()) {
+      box.setFromObject(clone);
+    }
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+
+    const maxDim = Math.max(size.x, size.y, size.z, 0.0001);
+    const height = Math.max(size.y, 0.0001);
+    return {
+      height,
+      maxDim,
+      minY: box.min.y,
+      cx: center.x,
+      cz: center.z
+    };
+  }
+
+  function ensureModelsLoaded() {
+    if (modelsLoadPromise) return modelsLoadPromise;
+    if (typeof THREE === 'undefined' || !THREE.GLTFLoader) {
+      modelsLoadPromise = Promise.resolve();
+      return modelsLoadPromise;
+    }
+
+    const loader = new THREE.GLTFLoader();
+    const entries = Object.entries(MODEL_MANIFEST);
+
+    modelsLoadPromise = Promise.all(
+      entries.map(([key, file]) => new Promise((resolve) => {
+        loader.load(
+          `${MODEL_DIR}${file}?v=${ASSET_VER}`,
+          (gltf) => {
+            try {
+              const norm = computeTrueWorldBox(gltf.scene, gltf.animations || []);
+              gltfCache.set(key, { gltf, norm });
+              modelsLoadedCount++;
+            } catch (e) {
+              console.warn('[Battle3D] norm warning:', key, e);
+            }
+            resolve();
+          },
+          undefined,
+          (err) => {
+            console.warn('[Battle3D] GLB load failed:', key, err);
+            resolve();
+          }
+        );
+      }))
+    );
+    return modelsLoadPromise;
+  }
+
+  /**
+   * 實例化已正規化尺寸與接地 (y=0) 的 3D 模型，若具骨骼動畫則自動註冊 AnimationMixer
+   */
+  function spawnModelInstance(key, {
+    targetHeight = null,
+    targetMaxDim = null,
+    tintHex = null,
+    tintStrength = 0.22,
+    castShadow = true,
+    registerAnim = false
+  } = {}) {
+    const entry = gltfCache.get(key);
+    if (!entry) return null;
+
+    const { gltf, norm } = entry;
+    const rawClone = (typeof THREE.SkeletonUtils !== 'undefined')
+      ? THREE.SkeletonUtils.clone(gltf.scene)
+      : gltf.scene.clone(true);
+
+    const scale = targetHeight
+      ? (targetHeight / norm.height)
+      : (targetMaxDim ? (targetMaxDim / norm.maxDim) : (1.0 / norm.maxDim));
+
+    rawClone.scale.multiplyScalar(scale);
+    rawClone.position.set(-norm.cx * scale, -norm.minY * scale, -norm.cz * scale);
+
+    const tintColor = tintHex !== null ? new THREE.Color(tintHex) : null;
+    rawClone.traverse((node) => {
+      if (!node.isMesh) return;
+      node.castShadow = castShadow;
+      node.receiveShadow = true;
+      node.frustumCulled = false;
+      if (tintColor && node.material) {
+        const mats = Array.isArray(node.material) ? node.material.map((m) => m.clone()) : [node.material.clone()];
+        mats.forEach((m) => {
+          if (m.color) m.color.lerp(tintColor, tintStrength);
+          if (m.roughness !== undefined) m.roughness = Math.min(0.85, Math.max(0.28, m.roughness));
+        });
+        node.material = Array.isArray(node.material) ? mats : mats[0];
+      }
+    });
+
+    const wrapper = new THREE.Group();
+    wrapper.add(rawClone);
+
+    let animCtrl = null;
+    if (registerAnim && gltf.animations && gltf.animations.length > 0) {
+      const mixer = new THREE.AnimationMixer(rawClone);
+      const clips = {
+        idle:   findClip(gltf.animations, ['idle_sword', 'attacking_idle', 'idle_2', 'idle']),
+        move:   findClip(gltf.animations, ['gallop', 'run', 'walk']),
+        attack: findClip(gltf.animations, ['sword_slash', 'dagger_attack', 'attack_headbutt', 'attack_kick', 'jump', 'punch_right']),
+        hit:    findClip(gltf.animations, ['hitrecieve', 'recievehit', 'idle_hitreact_left']),
+        death:  findClip(gltf.animations, ['death'])
+      };
+
+      const actions = {};
+      Object.entries(clips).forEach(([state, clip]) => {
+        if (!clip) return;
+        const act = mixer.clipAction(clip);
+        if (state === 'death') {
+          act.setLoop(THREE.LoopOnce, 1);
+          act.clampWhenFinished = true;
+        } else if (state === 'attack' || state === 'hit') {
+          act.setLoop(THREE.LoopOnce, 1);
+          act.clampWhenFinished = false;
+        }
+        actions[state] = act;
+      });
+
+      animCtrl = {
+        mixer,
+        actions,
+        currentState: 'idle',
+        playState(state, timeScale = 1.0) {
+          const next = actions[state] || actions.idle;
+          if (!next) return;
+          if (this.currentState === 'death') return;
+          const prev = actions[this.currentState];
+          if (prev && prev !== next) prev.fadeOut(0.14);
+          next.reset();
+          next.timeScale = timeScale;
+          next.fadeIn(0.12).play();
+          this.currentState = state;
+          if (state === 'attack' || state === 'hit') {
+            const durMs = Math.max(280, ((next.getClip().duration || 0.6) / timeScale) * 900);
+            setTimeout(() => {
+              if (this.currentState === state && actions.idle) {
+                next.fadeOut(0.16);
+                actions.idle.reset().fadeIn(0.16).play();
+                this.currentState = 'idle';
+              }
+            }, durMs);
+          }
+        }
+      };
+
+      if (actions.idle) {
+        actions.idle.play();
+        // 錯開每個士兵與戰馬的呼吸節奏，營造自然軍陣律動
+        mixer.update(Math.random() * 2.2);
+      }
+      activeMixers.push(animCtrl);
+    }
+
+    return { group: wrapper, animCtrl };
+  }
+
+  /* ----------------------------------------------------
+     2. 初始化 3D 場景、金秋戰場天光與山河渡口地形
+     ---------------------------------------------------- */
+  function createSkyBackdropTexture(weather) {
+    const c = document.createElement('canvas');
+    c.width = 32;
+    c.height = 512;
+    const ctx = c.getContext('2d');
+    const g = ctx.createLinearGradient(0, 0, 0, 512);
+    if (weather === 'storm') {
+      g.addColorStop(0.0, '#0f172a');
+      g.addColorStop(0.52, '#1e293b');
+      g.addColorStop(1.0, '#334155');
+    } else if (weather === 'em') {
+      g.addColorStop(0.0, '#1e293b');
+      g.addColorStop(0.5, '#475569');
+      g.addColorStop(1.0, '#94a3b8');
+    } else {
+      // 光榮《三國志》金秋黃昏蒼穹漸層
+      g.addColorStop(0.0, '#172033');
+      g.addColorStop(0.42, '#2d3a4f');
+      g.addColorStop(0.76, '#7c583c');
+      g.addColorStop(1.0, '#c89b68');
+    }
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 32, 512);
+    const tex = new THREE.CanvasTexture(c);
+    return tex;
+  }
+
   function init(containerEl) {
     if (!containerEl || typeof THREE === 'undefined') return false;
+
+    ensureModelsLoaded();
+
+    if (isInitialized && container === containerEl && renderer) {
+      onWindowResize();
+      return true;
+    }
+
     container = containerEl;
+    const width = container.clientWidth || 960;
+    const height = container.clientHeight || 340;
 
-    const width = container.clientWidth || 800;
-    const height = container.clientHeight || 420;
-
-    // 1. 場景與古戰場大氣迷霧
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x110c09);
-    scene.fog = new THREE.FogExp2(0x110c09, 0.020);
+    scene.background = createSkyBackdropTexture('plain');
+    scene.fog = new THREE.FogExp2(0x4a3d31, 0.0135);
 
-    // 2. 透視相機 (俯仰典雅合戰全景視角)
-    camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 300);
     updateCameraPosition();
 
-    // 3. WebGL 渲染器
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    if (THREE.ACESFilmicToneMapping !== undefined) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.12;
+    }
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // 4. 光照系統 (夕陽戰陣光影 + 晨昏環境光)
     setupLighting();
-
-    // 5. 構建典雅古典軍事沙盤台與楚河漢界地形
-    createAncientSandTable();
-
-    // 6. 視角拖曳與縮放互動事件
+    buildAncientBattlefieldTerrain();
     setupCameraControls();
-
-    // 7. 注入名將絕技 Cut-in 橫幅層
     injectCutinLayer();
 
-    // 視窗自適應
     window.removeEventListener('resize', onWindowResize);
     window.addEventListener('resize', onWindowResize);
 
     isInitialized = true;
+    lastTimestamp = performance.now();
     startAnimationLoop();
     return true;
   }
 
-  /* 光照系統配置 */
   function setupLighting() {
-    const ambientLight = new THREE.AmbientLight(0xffecd1, 0.82);
-    scene.add(ambientLight);
+    hemiLightRef = new THREE.HemisphereLight(0xfff4d6, 0x4b3f2f, 0.95);
+    hemiLightRef.position.set(0, 28, 0);
+    scene.add(hemiLightRef);
 
-    const sunLight = new THREE.DirectionalLight(0xfff7ed, 1.45);
-    sunLight.position.set(-18, 30, 14);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
-    sunLight.shadow.camera.near = 1;
-    sunLight.shadow.camera.far = 75;
-    sunLight.shadow.camera.left = -18;
-    sunLight.shadow.camera.right = 18;
-    sunLight.shadow.camera.top = 18;
-    sunLight.shadow.camera.bottom = -18;
-    scene.add(sunLight);
+    sunLightRef = new THREE.DirectionalLight(0xffedd5, 1.55);
+    sunLightRef.position.set(-16, 26, 15);
+    sunLightRef.castShadow = true;
+    sunLightRef.shadow.mapSize.width = 2048;
+    sunLightRef.shadow.mapSize.height = 2048;
+    sunLightRef.shadow.camera.near = 2;
+    sunLightRef.shadow.camera.far = 68;
+    const d = 18;
+    sunLightRef.shadow.camera.left = -d;
+    sunLightRef.shadow.camera.right = d;
+    sunLightRef.shadow.camera.top = d;
+    sunLightRef.shadow.camera.bottom = -d;
+    sunLightRef.shadow.bias = -0.0005;
+    scene.add(sunLightRef);
 
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.45);
-    rimLight.position.set(18, 14, -14);
+    // 東側冷色補光勾勒鎧甲與兵刃邊緣反光
+    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.52);
+    rimLight.position.set(18, 14, -12);
     scene.add(rimLight);
   }
 
-  /* 相機座標更新 */
-  function updateCameraPosition() {
-    if (!camera) return;
-    camera.position.x = CAM_TARGET.x + camRadius * Math.sin(camPhi) * Math.sin(camTheta);
-    camera.position.y = CAM_TARGET.y + camRadius * Math.cos(camPhi);
-    camera.position.z = CAM_TARGET.z + camRadius * Math.sin(camPhi) * Math.cos(camTheta);
-    camera.lookAt(CAM_TARGET);
-  }
+  function createTerrainTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
 
-  function resetCamera() {
-    camTheta = 0;
-    camPhi = 0.62;
-    camRadius = 27;
-    CAM_TARGET.set(0, 0.4, 0);
-    updateCameraPosition();
-  }
+    // 草野與黃土交錯古戰場地表
+    const baseGrad = ctx.createLinearGradient(0, 0, 1024, 0);
+    baseGrad.addColorStop(0.0, '#4a5a38');
+    baseGrad.addColorStop(0.28, '#6a6342');
+    baseGrad.addColorStop(0.45, '#8a7652');
+    baseGrad.addColorStop(0.50, '#78674a');
+    baseGrad.addColorStop(0.55, '#8a7652');
+    baseGrad.addColorStop(0.72, '#6a6342');
+    baseGrad.addColorStop(1.0, '#4d5839');
+    ctx.fillStyle = baseGrad;
+    ctx.fillRect(0, 0, 1024, 512);
 
-  function setupCameraControls() {
-    if (!container) return;
-
-    container.addEventListener('mousedown', e => {
-      isDragging = true;
-      prevMouseX = e.clientX;
-      prevMouseY = e.clientY;
-    });
-
-    window.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      const deltaX = e.clientX - prevMouseX;
-      const deltaY = e.clientY - prevMouseY;
-      prevMouseX = e.clientX;
-      prevMouseY = e.clientY;
-
-      camTheta -= deltaX * 0.007;
-      camPhi -= deltaY * 0.005;
-      camPhi = Math.max(0.18, Math.min(Math.PI / 2 - 0.05, camPhi));
-      updateCameraPosition();
-    });
-
-    window.addEventListener('mouseup', () => { isDragging = false; });
-
-    container.addEventListener('wheel', e => {
-      e.preventDefault();
-      camRadius += e.deltaY * 0.02;
-      camRadius = Math.max(14, Math.min(46, camRadius));
-      updateCameraPosition();
-    }, { passive: false });
-  }
-
-  /* ----------------------------------------------------
-     構建古典軍事沙盤台、楚河漢界地形與四角烽火台
-     ---------------------------------------------------- */
-  function createAncientSandTable() {
-    // 1. 厚重紅木雕花沙盤主體
-    const woodGeo = new THREE.BoxGeometry(27.4, 1.8, 16.8);
-    const woodMat = new THREE.MeshStandardMaterial({
-      color: 0x24150b,
-      roughness: 0.72,
-      metalness: 0.18
-    });
-    const woodMesh = new THREE.Mesh(woodGeo, woodMat);
-    woodMesh.position.y = -0.95;
-    woodMesh.receiveShadow = true;
-    scene.add(woodMesh);
-
-    // 2. 青銅鎏金饕餮紋包邊框
-    const borderGeo = new THREE.BoxGeometry(27.6, 0.28, 17.0);
-    const borderMat = new THREE.MeshStandardMaterial({
-      color: 0x92400e,
-      roughness: 0.35,
-      metalness: 0.82
-    });
-    const borderMesh = new THREE.Mesh(borderGeo, borderMat);
-    borderMesh.position.y = -0.05;
-    scene.add(borderMesh);
-
-    // 3. 古戰場寫意地形紋理
-    const groundCanvas = document.createElement('canvas');
-    groundCanvas.width = 1024;
-    groundCanvas.height = 640;
-    const gctx = groundCanvas.getContext('2d');
-
-    // 泥土沙質底色
-    const grad = gctx.createLinearGradient(0, 0, 1024, 640);
-    grad.addColorStop(0, '#2d251a');
-    grad.addColorStop(0.5, '#3b3122');
-    grad.addColorStop(1, '#2d251a');
-    gctx.fillStyle = grad;
-    gctx.fillRect(0, 0, 1024, 640);
-
-    // 沙盤方格暗紋
-    gctx.strokeStyle = 'rgba(217, 119, 6, 0.14)';
-    gctx.lineWidth = 1.5;
-    for (let x = 0; x <= 1024; x += 64) {
-      gctx.beginPath();
-      gctx.moveTo(x, 0); gctx.lineTo(x, 640);
-      gctx.stroke();
-    }
-    for (let y = 0; y <= 640; y += 64) {
-      gctx.beginPath();
-      gctx.moveTo(0, y); gctx.lineTo(1024, y);
-      gctx.stroke();
+    // 自然砂石與草叢紋理顆粒
+    for (let i = 0; i < 6500; i++) {
+      const x = Math.random() * 1024;
+      const y = Math.random() * 512;
+      const r = 1 + Math.random() * 3.5;
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(58, 72, 38, 0.18)' : 'rgba(168, 142, 98, 0.16)';
+      ctx.fillRect(x, y, r, r);
     }
 
-    // 中央楚河漢界大河流水 (深藍泛金色波紋)
-    const riverGrad = gctx.createLinearGradient(480, 0, 544, 0);
-    riverGrad.addColorStop(0, 'rgba(15, 33, 56, 0.9)');
-    riverGrad.addColorStop(0.5, 'rgba(24, 60, 96, 0.95)');
-    riverGrad.addColorStop(1, 'rgba(15, 33, 56, 0.9)');
-    gctx.fillStyle = riverGrad;
-    gctx.fillRect(480, 0, 64, 640);
-
-    // 水墨題字「楚河漢界」
-    gctx.save();
-    gctx.translate(512, 320);
-    gctx.rotate(-Math.PI / 2);
-    gctx.fillStyle = 'rgba(251, 191, 36, 0.55)';
-    gctx.font = 'bold 28px "Noto Sans TC", serif';
-    gctx.textAlign = 'center';
-    gctx.fillText('— 楚 河 漢 界 · 決 戰 疆 場 —', 0, 8);
-    gctx.restore();
-
-    // 兩軍陣地暗印
-    gctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
-    gctx.beginPath(); gctx.arc(240, 320, 160, 0, Math.PI * 2); gctx.fill();
-    gctx.fillStyle = 'rgba(245, 158, 11, 0.08)';
-    gctx.beginPath(); gctx.arc(784, 320, 160, 0, Math.PI * 2); gctx.fill();
-
-    const groundTex = new THREE.CanvasTexture(groundCanvas);
-    const groundGeo = new THREE.PlaneGeometry(27.0, 16.4);
-    const groundMat = new THREE.MeshStandardMaterial({
-      map: groundTex,
-      roughness: 0.85,
-      metalness: 0.1
+    // 三條橫貫東西的古戰場車馬馳道 (北翼、中軍、南翼)
+    [136, 256, 376].forEach((cy) => {
+      const roadG = ctx.createLinearGradient(0, cy - 28, 0, cy + 28);
+      roadG.addColorStop(0, 'rgba(124, 101, 68, 0)');
+      roadG.addColorStop(0.5, 'rgba(138, 112, 74, 0.58)');
+      roadG.addColorStop(1, 'rgba(124, 101, 68, 0)');
+      ctx.fillStyle = roadG;
+      ctx.fillRect(40, cy - 28, 944, 56);
     });
-    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
-    groundMesh.rotation.x = -Math.PI / 2;
-    groundMesh.receiveShadow = true;
-    scene.add(groundMesh);
 
-    // 4. 前線木柵拒馬
-    createBarricades();
+    // 淡雅戰術九宮格刻度線 (光榮沙盤韻味)
+    ctx.strokeStyle = 'rgba(245, 222, 179, 0.11)';
+    ctx.lineWidth = 1;
+    for (let x = 64; x < 1024; x += 64) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 512); ctx.stroke();
+    }
+    for (let y = 64; y < 512; y += 64) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1024, y); ctx.stroke();
+    }
 
-    // 5. 兩側大本營軍帳
-    createCampProps();
-
-    // 6. 沙盤四角青銅烽火台
-    createBraziers();
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = 4;
+    return tex;
   }
 
-  function createBarricades() {
-    const barricadeGroup = new THREE.Group();
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x5c3d22, roughness: 0.9 });
-    const zPositions = [-5.6, -2.5, 2.5, 5.6];
-    zPositions.forEach(z => {
-      [-1.3, 1.3].forEach(x => {
-        const post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 1.2, 6), woodMat);
-        post1.rotation.z = 0.55;
-        post1.position.set(x, 0.35, z);
-        post1.castShadow = true;
-        barricadeGroup.add(post1);
-
-        const post2 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 1.2, 6), woodMat);
-        post2.rotation.z = -0.55;
-        post2.position.set(x, 0.35, z);
-        post2.castShadow = true;
-        barricadeGroup.add(post2);
-      });
-    });
-    scene.add(barricadeGroup);
-  }
-
-  function createCampProps() {
-    createTent(-11.6, -5.5, 0x0284c7, '漢');
-    createTent(-11.6,  5.5, 0x0284c7, '帥');
-    createTent( 11.6, -5.5, 0xd97706, '楚');
-    createTent( 11.6,  5.5, 0xd97706, '將');
-  }
-
-  function createTent(x, z, flagColor, bannerChar) {
-    const group = new THREE.Group();
-    const tentGeo = new THREE.ConeGeometry(1.2, 1.5, 6);
-    const tentMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 });
-    const tent = new THREE.Mesh(tentGeo, tentMat);
-    tent.position.y = 0.75;
-    tent.castShadow = true;
-    group.add(tent);
-
-    const poleGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.4, 6);
-    const poleMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.6 });
-    const pole = new THREE.Mesh(poleGeo, poleMat);
-    pole.position.y = 1.2;
-    group.add(pole);
-
-    const flagCanvas = document.createElement('canvas');
-    flagCanvas.width = 128; flagCanvas.height = 96;
-    const fctx = flagCanvas.getContext('2d');
-    fctx.fillStyle = (flagColor === 0x0284c7) ? '#0284c7' : '#d97706';
-    fctx.fillRect(0, 0, 128, 96);
-    fctx.strokeStyle = '#fbbf24';
-    fctx.lineWidth = 6;
-    fctx.strokeRect(4, 4, 120, 88);
-    fctx.fillStyle = '#ffffff';
-    fctx.font = 'bold 48px "Noto Sans TC", serif';
-    fctx.textAlign = 'center';
-    fctx.fillText(bannerChar, 64, 68);
-
-    const flagTex = new THREE.CanvasTexture(flagCanvas);
-    const flagGeo = new THREE.PlaneGeometry(0.7, 0.5);
-    const flagMat = new THREE.MeshBasicMaterial({ map: flagTex, side: THREE.DoubleSide });
-    const flag = new THREE.Mesh(flagGeo, flagMat);
-    flag.position.set(0.38, 2.0, 0);
-    group.add(flag);
-
-    group.position.set(x, 0, z);
-    scene.add(group);
-  }
-
-  function createBraziers() {
+  function buildAncientBattlefieldTerrain() {
     brazierLights = [];
-    const corners = [
-      { x: -12.6, z: -7.5 },
-      { x: -12.6, z:  7.5 },
-      { x:  12.6, z: -7.5 },
-      { x:  12.6, z:  7.5 }
+
+    // 1. 廣袤起伏戰場地形平面
+    const groundGeo = new THREE.PlaneGeometry(58, 36, 72, 48);
+    const pos = groundGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const y = pos.getY(i); // 旋轉後對應世界 Z
+      let h = 0;
+      // 中央渡河淺灘微凹
+      const riverDist = Math.abs(x);
+      if (riverDist < 2.2) {
+        h -= (1 - riverDist / 2.2) * 0.22;
+      }
+      // 南北兩側山麓高坡隆起 (|z| > 8.5)
+      const flank = Math.max(0, Math.abs(y) - 8.2);
+      if (flank > 0) {
+        h += Math.pow(flank, 1.32) * 0.26 + Math.sin(x * 0.55 + y * 0.4) * 0.22;
+      }
+      // 東西遠景丘陵
+      const farX = Math.max(0, Math.abs(x) - 14.5);
+      if (farX > 0) {
+        h += Math.pow(farX, 1.2) * 0.16;
+      }
+      pos.setZ(i, h);
+    }
+    groundGeo.computeVertexNormals();
+
+    const groundMat = new THREE.MeshStandardMaterial({
+      map: createTerrainTexture(),
+      roughness: 0.88,
+      metalness: 0.04
+    });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // 2. 中央波光粼粼古戰場渡河 (渭水／官渡淺灘)
+    const riverGeo = new THREE.PlaneGeometry(3.2, 34, 8, 24);
+    const riverMat = new THREE.MeshStandardMaterial({
+      color: 0x2b6cb0,
+      emissive: 0x0c2d48,
+      emissiveIntensity: 0.35,
+      roughness: 0.18,
+      metalness: 0.65,
+      transparent: true,
+      opacity: 0.82
+    });
+    riverMeshRef = new THREE.Mesh(riverGeo, riverMat);
+    riverMeshRef.rotation.x = -Math.PI / 2;
+    riverMeshRef.position.y = -0.06;
+    riverMeshRef.receiveShadow = true;
+    scene.add(riverMeshRef);
+
+    // 3. 三座古木戰橋橫跨淺灘 (北橋 z=-3.8、中軍大橋 z=0、南橋 z=+3.8)
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.78, metalness: 0.08 });
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x4a2e16, roughness: 0.82 });
+    [-3.8, 0.0, 3.8].forEach((bz, idx) => {
+      const bw = idx === 1 ? 2.1 : 1.55;
+      const bridge = new THREE.Group();
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.14, bw), woodMat);
+      deck.position.set(0, 0.06, bz);
+      deck.castShadow = true;
+      deck.receiveShadow = true;
+      bridge.add(deck);
+
+      [-bw / 2 + 0.08, bw / 2 - 0.08].forEach((rz) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.24, 0.10), railMat);
+        rail.position.set(0, 0.22, bz + rz);
+        rail.castShadow = true;
+        bridge.add(rail);
+      });
+      scene.add(bridge);
+    });
+
+    // 4. 東西大營篝火火盆
+    const campBraziers = [
+      { x: -12.4, z: -2.8, c: 0x38bdf8 },
+      { x: -12.4, z:  2.8, c: 0xf97316 },
+      { x:  12.4, z: -2.8, c: 0xf97316 },
+      { x:  12.4, z:  2.8, c: 0xf59e0b }
     ];
-
-    const standGeo = new THREE.CylinderGeometry(0.35, 0.5, 1.4, 8);
-    const standMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5, metalness: 0.7 });
-    const bowlGeo = new THREE.CylinderGeometry(0.65, 0.25, 0.45, 8);
-    const bowlMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.8 });
-
-    corners.forEach(pos => {
-      const stand = new THREE.Mesh(standGeo, standMat);
-      stand.position.set(pos.x, 0.7, pos.z);
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.5, metalness: 0.7 });
+    campBraziers.forEach((bp) => {
+      const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.36, 0.65, 8), ironMat);
+      stand.position.set(bp.x, 0.32, bp.z);
       stand.castShadow = true;
       scene.add(stand);
 
-      const bowl = new THREE.Mesh(bowlGeo, bowlMat);
-      bowl.position.set(pos.x, 1.5, pos.z);
-      scene.add(bowl);
+      const flameMat = new THREE.MeshBasicMaterial({ color: 0xfb923c });
+      const flame = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.55, 7), flameMat);
+      flame.position.set(bp.x, 0.82, bp.z);
+      scene.add(flame);
 
-      const fireGeo = new THREE.SphereGeometry(0.25, 8, 8);
-      const fireMat = new THREE.MeshBasicMaterial({ color: 0xff7700 });
-      const fire = new THREE.Mesh(fireGeo, fireMat);
-      fire.position.set(pos.x, 1.7, pos.z);
-      scene.add(fire);
+      const pLight = new THREE.PointLight(0xff8c24, 1.45, 9.5);
+      pLight.position.set(bp.x, 1.35, bp.z);
+      scene.add(pLight);
+      brazierLights.push({ light: pLight, fireMesh: flame, baseIntensity: 1.45 });
+    });
 
-      const light = new THREE.PointLight(0xff8822, 1.6, 12);
-      light.position.set(pos.x, 2.0, pos.z);
-      scene.add(light);
-      brazierLights.push({ light, baseIntensity: 1.6, fireMesh: fire });
+    // 5. 待 GLB 載入完成後布置 3D 營帳、箭樓、鹿角拒馬與山崖巨石
+    envPropsGroup = new THREE.Group();
+    scene.add(envPropsGroup);
+    ensureModelsLoaded().then(() => {
+      if (!envPropsGroup) return;
+      populateBattlefieldProps();
     });
   }
 
+  /**
+   * 古戰場寫實「鹿角拒馬」交叉尖木柵 (取代現代施工路障，用於河岸防線與強弩陣前掩體)
+   * 本地座標系：左右沿 X 展開、尖刺朝 +Z (敵軍來襲方向)
+   */
+  function buildWoodenAbatis(width = 1.15, height = 0.62) {
+    const abatis = new THREE.Group();
+    const beamMat = new THREE.MeshStandardMaterial({ color: 0x5c3a1e, roughness: 0.86, metalness: 0.05 });
+    const stakeMat = new THREE.MeshStandardMaterial({ color: 0x784b26, roughness: 0.82, metalness: 0.06 });
+    const tipMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.42, metalness: 0.72 });
+    const ropeMat = new THREE.MeshStandardMaterial({ color: 0xa16207, roughness: 0.90 });
+
+    // 橫貫主木樑
+    const mainBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, width, 7), beamMat);
+    mainBeam.rotation.z = Math.PI / 2;
+    mainBeam.position.set(0, height * 0.44, 0);
+    mainBeam.castShadow = true;
+    mainBeam.receiveShadow = true;
+    abatis.add(mainBeam);
+
+    // 多組交叉削尖圓木樁 + 鐵包尖頭 + 麻繩綑紮
+    const pairCount = Math.max(3, Math.round(width / 0.30));
+    const stakeLen = height * 1.28;
+    for (let i = 0; i < pairCount; i++) {
+      const x = pairCount === 1 ? 0 : (-width * 0.42 + (width * 0.84 * i) / (pairCount - 1));
+
+      // 朝前斜刺 (+Z 敵陣方向)
+      const fwd = new THREE.Group();
+      fwd.position.set(x, height * 0.44, 0);
+      fwd.rotation.x = Math.PI * 0.27;
+      const fwdShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.045, stakeLen, 6), stakeMat);
+      fwdShaft.castShadow = true;
+      fwd.add(fwdShaft);
+      const fwdTip = new THREE.Mesh(new THREE.ConeGeometry(0.034, 0.14, 6), tipMat);
+      fwdTip.position.y = stakeLen * 0.5 + 0.06;
+      fwd.add(fwdTip);
+      abatis.add(fwd);
+
+      // 朝後支撐斜樁 (-Z 方向抓地)
+      const bwd = new THREE.Group();
+      bwd.position.set(x + 0.03, height * 0.44, 0);
+      bwd.rotation.x = -Math.PI * 0.25;
+      const bwdShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.030, 0.042, stakeLen * 0.94, 6), stakeMat);
+      bwdShaft.castShadow = true;
+      bwd.add(bwdShaft);
+      const bwdTip = new THREE.Mesh(new THREE.ConeGeometry(0.032, 0.12, 6), stakeMat);
+      bwdTip.position.y = stakeLen * 0.47 + 0.05;
+      bwd.add(bwdTip);
+      abatis.add(bwd);
+
+      // 麻繩十字結節
+      const knot = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.018, 5, 8), ropeMat);
+      knot.rotation.y = Math.PI / 2;
+      knot.position.set(x + 0.015, height * 0.44, 0);
+      abatis.add(knot);
+    }
+    return abatis;
+  }
+
+  /**
+   * 古戰場朱漆鎏金「雷音大戰鼓」與木架 (用於軍師奇謀本陣擂鼓助威)
+   */
+  function buildTaikoWarDrum() {
+    const grp = new THREE.Group();
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.75, metalness: 0.10 });
+    const lacquerMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.35, metalness: 0.22 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.65, metalness: 0.05 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.28, metalness: 0.82 });
+
+    // A字實木鼓架
+    [-0.18, 0.18].forEach((sx) => {
+      const leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.46, 0.05), woodMat);
+      leg1.position.set(sx, 0.21, 0.11);
+      leg1.rotation.x = -0.26;
+      leg1.castShadow = true;
+      grp.add(leg1);
+
+      const leg2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.46, 0.05), woodMat);
+      leg2.position.set(sx, 0.21, -0.11);
+      leg2.rotation.x = 0.26;
+      leg2.castShadow = true;
+      grp.add(leg2);
+    });
+
+    // 朱漆鼓身 (軸向沿本地 Z 鼓面朝前後)
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.36, 14), lacquerMat);
+    barrel.rotation.x = Math.PI / 2;
+    barrel.position.set(0, 0.44, 0);
+    barrel.castShadow = true;
+    grp.add(barrel);
+
+    // 鼓腹中央隆起腰環與雙側金鉚釘環
+    const belly = new THREE.Mesh(new THREE.CylinderGeometry(0.265, 0.265, 0.16, 14), lacquerMat);
+    belly.rotation.x = Math.PI / 2;
+    belly.position.set(0, 0.44, 0);
+    grp.add(belly);
+
+    [-0.175, 0.175].forEach((dz) => {
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(0.232, 0.232, 0.02, 14), skinMat);
+      head.rotation.x = Math.PI / 2;
+      head.position.set(0, 0.44, dz);
+      grp.add(head);
+
+      const goldRing = new THREE.Mesh(new THREE.TorusGeometry(0.238, 0.014, 6, 16), goldMat);
+      goldRing.position.set(0, 0.44, dz);
+      grp.add(goldRing);
+    });
+
+    return grp;
+  }
+
+  /**
+   * 為士兵模型頂部裝配古代兵種專屬兜鍪冠飾 (紅纓、鍬形前立、玄鐵兜)，拉開五兵種近景辨識度
+   */
+  function addHelmetCrest(parentGroup, headY, crestType, crestColor) {
+    const mat = new THREE.MeshStandardMaterial({
+      color: crestColor,
+      roughness: 0.32,
+      metalness: crestType === 'horns' ? 0.85 : 0.18
+    });
+    if (crestType === 'plume') {
+      // 突騎紅纓／蒼纓馬尾冠
+      const plume = new THREE.Mesh(new THREE.ConeGeometry(0.065, 0.22, 6), mat);
+      plume.rotation.x = -0.55;
+      plume.position.set(0, headY + 0.06, -0.05);
+      parentGroup.add(plume);
+    } else if (crestType === 'horns') {
+      // 重甲／先登大將鎏金鍬形前立雙角
+      [-1, 1].forEach((dir) => {
+        const horn = new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.20, 4), mat);
+        horn.position.set(dir * 0.08, headY + 0.07, 0.06);
+        horn.rotation.z = -dir * 0.48;
+        horn.rotation.x = 0.18;
+        parentGroup.add(horn);
+      });
+    }
+  }
+
+  function populateBattlefieldProps() {
+    if (!envPropsGroup || envPropsGroup.children.length > 0) return;
+
+    // 東西雙方本陣營帳與箭樓
+    [
+      { side: 'A', sx: -1, tint: 0x2563eb },
+      { side: 'B', sx:  1, tint: 0xdc2626 }
+    ].forEach(({ sx, tint }) => {
+      const faceY = sx < 0 ? Math.PI / 2 : -Math.PI / 2;
+
+      [-4.8, 4.8].forEach((zPos) => {
+        const tower = spawnModelInstance('watchtower', { targetHeight: 3.1, tintHex: tint, tintStrength: 0.14 });
+        if (tower) {
+          tower.group.position.set(sx * 13.0, 0, zPos);
+          tower.group.rotation.y = faceY;
+          envPropsGroup.add(tower.group);
+        }
+      });
+
+      [-1.9, 1.9].forEach((zPos) => {
+        const tent = spawnModelInstance('tent', { targetHeight: 1.85, tintHex: tint, tintStrength: 0.25 });
+        if (tent) {
+          tent.group.position.set(sx * 13.4, 0, zPos);
+          tent.group.rotation.y = faceY;
+          envPropsGroup.add(tent.group);
+        }
+      });
+
+      [-6.2, -2.9, 2.9, 6.2].forEach((zPos) => {
+        const flag = spawnModelInstance('banner', { targetHeight: 1.95, tintHex: tint, tintStrength: 0.42 });
+        if (flag) {
+          flag.group.position.set(sx * 11.8, 0, zPos);
+          flag.group.rotation.y = faceY;
+          envPropsGroup.add(flag.group);
+        }
+      });
+
+      // 河岸前哨寫實木製「鹿角拒馬」防線
+      [-5.8, -1.9, 1.9, 5.8].forEach((zPos) => {
+        const abatis = buildWoodenAbatis(1.32, 0.68);
+        abatis.position.set(sx * 2.55, 0, zPos);
+        abatis.rotation.y = faceY;
+        envPropsGroup.add(abatis);
+      });
+    });
+
+    // 南北山崖巨石群
+    const rockSpots = [
+      [-11, -9.5, 2.6, 'rock_a'], [-5, -10.2, 3.1, 'rock_b'], [2, -9.8, 2.8, 'rock_a'], [9, -10.0, 3.2, 'rock_b'],
+      [-10,  9.6, 2.8, 'rock_b'], [-3,  10.1, 2.5, 'rock_a'], [4,  9.9, 3.0, 'rock_b'], [11,  9.5, 2.7, 'rock_a']
+    ];
+    rockSpots.forEach(([rx, rz, rh, rkey], i) => {
+      const rk = spawnModelInstance(rkey, { targetHeight: rh, castShadow: true });
+      if (rk) {
+        rk.group.position.set(rx, 0.15, rz);
+        rk.group.rotation.y = i * 1.1;
+        envPropsGroup.add(rk.group);
+      }
+    });
+  }
+
+  function applyWeatherAtmosphere(weather) {
+    currentWeatherKey = weather || 'plain';
+    if (!scene) return;
+    scene.background = createSkyBackdropTexture(currentWeatherKey);
+
+    if (weatherParticles) {
+      scene.remove(weatherParticles);
+      weatherParticles.geometry.dispose();
+      weatherParticles.material.dispose();
+      weatherParticles = null;
+    }
+
+    if (currentWeatherKey === 'storm') {
+      scene.fog = new THREE.FogExp2(0x1e293b, 0.020);
+      if (sunLightRef) sunLightRef.intensity = 0.95;
+      if (hemiLightRef) hemiLightRef.intensity = 0.72;
+      // 暴雨雨絲粒子
+      const rainCount = 420;
+      const geo = new THREE.BufferGeometry();
+      const arr = new Float32Array(rainCount * 3);
+      for (let i = 0; i < rainCount; i++) {
+        arr[i * 3] = (Math.random() - 0.5) * 34;
+        arr[i * 3 + 1] = Math.random() * 14;
+        arr[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+      const mat = new THREE.PointsMaterial({ color: 0x93c5fd, size: 0.14, transparent: true, opacity: 0.55 });
+      weatherParticles = new THREE.Points(geo, mat);
+      scene.add(weatherParticles);
+    } else if (currentWeatherKey === 'em') {
+      scene.fog = new THREE.FogExp2(0x64748b, 0.025);
+      if (sunLightRef) sunLightRef.intensity = 1.15;
+    } else {
+      scene.fog = new THREE.FogExp2(0x4a3d31, 0.0125);
+      if (sunLightRef) sunLightRef.intensity = 1.55;
+      if (hemiLightRef) hemiLightRef.intensity = 0.95;
+    }
+  }
+
   /* ----------------------------------------------------
-     核心構建：光榮特庫摩立體部隊方陣托盤 (Unit Formation Plinth)
+     3. 打造《三國志》立體部隊方陣托盤 + 全 3D 骨骼動畫兵種
      ---------------------------------------------------- */
-  function createUnitToken(unit, side, slotIndex) {
-    const group = new THREE.Group();
+  function createUnitToken(unit, side, index) {
+    const isSideA = side === 'A';
     const cat = unit.cat || 'armor';
-    const coords = (SLOT_COORDS[side] && SLOT_COORDS[side][cat]) || { x: (side === 'A' ? -6 : 6), z: 0 };
+    const meta = CAT_META[cat] || CAT_META.armor;
+    const coords = (SLOT_COORDS[side] && SLOT_COORDS[side][cat]) || { x: isSideA ? -6 : 6, z: (index - 2) * 3.0 };
+    const factionColor = isSideA ? 0x2563eb : 0xdc2626;
+    const factionTrim = isSideA ? 0x38bdf8 : 0xf59e0b;
 
-    const isSideA = (side === 'A');
-    const facingDir = isSideA ? 1 : -1;
-    const catColor = CAT_COLORS[cat] || 0xffffff;
+    const rootGroup = new THREE.Group();
+    rootGroup.position.set(coords.x, 0, coords.z);
 
-    // ==========================================
-    // 1. 厚重長方形部隊方陣托盤 (Movement Tray Plinth)
-    // ==========================================
-    const PLINTH_W = 3.2; // 寬度 (迎敵衝鋒向)
-    const PLINTH_D = 2.2; // 深度
-    const PLINTH_H = 0.28; // 托盤厚度
+    // 朝向旋轉群組：本地 +Z 一律代表「面向敵陣前方」
+    // A 軍 (+X 方向): rotation.y = +Math.PI/2；B 軍 (-X 方向): rotation.y = -Math.PI/2
+    const formationRig = new THREE.Group();
+    formationRig.rotation.y = isSideA ? Math.PI / 2 : -Math.PI / 2;
+    rootGroup.add(formationRig);
+
+    // A. 光榮風格雕花漆木戰術方陣托盤 (Unit Formation Plinth)
+    const PLINTH_W = 2.45; // 左右寬 (local X)
+    const PLINTH_D = 2.65; // 前後深 (local Z)
+    const PLINTH_H = 0.22;
 
     const plinthGroup = new THREE.Group();
-
-    // 托盤主體厚底座 (黑檀木/沉香木)
-    const baseGeo = new THREE.BoxGeometry(PLINTH_W, PLINTH_H, PLINTH_D);
     const baseMat = new THREE.MeshStandardMaterial({
-      color: isSideA ? 0x141e2e : 0x24140e,
-      roughness: 0.6,
-      metalness: 0.3
+      color: isSideA ? 0x172554 : 0x450a0a,
+      roughness: 0.42,
+      metalness: 0.25
     });
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+    const baseMesh = new THREE.Mesh(new THREE.BoxGeometry(PLINTH_W, PLINTH_H, PLINTH_D), baseMat);
     baseMesh.position.y = PLINTH_H / 2;
     baseMesh.castShadow = true;
     baseMesh.receiveShadow = true;
     plinthGroup.add(baseMesh);
 
-    // 陣營包邊 (藍軍飾金，紅軍飾銅)
-    const trimMat = new THREE.MeshStandardMaterial({
-      color: isSideA ? 0x38bdf8 : 0xd97706,
-      metalness: 0.88,
-      roughness: 0.22
+    // 托盤頂面戰陣泥石台面
+    const topDeckMat = new THREE.MeshStandardMaterial({
+      color: isSideA ? 0x334155 : 0x44332a,
+      roughness: 0.78,
+      metalness: 0.08
     });
+    const topDeck = new THREE.Mesh(new THREE.BoxGeometry(PLINTH_W - 0.16, 0.04, PLINTH_D - 0.16), topDeckMat);
+    topDeck.position.y = PLINTH_H + 0.015;
+    topDeck.receiveShadow = true;
+    plinthGroup.add(topDeck);
 
-    // 托盤四周雕花護緣金屬框
-    const rimTop = new THREE.Mesh(new THREE.BoxGeometry(PLINTH_W + 0.08, 0.08, 0.08), trimMat);
-    rimTop.position.set(0, PLINTH_H + 0.02, -PLINTH_D / 2);
-    plinthGroup.add(rimTop);
-
-    const rimBot = new THREE.Mesh(new THREE.BoxGeometry(PLINTH_W + 0.08, 0.08, 0.08), trimMat);
-    rimBot.position.set(0, PLINTH_H + 0.02, PLINTH_D / 2);
-    plinthGroup.add(rimBot);
-
-    const rimLeft = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, PLINTH_D + 0.08), trimMat);
-    rimLeft.position.set(-PLINTH_W / 2, PLINTH_H + 0.02, 0);
-    plinthGroup.add(rimLeft);
-
-    const rimRight = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, PLINTH_D + 0.08), trimMat);
-    rimRight.position.set(PLINTH_W / 2, PLINTH_H + 0.02, 0);
-    plinthGroup.add(rimRight);
-
-    // 4 個黃金/青銅包角花飾
-    const cornerGeo = new THREE.BoxGeometry(0.24, 0.32, 0.24);
-    [
-      [-PLINTH_W/2, -PLINTH_D/2],
-      [ PLINTH_W/2, -PLINTH_D/2],
-      [-PLINTH_W/2,  PLINTH_D/2],
-      [ PLINTH_W/2,  PLINTH_D/2]
-    ].forEach(([cx, cz]) => {
-      const corner = new THREE.Mesh(cornerGeo, trimMat);
-      corner.position.set(cx, PLINTH_H / 2 + 0.02, cz);
-      plinthGroup.add(corner);
+    // 四邊鎏金／陣營鑲邊與前鋒箭頭指向標
+    const rimMat = new THREE.MeshStandardMaterial({
+      color: factionTrim,
+      emissive: factionColor,
+      emissiveIntensity: 0.22,
+      roughness: 0.3,
+      metalness: 0.75
     });
+    const fBar = new THREE.Mesh(new THREE.BoxGeometry(PLINTH_W + 0.06, 0.07, 0.08), rimMat);
+    fBar.position.set(0, PLINTH_H + 0.01, PLINTH_D / 2);
+    plinthGroup.add(fBar);
+    const bBar = fBar.clone();
+    bBar.position.z = -PLINTH_D / 2;
+    plinthGroup.add(bBar);
 
-    // 托盤內微縮泥地沙盤草皮 (Diorama Turf Top Surface)
-    const turfCanvas = document.createElement('canvas');
-    turfCanvas.width = 256; turfCanvas.height = 192;
-    const tctx = turfCanvas.getContext('2d');
-    const turfGrad = tctx.createLinearGradient(0, 0, 256, 192);
-    turfGrad.addColorStop(0, isSideA ? '#283824' : '#382820');
-    turfGrad.addColorStop(0.5, isSideA ? '#34462e' : '#423224');
-    turfGrad.addColorStop(1, isSideA ? '#283824' : '#382820');
-    tctx.fillStyle = turfGrad;
-    tctx.fillRect(0, 0, 256, 192);
+    const sBarGeo = new THREE.BoxGeometry(0.08, 0.07, PLINTH_D + 0.06);
+    const lBar = new THREE.Mesh(sBarGeo, rimMat);
+    lBar.position.set(-PLINTH_W / 2, PLINTH_H + 0.01, 0);
+    plinthGroup.add(lBar);
+    const rBar = lBar.clone();
+    rBar.position.x = PLINTH_W / 2;
+    plinthGroup.add(rBar);
 
-    // 踏碾痕跡與行軍方格線
-    tctx.strokeStyle = 'rgba(251, 191, 36, 0.18)';
-    tctx.lineWidth = 2;
-    tctx.strokeRect(8, 8, 240, 176);
+    // 托盤正前方陣向金三角箭標 (+Z 為前鋒)
+    const arrowChevron = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.32, 3), rimMat);
+    arrowChevron.rotation.x = Math.PI / 2;
+    arrowChevron.position.set(0, PLINTH_H * 0.6, PLINTH_D / 2 + 0.18);
+    plinthGroup.add(arrowChevron);
 
-    const turfTex = new THREE.CanvasTexture(turfCanvas);
-    const turfGeo = new THREE.PlaneGeometry(PLINTH_W - 0.12, PLINTH_D - 0.12);
-    const turfMat = new THREE.MeshStandardMaterial({ map: turfTex, roughness: 0.9 });
-    const turfMesh = new THREE.Mesh(turfGeo, turfMat);
-    turfMesh.rotation.x = -Math.PI / 2;
-    turfMesh.position.y = PLINTH_H + 0.01;
-    turfMesh.receiveShadow = true;
-    plinthGroup.add(turfMesh);
+    formationRig.add(plinthGroup);
 
-    // 托盤前沿部隊番號青銅浮雕名牌 (正面朝向視角/敵陣)
-    const plaqueCanvas = document.createElement('canvas');
-    plaqueCanvas.width = 256; plaqueCanvas.height = 64;
-    const pctx = plaqueCanvas.getContext('2d');
-    pctx.fillStyle = isSideA ? '#0c1a2e' : '#261208';
-    pctx.fillRect(0, 0, 256, 64);
-    pctx.strokeStyle = isSideA ? '#38bdf8' : '#fbbf24';
-    pctx.lineWidth = 4;
-    pctx.strokeRect(2, 2, 252, 60);
-    pctx.fillStyle = '#ffffff';
-    pctx.font = 'bold 26px "Noto Sans TC", sans-serif';
-    pctx.textAlign = 'center';
-    pctx.fillText(CAT_NAMES[cat] || '名將方陣', 128, 42);
+    // B. 3D 兵種模型方陣容器
+    const troopsContainer = new THREE.Group();
+    troopsContainer.position.y = PLINTH_H + 0.03;
+    formationRig.add(troopsContainer);
 
-    const plaqueTex = new THREE.CanvasTexture(plaqueCanvas);
-    const plaqueGeo = new THREE.PlaneGeometry(1.4, 0.22);
-    const plaqueMat = new THREE.MeshStandardMaterial({ map: plaqueTex, roughness: 0.3, metalness: 0.5 });
-    const plaqueMesh = new THREE.Mesh(plaqueGeo, plaqueMat);
-    plaqueMesh.position.set(0, PLINTH_H / 2, (PLINTH_D / 2 + 0.01) * facingDir);
-    if (!isSideA) plaqueMesh.rotation.y = Math.PI;
-    plinthGroup.add(plaqueMesh);
+    // C. 光榮式懸浮名將頭像軍徽與即時兵力銘牌 (Sprite 永遠正對鏡頭、不遮擋 3D 士兵！)
+    const startHp = Math.max(1, Number(unit.maxHp || unit.hpMax || unit.hp || 200));
+    const hud = buildWarlordCrestHud(unit, isSideA, meta, startHp, startHp);
+    hud.sprite.position.set(0, PLINTH_H + 2.28, 0);
+    rootGroup.add(hud.sprite);
 
-    group.add(plinthGroup);
+    scene.add(rootGroup);
 
-    // ==========================================
-    // 2. 托盤上方嚴整排列之微縮 3D 方陣部隊 (Miniature Rank & File)
-    // ==========================================
-    const troopsGroup = buildFormationTroops(cat, isSideA, PLINTH_H);
-    group.add(troopsGroup);
-
-    // ==========================================
-    // 3. 名將真實人物畫軍屏立牌 (高清水墨立體屏風)
-    // ==========================================
-    const billboard = buildWarlordScreen(unit, isSideA, catColor, PLINTH_H);
-    billboard.mesh.position.set(-0.95 * facingDir, PLINTH_H + 0.95, 0.0);
-    group.add(billboard.mesh);
-
-    // ==========================================
-    // 4. 頂部 3D 即時氣血條與兵力數字看板
-    // ==========================================
-    const hpBar = buildHpBar(unit.hp, unit.hpMax || unit.hp, unit.name);
-    hpBar.group.position.y = PLINTH_H + 2.45;
-    group.add(hpBar.group);
-
-    // 初始位置
-    group.position.set(coords.x, 0, coords.z);
-    scene.add(group);
-
-    return {
+    const token = {
       uid: unit.uid,
       id: unit.id,
       name: unit.name,
-      cost: unit.cost,
+      cost: unit.cost || 3,
       tag: unit.tag || '',
-      side: side,
-      cat: cat,
-      mesh: group,
-      plinthGroup: plinthGroup,
-      troopsGroup: troopsGroup,
-      billboardMesh: billboard.mesh,
-      hpFg: hpBar.fg,
-      hpGroup: hpBar.group,
-      hpTextCanvas: hpBar.textCanvas,
-      hpTextTex: hpBar.textTex,
+      wep: unit.wep || '',
+      side,
+      cat,
+      mesh: rootGroup,
+      formationRig,
+      plinthGroup,
+      troopsContainer,
+      hud,
+      unitAnims: [],
+      baguaMesh: null,
       origX: coords.x,
       origZ: coords.z,
-      currentHp: unit.hp,
-      maxHp: unit.hpMax || unit.hp,
-      alive: true
+      currentHp: startHp,
+      maxHp: startHp,
+      alive: true,
+      epoch: battleEpoch
     };
-  }
 
-  /* ----------------------------------------------------
-     五大兵團微縮士兵方陣模型建立
-     ---------------------------------------------------- */
-  function buildFormationTroops(cat, isSideA, plinthY) {
-    const fGroup = new THREE.Group();
-    fGroup.position.y = plinthY;
-    const facingDir = isSideA ? 1 : -1;
-
-    switch (cat) {
-      case 'air': {
-        // ====================================================
-        // ⚡ 奔雷突騎：3 匹重甲戰馬 (主將居中 + 左右突騎護衛) + 大纛長槍
-        // ====================================================
-        const horseMat = new THREE.MeshStandardMaterial({ color: 0x3e2314, roughness: 0.65 });
-        const horseArmorMat = new THREE.MeshStandardMaterial({
-          color: isSideA ? 0x0284c7 : 0xd97706,
-          metalness: 0.85,
-          roughness: 0.25
-        });
-        const riderArmorMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
-        const lanceMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 });
-
-        // 生成一匹戰馬與騎兵的輔助函式
-        function createCavalryman(offsetX, offsetZ, scale = 1.0, isCommander = false) {
-          const cav = new THREE.Group();
-          cav.position.set(offsetX * facingDir, 0, offsetZ);
-          cav.scale.set(scale, scale, scale);
-
-          // 馬身
-          const body = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.46, 0.36), horseMat);
-          body.position.set(0, 0.42, 0);
-          body.castShadow = true;
-          cav.add(body);
-
-          // 馬頸與頭
-          const neck = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.42, 0.24), horseMat);
-          neck.position.set(0.35 * facingDir, 0.68, 0);
-          neck.rotation.z = -0.35 * facingDir;
-          cav.add(neck);
-
-          const head = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.24, 0.22), horseMat);
-          head.position.set(0.48 * facingDir, 0.82, 0);
-          cav.add(head);
-
-          // 馬面金甲 (Chamfron)
-          const chamfron = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.22, 0.23), horseArmorMat);
-          chamfron.position.set(0.56 * facingDir, 0.83, 0);
-          cav.add(chamfron);
-
-          // 4 條馬腿
-          const legGeo = new THREE.CylinderGeometry(0.04, 0.05, 0.42, 6);
-          [
-            [-0.28, -0.12], [-0.28, 0.12],
-            [ 0.28, -0.12], [ 0.28, 0.12]
-          ].forEach(([lx, lz]) => {
-            const leg = new THREE.Mesh(legGeo, horseMat);
-            leg.position.set(lx * facingDir, 0.21, lz);
-            leg.castShadow = true;
-            cav.add(leg);
-          });
-
-          // 馬尾
-          const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.06, 0.4, 6), horseMat);
-          tail.position.set(-0.45 * facingDir, 0.38, 0);
-          tail.rotation.z = 0.5 * facingDir;
-          cav.add(tail);
-
-          // 馬鞍與鞍韉
-          const saddle = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.14, 0.38), horseArmorMat);
-          saddle.position.set(0, 0.64, 0);
-          cav.add(saddle);
-
-          // 騎兵軀幹 (鐵甲身軀)
-          const riderBody = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.38, 0.26), riderArmorMat);
-          riderBody.position.set(0, 0.88, 0);
-          riderBody.castShadow = true;
-          cav.add(riderBody);
-
-          // 騎兵頭盔 (帶紅纓)
-          const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), riderArmorMat);
-          helmet.position.set(0, 1.14, 0);
-          cav.add(helmet);
-
-          const plume = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.18, 6), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-          plume.position.set(0, 1.28, 0);
-          cav.add(plume);
-
-          // 平端突刺衝鋒長槍 (2.2m)
-          const lance = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.035, 2.1, 6), lanceMat);
-          lance.rotation.z = Math.PI / 2 * facingDir;
-          lance.position.set(0.75 * facingDir, 0.95, 0.18);
-          cav.add(lance);
-
-          // 槍尖紅纓
-          const lanceTassel = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 6), new THREE.MeshBasicMaterial({ color: 0xd97706 }));
-          lanceTassel.rotation.z = -Math.PI / 2 * facingDir;
-          lanceTassel.position.set(1.65 * facingDir, 0.95, 0.18);
-          cav.add(lanceTassel);
-
-          // 若為主將，配備飄揚帥氣披風
-          if (isCommander) {
-            const capeMat = new THREE.MeshStandardMaterial({
-              color: isSideA ? 0x0284c7 : 0xb91c1c,
-              side: THREE.DoubleSide
-            });
-            const cape = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.65), capeMat);
-            cape.position.set(-0.25 * facingDir, 0.85, 0);
-            cape.rotation.y = Math.PI / 2;
-            cape.rotation.x = -0.35 * facingDir;
-            cav.add(cape);
-          }
-
-          return cav;
-        }
-
-        // 居中大將戰馬 (居中居前)
-        fGroup.add(createCavalryman(0.2, 0.0, 1.15, true));
-        // 左翼突騎
-        fGroup.add(createCavalryman(-0.25, -0.65, 0.95, false));
-        // 右翼突騎
-        fGroup.add(createCavalryman(-0.25,  0.65, 0.95, false));
-
-        // 托盤大纛軍旗
-        const poleMat = new THREE.MeshStandardMaterial({ color: 0x5c3d22 });
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 2.7, 6), poleMat);
-        pole.position.set(-1.1 * facingDir, 1.35, -0.65);
-        fGroup.add(pole);
-
-        const flagMat = new THREE.MeshStandardMaterial({
-          color: isSideA ? 0x0284c7 : 0xb91c1c,
-          roughness: 0.35,
-          side: THREE.DoubleSide
-        });
-        const flag = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 1.05), flagMat);
-        flag.position.set((-1.1 + 0.42 * -facingDir), 2.15, -0.65);
-        flag.rotation.y = Math.PI / 2;
-        fGroup.add(flag);
-        break;
-      }
-
-      case 'armor': {
-        // ====================================================
-        // 🛡️ 重甲陷陣：前排 3 面巨型金屬塔盾結成無縫鋼盾牆 (Shield Wall) + 後排 3 長戟刺陣
-        // ====================================================
-        const shieldMat = new THREE.MeshStandardMaterial({
-          color: 0x334155,
-          metalness: 0.88,
-          roughness: 0.25
-        });
-        const bossMat = new THREE.MeshStandardMaterial({
-          color: isSideA ? 0x38bdf8 : 0xf59e0b,
-          metalness: 0.95,
-          roughness: 0.15
-        });
-        const soldierMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7 });
-        const spearMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9 });
-
-        [-0.68, 0, 0.68].forEach((offsetZ, i) => {
-          // 前排厚重玄鐵塔盾 (連成鐵壁)
-          const shield = new THREE.Mesh(new THREE.BoxGeometry(0.14, 1.15, 0.66), shieldMat);
-          shield.position.set(0.75 * facingDir, 0.58, offsetZ);
-          shield.rotation.y = (i === 0 ? 0.18 : i === 2 ? -0.18 : 0) * facingDir;
-          shield.castShadow = true;
-          fGroup.add(shield);
-
-          // 獸面銅釘盾心
-          const boss = new THREE.Mesh(new THREE.SphereGeometry(0.10, 8, 8), bossMat);
-          boss.position.set(0.83 * facingDir, 0.58, offsetZ);
-          fGroup.add(boss);
-
-          // 盾後持盾重甲兵身形
-          const soldier = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.85, 0.32), soldierMat);
-          soldier.position.set(0.48 * facingDir, 0.45, offsetZ);
-          soldier.castShadow = true;
-          fGroup.add(soldier);
-
-          const helm = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), bossMat);
-          helm.position.set(0.48 * facingDir, 0.98, offsetZ);
-          fGroup.add(helm);
-
-          // 後排長戟兵 (突出盾外的長矛矛尖)
-          const pikeman = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.95, 0.32), soldierMat);
-          pikeman.position.set(0.05 * facingDir, 0.50, offsetZ);
-          pikeman.castShadow = true;
-          fGroup.add(pikeman);
-
-          const pikeHelm = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), bossMat);
-          pikeHelm.position.set(0.05 * facingDir, 1.08, offsetZ);
-          fGroup.add(pikeHelm);
-
-          // 架出盾外的 2.6m 長戟長矛
-          const spear = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.035, 2.4, 6), spearMat);
-          spear.rotation.z = (Math.PI / 2 - 0.22) * facingDir;
-          spear.position.set(0.95 * facingDir, 0.98, offsetZ);
-          fGroup.add(spear);
-
-          // 長矛紅纓
-          const tassel = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 6), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-          tassel.rotation.z = -Math.PI / 2 * facingDir;
-          tassel.position.set(1.95 * facingDir, 1.25, offsetZ);
-          fGroup.add(tassel);
-        });
-        break;
-      }
-
-      case 'air_defense': {
-        // ====================================================
-        // 🏹 神射強弩：前排 2 跪射強弩 + 後排 2 立射長弓 + 地面箭箱與防騎尖樁
-        // ====================================================
-        const woodMat = new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.8 });
-        const metalMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85 });
-        const soldierMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
-
-        // 前排 2 名跪姿強弩兵
-        [-0.55, 0.55].forEach(offsetZ => {
-          // 跪姿步兵身軀
-          const soldier = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.55, 0.28), soldierMat);
-          soldier.position.set(0.45 * facingDir, 0.30, offsetZ);
-          soldier.castShadow = true;
-          fGroup.add(soldier);
-
-          const helm = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), metalMat);
-          helm.position.set(0.45 * facingDir, 0.65, offsetZ);
-          fGroup.add(helm);
-
-          // 諸葛連弩/軍用強弩機身
-          const crossStock = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.10, 0.12), woodMat);
-          crossStock.position.set(0.68 * facingDir, 0.58, offsetZ);
-          fGroup.add(crossStock);
-
-          const crossProd = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.62), metalMat);
-          crossProd.position.set(0.85 * facingDir, 0.58, offsetZ);
-          fGroup.add(crossProd);
-
-          // 瞄準待發的利箭
-          const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.5, 4), metalMat);
-          bolt.rotation.z = Math.PI / 2 * facingDir;
-          bolt.position.set(0.85 * facingDir, 0.64, offsetZ);
-          fGroup.add(bolt);
-        });
-
-        // 後排 2 名立射長弓兵
-        [-0.55, 0.55].forEach(offsetZ => {
-          const archer = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.85, 0.28), soldierMat);
-          archer.position.set(-0.25 * facingDir, 0.45, offsetZ);
-          archer.castShadow = true;
-          fGroup.add(archer);
-
-          const helm = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), metalMat);
-          helm.position.set(-0.25 * facingDir, 0.98, offsetZ);
-          fGroup.add(helm);
-
-          // 滿月開弓之複合長弓 (圓弧 Geometry)
-          const bow = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.025, 6, 12, Math.PI * 0.9), woodMat);
-          bow.rotation.y = (Math.PI / 2) * facingDir;
-          bow.rotation.x = -Math.PI / 6; // 30度仰射
-          bow.position.set(-0.05 * facingDir, 0.95, offsetZ);
-          fGroup.add(bow);
-
-          // 搭箭在弦 (仰角朝天)
-          const arrow = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.75, 4), metalMat);
-          arrow.rotation.z = (Math.PI / 2 - 0.52) * facingDir;
-          arrow.position.set(0.25 * facingDir, 1.15, offsetZ);
-          fGroup.add(arrow);
-        });
-
-        // 托盤地面箭筒匣與防騎尖樁
-        const quiverBox = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.38, 0.36), woodMat);
-        quiverBox.position.set(0.15 * facingDir, 0.20, 0);
-        fGroup.add(quiverBox);
-
-        // 前緣 3 根防騎斜尖木樁
-        [-0.7, 0, 0.7].forEach(sz => {
-          const stake = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.65, 5), woodMat);
-          stake.rotation.z = 0.55 * facingDir;
-          stake.position.set(1.2 * facingDir, 0.22, sz);
-          stake.castShadow = true;
-          fGroup.add(stake);
-        });
-        break;
-      }
-
-      case 'naval': {
-        // ====================================================
-        // ⚔️ 先登奇兵：4 名精銳突擊隊員組成的銳角「鋒矢破陣陣型」
-        // ====================================================
-        const bladeMat = new THREE.MeshStandardMaterial({
-          color: 0xf1f5f9,
-          metalness: 0.96,
-          roughness: 0.12
-        });
-        const armorMat = new THREE.MeshStandardMaterial({
-          color: isSideA ? 0x0284c7 : 0xb45309,
-          metalness: 0.75,
-          roughness: 0.3
-        });
-        const skinMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
-
-        // 鋒矢陣 4 個突擊戰位 (箭頭、左右翼、後衛)
-        const wedgePositions = [
-          { x:  0.85, z:  0.0, scale: 1.1, role: 'point' }, // 鋒頭第一人
-          { x:  0.22, z: -0.62, scale: 0.95, role: 'wing' }, // 左翼奇兵
-          { x:  0.22, z:  0.62, scale: 0.95, role: 'wing' }, // 右翼奇兵
-          { x: -0.40, z:  0.0, scale: 0.95, role: 'rear' }  // 陣尾壓陣
-        ];
-
-        wedgePositions.forEach(p => {
-          const warrior = new THREE.Group();
-          warrior.position.set(p.x * facingDir, 0, p.z);
-          warrior.scale.set(p.scale, p.scale, p.scale);
-
-          // 武士體魄
-          const torso = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.75, 0.30), armorMat);
-          torso.position.y = 0.42;
-          torso.castShadow = true;
-          warrior.add(torso);
-
-          // 戰盔與怒面
-          const helm = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), skinMat);
-          helm.position.y = 0.88;
-          warrior.add(helm);
-
-          const headband = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.03, 6, 12), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-          headband.position.y = 0.88;
-          headband.rotation.x = Math.PI / 2;
-          warrior.add(headband);
-
-          // 雙手揮舞的大型斬馬大刀 (1.4m 長巨刃)
-          const blade = new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.25, 0.16), bladeMat);
-          blade.position.set(0.35 * facingDir, 0.95, 0.15);
-          blade.rotation.z = (p.role === 'point' ? -0.45 : 0.45) * facingDir;
-          blade.castShadow = true;
-          warrior.add(blade);
-
-          // 金屬刀柄與護手環
-          const hilt = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.45, 6), armorMat);
-          hilt.position.set(0.18 * facingDir, 0.55, 0.15);
-          hilt.rotation.z = (p.role === 'point' ? -0.45 : 0.45) * facingDir;
-          warrior.add(hilt);
-
-          // 先登登城倒鉤小圓盾 (左手)
-          const buckler = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.04, 12), armorMat);
-          buckler.rotation.z = Math.PI / 2;
-          buckler.position.set(0.15 * facingDir, 0.65, -0.22);
-          warrior.add(buckler);
-
-          fGroup.add(warrior);
-        });
-        break;
-      }
-
-      case 'support': {
-        // ====================================================
-        // 📜 軍師奇謀：實木點將亭台 + 白羽扇軍師 + 巨型牛皮天音戰鼓與擂鼓手 + 八卦光陣
-        // ====================================================
-        const woodMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.7 });
-        const roofMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.4, metalness: 0.2 });
-        const drumMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.5 });
-        const drumRimMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9 });
-
-        // 1. 點將亭台 4 根雕花紅木立柱
-        const pillarGeo = new THREE.CylinderGeometry(0.05, 0.06, 1.45, 8);
-        [
-          [-0.65, -0.75], [0.65, -0.75],
-          [-0.65,  0.75], [0.65,  0.75]
-        ].forEach(([px, pz]) => {
-          const pillar = new THREE.Mesh(pillarGeo, woodMat);
-          pillar.position.set(px * facingDir, 0.75, pz);
-          pillar.castShadow = true;
-          fGroup.add(pillar);
-        });
-
-        // 2. 飛簷翹角歇山頂亭閣頂棚 (Oriental Pavilion Roof)
-        const roofBase = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.12, 1.85), roofMat);
-        roofBase.position.set(0, 1.48, 0);
-        roofBase.castShadow = true;
-        fGroup.add(roofBase);
-
-        const roofTop = new THREE.Mesh(new THREE.ConeGeometry(1.25, 0.55, 4), roofMat);
-        roofTop.rotation.y = Math.PI / 4;
-        roofTop.position.set(0, 1.82, 0);
-        roofTop.castShadow = true;
-        fGroup.add(roofTop);
-
-        const jewel = new THREE.Mesh(new THREE.SphereGeometry(0.10, 8, 8), drumRimMat);
-        jewel.position.set(0, 2.15, 0);
-        fGroup.add(jewel);
-
-        // 3. 軍師長袍仙風道骨身姿 (手執白羽扇)
-        const strategist = new THREE.Group();
-        strategist.position.set(-0.15 * facingDir, 0, -0.25);
-
-        // 寬袍大袖
-        const robe = new THREE.Mesh(
-          new THREE.ConeGeometry(0.32, 0.95, 8),
-          new THREE.MeshStandardMaterial({ color: isSideA ? 0x0284c7 : 0x7c2d12, roughness: 0.6 })
-        );
-        robe.position.y = 0.48;
-        strategist.add(robe);
-
-        // 綸巾高冠
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshStandardMaterial({ color: 0xfde047 }));
-        head.position.y = 1.02;
-        strategist.add(head);
-
-        const hat = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.16), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-        hat.position.y = 1.15;
-        strategist.add(hat);
-
-        // 諸葛鵝毛白羽扇
-        const fanMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
-        const fan = new THREE.Mesh(new THREE.ConeGeometry(0.20, 0.42, 6), fanMat);
-        fan.rotation.z = 0.55 * facingDir;
-        fan.position.set(0.35 * facingDir, 0.85, 0);
-        strategist.add(fan);
-
-        fGroup.add(strategist);
-
-        // 4. 巨型天音牛皮戰鼓與架座
-        const drumStand = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.55, 0.42), woodMat);
-        drumStand.position.set(0.25 * facingDir, 0.28, 0.45);
-        fGroup.add(drumStand);
-
-        const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.48, 16), drumMat);
-        drum.rotation.z = Math.PI / 2;
-        drum.position.set(0.25 * facingDir, 0.65, 0.45);
-        drum.castShadow = true;
-        fGroup.add(drum);
-
-        // 金屬鉚釘鼓圈
-        const drumRim = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.03, 6, 16), drumRimMat);
-        drumRim.rotation.y = Math.PI / 2;
-        drumRim.position.set((0.25 + 0.24) * facingDir, 0.65, 0.45);
-        fGroup.add(drumRim);
-
-        // 擂鼓力士 (雙持鼓槌在空中擂擊)
-        const drummer = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.75, 0.26), new THREE.MeshStandardMaterial({ color: 0x334155 }));
-        drummer.position.set(-0.20 * facingDir, 0.40, 0.45);
-        drummer.castShadow = true;
-        fGroup.add(drummer);
-
-        // 鼓槌
-        const malletGeo = new THREE.CylinderGeometry(0.015, 0.04, 0.35, 6);
-        const mallet1 = new THREE.Mesh(malletGeo, woodMat);
-        mallet1.position.set(0.05 * facingDir, 0.85, 0.35);
-        mallet1.rotation.z = 0.6 * facingDir;
-        fGroup.add(mallet1);
-
-        // 5. 托盤地表旋轉太極八卦陣圖光圈
-        const baguaCanvas = document.createElement('canvas');
-        baguaCanvas.width = 256; baguaCanvas.height = 256;
-        const bctx = baguaCanvas.getContext('2d');
-        bctx.translate(128, 128);
-        bctx.strokeStyle = '#4ade80';
-        bctx.lineWidth = 6;
-        bctx.beginPath(); bctx.arc(0, 0, 116, 0, Math.PI * 2); bctx.stroke();
-
-        // 太極雙魚
-        bctx.fillStyle = '#4ade80';
-        bctx.beginPath(); bctx.arc(0, 0, 80, -Math.PI / 2, Math.PI / 2); bctx.fill();
-        bctx.fillStyle = '#0f172a';
-        bctx.beginPath(); bctx.arc(0, 0, 80, Math.PI / 2, Math.PI * 1.5); bctx.fill();
-        bctx.fillStyle = '#4ade80';
-        bctx.beginPath(); bctx.arc(0, 40, 40, 0, Math.PI * 2); bctx.fill();
-        bctx.fillStyle = '#0f172a';
-        bctx.beginPath(); bctx.arc(0, -40, 40, 0, Math.PI * 2); bctx.fill();
-
-        const baguaTex = new THREE.CanvasTexture(baguaCanvas);
-        const baguaGeo = new THREE.PlaneGeometry(1.9, 1.9);
-        const baguaMat = new THREE.MeshBasicMaterial({
-          map: baguaTex,
-          transparent: true,
-          opacity: 0.85,
-          side: THREE.DoubleSide
-        });
-        const baguaMesh = new THREE.Mesh(baguaGeo, baguaMat);
-        baguaMesh.rotation.x = -Math.PI / 2;
-        baguaMesh.position.set(0, 0.03, 0);
-        baguaMesh.name = 'baguaRuneRing';
-        fGroup.add(baguaMesh);
-        break;
-      }
-    }
-
-    return fGroup;
-  }
-
-  /* ----------------------------------------------------
-     名將真實人物畫軍屏立牌 (高清水墨立體屏風)
-     ---------------------------------------------------- */
-  function buildWarlordScreen(unit, isSideA, catColor, plinthH) {
-    const width = 1.35, height = 1.85;
-    const bannerGeo = new THREE.BoxGeometry(width, height, 0.08);
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 352;
-    const ctx = canvas.getContext('2d');
-
-    function renderScreenFace(loadedImg) {
-      // 陣營古典暗紋邊框底色
-      ctx.fillStyle = isSideA ? '#071829' : '#261208';
-      ctx.fillRect(0, 0, 256, 352);
-
-      // 肖像繪製區 (若有載入的圖像，滿格完整繪製真實人物肖像畫)
-      if (loadedImg && loadedImg.complete && loadedImg.naturalWidth > 0) {
-        ctx.drawImage(loadedImg, 8, 8, 240, 248);
-
-        // 底部暈染過渡 (讓姓名區自然銜接，絕不遮掩臉孔五官)
-        const edgeGrad = ctx.createLinearGradient(0, 210, 0, 256);
-        edgeGrad.addColorStop(0, 'rgba(0,0,0,0)');
-        edgeGrad.addColorStop(1, isSideA ? '#071829' : '#261208');
-        ctx.fillStyle = edgeGrad;
-        ctx.fillRect(8, 210, 240, 46);
-      } else {
-        // 典雅底色
-        ctx.fillStyle = isSideA ? '#0c4a6e' : '#7c2d12';
-        ctx.fillRect(8, 8, 240, 248);
-      }
-
-      // 豪華金屬陣營外框 (雙層金邊 + 四角裝飾)
-      ctx.strokeStyle = isSideA ? '#38bdf8' : '#f59e0b';
-      ctx.lineWidth = 6;
-      ctx.strokeRect(4, 4, 248, 344);
-
-      // 四角雲紋金飾
-      ctx.fillStyle = isSideA ? '#38bdf8' : '#fbbf24';
-      ctx.fillRect(4, 4, 16, 6);
-      ctx.fillRect(4, 4, 6, 16);
-      ctx.fillRect(236, 4, 16, 6);
-      ctx.fillRect(246, 4, 6, 16);
-      ctx.fillRect(4, 342, 16, 6);
-      ctx.fillRect(4, 332, 6, 16);
-      ctx.fillRect(236, 342, 16, 6);
-      ctx.fillRect(246, 332, 6, 16);
-
-      // 國旗與費用角標金牌 ($5 突)
-      ctx.fillStyle = 'rgba(10, 16, 26, 0.92)';
-      ctx.fillRect(8, 8, 92, 34);
-      ctx.strokeStyle = isSideA ? '#38bdf8' : '#fbbf24';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(8, 8, 92, 34);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 20px "Noto Sans TC", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(`${unit.flag || ''} $${unit.cost}`, 14, 32);
-
-      // 底部名牌黑金漆底 (襯托書法姓名)
-      ctx.fillStyle = 'rgba(8, 12, 20, 0.95)';
-      ctx.fillRect(8, 260, 240, 84);
-      ctx.strokeStyle = isSideA ? '#38bdf8' : '#fbbf24';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(8, 260, 240, 84);
-
-      // 名將全名書法楷體
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 30px "KaiTi", "Noto Sans TC", serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(unit.name || '歷史名將', 128, 298);
-
-      // 兵種稱號與戰術標籤
-      ctx.fillStyle = isSideA ? '#38bdf8' : '#fbbf24';
-      ctx.font = 'bold 16px "Noto Sans TC", sans-serif';
-      const tagText = (unit.tag || '').split('·')[0].slice(0, 10);
-      ctx.fillText(tagText, 128, 332);
-    }
-
-    renderScreenFace(null);
-
-    const bannerTex = new THREE.CanvasTexture(canvas);
-    bannerTex.minFilter = THREE.LinearFilter;
-    const bannerMat = new THREE.MeshStandardMaterial({
-      map: bannerTex,
-      roughness: 0.35,
-      metalness: 0.15
+    // 載入完成後裝配真實 GLB 兵種方陣
+    ensureModelsLoaded().then(() => {
+      if (token.epoch !== battleEpoch || !unitsMap.has(token.uid)) return;
+      populateFormationGLB(token);
     });
 
-    // 非同步載入真實肖像畫並刷新 Canvas (全套 200 張本地已備齊)
+    return token;
+  }
+
+  function attachProp(parentGroup, key, opts, pos, rot) {
+    const inst = spawnModelInstance(key, opts);
+    if (!inst) return null;
+    if (pos) inst.group.position.set(pos[0], pos[1], pos[2]);
+    if (rot) inst.group.rotation.set(rot[0], rot[1], rot[2]);
+    parentGroup.add(inst.group);
+    return inst.group;
+  }
+
+  function populateFormationGLB(token) {
+    const g = token.troopsContainer;
+    if (!g || g.children.length > 0) return;
+
+    const isSideA = token.side === 'A';
+    const factionTint = isSideA ? 0x1d4ed8 : 0xb91c1c;
+    const plumeColor = isSideA ? 0x38bdf8 : 0xef4444;
+    const goldColor = 0xfbbf24;
+    const cat = token.cat;
+
+    // 後排主將背旗／帥旗 (所有兵種托盤皆立戰旗，強化三國合戰軍陣感)
+    attachProp(g, 'banner', { targetHeight: 1.55, tintHex: factionTint, tintStrength: 0.45 }, [-0.92, 0, -0.92], [0, 0, 0]);
+
+    if (cat === 'air') {
+      // 【⚡ 奔雷突騎】：3 騎全骨骼動畫具裝戰馬 + 挺立披甲騎將 + 水平前指長槊楔形陣
+      const cavSpots = [
+        { x:  0.00, z:  0.42, lead: true },
+        { x: -0.68, z: -0.32, lead: false },
+        { x:  0.68, z: -0.32, lead: false }
+      ];
+      cavSpots.forEach((sp) => {
+        const mountUnit = new THREE.Group();
+        mountUnit.position.set(sp.x, 0, sp.z);
+
+        const horseKey = sp.lead ? 'horse_armored' : 'horse';
+        const horse = spawnModelInstance(horseKey, {
+          targetHeight: sp.lead ? 1.08 : 0.98,
+          tintHex: sp.lead ? (isSideA ? 0xf8fafc : 0x7f1d1d) : null,
+          tintStrength: sp.lead ? 0.22 : 0,
+          registerAnim: true
+        });
+        if (horse) {
+          mountUnit.add(horse.group);
+          if (horse.animCtrl) token.unitAnims.push(horse.animCtrl);
+        }
+
+        const rider = spawnModelInstance('infantry', {
+          targetHeight: 0.78,
+          tintHex: factionTint,
+          tintStrength: 0.34,
+          registerAnim: true
+        });
+        if (rider) {
+          rider.group.position.set(0, 0.50, -0.04);
+          addHelmetCrest(rider.group, 0.74, sp.lead ? 'horns' : 'plume', sp.lead ? goldColor : plumeColor);
+          mountUnit.add(rider.group);
+          if (rider.animCtrl) token.unitAnims.push(rider.animCtrl);
+        }
+
+        // spear.glb 原生軸向已沿 +Z，設為微仰 [-0.10, 0, 0] 讓騎槊筆直朝前直指敵軍！
+        attachProp(mountUnit, 'spear', { targetMaxDim: 1.52 }, [0.22, 0.78, 0.32], [-0.10, 0, 0]);
+        g.add(mountUnit);
+      });
+
+    } else if (cat === 'armor') {
+      // 【🛡️ 重甲陷陣】：前排 3 名大盾重鎧甲士 + 後排 3 名長槍兵密集魚鱗方陣
+      const heavyArmorTint = isSideA ? 0x1e40af : 0x991b1b;
+      [-0.68, 0.0, 0.68].forEach((xPos, idx) => {
+        const front = new THREE.Group();
+        front.position.set(xPos, 0, 0.50);
+        const w = spawnModelInstance('infantry', {
+          targetHeight: idx === 1 ? 1.04 : 0.96,
+          tintHex: idx === 1 ? goldColor : heavyArmorTint,
+          tintStrength: idx === 1 ? 0.32 : 0.36,
+          registerAnim: true
+        });
+        if (w) {
+          if (idx === 1) addHelmetCrest(w.group, 1.00, 'horns', goldColor);
+          front.add(w.group);
+          if (w.animCtrl) token.unitAnims.push(w.animCtrl);
+        }
+        attachProp(front, 'shield_tower', { targetHeight: 0.78, tintHex: factionTint, tintStrength: 0.25 }, [-0.08, 0.08, 0.28], [0, 0, 0]);
+        // sword.glb 原生直立 (+Y)，旋轉 +Math.PI * 0.36 呈斜前備戰握持
+        attachProp(front, 'sword', { targetMaxDim: 0.72 }, [0.24, 0.44, 0.14], [Math.PI * 0.36, 0, 0]);
+        g.add(front);
+      });
+
+      [-0.68, 0.0, 0.68].forEach((xPos) => {
+        const rear = new THREE.Group();
+        rear.position.set(xPos, 0, -0.40);
+        const inf = spawnModelInstance('infantry', {
+          targetHeight: 0.96,
+          tintHex: heavyArmorTint,
+          tintStrength: 0.30,
+          registerAnim: true
+        });
+        if (inf) {
+          rear.add(inf.group);
+          if (inf.animCtrl) token.unitAnims.push(inf.animCtrl);
+        }
+        // pike.glb 原生直立 (+Y)，握把置於後排兵腰側並旋轉 +Math.PI * 0.42 越過前排盾牆平指前方！
+        attachProp(rear, 'pike', { targetMaxDim: 1.68 }, [0.22, 0.48, -0.05], [Math.PI * 0.42, 0, 0]);
+        g.add(rear);
+      });
+
+    } else if (cat === 'air_defense') {
+      // 【🏹 神射強弩】：前排雙座「鹿角拒馬」木柵掩體 + 4 名骨骼動畫強弩弓手交錯齊射陣
+      [-0.56, 0.56].forEach((bx) => {
+        const abatis = buildWoodenAbatis(0.92, 0.54);
+        abatis.position.set(bx, 0, 0.80);
+        g.add(abatis);
+      });
+
+      const archerTint = isSideA ? 0x3b82f6 : 0xd97706;
+      const archSpots = [
+        [-0.62, 0.16], [0.62, 0.16],
+        [-0.36, -0.52], [0.36, -0.52]
+      ];
+      archSpots.forEach(([ax, az], idx) => {
+        const archer = new THREE.Group();
+        archer.position.set(ax, 0, az);
+        const sol = spawnModelInstance('infantry', {
+          targetHeight: 0.95,
+          tintHex: archerTint,
+          tintStrength: 0.28,
+          registerAnim: true
+        });
+        if (sol) {
+          if (idx < 2) addHelmetCrest(sol.group, 0.91, 'plume', plumeColor);
+          archer.add(sol.group);
+          if (sol.animCtrl) token.unitAnims.push(sol.animCtrl);
+        }
+        attachProp(archer, 'bow', { targetMaxDim: 0.74 }, [0.16, 0.22, 0.28], [0, Math.PI / 2, 0]);
+        // arrow.glb 原生直立 (+Y)，旋轉 Math.PI * 0.46 微仰搭弦朝向敵軍 (+Z)
+        attachProp(archer, 'arrow', { targetMaxDim: 0.64 }, [0.16, 0.56, 0.18], [Math.PI * 0.46, 0, 0]);
+        g.add(archer);
+      });
+
+    } else if (cat === 'naval') {
+      // 【⚔️ 先登奇兵】：4 名玄甲死士鋒矢突擊陣 (持太刀＋圓盾，頭頂鍬形前立與突擊纓冠)
+      const vanguardTint = isSideA ? 0x0f766e : 0x7f1d1d;
+      const vanSpots = [
+        { x:  0.00, z:  0.60, h: 1.04, lead: true },
+        { x: -0.66, z:  0.02, h: 0.95, lead: false },
+        { x:  0.66, z:  0.02, h: 0.95, lead: false },
+        { x:  0.00, z: -0.52, h: 0.95, lead: false }
+      ];
+      vanSpots.forEach((sp) => {
+        const van = new THREE.Group();
+        van.position.set(sp.x, 0, sp.z);
+        const fig = spawnModelInstance('infantry', {
+          targetHeight: sp.h,
+          tintHex: vanguardTint,
+          tintStrength: 0.42,
+          registerAnim: true
+        });
+        if (fig) {
+          addHelmetCrest(fig.group, sp.h - 0.04, sp.lead ? 'horns' : 'plume', sp.lead ? goldColor : plumeColor);
+          van.add(fig.group);
+          if (fig.animCtrl) token.unitAnims.push(fig.animCtrl);
+        }
+        attachProp(van, 'katana', { targetMaxDim: 0.84 }, [0.22, 0.46, 0.18], [Math.PI * 0.32, 0, -0.22]);
+        attachProp(van, 'shield_round', { targetMaxDim: 0.52, tintHex: factionTint, tintStrength: 0.30 }, [-0.22, 0.44, 0.18], [0, 0.35, 0]);
+        g.add(van);
+      });
+
+    } else {
+      // 【📜 軍師奇謀】：太極八卦祈禳法壇 + 軍師本尊 + 朱漆雷音大戰鼓 + 左右金吾衛護法
+      const baguaCanvas = document.createElement('canvas');
+      baguaCanvas.width = 256;
+      baguaCanvas.height = 256;
+      const bctx = baguaCanvas.getContext('2d');
+      bctx.translate(128, 128);
+      bctx.strokeStyle = isSideA ? '#38bdf8' : '#fbbf24';
+      bctx.lineWidth = 5;
+      bctx.beginPath(); bctx.arc(0, 0, 114, 0, Math.PI * 2); bctx.stroke();
+      bctx.beginPath(); bctx.arc(0, 0, 88, 0, Math.PI * 2); bctx.stroke();
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        bctx.save();
+        bctx.rotate(a);
+        bctx.fillStyle = isSideA ? 'rgba(56,189,248,0.85)' : 'rgba(251,191,36,0.85)';
+        bctx.fillRect(-16, -106, 32, 6);
+        bctx.fillRect(-16, -96, 13, 6);
+        bctx.fillRect(3, -96, 13, 6);
+        bctx.restore();
+      }
+      const baguaTex = new THREE.CanvasTexture(baguaCanvas);
+      const baguaMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.05, 2.05),
+        new THREE.MeshBasicMaterial({ map: baguaTex, transparent: true, opacity: 0.78, depthWrite: false })
+      );
+      baguaMesh.rotation.x = -Math.PI / 2;
+      baguaMesh.position.y = 0.02;
+      g.add(baguaMesh);
+      token.baguaMesh = baguaMesh;
+
+      // 中央軍師高台與軍師模型
+      const dais = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.46, 0.56, 0.18, 8),
+        new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.5, metalness: 0.3 })
+      );
+      dais.position.set(0, 0.09, 0.05);
+      g.add(dais);
+
+      const strat = spawnModelInstance('strategist', {
+        targetHeight: 1.08,
+        tintHex: factionTint,
+        tintStrength: 0.22
+      });
+      if (strat) {
+        strat.group.position.set(0, 0.18, 0.05);
+        g.add(strat.group);
+      }
+
+      // 朱漆鎏金雷音戰鼓與帥旗
+      const warDrum = buildTaikoWarDrum();
+      warDrum.position.set(0.68, 0, -0.42);
+      warDrum.rotation.y = -0.35;
+      g.add(warDrum);
+
+      attachProp(g, 'flag', { targetHeight: 1.50, tintHex: factionTint, tintStrength: 0.45 }, [0.90, 0, -0.90], [0, 0, 0]);
+
+      [-0.68, 0.68].forEach((gx) => {
+        const guard = new THREE.Group();
+        guard.position.set(gx, 0, 0.48);
+        const gw = spawnModelInstance('infantry', {
+          targetHeight: 0.94,
+          tintHex: goldColor,
+          tintStrength: 0.30,
+          registerAnim: true
+        });
+        if (gw) {
+          addHelmetCrest(gw.group, 0.90, 'plume', plumeColor);
+          guard.add(gw.group);
+          if (gw.animCtrl) token.unitAnims.push(gw.animCtrl);
+        }
+        // 護衛執戟斜立 (-Math.PI * 0.38 使長戟由地面斜指前上方)
+        attachProp(guard, 'spear', { targetMaxDim: 1.38 }, [0.20, 0.55, 0.16], [-Math.PI * 0.36, 0, 0]);
+        g.add(guard);
+      });
+    }
+  }
+
+  /* ----------------------------------------------------
+     4. 光榮式懸浮寫實名將圓徽與即時兵力銘牌 (Sprite HUD)
+     ---------------------------------------------------- */
+  function roundRectPath(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function buildWarlordCrestHud(unit, isSideA, meta, currentHp, maxHp) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 176;
+    const ctx = canvas.getContext('2d');
+    let portraitImg = null;
+
+    function redraw(hpVal) {
+      const hp = Math.max(0, hpVal);
+      const ratio = Math.max(0, Math.min(1, hp / Math.max(1, maxHp)));
+      ctx.clearRect(0, 0, 512, 176);
+
+      // 1. 黑金漆器銘牌底板
+      roundRectPath(ctx, 88, 26, 408, 124, 18);
+      const bg = ctx.createLinearGradient(88, 26, 496, 150);
+      if (isSideA) {
+        bg.addColorStop(0, 'rgba(12, 26, 54, 0.92)');
+        bg.addColorStop(1, 'rgba(15, 23, 42, 0.88)');
+      } else {
+        bg.addColorStop(0, 'rgba(58, 14, 14, 0.92)');
+        bg.addColorStop(1, 'rgba(28, 16, 14, 0.88)');
+      }
+      ctx.fillStyle = bg;
+      ctx.fill();
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = isSideA ? '#38bdf8' : '#f59e0b';
+      ctx.stroke();
+
+      // 2. 名將名號與費率兵種印記
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '900 34px "Noto Serif TC", "Microsoft JhengHei", serif';
+      ctx.textAlign = 'left';
+      const displayName = (unit.name || '無名武將').slice(0, 7);
+      ctx.fillText(displayName, 166, 72);
+
+      // 右上角兵種標籤印章
+      roundRectPath(ctx, 412, 38, 68, 38, 10);
+      ctx.fillStyle = meta.hex;
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '900 24px "Noto Sans TC", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${meta.badge}$${unit.cost || 3}`, 446, 65);
+
+      // 3. 兵力條與即時兵力數
+      roundRectPath(ctx, 166, 92, 310, 22, 10);
+      ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
+      ctx.fill();
+
+      if (ratio > 0) {
+        const barW = Math.max(14, Math.round(306 * ratio));
+        roundRectPath(ctx, 168, 94, barW, 18, 8);
+        ctx.fillStyle = ratio > 0.52 ? '#22c55e' : (ratio > 0.25 ? '#f59e0b' : '#ef4444');
+        ctx.fill();
+      }
+
+      const troopsNum = Math.round(hp * 100).toLocaleString();
+      ctx.fillStyle = '#fde68a';
+      ctx.font = 'bold 23px "JetBrains Mono", "Noto Sans TC", sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`兵力 ${troopsNum}`, 474, 140);
+
+      ctx.fillStyle = isSideA ? '#7dd3fc' : '#fca5a5';
+      ctx.font = 'bold 20px "Noto Sans TC", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(isSideA ? '我軍方陣' : '敵軍本陣', 168, 140);
+
+      // 4. 左側鎏金圓形名將胸像勳章 (半徑 68)
+      const cx = 86, cy = 88, r = 68;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fillStyle = '#1e293b';
+      ctx.fill();
+      ctx.clip();
+
+      if (portraitImg && portraitImg.complete && portraitImg.naturalWidth > 0) {
+        // 聚焦臉部與胸甲上半身 (top-center crop)
+        const sw = portraitImg.naturalWidth;
+        const sh = portraitImg.naturalHeight;
+        const crop = Math.min(sw, sh) * 0.88;
+        const sx = (sw - crop) / 2;
+        const sy = Math.max(0, (sh - crop) * 0.14);
+        ctx.drawImage(portraitImg, sx, sy, crop, crop, cx - r, cy - r, r * 2, r * 2);
+      } else {
+        ctx.fillStyle = isSideA ? '#1e3a8a' : '#7f1d1d';
+        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+        ctx.fillStyle = '#fde68a';
+        ctx.font = '900 54px "Noto Serif TC", serif';
+        ctx.textAlign = 'center';
+        ctx.fillText((unit.name || '將')[0], cx, cy + 20);
+      }
+      ctx.restore();
+
+      // 雙層金環外框
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = isSideA ? '#38bdf8' : '#fbbf24';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r - 5, 0, Math.PI * 2);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#fef3c7';
+      ctx.stroke();
+    }
+
+    redraw(currentHp);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.LinearFilter;
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(2.85, 0.98, 1);
+    sprite.renderOrder = 20;
+
     if (unit.id) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = function () {
-        renderScreenFace(img);
-        bannerTex.needsUpdate = true;
+      img.onload = () => {
+        portraitImg = img;
+        const tok = unitsMap.get(unit.uid);
+        redraw(tok ? tok.currentHp : currentHp);
+        tex.needsUpdate = true;
       };
-      img.src = `assets/warlords/${unit.id}.jpg?v=1.0.0`;
+      img.src = `${PORTRAIT_DIR}${unit.id}.jpg?v=${ASSET_VER}`;
     }
 
-    const bannerMesh = new THREE.Mesh(bannerGeo, bannerMat);
-    bannerMesh.castShadow = true;
+    return { sprite, tex, redraw };
+  }
 
-    return { mesh: bannerMesh, material: bannerMat };
+  function spawnFloatingDamagePopup(worldPos, text, colorHex = '#ef4444', isBig = false) {
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 84;
+    const ctx = c.getContext('2d');
+    ctx.font = `900 ${isBig ? 44 : 36}px "Noto Sans TC", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.lineWidth = 7;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.88)';
+    ctx.strokeText(text, 128, 56);
+    ctx.fillStyle = colorHex;
+    ctx.fillText(text, 128, 56);
+
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+    const sp = new THREE.Sprite(mat);
+    sp.position.set(
+      worldPos.x + (Math.random() - 0.5) * 0.6,
+      worldPos.y + 2.65,
+      worldPos.z + (Math.random() - 0.5) * 0.5
+    );
+    const w = isBig ? 2.4 : 1.9;
+    sp.scale.set(w, w * 0.33, 1);
+    sp.renderOrder = 30;
+    scene.add(sp);
+
+    floatingPopups.push({ sprite: sp, tex, mat, life: 38, maxLife: 38 });
   }
 
   /* ----------------------------------------------------
-     3D 浮動即時血條與兵力數字
-     ---------------------------------------------------- */
-  function buildHpBar(currentHp, maxHp, warlordName) {
-    const hpGroup = new THREE.Group();
-
-    // 1. 底座背景槽
-    const bgGeo = new THREE.BoxGeometry(1.6, 0.14, 0.05);
-    const bgMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
-    const bgMesh = new THREE.Mesh(bgGeo, bgMat);
-    hpGroup.add(bgMesh);
-
-    // 2. 綠色氣血條前景
-    const fgGeo = new THREE.BoxGeometry(1.56, 0.10, 0.07);
-    const fgMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
-    const fgMesh = new THREE.Mesh(fgGeo, fgMat);
-    hpGroup.add(fgMesh);
-
-    // 3. 兵力數字動態浮動銘牌 (兵力 24,000)
-    const textCanvas = document.createElement('canvas');
-    textCanvas.width = 256; textCanvas.height = 64;
-    const tctx = textCanvas.getContext('2d');
-
-    function redrawHpText(hp) {
-      tctx.clearRect(0, 0, 256, 64);
-      tctx.fillStyle = 'rgba(10, 15, 26, 0.85)';
-      tctx.roundRect ? tctx.roundRect(4, 4, 248, 56, 12) : tctx.fillRect(4, 4, 248, 56);
-      tctx.fill();
-      tctx.strokeStyle = '#38bdf8';
-      tctx.lineWidth = 2;
-      tctx.stroke();
-
-      tctx.fillStyle = '#ffffff';
-      tctx.font = 'bold 28px sans-serif';
-      tctx.textAlign = 'center';
-      const troopCount = Math.max(0, Math.round(hp * 100)).toLocaleString();
-      tctx.fillText(`兵力 ${troopCount}`, 128, 42);
-    }
-    redrawHpText(currentHp);
-
-    const textTex = new THREE.CanvasTexture(textCanvas);
-    const textGeo = new THREE.PlaneGeometry(1.6, 0.40);
-    const textMat = new THREE.MeshBasicMaterial({ map: textTex, transparent: true, side: THREE.DoubleSide });
-    const textMesh = new THREE.Mesh(textGeo, textMat);
-    textMesh.position.y = 0.32;
-    hpGroup.add(textMesh);
-
-    return {
-      group: hpGroup,
-      fg: fgMesh,
-      textCanvas: textCanvas,
-      textTex: textTex,
-      redrawHpText: redrawHpText
-    };
-  }
-
-  /* ----------------------------------------------------
-     載入雙方名將陣容到沙盤上
+     5. 載入合戰雙方陣容與事件驅動骨骼動作演出
      ---------------------------------------------------- */
   function loadBattle(res) {
     if (!isInitialized) return;
-
+    battleEpoch++;
     clearAllTokens();
 
-    const teamA = (res.final && res.final.A) || [];
-    const teamB = (res.final && res.final.B) || [];
+    const wKey = (res && res.weather) || (window.state && window.state.weather) || 'plain';
+    applyWeatherAtmosphere(wKey);
+
+    const teamA = (res && res.final && res.final.A) || [];
+    const teamB = (res && res.final && res.final.B) || [];
 
     teamA.forEach((u, i) => {
-      const token = createUnitToken(u, 'A', i);
-      unitsMap.set(u.uid, token);
+      const tok = createUnitToken(u, 'A', i);
+      unitsMap.set(u.uid, tok);
     });
-
     teamB.forEach((u, i) => {
-      const token = createUnitToken(u, 'B', i);
-      unitsMap.set(u.uid, token);
+      const tok = createUnitToken(u, 'B', i);
+      unitsMap.set(u.uid, tok);
     });
 
     resetCamera();
   }
 
-  /* ----------------------------------------------------
-     光榮特庫摩風格戰鬥事件動畫演出
-     ---------------------------------------------------- */
+  function triggerSquadAnim(token, state, timeScale = 1.0) {
+    if (!token || !token.unitAnims) return;
+    token.unitAnims.forEach((ctrl) => ctrl.playState(state, timeScale));
+  }
+
   function playEvent(ln) {
-    if (!isInitialized || !isEnabled) return;
+    if (!isInitialized || !isEnabled || !ln) return;
 
     const aToken = ln.auid ? unitsMap.get(ln.auid) : null;
     const tToken = ln.tuid ? unitsMap.get(ln.tuid) : null;
-
     if (!aToken && !tToken) return;
 
-    // 1. 名將絕技 Cut-in 特寫 ($4, $5 名將發動攻勢或擊殺時觸發)
-    if (aToken && aToken.cost >= 4 && (ln.kind === 'hit' || ln.kind === 'kill')) {
-      triggerWarlordCutin(aToken);
+    // 1. 高費名將 ($4~$5) 戰法發動或斬將時觸發光榮風格橫幅 Cut-in (節流防刷屏)
+    const nowMs = performance.now();
+    if (aToken && aToken.cost >= 4 && (ln.kind === 'kill' || (ln.kind === 'hit' && nowMs - lastCutinAt > 3600))) {
+      lastCutinAt = nowMs;
+      triggerWarlordCutin(aToken, ln.kind === 'kill');
     }
 
-    // 2. 兵種托盤專屬合戰動作
+    // 2. 攝影機微聚焦於交鋒熱區
     if (aToken && tToken) {
+      const midX = (aToken.mesh.position.x + tToken.mesh.position.x) * 0.14;
+      const midZ = (aToken.mesh.position.z + tToken.mesh.position.z) * 0.14;
+      camFocusOffset.set(midX, 0, midZ);
+    }
+
+    // 3. 依五大兵種執行全 3D 模型骨骼動畫與彈道特效
+    if (aToken && tToken && aToken.alive) {
       if (aToken.cat === 'air') {
-        // 奔雷突騎托盤高速衝鋒破陣
         performCavalryCharge(aToken, tToken);
       } else if (aToken.cat === 'air_defense' || (ln.text && ln.text.includes('箭'))) {
-        // 神射萬箭齊發火箭雨
-        spawnArrowVolley(aToken.mesh.position, tToken.mesh.position, aToken.side);
+        triggerSquadAnim(aToken, 'attack', 1.25);
+        spawn3DArrowVolley(aToken.mesh.position, tToken.mesh.position, aToken.side);
       } else if (aToken.cat === 'naval') {
-        // 先登一番槍騰躍突擊
-        performVanguardLeap(aToken, tToken);
+        performVanguardAssault(aToken, tToken);
       } else if (aToken.cat === 'support') {
-        // 軍師八陣圖奇謀法術
-        performStrategistTactic(aToken, tToken);
+        performStrategistFormation(aToken, tToken, ln.text || '');
       } else {
-        // 重甲陷陣托盤短兵相接
-        performMeleeClash(aToken, tToken);
+        performPhalanxClash(aToken, tToken);
       }
     }
 
-    // 3. 盾牌格擋力場防禦
-    if (ln.kind === 'block' && tToken) {
-      performShieldBlock(tToken);
-    }
+    // 4. 受擊反應、盾牆格擋與 3D 浮動兵損數字
+    if (tToken) {
+      if (ln.kind === 'block') {
+        performShieldBlockDome(tToken);
+        spawnFloatingDamagePopup(tToken.mesh.position, '🛡️ 鐵壁格擋', '#fbbf24', false);
+      } else if (ln.dmg && ln.dmg > 0) {
+        triggerSquadAnim(tToken, 'hit', 1.2);
+        const lostTroops = Math.max(100, Math.round(ln.dmg * 100)).toLocaleString();
+        const isKill = ln.kind === 'kill';
+        spawnFloatingDamagePopup(
+          tToken.mesh.position,
+          isKill ? `💥 擊破 -${lostTroops}` : `-${lostTroops}`,
+          isKill ? '#fb7185' : '#f87171',
+          isKill
+        );
+      }
 
-    // 4. 即時更新目標氣血條與兵力數
-    if (tToken && ln.hpAfter !== undefined) {
-      updateTokenHp(tToken, ln.hpAfter);
-    }
-
-    // 5. 擊破陣亡演出
-    if (ln.kind === 'kill' && tToken) {
-      tokenFallDown(tToken);
+      if (ln.hpAfter !== undefined) {
+        updateTokenHp(tToken, ln.hpAfter);
+      }
+      if (ln.kind === 'kill') {
+        tokenFallDown(tToken);
+      }
     }
   }
 
-  /* 奔雷突騎整隊托盤高速衝擊 */
+  /* 奔雷突騎：戰馬切換 Gallop 奔馳動畫衝向敵陣，騎將揮槊斬擊 */
   function performCavalryCharge(aToken, tToken) {
     const orig = new THREE.Vector3(aToken.origX, 0, aToken.origZ);
     const target = tToken.mesh.position.clone();
     const dir = target.clone().sub(orig).normalize();
-    const chargePos = target.clone().sub(dir.clone().multiplyScalar(2.0));
+    const impactPos = target.clone().sub(dir.clone().multiplyScalar(2.2));
 
-    let t = 0;
-    const total = 28;
+    triggerSquadAnim(aToken, 'move', 1.45);
+    let stepIdx = 0;
+    const total = 30;
 
     function step() {
-      t++;
-      if (t <= 14) {
-        const p = t / 14;
-        aToken.mesh.position.lerpVectors(orig, chargePos, p);
-        aToken.mesh.rotation.z = (aToken.side === 'A' ? 0.14 : -0.14) * Math.sin(p * Math.PI);
-        if (t % 2 === 0) spawnDustPuff(aToken.mesh.position);
-      } else if (t === 15) {
-        // 猛烈撞擊頂點：震屏 + 金鐵交鳴火花
-        spawnSparkBurst(chargePos, 22);
-        screenShake(0.22);
-        // 被撞托盤震退
-        tToken.mesh.position.x += (aToken.side === 'A' ? 0.45 : -0.45);
-        setTimeout(() => {
-          if (tToken && tToken.alive) {
-            tToken.mesh.position.x = tToken.origX;
-          }
-        }, 160);
-      } else if (t <= total) {
-        const p = (t - 14) / 14;
-        aToken.mesh.position.lerpVectors(chargePos, orig, p);
-        aToken.mesh.rotation.z = 0;
+      if (!aToken.alive && stepIdx > 15) return;
+      stepIdx++;
+      if (stepIdx <= 14) {
+        const p = stepIdx / 14;
+        aToken.mesh.position.lerpVectors(orig, impactPos, p);
+        if (stepIdx % 2 === 0) spawnDustPuff(aToken.mesh.position);
+      } else if (stepIdx === 15) {
+        triggerSquadAnim(aToken, 'attack', 1.35);
+        spawnSparkBurst(target.clone().add(new THREE.Vector3(0, 0.8, 0)), 24, 0xfbbf24);
+        triggerCameraShake(0.24);
+        if (tToken && tToken.alive) {
+          tToken.mesh.position.x += (aToken.side === 'A' ? 0.42 : -0.42);
+          setTimeout(() => { if (tToken && tToken.alive) tToken.mesh.position.x = tToken.origX; }, 180);
+        }
+      } else {
+        const p = (stepIdx - 15) / 15;
+        aToken.mesh.position.lerpVectors(impactPos, orig, p);
       }
-
-      if (t < total) requestAnimationFrame(step);
+      if (stepIdx < total) {
+        requestAnimationFrame(step);
+      } else {
+        aToken.mesh.position.copy(orig);
+        triggerSquadAnim(aToken, 'idle', 1.0);
+      }
     }
     step();
   }
 
-  /* 神射萬箭齊發 3D 火箭雨 */
-  function spawnArrowVolley(fromPos, toPos, side) {
-    const arrowCount = 16;
-    for (let i = 0; i < arrowCount; i++) {
-      const spreadX = (Math.random() - 0.5) * 1.8;
-      const spreadZ = (Math.random() - 0.5) * 1.8;
-      const start = fromPos.clone().add(new THREE.Vector3(spreadX, 1.4, spreadZ));
-      const end = toPos.clone().add(new THREE.Vector3(spreadX * 0.7, 0.4, spreadZ * 0.7));
+  /* 神射強弩：發射 16 支真實 3D 箭矢模型 + 火羽軌跡拋物線齊射 */
+  function spawn3DArrowVolley(fromPos, toPos, side) {
+    const count = 16;
+    for (let i = 0; i < count; i++) {
+      const sx = (Math.random() - 0.5) * 1.6;
+      const sz = (Math.random() - 0.5) * 1.6;
+      const start = fromPos.clone().add(new THREE.Vector3(sx, 1.15, sz));
+      const end = toPos.clone().add(new THREE.Vector3(sx * 0.65, 0.45, sz * 0.65));
 
-      const arrowGeo = new THREE.CylinderGeometry(0.02, 0.04, 0.55, 6);
-      const arrowMat = new THREE.MeshBasicMaterial({ color: (side === 'A' ? 0x38bdf8 : 0xf59e0b) });
-      const arrowMesh = new THREE.Mesh(arrowGeo, arrowMat);
-      arrowMesh.position.copy(start);
-      scene.add(arrowMesh);
+      let projMesh = null;
+      const arrowInst = spawnModelInstance('arrow', { targetMaxDim: 0.78, castShadow: false });
+      if (arrowInst) {
+        projMesh = arrowInst.group;
+        // 附著火箭尾焰亮點
+        const tipGlow = new THREE.Mesh(
+          new THREE.SphereGeometry(0.06, 6, 6),
+          new THREE.MeshBasicMaterial({ color: side === 'A' ? 0x38bdf8 : 0xf97316 })
+        );
+        tipGlow.position.set(0, 0, 0.25);
+        projMesh.add(tipGlow);
+      } else {
+        projMesh = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.02, 0.04, 0.65, 6),
+          new THREE.MeshBasicMaterial({ color: side === 'A' ? 0x38bdf8 : 0xf97316 })
+        );
+      }
+
+      projMesh.position.copy(start);
+      scene.add(projMesh);
 
       projectiles.push({
-        mesh: arrowMesh,
-        start: start,
-        end: end,
-        progress: -(i * 0.035),
-        speed: 0.045,
-        arcHeight: 5.6 + Math.random() * 1.4
+        mesh: projMesh,
+        start,
+        end,
+        progress: -(i * 0.032),
+        speed: 0.046,
+        arcHeight: 4.8 + Math.random() * 1.3,
+        isGLB: Boolean(arrowInst)
       });
     }
   }
 
-  /* 先登奇兵托盤突擊 */
-  function performVanguardLeap(aToken, tToken) {
+  /* 先登奇兵：高速疾行騰躍突襲 */
+  function performVanguardAssault(aToken, tToken) {
     const orig = new THREE.Vector3(aToken.origX, 0, aToken.origZ);
-    const strikePos = tToken.mesh.position.clone().add(new THREE.Vector3(aToken.side === 'A' ? -1.8 : 1.8, 0, 0));
+    const strikePos = tToken.mesh.position.clone().add(new THREE.Vector3(aToken.side === 'A' ? -1.85 : 1.85, 0, 0));
+    triggerSquadAnim(aToken, 'move', 1.5);
 
     let t = 0;
-    function leap() {
+    function step() {
       t++;
       if (t <= 12) {
         const p = t / 12;
         aToken.mesh.position.lerpVectors(orig, strikePos, p);
-        aToken.mesh.position.y = Math.sin(p * Math.PI) * 1.2;
+        aToken.mesh.position.y = Math.sin(p * Math.PI) * 1.05;
       } else if (t === 13) {
-        spawnSparkBurst(strikePos, 18);
-        screenShake(0.14);
+        triggerSquadAnim(aToken, 'attack', 1.4);
+        spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.8, 0)), 18, 0x2dd4bf);
+        triggerCameraShake(0.15);
       } else if (t <= 24) {
         const p = (t - 12) / 12;
         aToken.mesh.position.lerpVectors(strikePos, orig, p);
         aToken.mesh.position.y = 0;
       }
-      if (t < 24) requestAnimationFrame(leap);
+      if (t < 24) requestAnimationFrame(step);
+      else aToken.mesh.position.copy(orig);
     }
-    leap();
+    step();
   }
 
-  /* 軍師八卦圖法術光波 */
-  function performStrategistTactic(aToken, tToken) {
-    const ringGeo = new THREE.RingGeometry(0.3, 1.2, 32);
+  /* 重甲陷陣：步兵方陣推進短兵相接 */
+  function performPhalanxClash(aToken, tToken) {
+    const orig = new THREE.Vector3(aToken.origX, 0, aToken.origZ);
+    const dir = tToken.mesh.position.clone().sub(orig).normalize();
+    const advancePos = orig.clone().add(dir.multiplyScalar(2.2));
+    triggerSquadAnim(aToken, 'move', 1.25);
+
+    let t = 0;
+    function step() {
+      t++;
+      if (t <= 11) {
+        aToken.mesh.position.lerpVectors(orig, advancePos, t / 11);
+      } else if (t === 12) {
+        triggerSquadAnim(aToken, 'attack', 1.25);
+        spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.7, 0)), 16, 0xfde047);
+        triggerCameraShake(0.14);
+      } else if (t <= 22) {
+        aToken.mesh.position.lerpVectors(advancePos, orig, (t - 11) / 11);
+      }
+      if (t < 22) requestAnimationFrame(step);
+      else aToken.mesh.position.copy(orig);
+    }
+    step();
+  }
+
+  /* 軍師奇謀：八卦天雷／火計光柱與陣紋擴散 */
+  function performStrategistFormation(aToken, tToken, logText) {
+    triggerSquadAnim(aToken, 'attack', 1.15);
+    const isFire = logText.includes('火') || logText.includes('砲') || logText.includes('焚');
+    const fxColor = isFire ? 0xf97316 : 0x4ade80;
+
+    // 目標陣地降下奇謀光柱 + 擴散法陣環
+    const pillarGeo = new THREE.CylinderGeometry(0.65, 0.95, 7.5, 16, 1, true);
+    const pillarMat = new THREE.MeshBasicMaterial({
+      color: fxColor,
+      transparent: true,
+      opacity: 0.68,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+    pillar.position.copy(tToken.mesh.position);
+    pillar.position.y = 3.75;
+    scene.add(pillar);
+
+    const ringGeo = new THREE.RingGeometry(0.4, 1.35, 32);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x4ade80,
+      color: fxColor,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.95
+      opacity: 0.92,
+      depthWrite: false
     });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = -Math.PI / 2;
     ring.position.copy(tToken.mesh.position);
-    ring.position.y = 0.45;
+    ring.position.y = 0.28;
     scene.add(ring);
 
-    let scale = 1;
-    function pulse() {
-      scale += 0.16;
-      ring.scale.set(scale, scale, 1);
-      ring.material.opacity -= 0.05;
-      if (ring.material.opacity > 0) {
-        requestAnimationFrame(pulse);
+    spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.9, 0)), isFire ? 26 : 16, fxColor);
+
+    let f = 0;
+    function animPillar() {
+      f++;
+      const s = 1 + f * 0.08;
+      ring.scale.set(s, s, 1);
+      ring.material.opacity = Math.max(0, 0.92 - f * 0.05);
+      pillar.scale.set(1 - f * 0.03, 1, 1 - f * 0.03);
+      pillar.material.opacity = Math.max(0, 0.68 - f * 0.04);
+      if (f < 18) {
+        requestAnimationFrame(animPillar);
       } else {
+        scene.remove(pillar);
         scene.remove(ring);
-        ring.geometry.dispose();
-        ring.material.dispose();
+        pillarGeo.dispose(); pillarMat.dispose();
+        ringGeo.dispose(); ringMat.dispose();
       }
     }
-    pulse();
+    animPillar();
   }
 
-  /* 盾牌格擋六角力場 */
-  function performShieldBlock(tToken) {
-    const shieldDomeGeo = new THREE.SphereGeometry(1.8, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2);
-    const shieldDomeMat = new THREE.MeshBasicMaterial({
-      color: 0xfbbf24,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.85
-    });
-    const dome = new THREE.Mesh(shieldDomeGeo, shieldDomeMat);
+  function performShieldBlockDome(tToken) {
+    const geo = new THREE.SphereGeometry(1.75, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xfbbf24, wireframe: true, transparent: true, opacity: 0.85 });
+    const dome = new THREE.Mesh(geo, mat);
     dome.position.copy(tToken.mesh.position);
     dome.position.y = 0.2;
     scene.add(dome);
 
-    setTimeout(() => {
-      scene.remove(dome);
-      dome.geometry.dispose();
-      dome.material.dispose();
-    }, 240);
-  }
-
-  /* 近身肉搏震動 */
-  function performMeleeClash(aToken, tToken) {
-    spawnSparkBurst(tToken.mesh.position, 12);
-    if (tToken.billboardMesh) {
-      tToken.billboardMesh.material.color.setHex(0xff3333);
-      setTimeout(() => {
-        if (tToken.billboardMesh) tToken.billboardMesh.material.color.setHex(0xffffff);
-      }, 140);
+    let f = 0;
+    function fade() {
+      f++;
+      dome.material.opacity = Math.max(0, 0.85 - f * 0.07);
+      dome.scale.addScalar(0.02);
+      if (f < 13) requestAnimationFrame(fade);
+      else {
+        scene.remove(dome);
+        geo.dispose();
+        mat.dispose();
+      }
     }
+    fade();
   }
 
-  /* 戰損血條與兵力數即時過渡 */
   function updateTokenHp(token, newHp) {
     token.currentHp = Math.max(0, newHp);
-    const pct = Math.max(0, token.currentHp / token.maxHp);
-    token.hpFg.scale.x = pct;
-    token.hpFg.position.x = -(1 - pct) * 0.78;
-
-    if (pct < 0.25) token.hpFg.material.color.setHex(0xef4444);
-    else if (pct < 0.6) token.hpFg.material.color.setHex(0xf59e0b);
-    else token.hpFg.material.color.setHex(0x22c55e);
-
-    // 刷新兵力文字
-    if (token.hpTextCanvas && token.hpTextTex) {
-      const tctx = token.hpTextCanvas.getContext('2d');
-      tctx.clearRect(0, 0, 256, 64);
-      tctx.fillStyle = 'rgba(10, 15, 26, 0.85)';
-      tctx.roundRect ? tctx.roundRect(4, 4, 248, 56, 12) : tctx.fillRect(4, 4, 248, 56);
-      tctx.fill();
-      tctx.strokeStyle = pct < 0.25 ? '#ef4444' : '#38bdf8';
-      tctx.lineWidth = 2;
-      tctx.stroke();
-
-      tctx.fillStyle = pct < 0.25 ? '#ef4444' : '#ffffff';
-      tctx.font = 'bold 28px sans-serif';
-      tctx.textAlign = 'center';
-      const troopCount = Math.max(0, Math.round(token.currentHp * 100)).toLocaleString();
-      tctx.fillText(`兵力 ${troopCount}`, 128, 42);
-      token.hpTextTex.needsUpdate = true;
+    if (token.hud && token.hud.redraw) {
+      token.hud.redraw(token.currentHp);
+      token.hud.tex.needsUpdate = true;
     }
   }
 
-  /* 名將陣亡潰散動畫 (部隊深沉沉降於沙盤泥土中，戰火黑煙升騰，絕非生硬側倒！) */
   function tokenFallDown(token) {
+    if (!token.alive) return;
     token.alive = false;
-    let step = 0;
+    updateTokenHp(token, 0);
+    triggerSquadAnim(token, 'death', 1.0);
+    spawnSparkBurst(token.mesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)), 28, 0xef4444);
+    triggerCameraShake(0.26);
+
+    // 托盤微沉並半透明黯淡，保留屍骸戰場滄桑感
+    let f = 0;
     function sink() {
-      step++;
-      // 士兵與戰旗傾折，托盤下沉
-      token.mesh.position.y -= 0.018;
-      if (token.billboardMesh) {
-        token.billboardMesh.rotation.z = (token.side === 'A' ? -0.015 : 0.015) * step;
+      f++;
+      token.formationRig.position.y = -0.10 * (f / 20);
+      if (token.hud && token.hud.sprite && token.hud.sprite.material) {
+        token.hud.sprite.material.opacity = Math.max(0.28, 1 - (f / 20) * 0.72);
       }
-      if (token.mesh.position.y > -0.65) {
-        requestAnimationFrame(sink);
-      }
+      if (f < 20) requestAnimationFrame(sink);
     }
     sink();
-    spawnDustPuff(token.mesh.position, 0x1e293b);
   }
 
   /* ----------------------------------------------------
-     名將絕技 Cut-in 水墨特寫條
+     6. 光榮《三國志》名將戰法 Cut-in 橫幅特寫
      ---------------------------------------------------- */
   function injectCutinLayer() {
-    if (document.getElementById('warlordCutinLayer')) return;
-    const cutin = document.createElement('div');
-    cutin.id = 'warlordCutinLayer';
-    cutin.style.cssText = `
-      position: absolute;
-      top: 18%;
-      left: 0;
-      right: 0;
-      height: 96px;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transform: translateY(-20px) scale(0.95);
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 100;
-    `;
-    cutin.innerHTML = `
-      <div id="cutinInner" style="
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        background: linear-gradient(90deg, rgba(15,23,42,0) 0%, rgba(15,23,42,0.95) 20%, rgba(15,23,42,0.95) 80%, rgba(15,23,42,0) 100%);
-        padding: 8px 64px;
-        border-top: 2px solid #fbbf24;
-        border-bottom: 2px solid #fbbf24;
-        box-shadow: 0 0 24px rgba(251, 191, 36, 0.5);
-      ">
-        <img id="cutinAvatar" src="" style="width: 72px; height: 72px; border-radius: 8px; border: 2px solid #fbbf24; object-fit: cover; box-shadow: 0 0 12px rgba(251,191,36,0.6);" />
-        <div>
-          <div id="cutinName" style="font-family: 'KaiTi', 'Noto Sans TC', serif; font-size: 28px; font-weight: 900; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8);"></div>
-          <div id="cutinTactic" style="font-family: sans-serif; font-size: 16px; font-weight: 700; color: #fbbf24; letter-spacing: 2px;"></div>
+    if (!container || container.querySelector('#warlordCutinBanner')) return;
+    const div = document.createElement('div');
+    div.id = 'warlordCutinBanner';
+    div.style.cssText = [
+      'position:absolute;top:12px;left:50%;transform:translateX(-50%) scale(0.92);',
+      'z-index:30;display:flex;align-items:center;gap:14px;padding:8px 22px 8px 10px;',
+      'background:linear-gradient(95deg,rgba(15,23,42,0.96),rgba(69,10,10,0.92),rgba(15,23,42,0.95));',
+      'border:2px solid #fbbf24;border-radius:999px;',
+      'box-shadow:0 10px 28px rgba(0,0,0,0.65),0 0 22px rgba(251,191,36,0.35);',
+      'color:#fff;pointer-events:none;opacity:0;transition:all 0.22s cubic-bezier(0.16,1,0.3,1);'
+    ].join('');
+    container.appendChild(div);
+  }
+
+  function triggerWarlordCutin(token, isKill = false) {
+    const el = container ? container.querySelector('#warlordCutinBanner') : null;
+    if (!el) return;
+    const meta = CAT_META[token.cat] || CAT_META.armor;
+    const actionLabel = isKill ? '一騎討・陣斬敵將！' : `${token.wep || meta.label}・戰法發動！`;
+    const borderCol = token.side === 'A' ? '#38bdf8' : '#f59e0b';
+
+    el.style.borderColor = borderCol;
+    el.innerHTML = `
+      <img src="${PORTRAIT_DIR}${token.id}.jpg?v=${ASSET_VER}"
+           style="width:54px;height:54px;border-radius:50%;object-fit:cover;object-position:center 15%;border:2.5px solid ${borderCol};flex-shrink:0;"
+           onerror="this.style.display='none'">
+      <div style="line-height:1.2;">
+        <div style="font-size:11px;color:#fde68a;font-weight:800;letter-spacing:1.5px;">
+          ${token.side === 'A' ? '【我軍主將戰法】' : '【敵軍猛將強襲】'} · ${meta.label}
+        </div>
+        <div style="font-size:18px;font-weight:900;font-family:'Noto Serif TC',serif;color:#ffffff;margin-top:2px;">
+          ${token.name} <span style="font-size:13px;color:#fbbf24;font-weight:700;margin-left:6px;">${actionLabel}</span>
         </div>
       </div>
     `;
-    if (container) container.appendChild(cutin);
-  }
-
-  function triggerWarlordCutin(token) {
-    const cutin = document.getElementById('warlordCutinLayer');
-    if (!cutin) return;
-
-    const imgEl = document.getElementById('cutinAvatar');
-    const nameEl = document.getElementById('cutinName');
-    const tacEl = document.getElementById('cutinTactic');
-
-    if (imgEl) imgEl.src = `assets/warlords/${token.id}.jpg?v=1.0.0`;
-    if (nameEl) nameEl.textContent = `${token.name} · 全軍突擊！`;
-    if (tacEl) tacEl.textContent = token.tag || '東亞名將專屬陣法奧義';
-
-    cutin.style.opacity = '1';
-    cutin.style.transform = 'translateY(0) scale(1)';
+    el.style.opacity = '1';
+    el.style.transform = 'translateX(-50%) scale(1)';
 
     if (cutinTimeout) clearTimeout(cutinTimeout);
     cutinTimeout = setTimeout(() => {
-      cutin.style.opacity = '0';
-      cutin.style.transform = 'translateY(-20px) scale(0.95)';
-    }, 1400);
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(-50%) scale(0.92)';
+    }, 1550);
   }
 
-  /* 粒子與震屏效果 */
-  function spawnSparkBurst(pos, count = 12) {
+  /* ----------------------------------------------------
+     7. 粒子火花、塵土、震屏與相機控制
+     ---------------------------------------------------- */
+  function spawnSparkBurst(pos, count = 14, colorHex = 0xfbbf24) {
     for (let i = 0; i < count; i++) {
-      const geo = new THREE.SphereGeometry(0.04, 4, 4);
-      const mat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.copy(pos);
-      scene.add(mesh);
-
+      const geo = new THREE.SphereGeometry(0.065, 4, 4);
+      const mat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? colorHex : 0xffffff, transparent: true, opacity: 1 });
+      const m = new THREE.Mesh(geo, mat);
+      m.position.copy(pos);
+      scene.add(m);
       particleSystems.push({
-        mesh: mesh,
-        vx: (Math.random() - 0.5) * 0.28,
-        vy: 0.15 + Math.random() * 0.22,
-        vz: (Math.random() - 0.5) * 0.28,
-        life: 20
+        mesh: m,
+        vx: (Math.random() - 0.5) * 0.26,
+        vy: Math.random() * 0.22 + 0.06,
+        vz: (Math.random() - 0.5) * 0.26,
+        life: 18 + Math.floor(Math.random() * 8),
+        maxLife: 24,
+        gravity: 0.013
       });
     }
   }
 
-  function spawnDustPuff(pos, color = 0x94a3b8) {
-    const geo = new THREE.SphereGeometry(0.24, 6, 6);
-    const mat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.7 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(pos.x, 0.2, pos.z);
-    scene.add(mesh);
-
+  function spawnDustPuff(pos) {
+    const geo = new THREE.SphereGeometry(0.22, 6, 6);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xd6c3a5, transparent: true, opacity: 0.48 });
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(pos.x + (Math.random() - 0.5) * 0.5, 0.22, pos.z + (Math.random() - 0.5) * 0.5);
+    scene.add(m);
     particleSystems.push({
-      mesh: mesh,
+      mesh: m,
       vx: (Math.random() - 0.5) * 0.04,
-      vy: 0.03,
+      vy: 0.035,
       vz: (Math.random() - 0.5) * 0.04,
-      life: 22,
-      scaleGrowth: 0.04
+      life: 20,
+      maxLife: 20,
+      gravity: 0,
+      scaleGrowth: 0.045
     });
   }
 
-  function screenShake(intensity = 0.15) {
-    const origTarget = CAM_TARGET.clone();
-    let s = 0;
-    function shake() {
-      s++;
-      CAM_TARGET.x = origTarget.x + (Math.random() - 0.5) * intensity;
-      CAM_TARGET.y = origTarget.y + (Math.random() - 0.5) * intensity;
-      updateCameraPosition();
-      if (s < 7) {
-        requestAnimationFrame(shake);
+  function triggerCameraShake(intensity = 0.18) {
+    let f = 0;
+    function step() {
+      f++;
+      if (f < 8) {
+        camShakeOffset.set((Math.random() - 0.5) * intensity, (Math.random() - 0.5) * intensity * 0.7, 0);
+        requestAnimationFrame(step);
       } else {
-        CAM_TARGET.copy(origTarget);
-        updateCameraPosition();
+        camShakeOffset.set(0, 0, 0);
       }
     }
-    shake();
+    step();
+  }
+
+  function updateCameraPosition() {
+    if (!camera) return;
+    const target = CAM_BASE_TARGET.clone().add(camFocusOffset).add(camShakeOffset);
+    const x = target.x + camRadius * Math.sin(camPhi) * Math.sin(camTheta);
+    const y = target.y + camRadius * Math.cos(camPhi);
+    const z = target.z + camRadius * Math.sin(camPhi) * Math.cos(camTheta);
+    camera.position.set(x, y, z);
+    camera.lookAt(target);
+  }
+
+  function setupCameraControls() {
+    if (!renderer) return;
+    const dom = renderer.domElement;
+
+    dom.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+    window.addEventListener('pointerup', () => { isDragging = false; });
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevMouseX;
+      const dy = e.clientY - prevMouseY;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+      camTheta -= dx * 0.0065;
+      camPhi = Math.max(0.32, Math.min(1.18, camPhi - dy * 0.0065));
+      updateCameraPosition();
+    });
+    dom.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      camRadius = Math.max(13, Math.min(38, camRadius + e.deltaY * 0.018));
+      updateCameraPosition();
+    }, { passive: false });
+  }
+
+  function resetCamera() {
+    camTheta = 0.0;
+    camPhi = 0.64;
+    camRadius = 25.5;
+    camFocusOffset.set(0, 0, 0);
+    camShakeOffset.set(0, 0, 0);
+    updateCameraPosition();
   }
 
   /* ----------------------------------------------------
-     主動畫渲染循環
+     8. 主渲染與骨骼動畫更新迴圈
      ---------------------------------------------------- */
   function startAnimationLoop() {
     if (animFrameId) cancelAnimationFrame(animFrameId);
 
-    let clock = 0;
-
-    function animate() {
+    function animate(now) {
       animFrameId = requestAnimationFrame(animate);
-      clock += 0.03;
+      const dt = Math.min(0.05, Math.max(0.001, (now - lastTimestamp) / 1000));
+      lastTimestamp = now;
+      const elapsed = now * 0.001;
 
-      // 1. 烽火台火光躍動
-      brazierLights.forEach(b => {
-        b.light.intensity = b.baseIntensity + Math.sin(clock * 6 + b.light.position.x) * 0.45;
+      if (!isEnabled) return;
+
+      // 1. 更新所有 3D 士兵與戰馬的骨骼動畫
+      for (let i = 0; i < activeMixers.length; i++) {
+        activeMixers[i].mixer.update(dt);
+      }
+
+      // 2. 相機焦點平滑回中與呼吸感
+      camFocusOffset.lerp(new THREE.Vector3(0, 0, 0), 0.035);
+      updateCameraPosition();
+
+      // 3. 營寨火盆躍動與河水波光
+      for (let i = 0; i < brazierLights.length; i++) {
+        const b = brazierLights[i];
+        b.light.intensity = b.baseIntensity + Math.sin(elapsed * 7.5 + i * 1.7) * 0.35;
         if (b.fireMesh) {
-          const s = 1.0 + Math.sin(clock * 8) * 0.18;
-          b.fireMesh.scale.set(s, s * 1.3, s);
+          const s = 1 + Math.sin(elapsed * 10 + i) * 0.14;
+          b.fireMesh.scale.set(s, s * 1.22, s);
         }
-      });
+      }
+      if (riverMeshRef && riverMeshRef.material) {
+        riverMeshRef.material.emissiveIntensity = 0.30 + Math.sin(elapsed * 2.2) * 0.08;
+      }
 
-      // 2. 拋物線彈道更新
+      // 4. 暴雨粒子下落
+      if (weatherParticles && currentWeatherKey === 'storm') {
+        const pos = weatherParticles.geometry.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          let py = pos.getY(i) - 18 * dt;
+          if (py < 0) py = 14;
+          pos.setY(i, py);
+        }
+        pos.needsUpdate = true;
+      }
+
+      // 5. 3D 拋物線箭矢飛行
       for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
         p.progress += p.speed;
         if (p.progress < 0) continue;
-
         if (p.progress >= 1.0) {
-          spawnSparkBurst(p.end, 4);
+          spawnSparkBurst(p.end, 3, 0xf97316);
           scene.remove(p.mesh);
-          p.mesh.geometry.dispose();
-          p.mesh.material.dispose();
           projectiles.splice(i, 1);
         } else {
           p.mesh.position.lerpVectors(p.start, p.end, p.progress);
           p.mesh.position.y += Math.sin(p.progress * Math.PI) * p.arcHeight;
-          const nextPos = p.start.clone().lerp(p.end, p.progress + 0.04);
-          nextPos.y += Math.sin((p.progress + 0.04) * Math.PI) * p.arcHeight;
+          const nextP = Math.min(1.0, p.progress + 0.04);
+          const nextPos = p.start.clone().lerp(p.end, nextP);
+          nextPos.y += Math.sin(nextP * Math.PI) * p.arcHeight;
           p.mesh.lookAt(nextPos);
         }
       }
 
-      // 3. 粒子運動與消退
+      // 6. 粒子與塵土更新
       for (let i = particleSystems.length - 1; i >= 0; i--) {
         const pt = particleSystems[i];
         pt.mesh.position.x += pt.vx;
         pt.mesh.position.y += pt.vy;
         pt.mesh.position.z += pt.vz;
-        pt.vy -= 0.012; // 重力
-
-        if (pt.scaleGrowth) {
-          pt.mesh.scale.addScalar(pt.scaleGrowth);
-        }
+        pt.vy -= pt.gravity || 0;
+        if (pt.scaleGrowth) pt.mesh.scale.addScalar(pt.scaleGrowth);
         pt.life--;
-        if (pt.mesh.material.opacity !== undefined) {
-          pt.mesh.material.opacity = pt.life / 22;
-        }
-
+        if (pt.mesh.material) pt.mesh.material.opacity = Math.max(0, pt.life / pt.maxLife);
         if (pt.life <= 0) {
           scene.remove(pt.mesh);
           pt.mesh.geometry.dispose();
@@ -1672,13 +1936,24 @@ const Battle3DEngine = (function () {
         }
       }
 
-      // 4. 太極八卦陣圖緩慢旋轉
-      unitsMap.forEach(token => {
-        if (token.troopsGroup && token.alive) {
-          const bagua = token.troopsGroup.getObjectByName('baguaRuneRing');
-          if (bagua) {
-            bagua.rotation.z += 0.015;
-          }
+      // 7. 浮動兵損數字上升消退
+      for (let i = floatingPopups.length - 1; i >= 0; i--) {
+        const fp = floatingPopups[i];
+        fp.sprite.position.y += 1.35 * dt;
+        fp.life--;
+        fp.mat.opacity = Math.min(1, (fp.life / fp.maxLife) * 1.4);
+        if (fp.life <= 0) {
+          scene.remove(fp.sprite);
+          fp.tex.dispose();
+          fp.mat.dispose();
+          floatingPopups.splice(i, 1);
+        }
+      }
+
+      // 8. 軍師八卦陣緩緩旋轉
+      unitsMap.forEach((tok) => {
+        if (tok.baguaMesh && tok.alive) {
+          tok.baguaMesh.rotation.z += 0.75 * dt;
         }
       });
 
@@ -1687,36 +1962,64 @@ const Battle3DEngine = (function () {
       }
     }
 
-    animate();
+    animate(performance.now());
   }
 
   function clearAllTokens() {
-    unitsMap.forEach(t => {
-      scene.remove(t.mesh);
+    unitsMap.forEach((t) => {
+      if (scene && t.mesh) scene.remove(t.mesh);
+      if (t.hud && t.hud.tex) t.hud.tex.dispose();
     });
     unitsMap.clear();
+    activeMixers = [];
 
-    projectiles.forEach(p => scene.remove(p.mesh));
+    projectiles.forEach((p) => { if (scene && p.mesh) scene.remove(p.mesh); });
     projectiles = [];
 
-    particleSystems.forEach(pt => scene.remove(pt.mesh));
+    particleSystems.forEach((pt) => { if (scene && pt.mesh) scene.remove(pt.mesh); });
     particleSystems = [];
+
+    floatingPopups.forEach((fp) => {
+      if (scene && fp.sprite) scene.remove(fp.sprite);
+      fp.tex.dispose();
+      fp.mat.dispose();
+    });
+    floatingPopups = [];
   }
 
   function onWindowResize() {
     if (!renderer || !camera || !container) return;
-    const width = container.clientWidth || 800;
-    const height = container.clientHeight || 420;
+    const width = container.clientWidth || 960;
+    const height = container.clientHeight || 340;
+    if (width <= 0 || height <= 0) return;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
   }
 
   function toggleMode(enabled) {
-    isEnabled = !!enabled;
-    if (container) {
-      container.hidden = !isEnabled;
-    }
+    isEnabled = Boolean(enabled);
+    if (container) container.hidden = !isEnabled;
+    if (isEnabled) setTimeout(onWindowResize, 30);
+  }
+
+  function getDebugState() {
+    return {
+      isInitialized,
+      isEnabled,
+      modelsTotal: Object.keys(MODEL_MANIFEST).length,
+      modelsLoaded: modelsLoadedCount,
+      plinthCount: unitsMap.size,
+      activeMixers: activeMixers.length,
+      envPropsChildren: envPropsGroup ? envPropsGroup.children.length : 0,
+      weather: currentWeatherKey
+    };
+  }
+
+  // 預先啟動 GLB 模型非同步載入，讓玩家點進戰鬥時已完成快取
+  if (typeof window !== 'undefined') {
+    const startPreload = window.requestIdleCallback || function (cb) { setTimeout(cb, 200); };
+    startPreload(() => ensureModelsLoaded());
   }
 
   return {
@@ -1725,7 +2028,9 @@ const Battle3DEngine = (function () {
     playEvent,
     toggleMode,
     clearAllTokens,
-    resetCamera
+    resetCamera,
+    getDebugState,
+    whenModelsReady: ensureModelsLoaded
   };
 })();
 

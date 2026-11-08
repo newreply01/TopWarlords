@@ -15,3 +15,4 @@ named = [n for n in names if not any(w in n for w in ['隊', '營', '組', '車'
 squads = [n for n in names if any(w in n for w in ['隊', '營', '組', '車', '卒', '兵', '箭', '弩'])]
 print(f"Named generals: {len(named)} (e.g. {named[:15]})")
 print(f"Military squads: {len(squads)} (e.g. {squads[:10]})")
+

@@ -41,3 +41,4 @@ for pid, p in data.get('query', {}).get('pages', {}).items():
     else:
         print('MISSING:', p['title'])
 print(f'Total found: {len(found)} / {len(titles)}')
+

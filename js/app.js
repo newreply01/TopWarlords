@@ -14,11 +14,11 @@ function ensureArray(val) {
    ===================================================== */
 const $ = s => document.querySelector(s);
 const ICON = {
-  air: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2 7 8 4v2l-8-2-1 5 3 2v1l-4-1-4 1v-1l3-2-1-5-8 2v-2l8-4z"/></svg>',
-  armor: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 15h18l-2 4H5z"/><path d="M7 10h9l1 4H6z"/><path d="M16 11h6v2h-6z"/></svg>',
-  air_defense: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2 3 3 6 3 10l2 3v3l-3-1h-4l-3 1v-3l2-3c0-4 1-7 3-10z"/></svg>',
-  naval: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 15h20l-3 5H5z"/><path d="M6 10h12v4H6z"/><path d="M10 5h4v5h-4z"/></svg>',
-  support: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="14" r="2" fill="currentColor"/><path d="M6 14a6 6 0 0 1 12 0M2.5 14a9.5 9.5 0 0 1 19 0"/><path d="M12 14V6"/></svg>'
+  air: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 5c-1.8 0-3.4.9-4.3 2.3L11 9l-5 1-3 4 2 1 2-2 2 1-2 5h2.5l2.5-4 3 1 1 4h2.5l-.5-5.5 2.5-3.5c1.2-.8 2-2.2 2-3.8C22.5 5.9 21 5 19 5z"/></svg>',
+  armor: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 5v6.1c0 5.1 3.4 9.8 8 10.9 4.6-1.1 8-5.8 8-10.9V5l-8-3zm0 3.2l5 1.9v4.7c0 3.6-2.1 6.9-5 8-2.9-1.1-5-4.4-5-8V7.1l5-1.9z"/></svg>',
+  air_defense: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 3c7 4 7 14 0 18"/><line x1="5" y1="3" x2="5" y2="21"/><line x1="3" y1="12" x2="20" y2="12"/><polyline points="16 8 20 12 16 16"/></svg>',
+  naval: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M9.5 17.5L21 6V3h-3L6.5 14.5"/><path d="M11 19l-6-6"/><path d="M8 16l-4 4"/></svg>',
+  support: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><circle cx="12.5" cy="10.5" r="3"/></svg>'
 };
 
 const LS = {
@@ -47,20 +47,20 @@ window.SoundEngine = SoundEngine;
 
 /* ---------- 預設社群幽靈名將錄 ---------- */
 const SEED_GHOSTS = [
-  { id: 'g_falcon', callsign: '蒼鷹·艾爾文少校', title: '少校', rating: 1420, wins: 58, losses: 19, deck: ['F22','T72','PANT','TJ','PZH'], doctrine: 'strike', motto: '極致空優先手打擊，防空彈砲合一！', isUser: false },
-  { id: 'g_iron', callsign: '鐵幕·伊凡上尉', title: '上尉', rating: 1310, wins: 41, losses: 22, deck: ['FA50','LEO2','PAC3','FREMM','PZH'], doctrine: 'defense', motto: '重裝豹2加上愛國者防空，固若金湯。', isUser: false },
-  { id: 'g_shadow', callsign: '深海·海蓮娜少校', title: '少校', rating: 1490, wins: 64, losses: 14, deck: ['EF2K','T90','SAMPT','VA','MQ9'], doctrine: 'deception', motto: '水下核潛刺殺加電戰隱蔽，你抓不到我。', isUser: false },
-  { id: 'g_swarm', callsign: '蜂群·莫里斯上尉', title: '上尉', rating: 1260, wins: 33, losses: 26, deck: ['F16V','TOYO','IRON','USV','E7'], doctrine: 'deception', motto: 'E-7 預警機搭配快艇與皮卡，極限以小博大。', isUser: false },
-  { id: 'g_viper', callsign: '毒蛇·影狐中校', title: '中校', rating: 1610, wins: 88, losses: 21, deck: ['SU57','K2','HQ9L','T22','TB2'], doctrine: 'strike', motto: '重載超音速截擊加上黑豹穿插，先制點穴。', isUser: false },
-  { id: 'g_aegis', callsign: '神盾·霍克上校', title: '上校', rating: 1720, wins: 104, losses: 25, deck: ['F35A','CH3','NASAMS','TJ','EA18'], doctrine: 'deception', motto: '全頻譜咆哮者干擾，雷達屏幕只剩雪花。', isUser: false }
+  { id: 'g_falcon', callsign: '冠軍侯・驃騎營', title: '驃騎將軍', rating: 1420, wins: 58, losses: 19, deck: ['HUO','ZHOUTAI','NASU','GANNING','CHENPING'], doctrine: 'strike', motto: '疾如風千里奔襲，閃擊直取中軍帥帳！', isUser: false },
+  { id: 'g_iron', callsign: '武安君・鐵壁陣', title: '鎮國大將軍', rating: 1310, wins: 41, losses: 22, deck: ['SHINGEN','BAIQI','ZONGZE','ZHANGLIAO','WEIXIAOKUAN'], doctrine: 'defense', motto: '不動如山大盾重甲，長平鐵壁固若金湯。', isUser: false },
+  { id: 'g_shadow', callsign: '臥龍崗・八陣圖', title: '軍師祭酒', rating: 1490, wins: 64, losses: 14, deck: ['ZHAOYUN','YUEFEI','HUANGZHONG','KUMANO','ZHUGELIANG'], doctrine: 'deception', motto: '奇門八陣迷霧困敵，未戰而廟算先勝。', isUser: false },
+  { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['GONGSUN','GYEBAEK','SAIGA','YISUNSIN','LIUCHENG'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
+  { id: 'g_viper', callsign: '毘沙門天・車懸陣', title: '越後守護', rating: 1610, wins: 88, losses: 21, deck: ['KENSHIN','ZHANGFEI','INABA','WEIYAN','GUOJIA'], doctrine: 'strike', motto: '車懸輪番急襲破陣，白刃一騎討斬將奪旗。', isUser: false },
+  { id: 'g_aegis', callsign: '天策府・玄甲精騎', title: '天策上將', rating: 1720, wins: 104, losses: 25, deck: ['LISHIMIN','LIANPO','LIGUANG','YANGSU','XUNYU'], doctrine: 'strike', motto: '玄甲鐵騎貫陣而入，神射強弩萬箭齊發。', isUser: false }
 ];
 
 function getGhostPool() {
-  const p = LS.get('wl15_ghost_pool', null);
-  if (!p || !p.length) { LS.set('wl15_ghost_pool', SEED_GHOSTS); return SEED_GHOSTS.slice(); }
+  const p = LS.get('wl15_ghost_pool_v2', null);
+  if (!p || !p.length) { LS.set('wl15_ghost_pool_v2', SEED_GHOSTS); return SEED_GHOSTS.slice(); }
   return p;
 }
-function saveGhostPool(p) { LS.set('wl15_ghost_pool', p); }
+function saveGhostPool(p) { LS.set('wl15_ghost_pool_v2', p); }
 
 const stats = LS.get('wl15_stats', { played: 0, win: 0, streak: 0, best: 0, bo3Won: 0 });
 const playerGhost = LS.get('wl15_player_ghost', { rp: 0, callsign: '虎步先鋒鐵騎營', rankTitle: '作戰少尉', wins: 0, losses: 0, myGhostDeck: null });
@@ -303,7 +303,7 @@ function autoFillAndSubmitPvpDeck() {
     filledDeck = randomDeck(Math.random, budgetLimit(), [], banned);
   }
   if (!filledDeck) {
-    filledDeck = ['F35A', 'M1A2', 'PAC3', 'TJ', 'MORTAR'];
+    filledDeck = ['ZHAOYUN', 'GYEBAEK', 'ZONGZE', 'DONGXI', 'LIUCHENG'];
   }
 
   state.deck = filledDeck.slice();
@@ -1099,20 +1099,20 @@ function getUnitWeatherMod(u, ev) {
   const id = activeEv.id;
   const traits = u.traits || [];
   if (id === 'plain') {
-    if (u.cat === 'armor') return { type: 'buff', short: '▲ +20%', tip: `${activeEv.icon} ${activeEv.name}：裝甲火力 +20%` };
-    if (u.cat === 'naval') return { type: 'debuff', short: '▼ -30%', tip: `${activeEv.icon} ${activeEv.name}：艦艇火力 −30%` };
+    if (u.cat === 'armor') return { type: 'buff', short: '▲ +20%', tip: `${activeEv.icon} ${activeEv.name}：重甲步陣戰力 +20%` };
+    if (u.cat === 'naval') return { type: 'debuff', short: '▼ -30%', tip: `${activeEv.icon} ${activeEv.name}：先登水師奇襲 −30%` };
   } else if (id === 'strait') {
-    if (u.cat === 'naval') return { type: 'buff', short: '▲ +25%', tip: `${activeEv.icon} ${activeEv.name}：艦艇火力 +25%` };
-    if (u.cat === 'armor') return { type: 'debuff', short: '▼ -15%', tip: `${activeEv.icon} ${activeEv.name}：裝甲火力 −15%` };
+    if (u.cat === 'naval') return { type: 'buff', short: '▲ +25%', tip: `${activeEv.icon} ${activeEv.name}：先登水師戰力 +25%` };
+    if (u.cat === 'armor') return { type: 'debuff', short: '▼ -15%', tip: `${activeEv.icon} ${activeEv.name}：重甲步陣 −15%` };
   } else if (id === 'storm') {
-    if (u.cat === 'air') return { type: 'debuff', short: '▼ -15%命中', tip: `${activeEv.icon} ${activeEv.name}：空中命中率 −15%` };
-    if (u.cat === 'support' && traits.includes('TRUE_AT')) return { type: 'debuff', short: '▼ -25%', tip: `${activeEv.icon} ${activeEv.name}：無人機傷害 −25%` };
+    if (u.cat === 'air') return { type: 'debuff', short: '▼ -15%命中', tip: `${activeEv.icon} ${activeEv.name}：突騎奔襲命中 −15%` };
+    if (u.cat === 'support' && traits.includes('TRUE_AT')) return { type: 'debuff', short: '▼ -25%', tip: `${activeEv.icon} ${activeEv.name}：火攻奇器威力 −25%` };
   } else if (id === 'urban') {
-    if (u.cat === 'support' && traits.includes('TRUE_AT')) return { type: 'buff', short: '▲ +30%', tip: `${activeEv.icon} ${activeEv.name}：無人機傷害 +30%` };
-    if (u.cat === 'support' && (traits.includes('ARTY') || traits.includes('DEEP'))) return { type: 'debuff', short: '▼ -25%', tip: `${activeEv.icon} ${activeEv.name}：火砲／縱深火力 −25%` };
-    if (u.cat === 'armor') return { type: 'debuff', short: '▼ -10%', tip: `${activeEv.icon} ${activeEv.name}：裝甲火力 −10%` };
+    if (u.cat === 'support' && traits.includes('TRUE_AT')) return { type: 'buff', short: '▲ +30%', tip: `${activeEv.icon} ${activeEv.name}：攻城奇器威力 +30%` };
+    if (u.cat === 'support' && (traits.includes('ARTY') || traits.includes('DEEP'))) return { type: 'debuff', short: '▼ -25%', tip: `${activeEv.icon} ${activeEv.name}：遠程投石／斬首 −25%` };
+    if (u.cat === 'armor') return { type: 'debuff', short: '▼ -10%', tip: `${activeEv.icon} ${activeEv.name}：重甲展開受限 −10%` };
   } else if (id === 'em') {
-    if ((u.ew || 0) >= 25) return { type: 'buff', short: '▲ 電戰×1.6', tip: `${activeEv.icon} ${activeEv.name}：電戰效果 ×1.6，全體隱匿 +10` };
+    if ((u.ew || 0) >= 25) return { type: 'buff', short: '▲ 奇謀×1.6', tip: `${activeEv.icon} ${activeEv.name}：軍師奇謀 ×1.6，全軍伏兵隱匿 +10` };
   }
   return null;
 }
@@ -1123,7 +1123,7 @@ function renderMatrix() {
   const mb = $('#matrixBoard');
   if (!mb) return;
   const cats = ['air', 'armor', 'air_defense', 'naval', 'support'];
-  const catSlots = { air: '制空槽', armor: '裝甲槽', air_defense: '防空槽', naval: '制海槽', support: '支援槽' };
+  const catSlots = { air: '突騎槽', armor: '重甲槽', air_defense: '神射槽', naval: '先登槽', support: '軍師槽' };
   const activeWeather = getActiveBuildWeather();
 
   if (!state.marketPool) {
@@ -1164,11 +1164,11 @@ function renderMatrix() {
     }
 
     const M_TRAIT_SHORT = {
-      CAS: '🎯密接對地', LR: '🚀超視距', HEAVY: '🛡️重裝甲', APS: '⚡主動防護',
-      AA_LONG: '📡遠程防空', CIWS: '🔥近防火網', AEGIS: '🔱神盾防空', SUB: '🌊深海潛航',
-      ASW: '🎯反潛獵殺', AMBUSH: '💥匿蹤伏擊', SWARM: '🐝蜂群齊射', EW: '📡電戰壓制',
-      SEAD: '⚡防空壓制', DEEP: '🎯縱深斬首', ARTY: '💥遠程火砲', SAT: '🚀飽和打擊',
-      TRUE_AT: '🗡️頂攻破甲', SPOT: '🔭前觀校射'
+      CAS: '🐎蹂躪步陣', LR: '🏹百步穿楊', HEAVY: '🛡️玄甲鐵壁', APS: '⚔️格擋反震',
+      AA_LONG: '🎯專克突騎', CIWS: '🔥密集弩陣', AEGIS: '🏯鐵桶拒馬', SUB: '🌊潛行渡江',
+      ASW: '🔱水陸搜剿', AMBUSH: '🌑奇兵伏擊', SWARM: '🔥萬箭連發', EW: '📜奇門遁甲',
+      SEAD: '⚡破除弓陣', DEEP: '🗡️斬將奪旗', ARTY: '☄️霹靂火砲', SAT: '🔥烈火燎原',
+      TRUE_AT: '🪓破甲重擊', SPOT: '🚩登高瞭望'
     };
     const cardsHtml = displayUnits.map(u => {
       const isEquipped = state.deck.includes(u.id);
@@ -1283,15 +1283,14 @@ function showTooltip(u, x, y) {
 }
 function hideTooltip() { if (tooltip) tooltip.hidden = true; }
 
-/* ---------- 隊伍風格即時分析雷達 (Combat Archetype Radar) ---------- */
+/* ---------- 隊伍陣法即時分析 (Warlord Formation Archetype) ---------- */
 function analyzeDeckArchetype(deck) {
-  if (!Array.isArray(deck)) return { name: '均衡聯合作戰流', icon: '🎖️', desc: '五大兵種平衡，適配各種突發天候', detail: '陸海空天電全維度均衡配置。' };
+  if (!Array.isArray(deck)) return { name: '五行正奇合戰陣', icon: '🏯', desc: '五軍均衡列陣，萬變不驚', detail: '突騎、重甲、神射、先登、軍師五部齊備。' };
   const units = deck.filter(Boolean).map(id => UNIT_MAP[id]).filter(Boolean);
   if (units.length < 3) {
-    return { name: '戰力籌備中', icon: '⚙️', desc: '請挑選至少 3 個槽位裝備', detail: '部隊尚未成型，請繼續在上方各兵種中挑選適合的作戰單位。' };
+    return { name: '點兵聚將中', icon: '📜', desc: '請調遣至少 3 部兵馬入帳', detail: '軍陣尚未成型，請繼續於上方五軍名將譜中點選將領。' };
   }
   
-  const totalCost = typeof deckCost === 'function' ? deckCost(deck.filter(Boolean)) : 0;
   const avgStealth = units.reduce((s, u) => s + (u.st || 0), 0) / units.length;
   const avgHp = units.reduce((s, u) => s + (u.hp || 0), 0) / units.length;
   const avgEw = units.reduce((s, u) => s + (u.ew || 0), 0) / units.length;
@@ -1302,35 +1301,27 @@ function analyzeDeckArchetype(deck) {
   const airUnit = units.find(u => u.cat === 'air');
   const armorUnit = units.find(u => u.cat === 'armor');
   const adUnit = units.find(u => u.cat === 'air_defense');
-  const navUnit = units.find(u => u.cat === 'naval');
   const supUnit = units.find(u => u.cat === 'support');
 
-  // 1. 隱身刺殺流
   if (avgStealth >= 50 || (airUnit && (airUnit.st || 0) >= 80)) {
-    return { name: '隱匿突防刺殺流', icon: '🎯', desc: '雷達低可探測，先制狙殺高價旗艦', detail: '以高度隱匿裝備突防敵方警戒圈，第一時間點穴瓦解敵方關鍵制空與防空節點。' };
+    return { name: '銜枚奇襲斬首陣', icon: '🗡️', desc: '伏兵潛行千里，直取敵軍主帥', detail: '以高隱匿精銳奇兵繞過正面盾牆，開戰瞬間斬將奪旗、動搖敵軍軍心。' };
   }
-  // 2. 電磁壓制流
   if (avgEw >= 36 || (supUnit && (supUnit.ew || 0) >= 65)) {
-    return { name: '全頻電磁干擾流', icon: '📡', desc: '奪取電磁主動權，壓制敵精準射控', detail: '以強大的電戰機與干擾莢艙阻斷敵方指揮鏈，大幅削弱敵方全體命中率與射控導引。' };
+    return { name: '奇門八陣困敵流', icon: '☯️', desc: '掌握奇謀天時，惑亂敵軍陣腳', detail: '仰仗大軍師布下八卦奇陣與虛實疑兵，大幅削弱敵軍命中並強化我軍先機。' };
   }
-  // 3. 鋼鐵重裝要塞流
   if (avgHp >= 200 || (armorUnit && armorUnit.cost === 5 && (armorUnit.hp || 0) >= 300)) {
-    return { name: '鋼鐵要塞推進流', icon: '🛡️', desc: '極高抗揍裝甲，地面殘局穩操勝券', detail: '依托重型主戰坦克與厚實裝甲防線，能硬抗猛烈打擊並在地面決戰階段奪取高額控制分。' };
+    return { name: '不動如山鐵壁陣', icon: '🛡️', desc: '重甲大盾如林，白刃死戰稱雄', detail: '依托重甲名將與塔盾方陣穩守中軍，硬抗萬箭齊發並在短兵決戰輾壓敵陣。' };
   }
-  // 4. 遠程飽和打擊流
   if (supUnit && ((supUnit.traits && supUnit.traits.includes('strike')) || supUnit.cost >= 4) && avgAtk >= 82) {
-    return { name: '飽和火力覆蓋流', icon: '🚀', desc: '縱深火箭火砲，覆蓋式洗滅敵陣', detail: '以長程精準火箭與大口徑自走砲實施超地平線覆蓋射擊，在第一、二階段造成大量面殺傷。' };
+    return { name: '烈火轟雷破陣流', icon: '🔥', desc: '火攻霹靂齊發，焚毀敵軍連營', detail: '結合火器名將與強弓猛襲，於遠程交鋒階段傾瀉毀滅性火攻。' };
   }
-  // 5. 區域穹頂防空流
   if (adUnit && adUnit.cost >= 4) {
-    return { name: '區域穹頂拒止流', icon: '🌐', desc: '長程地空飛彈，封鎖空域獵殺戰機', detail: '建構梯次密集的防空攔截網，徹底剝奪敵方空中密接支援（CAS）與戰機生存空間。' };
+    return { name: '萬弩連珠拒馬陣', icon: '🏹', desc: '強弩勁弓封鎖，專克奔雷鐵騎', detail: '構築三段擊與連弩拒馬火網，徹底粉碎敵軍騎兵衝鋒與先登突襲。' };
   }
-  // 6. 旗艦刺蝟游擊流（ 帶多個 ）
   if (hasStar5 && onesCount >= 2) {
-    return { name: '旗艦刺蝟游擊流', icon: '⚡', desc: '明星旗艦領銜，平民蜂群靈活掩護', detail: '以極致戰力的頂級旗艦作為主要戰略錨點，輔以多組廉價載具分攤傷害並提供牽制。' };
+    return { name: '無雙猛將親衛陣', icon: '🐎', desc: '絕世名將領軍，輕騎奇兵策應', detail: '以 $5 傳奇統帥為破陣核心，輔以多支低費精銳斥候分攤兵損、側翼牽制。' };
   }
-  // 7. 均衡聯合作戰流
-  return { name: '均衡聯合作戰流', icon: '🎖️', desc: '五大兵種平衡，適配各種突發天候', detail: '陸海空天電全維度均衡配置，無明顯兵種弱點，面對任何隨機戰場事件皆有優秀適應力。' };
+  return { name: '五行正奇合戰陣', icon: '🏯', desc: '五軍均衡列陣，適配四時天象', detail: '騎、盾、弓、鋒、謀五軍協同互補，面對大霧、豪雨、渡口皆游刃有餘。' };
 }
 
 /* ---------- 渲染：底部常駐指揮台 (Command Deck) ---------- */
@@ -1395,20 +1386,20 @@ function renderCommandDeck() {
     const activeSyns = (typeof getDeckSynergies === 'function') ? getDeckSynergies(pickedUnits) : [];
     const activeSynMap = new Set(activeSyns.map(s => s.id));
 
-    // 4 大核心體系常駐指示燈定義 (改回原本五個經典英文字母代號)
+    // 4 大核心古兵法陣勢羈絆指示燈
     const INDICATOR_DEFS = [
-      { id: 'cec', icon: '📡', code: 'CEC', name: '協同接戰網 (CEC)', req: '$5高階預警機 ＋ 遠程防空/神盾艦' },
-      { id: 'mumt', icon: '🛸', code: 'MUM-T', name: '有人無人協同 (MUM-T)', req: '$5五代空優 ＋ 無人機/巡飛彈/快艇' },
-      { id: 'asw_net', icon: '🌊', code: 'ASW', name: '海空反潛獵殺 (ASW)', req: '反潛艦/潛艦 ＋ 電戰/前觀校射' },
-      { id: 'iron_fist', icon: '⚙️', code: 'LAND', name: '步坦協同鐵拳 (LAND)', req: '重裝坦克 ＋ 自走砲/前觀校射' }
+      { id: 'cec', icon: '☯️', code: '八陣', name: '八陣圖天羅網', req: '$5大軍師 ＋ 神射強弩／重甲拒馬' },
+      { id: 'mumt', icon: '🐎', code: '奇正', name: '奇正相生奔雷陣', req: '$5無雙突騎 ＋ 奇謀斥候／先登快艇' },
+      { id: 'asw_net', icon: '🌊', code: '伏波', name: '水陸伏波合擊', req: '先登水師 ＋ 軍師奇謀／登高瞭望' },
+      { id: 'iron_fist', icon: '🛡️', code: '合圍', name: '步騎鐵壁合圍', req: '重甲陷陣 ＋ 霹靂火器／登高瞭望' }
     ];
 
     const indicatorsHtml = INDICATOR_DEFS.map(ind => {
       const isLit = activeSynMap.has(ind.id);
       const synObj = activeSyns.find(s => s.id === ind.id);
       const tip = isLit
-        ? `【${ind.icon} ${ind.name} · 已啟動】${synObj ? synObj.desc : '體系加成生效中'}`
-        : `【${ind.icon} ${ind.name} · 待命】啟動條件：${ind.req}`;
+        ? `【${ind.icon} ${ind.name} · 已成陣】${synObj ? synObj.desc : '兵法陣勢加成生效中'}`
+        : `【${ind.icon} ${ind.name} · 未成陣】成陣條件：${ind.req}`;
       return `<div class="syn-indicator ${isLit ? 'lit' : 'idle'} ind-${ind.id}" data-syn-id="${ind.id}" data-syn-tip="${esc(tip)}" title="${esc(tip)}">
         <span class="ind-icon">${ind.icon}</span>
         <span class="ind-code">${ind.code}</span>
@@ -1416,23 +1407,23 @@ function renderCommandDeck() {
       </div>`;
     }).join('');
 
-    // 電磁戰力常駐平衡指示 (EW)
+    // 奇謀戰力常駐平衡指示
     const baseEw = pickedUnits.reduce((acc, u) => acc + (u.ew || 0), 0) + (activeSynMap.has('cec') ? 12 : 0);
     const effEw = Math.round(baseEw * (state.doctrine === 'deception' ? 1.5 : 1));
     let ewClass = 'idle';
-    let ewText = `EW ${effEw}`;
-    let ewTip = `【⚡ 電磁戰力 (EW) · 數值 ${effEw}】全隊電磁壓制值（點擊查看說明）`;
+    let ewText = `奇謀 ${effEw}`;
+    let ewTip = `【📜 軍師奇謀 · 數值 ${effEw}】全軍奇門謀略壓制值（點擊查看說明）`;
     if (pickedUnits.length >= 3) {
       if (effEw < 10) {
         ewClass = 'warn';
-        ewTip = `【⚠ 電磁偏弱 (EW ${effEw})】全隊電戰值僅 ${effEw}，面對電戰流易遭壓制`;
+        ewTip = `【⚠ 謀略偏弱 (奇謀 ${effEw})】全軍奇謀值僅 ${effEw}，遭遇八陣流易中敵計`;
       } else {
         ewClass = 'strong';
-        ewTip = `【⚡ 電磁強勢 (EW ${effEw})】全隊電戰值 ${effEw}，可壓制敵方命中並增益火力`;
+        ewTip = `【📜 算無遺策 (奇謀 ${effEw})】全軍奇謀值 ${effEw}，可動搖敵軍命中並增益戰法`;
       }
     }
     const ewHtml = `<div class="syn-indicator ew-ind ${ewClass}" data-syn-tip="${esc(ewTip)}" title="${esc(ewTip)}">
-      <span class="ind-icon">${ewClass === 'warn' ? '⚠' : '⚡'}</span>
+      <span class="ind-icon">${ewClass === 'warn' ? '⚠' : '📜'}</span>
       <span class="ind-code">${ewText}</span>
       <i class="ind-dot"></i>
     </div>`;
@@ -1711,26 +1702,26 @@ function renderOnboardingGuide() {
   bar.hidden = false;
   bar.innerHTML = `
     <div class="onboard-head">
-      <span class="onboard-badge">🔰 新手 30 秒戰術速成</span>
+      <span class="onboard-badge">📜 新手 30 秒點將速成</span>
     </div>
     <div class="onboard-steps">
       <div class="onboard-step ${activeStep === 1 ? 'active' : ''} ${step1Done ? 'done' : ''}">
         <i class="ob-num">${step1Done ? '✓' : '1'}</i>
-        <span><b>5兵種各選1款</b>（預算 ≤$${lim}，已選 ${filledCount}/5）</span>
+        <span><b>五軍各點 1 將</b>（軍令 ≤$${lim}，已選 ${filledCount}/5）</span>
       </div>
       <span class="onboard-sep">▸</span>
       <div class="onboard-step ${activeStep === 2 ? 'active' : ''} ${step2Active ? 'done' : ''}">
         <i class="ob-num">${step2Active ? '✓' : '2'}</i>
-        <span><b>湊齊聯合作戰羈絆</b>（左下點亮 CEC / MUM-T / ASW / LAND）</span>
+        <span><b>湊齊古兵法陣勢</b>（左下點亮 八陣 / 奇正 / 伏波 / 合圍）</span>
       </div>
       <span class="onboard-sep">▸</span>
       <div class="onboard-step ${activeStep === 3 ? 'active' : ''}">
         <i class="ob-num">3</i>
-        <span><b>選教條並點擊右下【開始聯合作戰 ➔】</b></span>
+        <span><b>選風林火山兵法並點擊右下【出師合戰 ➔】</b></span>
       </div>
     </div>
     <div class="onboard-actions">
-      <button type="button" class="btn-onboard-demo" id="btnOnboardDemo" title="自動從當前軍火庫配滿 $15 聯合作戰陣容">🎲 一鍵示範配裝</button>
+      <button type="button" class="btn-onboard-demo" id="btnOnboardDemo" title="自動從當前名將譜配滿 $15 出陣陣容">🎲 一鍵示範點兵</button>
       <button type="button" class="btn-onboard-close" id="btnOnboardDismiss" title="關閉新手引導列">我知道了 ✕</button>
     </div>
   `;
@@ -3970,24 +3961,24 @@ function teamHtml(units, side, docId) {
   }
 
   const TRAIT_SHORT_MAP = {
-    CAS: '🎯密接對地',
-    LR: '🚀超視距',
-    HEAVY: '🛡️重裝甲',
-    APS: '⚡主動防護',
-    AA_LONG: '📡遠程防空',
-    CIWS: '🔥近防火網',
-    AEGIS: '🔱神盾防空',
-    SUB: '🌊深海潛航',
-    ASW: '🎯反潛獵殺',
-    AMBUSH: '💥匿蹤伏擊',
-    SWARM: '🐝蜂群齊射',
-    EW: '📡電戰壓制',
-    SEAD: '⚡防空壓制',
-    DEEP: '🎯縱深斬首',
-    ARTY: '💥遠程火砲',
-    SAT: '🚀飽和打擊',
-    TRUE_AT: '🗡️頂攻破甲',
-    SPOT: '🔭前觀校射'
+    CAS: '🐎蹂躪步陣',
+    LR: '🏹百步穿楊',
+    HEAVY: '🛡️玄甲鐵壁',
+    APS: '⚔️格擋反震',
+    AA_LONG: '🎯專克突騎',
+    CIWS: '🔥密集弩陣',
+    AEGIS: '🏯鐵桶拒馬',
+    SUB: '🌊潛行渡江',
+    ASW: '🔱水陸搜剿',
+    AMBUSH: '🌑奇兵伏擊',
+    SWARM: '🔥萬箭連發',
+    EW: '📜奇門遁甲',
+    SEAD: '⚡破除弓陣',
+    DEEP: '🗡️斬將奪旗',
+    ARTY: '☄️霹靂火砲',
+    SAT: '🔥烈火燎原',
+    TRUE_AT: '🪓破甲重擊',
+    SPOT: '🚩登高瞭望'
   };
 
   const mobileTitleHtml = side === 'A' ? '🔵 我方部隊' : '🔴 敵方部隊';
@@ -4156,8 +4147,12 @@ async function showBattle(res, opts = {}) {
   if (uBoxA) uBoxA.innerHTML = teamHtml(T.A, 'A', res.docs?.A);
   if (uBoxB) uBoxB.innerHTML = teamHtml(T.B, 'B', res.docs?.B);
 
-  // 初始化並載入 3D 古戰場推演沙盤
+  // 初始化並載入 3D 古戰場推演沙盤與合戰鼓角配樂
   try {
+    if (typeof SoundEngine !== 'undefined') {
+      if (typeof SoundEngine.playBgm === 'function') SoundEngine.playBgm('battle');
+      if (typeof SoundEngine.play === 'function') SoundEngine.play('battleStart');
+    }
     const c3d = $('#battle3DCanvas');
     if (c3d && typeof Battle3DEngine !== 'undefined') {
       Battle3DEngine.init(c3d);
@@ -4179,7 +4174,7 @@ async function showBattle(res, opts = {}) {
   if (sTgt && uB) sTgt.textContent = `${uB.flag} ${uB.name}`;
   if (sVec) sVec.textContent = '⚡ 兩軍對峙列陣 ➔';
 
-  const maxHp = {}; [...T.A, ...T.B].forEach(u => { maxHp[u.uid] = u.hpMax; });
+  const maxHp = {}; [...T.A, ...T.B].forEach(u => { maxHp[u.uid] = u.maxHp || u.hpMax || u.hp; });
   $('#battleLog').innerHTML = '';
   $('#phaseTitle').textContent = '戰 場 就 緒';
   const initTimer = $('#camTimer');
@@ -4516,107 +4511,62 @@ function playFx(ln) {
     // 開火端砲口爆閃 / 垂發白煙特效
     spawnMuzzleFx(ax, ay, baseAngle, wType, sideColor);
 
-    if (wType === 'ew') {
-      // 【類型 7：全息電磁脈衝波束與反輻射壓制】
-      spawnEwBeam(ax, ay, tx, ty, dist, baseAngle, sideColor);
+    if (wType === 'strategy') {
+      // 【軍師奇謀：八卦金光法陣束流】
+      spawnEwBeam(ax, ay, tx, ty, dist, baseAngle, '#4ade80');
       setTimeout(() => triggerImpact(), Math.max(90, 170 / speed));
 
-    } else if (wType === 'autocannon') {
-      // 【類型 4：30mm 鏈砲 / 方陣快砲密集曳光彈幕流 (5連發高速彈鏈)】
-      const burstCount = 5;
+    } else if (wType === 'arrow') {
+      // 【神射強弩：三矢齊發火羽箭雨】
+      const burstCount = 3;
       for (let i = 0; i < burstCount; i++) {
         setTimeout(() => {
           if (skip) return;
-          const spreadY = (Math.random() - 0.5) * 22;
-          const spreadX = (Math.random() - 0.5) * 16;
+          const spreadY = (i - 1) * 12;
           launchSingleProjectile({
-            ax, ay: ay + (Math.random() - 0.5) * 8,
-            tx: tx + spreadX, ty: ty + spreadY,
-            wType: 'autocannon', arcHeight: 0, waveAmp: 0,
-            dur: Math.max(55, 115 / speed),
+            ax, ay: ay + spreadY * 0.4,
+            tx, ty: ty + spreadY,
+            wType: 'arrow', arcHeight: -Math.min(76, dist * 0.18) - i * 10, waveAmp: 0,
+            dur: Math.max(95, 195 / speed),
             side: ln.side,
-            onHit: i === burstCount - 1 ? () => triggerImpact() : () => spawnMiniSparks(tx + spreadX, ty + spreadY)
+            onHit: i === burstCount - 1 ? () => triggerImpact() : () => spawnMiniSparks(tx, ty + spreadY)
           });
-        }, (i * 26) / speed);
+        }, (i * 32) / speed);
       }
 
-    } else if (wType === 'salvo') {
-      // 【類型 3：海馬斯 / 多管火箭 / 巡弋飛彈波次高拋物線飽和齊射 (3枚交錯彈道)】
-      const salvoCount = 3;
-      for (let i = 0; i < salvoCount; i++) {
-        setTimeout(() => {
-          if (skip) return;
-          const offX = (i - 1) * 14;
-          const offY = (i - 1) * 10;
-          launchSingleProjectile({
-            ax, ay,
-            tx: tx + offX, ty: ty + offY,
-            wType: 'salvo',
-            arcHeight: -Math.min(115, dist * 0.24) - i * 22,
-            waveAmp: 0,
-            dur: Math.max(110, (240 + i * 25) / speed),
-            side: ln.side,
-            onHit: i === salvoCount - 1
-              ? () => triggerImpact()
-              : () => spawnExplosion(tx + offX, ty + offY, false, 'salvo', 0.65)
-          });
-        }, (i * 42) / speed);
-      }
-
-    } else if (wType === 'swarm') {
-      // 【類型 6：自殺無人機 / 巡飛彈三角翼蜂群編隊 (3架螺旋蛇行突防)】
-      const droneCount = 3;
-      for (let i = 0; i < droneCount; i++) {
-        setTimeout(() => {
-          if (skip) return;
-          launchSingleProjectile({
-            ax, ay: ay + (i - 1) * 14,
-            tx: tx + (i - 1) * 8, ty: ty + (i - 1) * 8,
-            wType: 'swarm',
-            arcHeight: (i - 1) * 26,
-            waveAmp: (i % 2 === 0 ? 1 : -1) * 14,
-            dur: Math.max(120, 250 / speed),
-            side: ln.side,
-            onHit: i === droneCount - 1
-              ? () => triggerImpact()
-              : () => spawnMiniSparks(tx + (i - 1) * 8, ty + (i - 1) * 8)
-          });
-        }, (i * 35) / speed);
-      }
-
-    } else if (wType === 'sabot') {
-      // 【類型 1：120mm 翼穩脫殼穿甲彈 APFSDS (超高速平射鎢芯箭 + 穿甲震波軌跡)】
-      spawnSabotMachLine(ax, ay, tx, ty, dist, baseAngle);
+    } else if (wType === 'fire') {
+      // 【火攻霹靂：烈焰火球拋射】
       launchSingleProjectile({
         ax, ay, tx, ty,
-        wType: 'sabot',
-        arcHeight: 0,
+        wType: 'fire',
+        arcHeight: -Math.min(95, dist * 0.22),
         waveAmp: 0,
-        dur: Math.max(60, 125 / speed),
+        dur: Math.max(110, 225 / speed),
         side: ln.side,
         onHit: () => triggerImpact()
       });
 
-    } else if (wType === 'torpedo') {
-      // 【類型 5：重型反潛魚雷 / 反艦飛彈 (S型掠海或水下空泡推進軌跡)】
+    } else if (wType === 'cavalry') {
+      // 【奔雷突騎：長槊破陣金芒疾衝】
+      spawnSabotMachLine(ax, ay, tx, ty, dist, baseAngle);
       launchSingleProjectile({
         ax, ay, tx, ty,
-        wType: 'torpedo',
+        wType: 'cavalry',
         arcHeight: 0,
-        waveAmp: 12,
-        dur: Math.max(110, 235 / speed),
+        waveAmp: 0,
+        dur: Math.max(65, 135 / speed),
         side: ln.side,
         onHit: () => triggerImpact()
       });
 
     } else {
-      // 【類型 2：超視距防空 / 空對空飛彈 (二段爬升俯衝曲線 + 凝結尾煙)】
+      // 【重甲／先登：冷兵器刀氣斬擊弧光】
       launchSingleProjectile({
         ax, ay, tx, ty,
-        wType: 'missile',
-        arcHeight: -Math.min(72, dist * 0.16),
+        wType: 'blade',
+        arcHeight: -Math.min(36, dist * 0.08),
         waveAmp: 0,
-        dur: Math.max(95, 210 / speed),
+        dur: Math.max(80, 165 / speed),
         side: ln.side,
         onHit: () => triggerImpact()
       });
@@ -4625,118 +4575,39 @@ function playFx(ln) {
     triggerImpact();
   }
 
-  // 生成各兵種專屬高精細 SVG 武器實體圖形 (大幅放大立體尺寸與強光尾焰)
+  // 古戰場冷兵器／火羽箭／烈火彈 SVG 實體特效
   function getWeaponSvgHtml(type, side) {
-    const accent = side === 'A' ? '#3de0ff' : '#ff5d6e';
-    const flameColor = side === 'A' ? '#38bdf8' : '#f43f5e';
-    if (type === 'sabot') {
-      // 翼穩脫殼穿甲彈 (APFSDS Fin-Stabilized Tungsten Dart + Super-Sonic Shock Cone, 放大至 92x24)
+    const accent = side === 'A' ? '#38bdf8' : '#f59e0b';
+    const flameColor = side === 'A' ? '#60a5fa' : '#fb7185';
+    if (type === 'cavalry') {
+      // 鎏金騎槍長槊破陣寒芒
       return `<svg class="fx-weapon-svg sabot-svg" viewBox="0 0 96 26" width="92" height="24">
-        <defs>
-          <linearGradient id="sabotGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="transparent"/>
-            <stop offset="35%" stop-color="rgba(245,158,11,0.4)"/>
-            <stop offset="70%" stop-color="#f59e0b"/>
-            <stop offset="90%" stop-color="#fef08a"/>
-            <stop offset="100%" stop-color="#ffffff"/>
-          </linearGradient>
-          <filter id="sabotGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.5" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-          </filter>
-        </defs>
-        <!-- 超音速尾部燃燒光柱 -->
-        <polygon points="0,11 68,11.5 68,14.5 0,15" fill="url(#sabotGrad)" filter="url(#sabotGlow)"/>
-        <!-- 脫殼瓣尾部穩定翼片 -->
-        <polygon points="26,4 40,11.5 26,11.5" fill="#f59e0b"/>
-        <polygon points="26,22 40,14.5 26,14.5" fill="#f59e0b"/>
-        <!-- 鎢合金箭身與高密度針狀穿桿 -->
-        <polygon points="36,11 84,11 96,13 84,15 36,15" fill="#ffffff"/>
-        <!-- 穿甲箭前緣高溫等離子電漿光團 -->
-        <ellipse cx="86" cy="13" rx="14" ry="5.5" fill="#fef08a" opacity="0.85"/>
-        <circle cx="94" cy="13" r="3" fill="#ffffff"/>
+        <polygon points="0,11 66,11 66,15 0,15" fill="${accent}" opacity="0.55"/>
+        <rect x="24" y="11.5" width="46" height="3" fill="#b45309"/>
+        <polygon points="64,7 72,13 64,19" fill="#ef4444"/>
+        <polygon points="68,9.5 95,13 68,16.5" fill="#f8fafc" stroke="#fbbf24" stroke-width="1"/>
       </svg>`;
-    } else if (type === 'autocannon') {
-      // 30mm 高爆曳光穿甲彈鏈 (密集高速彈幕, 放大至 62x16)
-      return `<svg class="fx-weapon-svg cannon-svg" viewBox="0 0 66 18" width="62" height="16">
-        <defs>
-          <linearGradient id="cannonGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="transparent"/>
-            <stop offset="50%" stop-color="#ea580c"/>
-            <stop offset="85%" stop-color="#fef08a"/>
-            <stop offset="100%" stop-color="#ffffff"/>
-          </linearGradient>
-        </defs>
-        <polygon points="0,6 48,5.5 48,12.5 0,12" fill="url(#cannonGrad)"/>
-        <polygon points="38,4 66,9 38,14" fill="#ffffff"/>
-        <ellipse cx="44" cy="9" rx="10" ry="4" fill="#fef08a" opacity="0.9"/>
+    } else if (type === 'arrow') {
+      // 雕翎火羽箭
+      return `<svg class="fx-weapon-svg cannon-svg" viewBox="0 0 84 22" width="78" height="20">
+        <polygon points="6,5 18,9.5 8,9.5" fill="#f8fafc"/>
+        <polygon points="6,17 18,12.5 8,12.5" fill="#f8fafc"/>
+        <rect x="10" y="10" width="52" height="2.2" fill="#d97706"/>
+        <circle cx="64" cy="11" r="5" fill="#f97316" opacity="0.85"/>
+        <polygon points="60,7 82,11 60,15" fill="#fef08a"/>
       </svg>`;
-    } else if (type === 'salvo') {
-      // 多管重型火箭彈 / 巡弋飛彈實體 (Heavy Rocket/Cruise Missile with roaring plume, 放大至 82x26)
-      return `<svg class="fx-weapon-svg salvo-svg" viewBox="0 0 86 28" width="82" height="26">
-        <!-- 推進器猛烈尾焰噴流 -->
-        <ellipse cx="14" cy="14" rx="16" ry="6.5" fill="#ea580c" opacity="0.95"/>
-        <ellipse cx="20" cy="14" rx="10" ry="3.8" fill="#fef08a"/>
-        <circle cx="25" cy="14" r="2.5" fill="#ffffff"/>
-        <!-- 摺疊尾翼 -->
-        <polygon points="26,6 38,10.5 26,10.5" fill="#64748b"/>
-        <polygon points="26,22 38,17.5 26,17.5" fill="#64748b"/>
-        <!-- 火箭/巡弋導彈圓柱彈體 -->
-        <rect x="30" y="10" width="34" height="8" rx="2" fill="#e2e8f0" stroke="#334155" stroke-width="1"/>
-        <!-- 戰術高爆引信標記環 -->
-        <rect x="52" y="10" width="6" height="8" fill="#ef4444"/>
-        <!-- 流線型雷達導引頭前錐 -->
-        <polygon points="64,10 84,14 64,18" fill="#cbd5e1" stroke="#334155" stroke-width="1"/>
-        <polygon points="46,5 54,10 46,10" fill="#94a3b8"/>
-        <polygon points="46,23 54,18 46,18" fill="#94a3b8"/>
-      </svg>`;
-    } else if (type === 'torpedo') {
-      // 重型魚雷 / 掠海反艦彈體 (帶氣泡尾流與空泡推進環, 放大至 78x26)
-      return `<svg class="fx-weapon-svg torpedo-svg" viewBox="0 0 82 28" width="78" height="26">
-        <!-- 螺旋槳水下微空泡流 -->
-        <circle cx="10" cy="14" r="5.5" fill="#67e8f9" opacity="0.75"/>
-        <circle cx="20" cy="11" r="3.5" fill="#cffafe" opacity="0.85"/>
-        <circle cx="20" cy="17" r="3.5" fill="#cffafe" opacity="0.85"/>
-        <!-- 十字尾舵 -->
-        <polygon points="24,6 34,10 24,10" fill="#0891b2"/>
-        <polygon points="24,22 34,18 24,18" fill="#0891b2"/>
-        <!-- 魚雷主耐壓艙身 -->
-        <rect x="28" y="9.5" width="36" height="9" rx="3" fill="#0e7490" stroke="#67e8f9" stroke-width="1.2"/>
-        <!-- 聲納尋標聲學圓頭 -->
-        <path d="M64,9.5 C76,9.5 80,14 80,14 C80,14 76,18.5 64,18.5 Z" fill="#22d3ee"/>
-      </svg>`;
-    } else if (type === 'swarm') {
-      // 三角翼自殺無人機 / 巡飛彈 (Loitering Munition Delta-Wing, 放大至 54x38)
-      return `<svg class="fx-weapon-svg swarm-svg" viewBox="0 0 58 42" width="54" height="38">
-        <!-- 機翼輪廓與高對比陣營飾線 -->
-        <polygon points="8,4 46,21 8,38 18,21" fill="#1e293b" stroke="${accent}" stroke-width="2"/>
-        <!-- 中央機身與機背電子艙 -->
-        <polygon points="18,17 54,21 18,25" fill="#94a3b8"/>
-        <!-- 機鼻微型光電紅外尋標頭 -->
-        <circle cx="47" cy="21" r="3.5" fill="#ff2a4b"/>
-        <circle cx="48" cy="21" r="1.5" fill="#ffffff"/>
-        <!-- 尾部推進螺旋槳高亮光錐 -->
-        <ellipse cx="10" cy="21" rx="8" ry="3.5" fill="${flameColor}" opacity="0.9"/>
+    } else if (type === 'fire') {
+      // 霹靂烈火流星彈
+      return `<svg class="fx-weapon-svg salvo-svg" viewBox="0 0 76 28" width="72" height="26">
+        <ellipse cx="28" cy="14" rx="24" ry="8" fill="#ea580c" opacity="0.78"/>
+        <ellipse cx="42" cy="14" rx="16" ry="6" fill="#fbbf24" opacity="0.92"/>
+        <circle cx="56" cy="14" r="8" fill="#fef08a" stroke="#dc2626" stroke-width="1.5"/>
       </svg>`;
     } else {
-      // 超音速防空 / 空對空飛彈 (Supersonic Dual-Stage Missile with high-thrust afterburner, 放大至 84x28)
-      return `<svg class="fx-weapon-svg missile-svg" viewBox="0 0 88 30" width="84" height="28">
-        <!-- 雙脈衝火箭引擎強力離子噴流 -->
-        <ellipse cx="15" cy="15" rx="16" ry="6" fill="${flameColor}" opacity="0.9"/>
-        <ellipse cx="22" cy="15" rx="9" ry="3.2" fill="#ffffff"/>
-        <!-- 尾部控制翼面 (4片十字舵) -->
-        <polygon points="26,5 36,11.5 26,11.5" fill="#475569"/>
-        <polygon points="26,25 36,18.5 26,18.5" fill="#475569"/>
-        <!-- 彈體中部雙三角穩定翼片 -->
-        <polygon points="46,7 54,11.5 46,11.5" fill="#334155"/>
-        <polygon points="46,23 54,18.5 46,18.5" fill="#334155"/>
-        <!-- 飛彈長柱主體 -->
-        <rect x="28" y="11.5" width="38" height="7" fill="#f8fafc" stroke="#334155" stroke-width="1"/>
-        <!-- 陣營識別導引色帶 -->
-        <rect x="52" y="11.5" width="5.5" height="7" fill="${accent}"/>
-        <!-- 尖銳超音速雷達尋標鼻錐 -->
-        <polygon points="66,11.5 86,15 66,18.5" fill="#e2e8f0" stroke="#334155" stroke-width="1"/>
-        <circle cx="82" cy="15" r="1.5" fill="#ffffff"/>
+      // 偃月半月刀氣斬光
+      return `<svg class="fx-weapon-svg missile-svg" viewBox="0 0 72 34" width="68" height="32">
+        <path d="M18,4 Q64,17 18,30 Q42,17 18,4 Z" fill="${flameColor}" opacity="0.85"/>
+        <path d="M28,6 Q68,17 28,28 Q50,17 28,6 Z" fill="#ffffff"/>
       </svg>`;
     }
   }
@@ -5041,7 +4912,7 @@ function fastForwardBattle(res, opts = {}) {
   // 2. 立即將雙方全體裝備生命值更新為最終結算 HP 與陣亡樣式
   if (res.final) {
     const maxHp = {};
-    [...res.final.A, ...res.final.B].forEach(u => { maxHp[u.uid] = u.hpMax; });
+    [...res.final.A, ...res.final.B].forEach(u => { maxHp[u.uid] = u.maxHp || u.hpMax || u.hp; });
     [...res.final.A, ...res.final.B].forEach(u => setHp(u.uid, u.hp, maxHp[u.uid]));
   }
 
@@ -5242,6 +5113,9 @@ $('#btnBattleExit')?.addEventListener('click', handleExitBattleToCurrentMode);
 function finishBattle(res) {
   enterBattlefieldReviewState();
   const won = res.winner === 'A', draw = res.winner === 'draw';
+  if (typeof SoundEngine !== 'undefined' && typeof SoundEngine.play === 'function') {
+    SoundEngine.play(won ? 'victory' : 'defeat');
+  }
   if (state.mode !== 'sandbox') {
     const mySideForMastery = (state.isOnlinePvp && typeof OnlinePvPEngine !== 'undefined' && !OnlinePvPEngine.isHostUser()) ? 'B' : 'A';
     if (typeof recordUnitMasteryFromBattle === 'function') {
@@ -6357,45 +6231,45 @@ function buildWhy(res) {
   const ewB = Number(res.ewB) || 0;
   if (res.advSide) {
     const big = Math.abs(ewA - ewB) >= 25, mine = res.advSide === 'A';
-    out.push({ t: mine ? 'good' : 'bad', s: `電戰：我方 ${ewA.toFixed(0)} vs 敵方 ${ewB.toFixed(0)}，${mine ? (big ? '你掌握了電磁優勢，敵方命中率明顯下降。' : '你略占電戰優勢，效果有限。') : (big ? '敵方掌握電磁優勢，你的攻擊更難命中。' : '敵方略占電戰優勢，影響有限。')}` });
+    out.push({ t: mine ? 'good' : 'bad', s: `軍師奇謀：我方 ${ewA.toFixed(0)} vs 敵方 ${ewB.toFixed(0)}，${mine ? (big ? '我軍算無遺策，敵陣動搖、命中率顯著下降。' : '我軍略占奇謀先機。') : (big ? '敵軍奇門八陣壓制我軍，攻勢屢屢受挫。' : '敵軍略占奇謀之利。')}` });
   } else {
-    out.push({ t: '', s: `電戰：我方 ${ewA.toFixed(0)} vs 敵方 ${ewB.toFixed(0)}，雙方電磁權互不相讓。` });
+    out.push({ t: '', s: `軍師奇謀：我方 ${ewA.toFixed(0)} vs 敵方 ${ewB.toFixed(0)}，雙方軍師鬥法旗鼓相當。` });
   }
   const dRemain = (A.remain || 0) - (B.remain || 0);
-  out.push({ t: dRemain >= 0 ? 'good' : 'bad', s: `殘餘戰力${dRemain >= 0 ? '領先' : '落後'} ${Math.abs(dRemain).toFixed(1)} 分——${dRemain >= 0 ? '你的部隊保存得更完整。' : '你的主力損失較大。'}` });
+  out.push({ t: dRemain >= 0 ? 'good' : 'bad', s: `殘餘兵力${dRemain >= 0 ? '領先' : '落後'} ${Math.abs(dRemain).toFixed(1)} 分——${dRemain >= 0 ? '我軍主力保存更為完整。' : '我軍主力折損較重。'}` });
   if ((A.control || 0) !== (B.control || 0)) {
-    out.push({ t: (A.control || 0) > (B.control || 0) ? 'good' : 'bad', s: `戰線控制 ${(A.control || 0).toFixed(0)} vs ${(B.control || 0).toFixed(0)}：${(A.control || 0) > (B.control || 0) ? '你掌握了裝甲／空優／海權的優勢。' : '對手在裝甲、空優或海權取得更多控制。'}` });
+    out.push({ t: (A.control || 0) > (B.control || 0) ? 'good' : 'bad', s: `陣地奪控 ${(A.control || 0).toFixed(0)} vs ${(B.control || 0)}：${(A.control || 0) > (B.control || 0) ? '我軍牢牢掌控中軍重甲、突騎與渡口主動權。' : '敵軍於重甲步陣與兩翼突擊取得優勢。'}` });
   }
   const mvpSide = won ? 'A' : 'B';
   const m = res.mvp ? (res.mvp[mvpSide] || res.mvp.A || res.mvp.B) : null;
   if (m && m.name) {
-    out.push({ t: '', s: `${won ? '我方' : '敵方'}火力王：${esc(m.name)}（累計傷害 ${Math.round(m.dmgDone || 0)}，擊發 ${m.shots || 0} 波）` });
+    out.push({ t: '', s: `${won ? '我軍' : '敵軍'}破陣首功：${esc(m.name)}（累計殺傷 ${Math.round(m.dmgDone || 0)}，出擊 ${m.shots || 0} 合）` });
   }
   // 擷取戰場關鍵攔截與首波斬首事件
   const allLines = (res.frames || []).flatMap(f => (f && f.lines) ? f.lines.map(l => Object.assign({ phase: f.phase }, l)) : []);
   const abmLine = allLines.find(l => l.brevity === 'ABM-KILL');
   if (abmLine) {
-    out.push({ t: abmLine.side === 'A' ? 'good' : 'bad', s: `高空反導攔截：${esc(abmLine.text.replace(/^\[[^\]]+\]\s*/, ''))}` });
+    out.push({ t: abmLine.side === 'A' ? 'good' : 'bad', s: `強弩截擊破敵：${esc(abmLine.text.replace(/^\[[^\]]+\]\s*/, ''))}` });
   }
   const p1Kill = allLines.find(l => l.phase === 1 && l.kind === 'kill');
   if (p1Kill) {
-    out.push({ t: p1Kill.side === 'A' ? 'good' : 'bad', s: `先制斬首破局：階段一 ${esc(p1Kill.text.replace(/^\[[^\]]+\]\s*/, ''))}` });
+    out.push({ t: p1Kill.side === 'A' ? 'good' : 'bad', s: `先制斬將奪旗：階段一 ${esc(p1Kill.text.replace(/^\[[^\]]+\]\s*/, ''))}` });
   }
   if (!won && res.winner !== 'draw' && res.final?.A) {
     const enemyMvp = res.mvp?.B;
     const lostP1Ads = res.final.A.find(u => u && u.cat === 'air_defense' && !u.alive && allLines.some(l => l.phase === 1 && l.kind === 'kill' && l.tuid === u.uid));
     if (lostP1Ads) {
-      out.push({ t: 'bad', s: `參謀建議：我方防空【${esc(lostP1Ads.name)}】於階段一遭敵方先制摧毀；可改配刺針／柳樹等被動紅外防空規避反輻射鎖定，或部署薩德／S-500 實施高空反導攔截。` });
+      out.push({ t: 'bad', s: `軍師獻策：我軍神射營【${esc(lostP1Ads.name)}】於開戰先制遭敵奇襲潰滅；建議改配高隱匿伏弓或鐵桶拒馬弓將鞏固後陣。` });
     } else if (ewB - ewA >= 20) {
-      out.push({ t: 'bad', s: `參謀建議：敵方電戰大幅領先（+${(ewB - ewA).toFixed(0)} EW）致盲我方火控；建議編入 E-7A、咆哮者、殲-16D 或改採「電子欺敵」教條反制。` });
+      out.push({ t: 'bad', s: `軍師獻策：敵方奇謀大幅領先（+${(ewB - ewA).toFixed(0)} 奇謀）惑亂我軍陣腳；建議起用諸葛亮、竹中半兵衛、郭嘉等大軍師，或改採「難知如陰」兵法反制。` });
     } else if (enemyMvp && enemyMvp.traits && enemyMvp.traits.includes('SUB')) {
-      out.push({ t: 'bad', s: `參謀建議：敵方潛艦【${esc(enemyMvp.name)}】造成重創；建議配置具備【ASW 反潛】特性之巡防艦（如 FREMM、054A、成功級）實施獵潛克制。` });
+      out.push({ t: 'bad', s: `軍師獻策：敵方潛行奇兵【${esc(enemyMvp.name)}】奇襲得手；建議配置具備【水陸搜剿】或【登高瞭望】特技之先登名將識破伏兵。` });
     } else if (enemyMvp && enemyMvp.cat === 'support' && enemyMvp.traits && enemyMvp.traits.includes('TRUE_AT')) {
-      out.push({ t: 'bad', s: `參謀建議：敵方穿甲無人機／巡飛彈穿透我方裝甲；建議部署【CIWS 近防】（鐵穹、鎧甲、Skynex、雲豹 CM-34）減半無人機傷害。` });
+      out.push({ t: 'bad', s: `軍師獻策：敵軍破甲火器重創我軍盾陣；建議部署具備【密集弩陣】特性之神射名將壓制敵方奇器。` });
     } else {
       const air = res.final.A.find(u => u && u.cat === 'air');
-      if (air && !air.alive) out.push({ t: 'bad', s: '參謀建議：我方戰機遭防空火網擊落，下次可改配高隱匿戰機，或搭配 SEAD 反輻射單位先制壓制敵方防空。' });
-      else out.push({ t: 'bad', s: '參謀建議：嘗試調整戰術教條，或湊齊「CEC 協同接戰／MUM-T 忠誠僚機／鋼鐵洪流」體系羈絆以強化全局戰力。' });
+      if (air && !air.alive) out.push({ t: 'bad', s: '軍師獻策：我軍奔雷突騎遭敵強弩拒馬重創，可改遣高隱匿輕騎迂迴側擊，或以先制破弓戰法開路。' });
+      else out.push({ t: 'bad', s: '軍師獻策：可調整風林火山兵法教條，或湊齊「八陣圖／奇正相生／步騎合圍」古兵法陣勢以扭轉乾坤。' });
     }
   }
   return out;
@@ -6428,6 +6302,9 @@ function shareText(res) {
 
 function closeBattle() {
   exitActiveBattle();
+  if (typeof SoundEngine !== 'undefined' && typeof SoundEngine.playBgm === 'function') {
+    SoundEngine.playBgm('prep');
+  }
   const vb = $('#viewBuild'); if (vb) vb.hidden = false;
   const mb = $('#missionBar'); if (mb) mb.hidden = false;
   const cd = $('#commandDeck'); if (cd) cd.hidden = false;

@@ -26,3 +26,4 @@ for pid, p in data.get('query', {}).get('pages', {}).items():
         print(p['title'], '->', info[0]['url'])
     else:
         print(p['title'], '-> NOT FOUND')
+

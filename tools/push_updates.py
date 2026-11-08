@@ -11,13 +11,14 @@ if not TOKEN:
 REPO_AUTH = f"https://{TOKEN}@github.com/newreply01/TopWarlords.git"
 
 def run(cmd, cwd="D:/TopWarlords"):
+    safe_cmd = cmd.replace(TOKEN, "***") if TOKEN else cmd
     p = subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, text=True)
     if p.returncode != 0:
-        print(f"FAILED: {cmd}\nSTDOUT: {p.stdout}\nSTDERR: {p.stderr}")
+        print(f"FAILED: {safe_cmd}\nSTDOUT: {p.stdout}\nSTDERR: {p.stderr.replace(TOKEN, '***')}")
     else:
-        print(f"OK: {cmd}")
+        print(f"OK: {safe_cmd}")
         if p.stdout.strip():
-            print(p.stdout.strip())
+            print(p.stdout.replace(TOKEN, "***").strip())
     return p.returncode
 
 try:

@@ -72,3 +72,4 @@ for uid, url in SPECIFIC_FILES.items():
     time.sleep(0.6) # 避免 429
 
 print("\nDone fetching specific portraits!")
+

@@ -25,3 +25,4 @@ for name in ['霍去病', '衛青', '關羽', '諸葛亮', '曹操', '戚繼光'
     print(f"{name} -> {len(res)} results:")
     for t, u in res[:2]:
         print("   ", t, "->", u)
+

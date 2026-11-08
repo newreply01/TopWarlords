@@ -710,7 +710,7 @@ kbd{display:inline-block;padding:1px 5px;font-family:var(--mono);font-size:10px;
 .sim-tbl td:last-child{text-align:right;font-family:var(--mono)}
 
 /* ---------- Battle (100vh 零截斷全景自適應 100% 滿版大氣展開) ---------- */
-.battle{padding:4px 18px 6px;width:100%;max-width:100%;margin:0;box-sizing:border-box;height:calc(100vh - 54px);max-height:calc(100vh - 54px);overflow:hidden;display:flex;flex-direction:column}
+.battle{padding:4px 18px 14px;width:100%;max-width:100%;margin:0;box-sizing:border-box;min-height:calc(100vh - 54px);height:auto;max-height:none;overflow-x:hidden;overflow-y:auto;display:flex;flex-direction:column}
 .battle-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;flex:none;min-height:34px;width:100%}
 .phase-steps{display:flex;gap:6px}
 .ph{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);transition:.3s;font-weight:700;font-size:12px}
@@ -3241,20 +3241,20 @@ body:has(.battle:not([hidden])) .command-deck,
 }
 .m-avatar-wrap {
   position: relative;
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 10px;
   overflow: hidden;
-  border: 1.5px solid var(--c);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--c);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
   background: #0f172a;
 }
 .m-avatar-img {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  object-position: center !important; /* 精準聚焦在名將頭像與題名 */
+  object-position: center 14% !important; /* 精準聚焦在名將寫實臉部與胸甲 */
   display: block;
 }
 .m-avatar-cost {
@@ -3556,7 +3556,7 @@ body:has(.battle:not([hidden])) .command-deck,
   position: relative;
 }
 .bu.destroyed-badge::after {
-  content: '💥 DESTROYED';
+  content: '⚔️ 潰敗陣亡';
   position: absolute;
   right: 8px;
   bottom: 5px;
@@ -19595,14 +19595,20 @@ select:focus-visible,
 .battle-3d-wrapper {
   position: relative;
   width: 100%;
-  height: 380px;
-  background: #080f1a;
-  border: 1px solid var(--line2);
+  height: clamp(305px, 47vh, 430px);
+  background: #172033;
+  border: 1.5px solid rgba(251, 191, 36, 0.38);
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7), 0 8px 24px rgba(0, 0, 0, 0.4);
-  margin-bottom: 8px;
+  box-shadow: inset 0 0 32px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.35);
+  margin-bottom: 10px;
   flex: none;
+}
+.battle-3d-wrapper:not([hidden]) ~ .battle-grid {
+  min-height: 296px;
+}
+.battle-3d-wrapper:not([hidden]) ~ .battle-grid .team-bg-hud {
+  display: none;
 }
 .battle-3d-canvas-container {
   width: 100%;

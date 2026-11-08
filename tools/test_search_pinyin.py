@@ -31,3 +31,4 @@ for name in pinyins:
     print(f"{name} -> {len(res)} results:")
     for t, u in res[:2]:
         print("   ", t, "->", u)
+

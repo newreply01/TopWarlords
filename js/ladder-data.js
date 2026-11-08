@@ -105,7 +105,7 @@ const LADDER_PRESETS = [
     "deck": [
       "XIAHOUYUAN",
       "MENGGONG",
-      "LUSUARCH",
+      "GENGYAN",
       "WEIYAN",
       "ZHUGELIANG"
     ],
@@ -136,7 +136,7 @@ const LADDER_PRESETS = [
       "LINGTONG",
       "GUANYU",
       "HUANGZHONG",
-      "ZHANGLIAO_V",
+      "XIEXUAN",
       "LUSU"
     ],
     "title": "神機帷幄奇正聯防"
@@ -150,8 +150,8 @@ const LADDER_PRESETS = [
     "deck": [
       "YUWENTAI",
       "DIANWEI",
-      "LUSUARCH",
-      "ZHANGLIAO_V",
+      "GENGYAN",
+      "XIEXUAN",
       "CHENGONG"
     ],
     "title": "赤壁赤焰水陸突襲"
@@ -165,7 +165,7 @@ const LADDER_PRESETS = [
     "deck": [
       "YAMAGATA",
       "HONDA",
-      "TANEGASHIMA",
+      "MATSUNAGA",
       "KUKI",
       "MASANOBU"
     ],
@@ -181,7 +181,7 @@ const LADDER_PRESETS = [
       "TACHIBANA",
       "SHIMAZUY",
       "SAIKA",
-      "MOURI_V",
+      "MOURI_MOTO",
       "TAKAKAGE"
     ],
     "title": "車懸之陣正面決戰"
@@ -195,8 +195,8 @@ const LADDER_PRESETS = [
     "deck": [
       "YOSHITSUNE",
       "SHIMAZUY",
-      "KUNITOMO",
-      "MOURI_V",
+      "TSUDA_SAN",
+      "MOURI_MOTO",
       "SESSAI"
     ],
     "title": "三段輪射火力重壁"
@@ -208,7 +208,7 @@ const LADDER_PRESETS = [
     "rp": 49773,
     "doc": "defense",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "GYEBAEK",
       "CHOIMUSEON",
       "JEONGJI",
@@ -225,7 +225,7 @@ const LADDER_PRESETS = [
     "deck": [
       "KIMYUSHIN",
       "GYEBAEK",
-      "TANEGASHIMA",
+      "MATSUNAGA",
       "JEONGJI",
       "NAOIE"
     ],
@@ -241,7 +241,7 @@ const LADDER_PRESETS = [
       "HUO",
       "MENGGONG",
       "ZONGZE",
-      "MENGCHONG",
+      "LUFAN",
       "WEIXIAOKUAN"
     ],
     "title": "太宗親衛千里奔襲"
@@ -270,7 +270,7 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "XUCHU",
-      "LUSUARCH",
+      "GENGYAN",
       "DINGFENG",
       "WEIXIAOKUAN"
     ],
@@ -283,7 +283,7 @@ const LADDER_PRESETS = [
     "rp": 47282,
     "doc": "strike",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "GYEBAEK",
       "CHOIMUSEON",
       "DINGFENG",
@@ -300,7 +300,7 @@ const LADDER_PRESETS = [
     "deck": [
       "GAISUWEN",
       "GYEBAEK",
-      "KOGURYOBOW",
+      "MILYU",
       "JEONGJI",
       "PANGTONG"
     ],
@@ -315,8 +315,8 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHAOYUN",
       "GAOSHUN",
-      "LUSUARCH",
-      "XIANDENG",
+      "GENGYAN",
+      "HEQI",
       "ZHANGLIANG"
     ],
     "title": "十面埋伏天羅地網"
@@ -343,9 +343,9 @@ const LADDER_PRESETS = [
     "rp": 45122,
     "doc": "defense",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "CAOREN",
-      "KOGURYOBOW",
+      "MILYU",
       "YISUNSIN",
       "GANGGAMCHAN"
     ],
@@ -360,9 +360,9 @@ const LADDER_PRESETS = [
     "deck": [
       "KIMYUSHIN",
       "GYEBAEK",
-      "CAOPICROSS",
+      "FENGYI",
       "JANGPOGO",
-      "KORYO_CAT"
+      "KIMBUSHIK"
     ],
     "title": "玄甲重盾正面死鬥"
   },
@@ -390,8 +390,8 @@ const LADDER_PRESETS = [
     "deck": [
       "YAMAGATA",
       "SHIMAZUY",
-      "INABA",
-      "MOURI_V",
+      "TORII",
+      "MOURI_MOTO",
       "EKEI"
     ],
     "title": "奔雷突襲極致先手"
@@ -403,10 +403,10 @@ const LADDER_PRESETS = [
     "rp": 42839,
     "doc": "strike",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "GYEBAEK",
       "CHOIMUSEON",
-      "MENGCHONG",
+      "LUFAN",
       "PANGTONG"
     ],
     "title": "十面埋伏天羅地網"
@@ -420,7 +420,7 @@ const LADDER_PRESETS = [
     "deck": [
       "YUKIMURA",
       "SHIMAZUY",
-      "NEGORO",
+      "HONDA_TADATSUGU",
       "KUKI",
       "NAOIE"
     ],
@@ -435,8 +435,8 @@ const LADDER_PRESETS = [
     "deck": [
       "CAOZHANG",
       "XUCHU",
-      "YANYAN",
-      "ZHANGLIAO_V",
+      "ZHOUYAFU",
+      "XIEXUAN",
       "LUSU"
     ],
     "title": "登高觀瞻精確校射"
@@ -450,8 +450,8 @@ const LADDER_PRESETS = [
     "deck": [
       "LUBU",
       "YUJIN",
-      "LUSUARCH",
-      "MENGCHONG",
+      "GENGYAN",
+      "LUFAN",
       "ZHANGLIANG"
     ],
     "title": "先登奇兵暗夜刺殺"
@@ -466,7 +466,7 @@ const LADDER_PRESETS = [
       "DENGAI",
       "DIANWEI",
       "ZHANGHE",
-      "ZHANGLIAO_V",
+      "XIEXUAN",
       "CHENGONG"
     ],
     "title": "八陣帷幄奇謀致勝"
@@ -480,7 +480,7 @@ const LADDER_PRESETS = [
     "deck": [
       "CAOZHANG",
       "YUEFEI",
-      "CHUBEE",
+      "KUANGZHANG",
       "YANGSU",
       "FAZHENG"
     ],
@@ -495,8 +495,8 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHANGLIAO",
       "MENGTIAN",
-      "LUSUARCH",
-      "MENGCHONG",
+      "GENGYAN",
+      "LUFAN",
       "PANGTONG"
     ],
     "title": "伏波龍骨水陸破暗"
@@ -510,7 +510,7 @@ const LADDER_PRESETS = [
     "deck": [
       "CAOCHUN",
       "GAOSHUN",
-      "YANYAN",
+      "ZHOUYAFU",
       "ZHOUYU",
       "CHENGONG"
     ],
@@ -525,7 +525,7 @@ const LADDER_PRESETS = [
     "deck": [
       "YOSHITSUNE",
       "IINAOMASA",
-      "TANEGASHIMA",
+      "MATSUNAGA",
       "HATTORI",
       "TAKAKAGE"
     ],
@@ -540,7 +540,7 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "XUCHU",
-      "SHENBI",
+      "TANDAOJI",
       "KUKI",
       "WEIXIAOKUAN"
     ],
@@ -555,8 +555,8 @@ const LADDER_PRESETS = [
     "deck": [
       "SHINGEN",
       "SHIMAZUY",
-      "TANEGASHIMA",
-      "FUMASUB",
+      "MATSUNAGA",
+      "WAKIZAKA",
       "SESSAI"
     ],
     "title": "步騎火砲協同合圍"
@@ -568,11 +568,11 @@ const LADDER_PRESETS = [
     "rp": 36487,
     "doc": "defense",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "CHOIYOUNG",
-      "PARKJESANG",
+      "HULUGUANG",
       "GANNING",
-      "HOGAK_DRUM"
+      "TOKUGAWA"
     ],
     "title": "十面埋伏天羅地網"
   },
@@ -600,8 +600,8 @@ const LADDER_PRESETS = [
     "deck": [
       "EULJI",
       "GYEBAEK",
-      "TANEGASHIMA",
-      "MENGCHONG",
+      "MATSUNAGA",
+      "LUFAN",
       "PANGTONG"
     ],
     "title": "先制斬首千里破陣"
@@ -615,7 +615,7 @@ const LADDER_PRESETS = [
     "deck": [
       "EULJI",
       "GYEBAEK",
-      "KOGURYOBOW",
+      "MILYU",
       "JEONGJI",
       "GANGGAMCHAN"
     ],
@@ -630,9 +630,9 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHAOYUN",
       "DIQING",
-      "CAOPICROSS",
-      "HANSHIZHONG_V",
-      "ZHUGUKE"
+      "FENGYI",
+      "YUYUNWEN",
+      "FANLI"
     ],
     "title": "多路並進漫天火矢"
   },
@@ -645,8 +645,8 @@ const LADDER_PRESETS = [
     "deck": [
       "KIMYUSHIN",
       "CAOREN",
-      "PARKJESANG",
-      "TAMNA",
+      "HULUGUANG",
+      "BAEJEONG",
       "SEOHUI"
     ],
     "title": "神射強弩封鎖全場"
@@ -690,7 +690,7 @@ const LADDER_PRESETS = [
     "deck": [
       "GAISUWEN",
       "CAOREN",
-      "KOGURYOBOW",
+      "MILYU",
       "DINGFENG",
       "GANGGAMCHAN"
     ],
@@ -705,8 +705,8 @@ const LADDER_PRESETS = [
     "deck": [
       "DATE",
       "SHIMAZUY",
-      "NAGASHINO",
-      "FUMASUB",
+      "ASAKURA_SOT",
+      "WAKIZAKA",
       "KANBEI"
     ],
     "title": "先登奇兵暗夜刺殺"
@@ -719,9 +719,9 @@ const LADDER_PRESETS = [
     "doc": "defense",
     "deck": [
       "YAMAGATA",
-      "ONIKOJIMA",
-      "TANEGASHIMA",
-      "SHIMAZU_V",
+      "SANADA_NOB",
+      "MATSUNAGA",
+      "CHOSOKABE",
       "KANBEI"
     ],
     "title": "登高觀瞻精確校射"
@@ -735,7 +735,7 @@ const LADDER_PRESETS = [
     "deck": [
       "GONGSUNDU",
       "MENGGONG",
-      "LUSUARCH",
+      "GENGYAN",
       "KUKI",
       "PANGTONG"
     ],
@@ -750,8 +750,8 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHAOYUN",
       "MENGTIAN",
-      "SHESHENG",
-      "MENGCHONG",
+      "GENGGONG",
+      "LUFAN",
       "XUNYU"
     ],
     "title": "先制斬首千里破陣"
@@ -765,7 +765,7 @@ const LADDER_PRESETS = [
     "deck": [
       "YUKIMURA",
       "SHIMAZUY",
-      "TANEGASHIMA",
+      "MATSUNAGA",
       "HATTORI",
       "SESSAI"
     ],
@@ -795,7 +795,7 @@ const LADDER_PRESETS = [
     "deck": [
       "TACHIBANA",
       "TACHIBANAD",
-      "SUZUKI",
+      "SHIMOTSUMA",
       "HATTORI",
       "SANADAMASA"
     ],
@@ -810,8 +810,8 @@ const LADDER_PRESETS = [
     "deck": [
       "TACHIBANA",
       "SHIMAZUY",
-      "INABA",
-      "YOSHITSUN_V",
+      "TORII",
+      "ZUTI",
       "SESSAI"
     ],
     "title": "八陣帷幄奇謀致勝"
@@ -826,7 +826,7 @@ const LADDER_PRESETS = [
       "LINGTONG",
       "CAOREN",
       "LIGUANG",
-      "HANSHIZHONG_V",
+      "YUYUNWEN",
       "CHENGONG"
     ],
     "title": "十面埋伏天羅地網"
@@ -870,8 +870,8 @@ const LADDER_PRESETS = [
     "deck": [
       "YUKIMURA",
       "SHIMAZUY",
-      "INABA",
-      "FUMASUB",
+      "TORII",
+      "WAKIZAKA",
       "NAOIE"
     ],
     "title": "十面埋伏天羅地網"
@@ -885,7 +885,7 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "MENGGONG",
-      "LUSUARCH",
+      "GENGYAN",
       "WEIYAN",
       "SUNBIN"
     ],
@@ -900,8 +900,8 @@ const LADDER_PRESETS = [
     "deck": [
       "FUMA",
       "HONDA",
-      "SUZUKI",
-      "MOURI_V",
+      "SHIMOTSUMA",
+      "MOURI_MOTO",
       "SESSAI"
     ],
     "title": "重鎧陣線寸步不讓"
@@ -915,8 +915,8 @@ const LADDER_PRESETS = [
     "deck": [
       "SHINGEN",
       "SHIMAZUY",
-      "TANEGASHIMA",
-      "MOURI_V",
+      "MATSUNAGA",
+      "MOURI_MOTO",
       "NAOIE"
     ],
     "title": "八陣帷幄奇謀致勝"
@@ -930,9 +930,9 @@ const LADDER_PRESETS = [
     "deck": [
       "DATE",
       "SHIMAZUY",
-      "SUZUKI",
-      "SHIMAZU_V",
-      "KOGA_SCOUT"
+      "SHIMOTSUMA",
+      "CHOSOKABE",
+      "YAMAMOTO"
     ],
     "title": "奔雷突襲極致先手"
   },
@@ -946,7 +946,7 @@ const LADDER_PRESETS = [
       "FUMA",
       "SHIBATA",
       "YOICHI",
-      "KONISHI",
+      "TOUDO",
       "EKEI"
     ],
     "title": "重鎧陣線寸步不讓"
@@ -961,7 +961,7 @@ const LADDER_PRESETS = [
       "HULU",
       "BAIQI",
       "ZHANGHE",
-      "MENGCHONG",
+      "LUFAN",
       "WEIXIAOKUAN"
     ],
     "title": "奔雷突襲極致先手"
@@ -975,8 +975,8 @@ const LADDER_PRESETS = [
     "deck": [
       "OBATA",
       "SHIBATA",
-      "TANEGASHIMA",
-      "MOURI_V",
+      "MATSUNAGA",
+      "MOURI_MOTO",
       "MASASHIGE"
     ],
     "title": "多路並進漫天火矢"
@@ -991,8 +991,8 @@ const LADDER_PRESETS = [
       "KENSHIN",
       "SHIMAZUY",
       "NOBUNAGA",
-      "FUMASUB",
-      "KOGA_SCOUT"
+      "WAKIZAKA",
+      "YAMAMOTO"
     ],
     "title": "八陣帷幄奇謀致勝"
   },
@@ -1006,7 +1006,7 @@ const LADDER_PRESETS = [
       "DENGAI",
       "XUCHU",
       "ZHANGHE",
-      "ZHANGLIAO_V",
+      "XIEXUAN",
       "CHENGONG"
     ],
     "title": "伏波龍骨水陸破暗"
@@ -1018,9 +1018,9 @@ const LADDER_PRESETS = [
     "rp": 19050,
     "doc": "strike",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "GYEBAEK",
-      "PARKJESANG",
+      "HULUGUANG",
       "JEONGJI",
       "PANGTONG"
     ],
@@ -1033,9 +1033,9 @@ const LADDER_PRESETS = [
     "rp": 18606,
     "doc": "strike",
     "deck": [
-      "BAEKJEO",
+      "MAEDATOSHI",
       "CHOIYOUNG",
-      "TANEGASHIMA",
+      "MATSUNAGA",
       "GANNING",
       "SEOHUI"
     ],
@@ -1065,7 +1065,7 @@ const LADDER_PRESETS = [
     "deck": [
       "KENSHIN",
       "SHIMAZUY",
-      "NAGASHINO",
+      "ASAKURA_SOT",
       "HATTORI",
       "NAOIE"
     ],
@@ -1080,7 +1080,7 @@ const LADDER_PRESETS = [
     "deck": [
       "GONGSUNDU",
       "DIANWEI",
-      "YANYAN",
+      "ZHOUYAFU",
       "WEIYAN",
       "CHENGONG"
     ],
@@ -1110,7 +1110,7 @@ const LADDER_PRESETS = [
     "deck": [
       "KEIJI",
       "SHIMAZUY",
-      "SUZUKI",
+      "SHIMOTSUMA",
       "HATTORI",
       "SANADAMASA"
     ],
@@ -1125,7 +1125,7 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHANGLIAO",
       "LIANPO",
-      "LUSUARCH",
+      "GENGYAN",
       "HUANGGAI",
       "TIANDAN"
     ],
@@ -1140,8 +1140,8 @@ const LADDER_PRESETS = [
     "deck": [
       "DATE",
       "SHIMAZUY",
-      "SUZUKI",
-      "MOURI_V",
+      "SHIMOTSUMA",
+      "MOURI_MOTO",
       "TAKAKAGE"
     ],
     "title": "十面埋伏天羅地網"
@@ -1155,8 +1155,8 @@ const LADDER_PRESETS = [
     "deck": [
       "TACHIBANA",
       "KATOKIYOMASA",
-      "INABA",
-      "MOURI_V",
+      "TORII",
+      "MOURI_MOTO",
       "SESSAI"
     ],
     "title": "先制斬首千里破陣"
@@ -1171,7 +1171,7 @@ const LADDER_PRESETS = [
       "KIMYUSHIN",
       "CAOREN",
       "YANGMANCHUN",
-      "MENGCHONG",
+      "LUFAN",
       "PANGTONG"
     ],
     "title": "玄甲重盾正面死鬥"
@@ -1184,8 +1184,8 @@ const LADDER_PRESETS = [
     "doc": "strike",
     "deck": [
       "YUKIMURA",
-      "KANISAIZO",
-      "TANEGASHIMA",
+      "NIWA",
+      "MATSUNAGA",
       "MURAKAMI",
       "MASASHIGE"
     ],
@@ -1201,7 +1201,7 @@ const LADDER_PRESETS = [
       "WENPING",
       "ZHOUTAI",
       "ZHANGHE",
-      "HANSHIZHONG_V",
+      "YUYUNWEN",
       "PANGTONG"
     ],
     "title": "玄甲重盾正面死鬥"
@@ -1215,8 +1215,8 @@ const LADDER_PRESETS = [
     "deck": [
       "CHENQINGZHI",
       "DIANWEI",
-      "WENCHOU",
-      "MENGCHONG",
+      "PANGJUAN",
+      "LUFAN",
       "PANGTONG"
     ],
     "title": "重鎧陣線寸步不讓"
@@ -1231,7 +1231,7 @@ const LADDER_PRESETS = [
       "DATE",
       "SHIMAZUY",
       "YOICHI",
-      "KUMANO",
+      "KUKI_MORI",
       "SANADAMASA"
     ],
     "title": "登高觀瞻精確校射"
@@ -1246,7 +1246,7 @@ const LADDER_PRESETS = [
       "EULJI",
       "CAOREN",
       "CHOIMUSEON",
-      "MENGCHONG",
+      "LUFAN",
       "PANGTONG"
     ],
     "title": "多路並進漫天火矢"
@@ -1275,7 +1275,7 @@ const LADDER_PRESETS = [
     "deck": [
       "YAMAGATA",
       "SHIMAZUY",
-      "SUZUKI",
+      "SHIMOTSUMA",
       "HATTORI",
       "MASASHIGE"
     ],
@@ -1290,8 +1290,8 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "ZHANGFEI",
-      "LUSUARCH",
-      "MENGCHONG",
+      "GENGYAN",
+      "LUFAN",
       "PANGTONG"
     ],
     "title": "十面埋伏天羅地網"
@@ -1303,9 +1303,9 @@ const LADDER_PRESETS = [
     "rp": 7902,
     "doc": "deception",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "GYEBAEK",
-      "CAOPICROSS",
+      "FENGYI",
       "GANNING",
       "SEOHUI"
     ],
@@ -1321,7 +1321,7 @@ const LADDER_PRESETS = [
       "GONGSUNDU",
       "DIANWEI",
       "LIGUANG",
-      "ZHUANZHU",
+      "WANGBA",
       "PANGTONG"
     ],
     "title": "玄甲重盾正面死鬥"
@@ -1335,8 +1335,8 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "DIANWEI",
-      "YANYAN",
-      "HANSHIZHONG_V",
+      "ZHOUYAFU",
+      "YUYUNWEN",
       "PANGTONG"
     ],
     "title": "神射強弩封鎖全場"
@@ -1350,8 +1350,8 @@ const LADDER_PRESETS = [
     "deck": [
       "OBATA",
       "TACHIBANAD",
-      "NAGASHINO",
-      "YOSHITSUN_V",
+      "ASAKURA_SOT",
+      "ZUTI",
       "MASASHIGE"
     ],
     "title": "伏波龍骨水陸破暗"
@@ -1365,8 +1365,8 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "LIANPO",
-      "YANYAN",
-      "ZHANGLIAO_V",
+      "ZHOUYAFU",
+      "XIEXUAN",
       "CHENGYU"
     ],
     "title": "步騎火砲協同合圍"
@@ -1381,7 +1381,7 @@ const LADDER_PRESETS = [
       "KENSHIN",
       "SHIMAZUY",
       "AKECHI",
-      "KONISHI",
+      "TOUDO",
       "EKEI"
     ],
     "title": "奔雷突襲極致先手"
@@ -1395,7 +1395,7 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "DIANWEI",
-      "LUSUARCH",
+      "GENGYAN",
       "DINGFENG",
       "WEIXIAOKUAN"
     ],
@@ -1425,7 +1425,7 @@ const LADDER_PRESETS = [
     "deck": [
       "GAISUWEN",
       "GYEBAEK",
-      "KOGURYOBOW",
+      "MILYU",
       "JEONGJI",
       "PANGTONG"
     ],
@@ -1439,9 +1439,9 @@ const LADDER_PRESETS = [
     "doc": "deception",
     "deck": [
       "SHINGEN",
-      "ONIKOJIMA",
-      "TANEGASHIMA",
-      "FUMASUB",
+      "SANADA_NOB",
+      "MATSUNAGA",
+      "WAKIZAKA",
       "KANBEI"
     ],
     "title": "玄甲重盾正面死鬥"
@@ -1455,8 +1455,8 @@ const LADDER_PRESETS = [
     "deck": [
       "TACHIBANA",
       "TACHIBANAD",
-      "NEGORO",
-      "YOSHITSUN_V",
+      "HONDA_TADATSUGU",
+      "ZUTI",
       "MASASHIGE"
     ],
     "title": "八陣帷幄奇謀致勝"
@@ -1498,7 +1498,7 @@ const LADDER_PRESETS = [
     "rp": 751,
     "doc": "defense",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "GYEBAEK",
       "YANGMANCHUN",
       "GANNING",
@@ -1528,7 +1528,7 @@ const LADDER_PRESETS = [
     "rp": 100,
     "doc": "deception",
     "deck": [
-      "ONDAL",
+      "ZHAOSHE",
       "GYEBAEK",
       "JUMONG",
       "JEONGJI",
@@ -1560,7 +1560,7 @@ const LADDER_PRESETS = [
     "deck": [
       "TACHIBANA",
       "TACHIBANAD",
-      "KUNITOMO",
+      "TSUDA_SAN",
       "MURAKAMI",
       "MASASHIGE"
     ],
@@ -1576,7 +1576,7 @@ const LADDER_PRESETS = [
       "DENGAI",
       "XUCHU",
       "LIGUANG",
-      "JINGKE",
+      "CAOBIN",
       "FAZHENG"
     ],
     "title": "先制斬首千里破陣"
@@ -1590,7 +1590,7 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "XUCHU",
-      "YANYAN",
+      "ZHOUYAFU",
       "WEIYAN",
       "FAZHENG"
     ],

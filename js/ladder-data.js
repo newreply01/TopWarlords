@@ -106,7 +106,7 @@ const LADDER_PRESETS = [
       "XIAHOUYUAN",
       "MENGGONG",
       "LUSUARCH",
-      "LIXU_V",
+      "WEIYAN",
       "ZHUGELIANG"
     ],
     "title": "封狼居胥遠征打擊"
@@ -238,7 +238,7 @@ const LADDER_PRESETS = [
     "rp": 48757,
     "doc": "strike",
     "deck": [
-      "LISHIMIN",
+      "HUO",
       "MENGGONG",
       "ZONGZE",
       "MENGCHONG",
@@ -269,7 +269,7 @@ const LADDER_PRESETS = [
     "doc": "deception",
     "deck": [
       "DENGAI",
-      "YUCHIGONG",
+      "XUCHU",
       "LUSUARCH",
       "DINGFENG",
       "WEIXIAOKUAN"
@@ -465,7 +465,7 @@ const LADDER_PRESETS = [
     "deck": [
       "DENGAI",
       "DIANWEI",
-      "ZHANGXUN",
+      "ZHANGHE",
       "ZHANGLIAO_V",
       "CHENGONG"
     ],
@@ -539,7 +539,7 @@ const LADDER_PRESETS = [
     "doc": "deception",
     "deck": [
       "DENGAI",
-      "YUCHIGONG",
+      "XUCHU",
       "SHENBI",
       "KUKI",
       "WEIXIAOKUAN"
@@ -659,7 +659,7 @@ const LADDER_PRESETS = [
     "doc": "strike",
     "deck": [
       "GONGSUNDU",
-      "QINSHUBAO",
+      "DIANWEI",
       "ZONGZE",
       "DONGXI",
       "LUSU"
@@ -674,7 +674,7 @@ const LADDER_PRESETS = [
     "doc": "deception",
     "deck": [
       "CAOCHUN",
-      "GUOZIYI",
+      "LIANPO",
       "HUANGZHONG",
       "JIANGQIN",
       "LUXUN"
@@ -748,7 +748,7 @@ const LADDER_PRESETS = [
     "rp": 29864,
     "doc": "strike",
     "deck": [
-      "LIXU",
+      "ZHAOYUN",
       "MENGTIAN",
       "SHESHENG",
       "MENGCHONG",
@@ -838,8 +838,8 @@ const LADDER_PRESETS = [
     "rp": 26095,
     "doc": "deception",
     "deck": [
-      "XUETOU",
-      "QINSHUBAO",
+      "DENGAI",
+      "DIANWEI",
       "ZONGZE",
       "WEIYAN",
       "FAZHENG"
@@ -883,7 +883,7 @@ const LADDER_PRESETS = [
     "rp": 24555,
     "doc": "strike",
     "deck": [
-      "XUETOU",
+      "DENGAI",
       "MENGGONG",
       "LUSUARCH",
       "WEIYAN",
@@ -959,7 +959,7 @@ const LADDER_PRESETS = [
     "doc": "defense",
     "deck": [
       "HULU",
-      "LIJING",
+      "BAIQI",
       "ZHANGHE",
       "MENGCHONG",
       "WEIXIAOKUAN"
@@ -1003,9 +1003,9 @@ const LADDER_PRESETS = [
     "rp": 19776,
     "doc": "defense",
     "deck": [
-      "XUETOU",
+      "DENGAI",
       "XUCHU",
-      "ZHANGXUN",
+      "ZHANGHE",
       "ZHANGLIAO_V",
       "CHENGONG"
     ],
@@ -1214,7 +1214,7 @@ const LADDER_PRESETS = [
     "doc": "strike",
     "deck": [
       "CHENQINGZHI",
-      "QINSHUBAO",
+      "DIANWEI",
       "WENCHOU",
       "MENGCHONG",
       "PANGTONG"
@@ -1319,8 +1319,8 @@ const LADDER_PRESETS = [
     "doc": "deception",
     "deck": [
       "GONGSUNDU",
-      "QINSHUBAO",
-      "XUERENARROW",
+      "DIANWEI",
+      "LIGUANG",
       "ZHUANZHU",
       "PANGTONG"
     ],
@@ -1333,7 +1333,7 @@ const LADDER_PRESETS = [
     "rp": 6788,
     "doc": "deception",
     "deck": [
-      "XUETOU",
+      "DENGAI",
       "DIANWEI",
       "YANYAN",
       "HANSHIZHONG_V",
@@ -1513,9 +1513,9 @@ const LADDER_PRESETS = [
     "rp": 176,
     "doc": "strike",
     "deck": [
-      "XUETOU",
-      "LIJING",
-      "ZHANGXUN",
+      "DENGAI",
+      "BAIQI",
+      "ZHANGHE",
       "DINGFENG",
       "LUSU"
     ],
@@ -1574,7 +1574,7 @@ const LADDER_PRESETS = [
     "doc": "strike",
     "deck": [
       "DENGAI",
-      "YUCHIGONG",
+      "XUCHU",
       "LIGUANG",
       "JINGKE",
       "FAZHENG"
@@ -1588,10 +1588,10 @@ const LADDER_PRESETS = [
     "rp": 100,
     "doc": "strike",
     "deck": [
-      "XUETOU",
-      "YUCHIGONG",
+      "DENGAI",
+      "XUCHU",
       "YANYAN",
-      "LIXU_V",
+      "WEIYAN",
       "FAZHENG"
     ],
     "title": "十面埋伏天羅地網"

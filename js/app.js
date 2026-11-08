@@ -52,7 +52,7 @@ const SEED_GHOSTS = [
   { id: 'g_shadow', callsign: '臥龍崗・八陣圖', title: '軍師祭酒', rating: 1490, wins: 64, losses: 14, deck: ['ZHAOYUN','YUEFEI','HUANGZHONG','KUMANO','ZHUGELIANG'], doctrine: 'deception', motto: '奇門八陣迷霧困敵，未戰而廟算先勝。', isUser: false },
   { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['GONGSUNDU','KATOKIYOMASA','NAGASHINO','YISUNSIN','PANGTONG'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
   { id: 'g_viper', callsign: '毘沙門天・車懸陣', title: '越後守護', rating: 1610, wins: 88, losses: 21, deck: ['KENSHIN','ZHANGFEI','INABA','WEIYAN','GUOJIA'], doctrine: 'strike', motto: '車懸輪番急襲破陣，白刃一騎討斬將奪旗。', isUser: false },
-  { id: 'g_aegis', callsign: '天策府・玄甲精騎', title: '天策上將', rating: 1720, wins: 104, losses: 25, deck: ['LISHIMIN','LIANPO','LIGUANG','YANGSU','XUNYU'], doctrine: 'strike', motto: '玄甲鐵騎貫陣而入，神射強弩萬箭齊發。', isUser: false }
+  { id: 'g_aegis', callsign: '大司馬・漢軍鐵騎', title: '大將軍大司馬', rating: 1720, wins: 104, losses: 25, deck: ['WEI','LIANPO','LIGUANG','YANGSU','XUNYU'], doctrine: 'strike', motto: '武剛車陣奇兵破虜，神射強弩萬箭齊發。', isUser: false }
 ];
 
 function getGhostPool() {

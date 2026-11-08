@@ -100,32 +100,6 @@
     "sfx": "blade_clash"
   },
   {
-    "id": "LISHIMIN",
-    "name": "李世民",
-    "cat": "air",
-    "cost": 5,
-    "v": "E",
-    "tag": "天策上將·玄甲衝陣",
-    "desc": "唐太宗李世民，親率數千精選玄甲黑馬騎兵直撲敵軍大旗，虎牢關以小博大一舉定中原。",
-    "st": 82,
-    "ew": 28,
-    "traits": [
-      "LR",
-      "DEEP",
-      "EW"
-    ],
-    "roleFlags": [
-      "STAMINA_DEEP"
-    ],
-    "hp": 220,
-    "atk": 124,
-    "def": 0,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "天策黑槊 + 玄甲良駒",
-    "sfx": "war_drum"
-  },
-  {
     "id": "YOSHITSUNE",
     "name": "源義經",
     "cat": "air",
@@ -271,29 +245,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "問天青龍雙戟 + 塞外駿馬",
-    "sfx": "blade_clash"
-  },
-  {
-    "id": "LIXU",
-    "name": "李愬",
-    "cat": "air",
-    "cost": 4,
-    "v": "D",
-    "tag": "雪夜入蔡州·奇襲生擒",
-    "desc": "唐代奇襲名將，頂著風雪長途急行軍六十五里無聲入蔡州，奇襲生擒吳元濟平定淮西。",
-    "st": 78,
-    "ew": 22,
-    "traits": [
-      "LR",
-      "DEEP"
-    ],
-    "roleFlags": [],
-    "hp": 188,
-    "atk": 106,
-    "def": 0,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "唐橫刀 + 風雪踏蹄長矛",
     "sfx": "blade_clash"
   },
   {
@@ -461,29 +412,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "白馬長槊 + 雕花角弓",
-    "sfx": "arrow_volley"
-  },
-  {
-    "id": "XUETOU",
-    "name": "薛仁貴",
-    "cat": "air",
-    "cost": 3,
-    "v": "D",
-    "tag": "將軍三箭·白衣馳突",
-    "desc": "唐初名將，身穿白袍單騎突入萬軍所向披靡，天山陣前三箭連斃三名敵酋。",
-    "st": 50,
-    "ew": 10,
-    "traits": [
-      "LR",
-      "CAS"
-    ],
-    "roleFlags": [],
-    "hp": 152,
-    "atk": 85,
-    "def": 0,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "方天戟 + 震天弓",
     "sfx": "arrow_volley"
   },
   {
@@ -1010,32 +938,6 @@
     "sfx": "war_drum"
   },
   {
-    "id": "LIJING",
-    "name": "李靖",
-    "cat": "armor",
-    "cost": 5,
-    "v": "E",
-    "tag": "衛國公·六花大陣",
-    "desc": "大唐軍神，著《衛公兵法》，創制「六花陣」以步步為營之重步大陣千里的深入踏平東突厥。",
-    "st": 14,
-    "ew": 22,
-    "traits": [
-      "APS",
-      "HEAVY",
-      "EW"
-    ],
-    "roleFlags": [
-      "STAMINA_DEEP"
-    ],
-    "hp": 350,
-    "atk": 120,
-    "def": 0.26,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "六花陣法旗 + 唐陌刀",
-    "sfx": "strategy_gong"
-  },
-  {
     "id": "HONDA",
     "name": "本多忠勝",
     "cat": "armor",
@@ -1181,29 +1083,6 @@
     "sfx": "blade_clash"
   },
   {
-    "id": "GUOZIYI",
-    "name": "郭子儀",
-    "cat": "armor",
-    "cost": 4,
-    "v": "E",
-    "tag": "再造唐室·單騎退吐蕃",
-    "desc": "唐代名將，安史之亂率重步陣收復長安洛陽，單騎免胄入敵營以德服人。",
-    "st": 12,
-    "ew": 16,
-    "traits": [
-      "HEAVY",
-      "SPOT"
-    ],
-    "roleFlags": [],
-    "hp": 286,
-    "atk": 92,
-    "def": 0.23,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "唐儀刀 + 紫金戰鎧",
-    "sfx": "strategy_gong"
-  },
-  {
     "id": "TACHIBANAD",
     "name": "立花道雪",
     "cat": "armor",
@@ -1318,50 +1197,6 @@
     "origin": "中國 · 三國",
     "weapon": "陷陣大盾 + 破甲長矛",
     "sfx": "war_drum"
-  },
-  {
-    "id": "QINSHUBAO",
-    "name": "秦叔寶",
-    "cat": "armor",
-    "cost": 3,
-    "v": "D",
-    "tag": "雙鐧重裝·百萬軍中取將",
-    "desc": "大唐門神，手使雙鐧重甲突入萬軍之中取敵將首級，身上歷經創傷無數。",
-    "st": 10,
-    "ew": 0,
-    "traits": [
-      "HEAVY"
-    ],
-    "roleFlags": [],
-    "hp": 246,
-    "atk": 82,
-    "def": 0.25,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "熟銅雙鐧 + 步戰明光甲",
-    "sfx": "blade_clash"
-  },
-  {
-    "id": "YUCHIGONG",
-    "name": "尉遲恭",
-    "cat": "armor",
-    "cost": 3,
-    "v": "E",
-    "tag": "奪槊陷陣·黑甲門神",
-    "desc": "大唐大將，善於單騎奪敵長槊，玄武門護衛李世民立下奇功。",
-    "st": 12,
-    "ew": 6,
-    "traits": [
-      "TRUE_AT"
-    ],
-    "roleFlags": [],
-    "hp": 238,
-    "atk": 84,
-    "def": 0.2,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "單雄丈二矛 + 烏金甲",
-    "sfx": "blade_clash"
   },
   {
     "id": "DIQING",
@@ -1843,31 +1678,6 @@
     "sfx": "arrow_volley"
   },
   {
-    "id": "XUERENARROW",
-    "name": "薛仁貴射雕營",
-    "cat": "air_defense",
-    "cost": 5,
-    "v": "H",
-    "tag": "三箭定天山·射雕破騎",
-    "desc": "唐代神射禁衛軍，傳承薛禮「脫帽退敵、三箭平定天山」之威名，連鎖封鎖騎兵衝鋒。",
-    "st": 14,
-    "ew": 22,
-    "traits": [
-      "AA_LONG",
-      "CIWS"
-    ],
-    "roleFlags": [
-      "PASSIVE_VOLLEY"
-    ],
-    "hp": 252,
-    "atk": 128,
-    "def": 0.06,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "天山鵰翎破甲箭 + 唐代角弓",
-    "sfx": "arrow_volley"
-  },
-  {
     "id": "HUANGZHONG",
     "name": "黃忠",
     "cat": "air_defense",
@@ -2070,29 +1880,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "巧變長弓 + 綠沉槍",
-    "sfx": "arrow_volley"
-  },
-  {
-    "id": "ZHANGXUN",
-    "name": "張巡",
-    "cat": "air_defense",
-    "cost": 3,
-    "v": "B",
-    "tag": "睢陽堅守·以矢抗賊",
-    "desc": "大唐忠烈，以數千守軍堅守睢陽擋叛軍十三萬，箭盡削竹為矢連環狙殺。",
-    "st": 20,
-    "ew": 14,
-    "traits": [
-      "CIWS",
-      "AA_LONG"
-    ],
-    "roleFlags": [],
-    "hp": 162,
-    "atk": 86,
-    "def": 0.06,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "草人借箭 + 睢陽斷竹箭",
     "sfx": "arrow_volley"
   },
   {
@@ -2853,28 +2640,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "狂骨環刀 + 伏兵令旗",
-    "sfx": "blade_clash"
-  },
-  {
-    "id": "LIXU_V",
-    "name": "李愬蔡州夜襲隊",
-    "cat": "naval",
-    "cost": 3,
-    "v": "D",
-    "tag": "風雪無聲·鵝鴨遮聲",
-    "desc": "李愬率精兵經鵝鴨池藉喧鬧遮掩踏雪腳步，無聲突破重門直達敵主帥臥房。",
-    "st": 72,
-    "ew": 8,
-    "traits": [
-      "SUB"
-    ],
-    "roleFlags": [],
-    "hp": 212,
-    "atk": 80,
-    "def": 0.1,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "鵝鴨羽偽裝 + 破鎖長匕",
     "sfx": "blade_clash"
   },
   {

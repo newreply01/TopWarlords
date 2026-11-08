@@ -40,16 +40,6 @@
     "tag": "背嵬重騎·突陣碎甲"
   },
   {
-    "id": "LISHIMIN",
-    "name": "李世民",
-    "cat": "air",
-    "cost": 5,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "天策黑槊 + 玄甲良駒",
-    "tag": "天策上將·玄甲衝陣"
-  },
-  {
     "id": "YOSHITSUNE",
     "name": "源義經",
     "cat": "air",
@@ -108,16 +98,6 @@
     "origin": "中國 · 三國",
     "weapon": "問天青龍雙戟 + 塞外駿馬",
     "tag": "逍遙津突襲·威震江東"
-  },
-  {
-    "id": "LIXU",
-    "name": "李愬",
-    "cat": "air",
-    "cost": 4,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "唐橫刀 + 風雪踏蹄長矛",
-    "tag": "雪夜入蔡州·奇襲生擒"
   },
   {
     "id": "CHENQINGZHI",
@@ -188,16 +168,6 @@
     "origin": "中國 · 三國",
     "weapon": "白馬長槊 + 雕花角弓",
     "tag": "白馬義從·塞外破胡"
-  },
-  {
-    "id": "XUETOU",
-    "name": "薛仁貴",
-    "cat": "air",
-    "cost": 3,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "方天戟 + 震天弓",
-    "tag": "將軍三箭·白衣馳突"
   },
   {
     "id": "DATE",
@@ -430,16 +400,6 @@
     "tag": "秦滅六國·穩若泰山"
   },
   {
-    "id": "LIJING",
-    "name": "李靖",
-    "cat": "armor",
-    "cost": 5,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "六花陣法旗 + 唐陌刀",
-    "tag": "衛國公·六花大陣"
-  },
-  {
     "id": "HONDA",
     "name": "本多忠勝",
     "cat": "armor",
@@ -500,16 +460,6 @@
     "tag": "據水斷橋·萬人敵猛張飛"
   },
   {
-    "id": "GUOZIYI",
-    "name": "郭子儀",
-    "cat": "armor",
-    "cost": 4,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "唐儀刀 + 紫金戰鎧",
-    "tag": "再造唐室·單騎退吐蕃"
-  },
-  {
     "id": "TACHIBANAD",
     "name": "立花道雪",
     "cat": "armor",
@@ -558,26 +508,6 @@
     "origin": "中國 · 三國",
     "weapon": "陷陣大盾 + 破甲長矛",
     "tag": "陷陣營·鎧甲精整每戰必破"
-  },
-  {
-    "id": "QINSHUBAO",
-    "name": "秦叔寶",
-    "cat": "armor",
-    "cost": 3,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "熟銅雙鐧 + 步戰明光甲",
-    "tag": "雙鐧重裝·百萬軍中取將"
-  },
-  {
-    "id": "YUCHIGONG",
-    "name": "尉遲恭",
-    "cat": "armor",
-    "cost": 3,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "單雄丈二矛 + 烏金甲",
-    "tag": "奪槊陷陣·黑甲門神"
   },
   {
     "id": "DIQING",
@@ -790,16 +720,6 @@
     "tag": "東明神王·百發百中"
   },
   {
-    "id": "XUERENARROW",
-    "name": "薛仁貴射雕營",
-    "cat": "air_defense",
-    "cost": 5,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "天山鵰翎破甲箭 + 唐代角弓",
-    "tag": "三箭定天山·射雕破騎"
-  },
-  {
     "id": "HUANGZHONG",
     "name": "黃忠",
     "cat": "air_defense",
@@ -888,16 +808,6 @@
     "origin": "中國 · 三國",
     "weapon": "巧變長弓 + 綠沉槍",
     "tag": "木門伏射·巧變良將"
-  },
-  {
-    "id": "ZHANGXUN",
-    "name": "張巡",
-    "cat": "air_defense",
-    "cost": 3,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "草人借箭 + 睢陽斷竹箭",
-    "tag": "睢陽堅守·以矢抗賊"
   },
   {
     "id": "YANYAN",
@@ -1228,16 +1138,6 @@
     "origin": "中國 · 三國",
     "weapon": "狂骨環刀 + 伏兵令旗",
     "tag": "子午奇略·勇略先登"
-  },
-  {
-    "id": "LIXU_V",
-    "name": "李愬蔡州夜襲隊",
-    "cat": "naval",
-    "cost": 3,
-    "flag": "🇨🇳",
-    "origin": "中國 · 唐朝",
-    "weapon": "鵝鴨羽偽裝 + 破鎖長匕",
-    "tag": "風雪無聲·鵝鴨遮聲"
   },
   {
     "id": "MOURI_V",

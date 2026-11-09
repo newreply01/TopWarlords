@@ -14,7 +14,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 sys.stdout.reconfigure(encoding='utf-8')
-ROOT = Path("D:/TopWarlords")
+ROOT = Path(__file__).resolve().parents[1]
 PORT = 8139
 
 server = subprocess.Popen(
@@ -62,7 +62,7 @@ try:
 
         # 檢查預算儀表與選定的名將
         deck_info = page.evaluate("""() => {
-            const rawDeck = localStorage.getItem('wl15_deck_A');
+            const rawDeck = localStorage.getItem('wl15_deck');
             const deck = rawDeck ? JSON.parse(rawDeck) : [];
             const unitMap = (typeof UNIT_MAP !== 'undefined') ? UNIT_MAP : window.UNIT_MAP;
             return {

@@ -83,25 +83,26 @@ function calcRankTitle(rp) {
 }
 
 // 重新整理頁面時，名將錄重新洗牌，同時將名將選擇重置回到完全未選取狀態（全新開局）
-LS.set('wl15_deck_A', [null, null, null, null, null]);
-LS.set('wl15_deck_B', [null, null, null, null, null]);
-const savedDeckA = [null, null, null, null, null];
-const savedDeckB = [null, null, null, null, null];
-const savedDocA = LS.get('wl15_doc_A', 'strike');
-const savedDocB = LS.get('wl15_doc_B', 'defense');
-const activeSlot = LS.get('wl15_active_slot', 'A');
+const savedDoctrine = LS.get('wl15_doc', 'strike');
+LS.set('wl15_deck', [null, null, null, null, null]);
+const validFormationIds = new Set(BATTLE_FORMATION_DEFS.map(formation => formation.id));
+const normalizeFormations = values => Array.from({ length: 5 }, (_, i) =>
+  validFormationIds.has(values && values[i]) ? values[i] : 'fishscale'
+);
+const savedFormations = normalizeFormations(LS.get('wl15_formations', []));
+const normalizeTerrain = value => BATTLE_TERRAINS.some(terrain => terrain.id === value) ? value : 'plain';
+const savedTerrain = normalizeTerrain(LS.get('wl15_terrain', 'plain'));
 
 const state = {
   mode: 'quick',
   practiceSubMode: 'quick',
   quickSubMode: 'ai', // 'ai' (預設 AI 演習) 或 'ghost' (全球名將異步幽靈)
-  deckSlot: activeSlot,
-  dualDecks: { A: savedDeckA.slice(), B: savedDeckB.slice() },
-  dualDocs: { A: savedDocA, B: savedDocB },
   deck: [null, null, null, null, null],
+  formations: savedFormations.slice(),
+  terrain: savedTerrain,
   active: 0,
   flexCat: { 3: 'naval', 4: 'support' },
-  doctrine: activeSlot === 'B' ? savedDocB : savedDocA,
+  doctrine: savedDoctrine,
   aiArch: 'random', event: null, enemy: null, enemyName: '', enemyDoc: 'defense',
   sandEnemy: 'random', sandEvent: 'all', sandResult: null, hover: null, lastRes: null,
   /* 手機版活躍兵種分頁 */
@@ -125,29 +126,18 @@ const state = {
   pvpOpponentReady: false,
   pvpOpponentDeck: null,
   pvpOpponentDoc: 'defense',
+  pvpOpponentFormations: null,
+  pvpOpponentTerrain: null,
   pvpAfkStreak: 0
 };
 let playToken = 0, speed = Number(LS.get('wl15_speed', 1)) || 1, skip = false, paused = false, currentActiveModal = null, lastBattleRes = null;
 
 function syncActiveDeck() {
-  state.dualDecks[state.deckSlot] = state.deck.slice();
-  state.dualDocs[state.deckSlot] = state.doctrine;
-  LS.set('wl15_deck_' + state.deckSlot, state.deck);
-  LS.set('wl15_doc_' + state.deckSlot, state.doctrine);
-  LS.set('wl15_active_slot', state.deckSlot);
+  LS.set('wl15_deck', state.deck);
+  LS.set('wl15_doc', state.doctrine);
+  LS.set('wl15_formations', state.formations);
+  LS.set('wl15_terrain', state.terrain);
 }
-
-function switchDeckSlot(slot) {
-  if (state.deckSlot === slot) return;
-  syncActiveDeck();
-  state.deckSlot = slot;
-  LS.set('wl15_active_slot', slot);
-  state.deck = (state.dualDecks[slot] || [null, null, null, null, null]).slice();
-  state.doctrine = state.dualDocs[slot] || 'strike';
-  renderAll();
-  toast(`已切換至【編制 ${slot}】戰備槽位`);
-}
-
 
 /* =====================================================
    PvPTimerManager: 雙人真人連線與多局系列賽倒數與逾時接管管理器
@@ -1325,6 +1315,54 @@ function analyzeDeckArchetype(deck) {
 }
 
 /* ---------- 渲染：底部常駐指揮台 (Command Deck) ---------- */
+function renderFormationEditor() {
+  const rows = $('#formationRows');
+  const summary = $('#formationSummary');
+  const button = $('#btnOpenFormation');
+  if (!rows || !summary || !button) return;
+
+  const selectedIds = normalizeFormations(state.formations);
+  let needsSave = false;
+  selectedIds.forEach((id, index) => {
+    const formation = getBattleFormation(id);
+    const unitId = state.deck[index];
+    if (formation.eligibleUnitIds && (!unitId || !formation.eligibleUnitIds.includes(unitId))) {
+      selectedIds[index] = 'fishscale';
+      state.formations[index] = 'fishscale';
+      needsSave = true;
+    }
+  });
+  if (needsSave) syncActiveDeck();
+  const selectedNames = [...new Set(selectedIds.map(id => getBattleFormation(id).name))];
+  const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
+  const terrainLockedByRoom = state.isOnlinePvp && !OnlinePvPEngine.isHostUser();
+  summary.textContent = selectedNames.length === 1 ? selectedNames[0] : `${selectedNames.length} 種陣形`;
+  button.disabled = formationEditingLocked;
+  button.title = formationEditingLocked ? '陣容已鎖定，本局陣形已提交' : '設定各部隊陣形與戰場地形';
+
+  rows.innerHTML = selectedIds.map((id, i) => {
+    const unit = state.deck[i] ? UNIT_MAP[state.deck[i]] : null;
+    const formation = getBattleFormation(id);
+    const availableFormations = BATTLE_FORMATION_DEFS.filter(option =>
+      !option.eligibleUnitIds || (unit && option.eligibleUnitIds.includes(unit.id))
+    );
+    return `<label class="formation-row">
+      <span class="formation-row-name">${unit ? esc(unit.name) : `第 ${i + 1} 槽 · 待部署`}</span>
+      <select data-formation-slot="${i}" aria-label="${unit ? esc(unit.name) : `第 ${i + 1} 槽`}陣形" ${formationEditingLocked ? 'disabled' : ''}>
+        ${availableFormations.map(option => `<option value="${option.id}" title="${esc(option.desc)}" ${option.id === id ? 'selected' : ''}>${esc(option.name)}</option>`).join('')}
+      </select>
+      <span class="formation-row-desc">${esc(formation.desc)}</span>
+    </label>`;
+  }).join('');
+
+  const terrainSelect = $('#formationTerrain');
+  if (terrainSelect) {
+    terrainSelect.value = normalizeTerrain(state.terrain);
+    terrainSelect.disabled = formationEditingLocked || terrainLockedByRoom;
+    terrainSelect.title = terrainLockedByRoom ? '本局地形由房主設定並同步' : '';
+  }
+}
+
 function renderCommandDeck() {
   const cd = $('#commandDeck');
   if (!cd) return;
@@ -1337,10 +1375,6 @@ function renderCommandDeck() {
   $('#budgetUsed')?.classList.toggle('over', used > lim);
   $('.budget-digits')?.classList.toggle('over', used > lim);
   const bmb = $('#budgetMiniBar'); if (bmb) bmb.innerHTML = Array.from({ length: lim }, (_, i) => `<i class="${i < used ? 'on' : ''}"></i>`).join('');
-
-  // A/B 雙陣容按鈕狀態
-  $('#btnDeckA')?.classList.toggle('active', state.deckSlot === 'A');
-  $('#btnDeckB')?.classList.toggle('active', state.deckSlot === 'B');
 
   // 槽位已選計數膠囊
   const filledCount = (state.deck || []).filter(Boolean).length;
@@ -1378,6 +1412,7 @@ function renderCommandDeck() {
         <span class="doc-name">${esc(d.name)}</span>
       </button>`).join('');
   }
+  renderFormationEditor();
 
   // 聯合理論體系羈絆常駐亮燈指示槽 (改回原本五個英文字母代號：CEC, MUM-T, ASW, LAND, EW，滑鼠懸停顯示完整體系與達成條件)
   const synBar = $('#deckSynergyBar');
@@ -1753,6 +1788,44 @@ function renderAll() {
   renderOnboardingGuide();
 }
 
+document.addEventListener('click', event => {
+  if (event.target.closest('#btnOpenFormation')) {
+    const dialog = $('#formationDialog');
+    renderFormationEditor();
+    if (dialog && typeof dialog.showModal === 'function') dialog.showModal();
+    else if (dialog) dialog.setAttribute('open', '');
+    return;
+  }
+  if (event.target.closest('#btnCloseFormation')) {
+    $('#formationDialog')?.close();
+  }
+});
+
+document.addEventListener('change', event => {
+  const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
+  const terrainLockedByRoom = state.isOnlinePvp && !OnlinePvPEngine.isHostUser();
+  const formationSelect = event.target.closest('[data-formation-slot]');
+  if (formationSelect && !formationEditingLocked) {
+    const slot = Number(formationSelect.dataset.formationSlot);
+    if (Number.isInteger(slot) && slot >= 0 && slot < 5 && validFormationIds.has(formationSelect.value)) {
+      state.formations[slot] = formationSelect.value;
+      syncActiveDeck();
+      renderFormationEditor();
+    }
+    return;
+  }
+
+  if (event.target.id === 'formationTerrain' && !formationEditingLocked && !terrainLockedByRoom) {
+    state.terrain = normalizeTerrain(event.target.value);
+    syncActiveDeck();
+    renderFormationEditor();
+  }
+});
+
+$('#formationDialog')?.addEventListener('click', event => {
+  if (event.target === event.currentTarget) event.currentTarget.close();
+});
+
 /* ---------- 常用自訂編制與參謀部推薦模板管理 ---------- */
 function getCustomPresets() {
   const raw = LS.get('wl15_custom_presets', null);
@@ -2102,11 +2175,6 @@ $('#commandDeck').addEventListener('click', e => {
   const synTipEl = e.target.closest('[data-syn-tip]');
   if (synTipEl) {
     toast(synTipEl.dataset.synTip);
-    return;
-  }
-  const abBtn = e.target.closest('[data-ab]');
-  if (abBtn) {
-    switchDeckSlot(abBtn.dataset.ab);
     return;
   }
   const clr = e.target.closest('[data-clear-slot]');
@@ -2520,8 +2588,6 @@ function startLadderBuild(pendingTarget = null) {
   const lState = (typeof LadderEngine !== 'undefined') ? LadderEngine.getState() : null;
   if (lState?.player?.defenseDeck && Array.isArray(lState.player.defenseDeck) && lState.player.defenseDeck.filter(Boolean).length === 5) {
     state.deck = lState.player.defenseDeck.slice();
-    if (state.deckSlot === 'A') state.dualDecks.A = state.deck.slice();
-    else if (state.deckSlot === 'B') state.dualDecks.B = state.deck.slice();
   }
   if (lState?.player?.defenseDoc) {
     state.doctrine = lState.player.defenseDoc;
@@ -3908,7 +3974,16 @@ function startBattle() {
     updateRerollMarketButtonState();
   }
   const seed = state.mode === 'daily' ? hashStr(dateKey() + deck.join('.') + state.doctrine) : (Math.random() * 4294967296) >>> 0;
-  const res = resolveBattle(deck, state.enemy, { seed, event: state.event, docA: state.doctrine, docB: state.enemyDoc });
+  const enemyFormations = getRecommendedFormations(state.enemy, state.terrain);
+  const res = resolveBattle(deck, state.enemy, {
+    seed,
+    event: state.event,
+    docA: state.doctrine,
+    docB: state.enemyDoc,
+    formationsA: state.formations,
+    formationsB: enemyFormations,
+    terrain: state.terrain
+  });
   state.lastRes = res;
   if (state.enemy && state.enemy.length === 5) {
     state.lastBattleEnemy = {
@@ -4251,7 +4326,7 @@ async function showBattle(res, opts = {}) {
   }
   $('#battleMeta').innerHTML = metaHtml;
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph');
-  await sleep(700 / speed);
+  await sleep(1900);
   let curPhase = 0, sec = 0;
   const log = $('#battleLog');
   try {
@@ -5784,10 +5859,12 @@ function showResult(res, bo3Custom) {
     const aliveCountA = finalA.filter(u => u.alive).length;
     const aliveCountB = finalB.filter(u => u.alive).length;
     const mySide = state.isOnlinePvp ? (isHost ? 'A' : 'B') : 'A';
+    const capturedCountA = finalA.filter(u => u.captured).length;
+    const capturedCountB = finalB.filter(u => u.captured).length;
+    const survivalLabelA = `${aliveCountA}/5 存活${capturedCountA ? ` · ${capturedCountA} 被俘` : ''}`;
+    const survivalLabelB = `${aliveCountB}/5 存活${capturedCountB ? ` · ${capturedCountB} 被俘` : ''}`;
     const enemySide = mySide === 'A' ? 'B' : 'A';
     const myAlive = mySide === 'A' ? aliveCountA : aliveCountB;
-    const enemyAlive = mySide === 'A' ? aliveCountB : aliveCountA;
-    const myTotalVP = (res.vp && res.vp[mySide] && typeof res.vp[mySide].total === 'number') ? res.vp[mySide].total : 0;
     const enemyTotalVP = (res.vp && res.vp[enemySide] && typeof res.vp[enemySide].total === 'number') ? res.vp[enemySide].total : 0;
     const diffVP = myTotalVP - enemyTotalVP;
     const enemyWiped = enemyAlive === 0;
@@ -5917,9 +5994,9 @@ function showResult(res, bo3Custom) {
         </div>
         <div class="outcome-gauge-col">
           <div class="gauge-labels-compact">
-            <span class="g-side g-a">${state.isOnlinePvp ? (isHost ? '🔵 司令部特遣隊 (我方)' : '🔵 司令部特遣隊 (對方)') : '我方'} <b>${f(A.total)} VP</b> <span class="g-alive">(${aliveCountA}/5 存活)</span></span>
+            <span class="g-side g-a">${state.isOnlinePvp ? (isHost ? '🔵 司令部特遣隊 (我方)' : '🔵 司令部特遣隊 (對方)') : '我方'} <b>${f(A.total)} VP</b> <span class="g-alive">(${survivalLabelA})</span></span>
             <span class="g-vs">VS</span>
-            <span class="g-side g-b">${state.isOnlinePvp ? (isHost ? '🔴 假想敵突擊隊 (對方)' : '🔴 假想敵突擊隊 (我方)') : (state.mode === 'quick' && state.enemyName ? `🔴 敵方 (${esc(state.enemyName)})` : (state.mode === 'ladder' && state.ladderEnemy ? `🔴 天梯對手 (${esc(state.ladderEnemy.name)})` : '敵方'))} <b>${f(B.total)} VP</b> <span class="g-alive">(${aliveCountB}/5 存活)</span></span>
+            <span class="g-side g-b">${state.isOnlinePvp ? (isHost ? '🔴 假想敵突擊隊 (對方)' : '🔴 假想敵突擊隊 (我方)') : (state.mode === 'quick' && state.enemyName ? `🔴 敵方 (${esc(state.enemyName)})` : (state.mode === 'ladder' && state.ladderEnemy ? `🔴 天梯對手 (${esc(state.ladderEnemy.name)})` : '敵方'))} <b>${f(B.total)} VP</b> <span class="g-alive">(${survivalLabelB})</span></span>
           </div>
           <div class="gauge-bar-track">
             <div class="gauge-fill-a" style="width:${pctA}%"></div>
@@ -5968,15 +6045,26 @@ function showResult(res, bo3Custom) {
               <b class="s-b ${(B.remain || 0) >= (A.remain || 0) ? 'lead' : ''}">${f(B.remain)}</b>
             </div>
           </div>
-          <div class="vp-dimension-item" title="【戰場控制】：海陸空三大作戰主導權總計（滿分30分）。包含地面裝甲防線控制(最高15分)、制空權掌控(10分)、制海權掌控(5分)。">
+          <div class="vp-dimension-item" title="【戰場控制】：包含地面防線(最高15分)、制空權(10分)、制海權(5分)；鶴翼區域佔領另列計分。">
             <div class="vp-dim-info">
               <span class="dim-name">🌐 戰場控制 (Zone Dominance)</span>
-              <small class="dim-desc">海陸空三大主導權 (陸15/空10/海5)</small>
+              <small class="dim-desc">地面／制空／制海／鶴翼佔領</small>
             </div>
             <div class="vp-dim-scores">
               <b class="s-a ${(A.control || 0) >= (B.control || 0) ? 'lead' : ''}">${f(A.control)}</b>
               <span class="s-sep">:</span>
               <b class="s-b ${(B.control || 0) >= (A.control || 0) ? 'lead' : ''}">${f(B.control)}</b>
+            </div>
+          </div>
+          <div class="vp-dimension-item" title="【區域控制】：存活的鶴翼包抄或錐行穿插部隊控制戰場區域，兩支滿戰力部隊最多提供 6 分。">
+            <div class="vp-dim-info">
+              <span class="dim-name">🏴 區域佔領 (Area Control)</span>
+              <small class="dim-desc">鶴翼包抄／錐行穿插控制區域</small>
+            </div>
+            <div class="vp-dim-scores">
+              <b class="s-a ${(A.occupationCtl || 0) >= (B.occupationCtl || 0) ? 'lead' : ''}">${f(A.occupationCtl)}</b>
+              <span class="s-sep">:</span>
+              <b class="s-b ${(B.occupationCtl || 0) >= (A.occupationCtl || 0) ? 'lead' : ''}">${f(B.occupationCtl)}</b>
             </div>
           </div>
           <div class="vp-dimension-item" title="【以弱勝強】：平價輕型部隊成功越級狙殺敵方高價主力的戰術奇襲獎勵！（越級價差 × 2，單局上限12分）。小成本消滅昂貴裝備可獲高額加分。">
@@ -6021,7 +6109,7 @@ function showResult(res, bo3Custom) {
                       <span style="font-family:var(--mono);font-size:10px;color:${catInfo.color || 'var(--muted)'};font-weight:700;margin-right:3px">${catInfo.short || `#${idx+1}`}</span>
                       ${uMeta.flag || ''} <b>${esc((u && u.name) || '作戰單位')}</b> <small>$${(u && u.cost) || 0}</small>
                     </span>
-                    <span class="dmg-u-stat">${d} 傷害 <small>(${sharePct}%)</small> · <i class="${u && u.alive ? 'alive' : 'dead'}">${u && u.alive ? `存活 ${hpPct}%` : '陣亡'}</i></span>
+                    <span class="dmg-u-stat">${d} 傷害 <small>(${sharePct}%)</small> · <i class="${u && u.alive ? 'alive' : 'dead'}">${u && u.alive ? `存活 ${hpPct}%` : u && u.captured ? '被俘' : '陣亡'}</i></span>
                   </div>
                   <div class="dmg-bar-track">
                     <div class="dmg-bar-fill" style="width:${barPct}%;background:${isMvp ? 'linear-gradient(90deg, #f59e0b, #fbbf24);box-shadow:0 0 10px rgba(251,191,36,0.6)' : (catInfo.color || 'var(--cyan)')}"></div>
@@ -6278,13 +6366,18 @@ function buildWhy(res) {
 function buildReplayShareUrl(res) {
   const deckA = (res.final?.A || []).map(u => u.id);
   const deckB = (res.final?.B || []).map(u => u.id);
+  const formationsA = (res.final?.A || []).map(unit => unit.formation || 'fishscale');
+  const formationsB = (res.final?.B || []).map(unit => unit.formation || 'fishscale');
   const payload = [
     deckA.join('.'),
     deckB.join('.'),
     res.seed >>> 0,
     res.ev?.id || 'clear',
     res.docs?.A || 'defense',
-    res.docs?.B || 'defense'
+    res.docs?.B || 'defense',
+    formationsA.join('.'),
+    formationsB.join('.'),
+    res.terrain || 'plain'
   ].join('~');
   const url = new URL(window.location.href);
   url.search = '';
@@ -6536,7 +6629,27 @@ OnlinePvPEngine.on('opponent_joined', ({ opponent, isHost }) => {
   toast(`⚡ 玩家【${opponent.flag || '🌐'} ${oppName}】(${opponent.uid}) 已成功連線進房！`);
 });
 
-function handleOnlinePvpSubmit() {
+function getOnlinePvpLoadout() {
+  return {
+    formations: normalizeFormations(state.formations),
+    terrain: normalizeTerrain(state.terrain)
+  };
+}
+
+function sendOnlinePvpDeckReveal() {
+  const loadout = getOnlinePvpLoadout();
+  OnlinePvPEngine.sendPacket('DECK_SUBMIT', {
+    deck: state.deck.slice(),
+    doctrine: state.doctrine,
+    formations: loadout.formations,
+    terrain: loadout.terrain,
+    salt: state.pvpMySalt,
+    commitHash: state.pvpMyCommitHash,
+    round: state.bo3.round
+  });
+}
+
+async function handleOnlinePvpSubmit() {
   if (state.pvpMyReady) {
     if (state.pvpOpponentReady) {
       if (OnlinePvPEngine.isHostUser() && state.pvpOpponentDeck && state.pvpOpponentDeck.length === 5) {
@@ -6545,13 +6658,7 @@ function handleOnlinePvpSubmit() {
       } else {
         toast('📡 已再次向對手發送陣容揭曉信號...');
         state.pvpMyRevealed = true;
-        OnlinePvPEngine.sendPacket('DECK_SUBMIT', {
-          deck: state.deck.slice(),
-          doctrine: state.doctrine,
-          salt: state.pvpMySalt,
-          commitHash: state.pvpMyCommitHash,
-          round: state.bo3.round
-        });
+        sendOnlinePvpDeckReveal();
       }
     } else {
       toast('⏳ 你的陣容已提交並鎖定，正在等待對手完成配置 (已重新發送加密雜湊就緒信號)...');
@@ -6576,11 +6683,21 @@ function handleOnlinePvpSubmit() {
   state.pvpMySalt = (typeof OnlinePvPEngine.generateSecureSalt === 'function')
     ? OnlinePvPEngine.generateSecureSalt()
     : Math.random().toString(36).slice(2, 12);
-  state.pvpMyCommitHash = OnlinePvPEngine.computeCommitHash(state.deck, state.doctrine, state.pvpMySalt);
+  const loadout = getOnlinePvpLoadout();
+  const fallbackHash = OnlinePvPEngine.computeCommitHash(state.deck, state.doctrine, state.pvpMySalt, loadout.formations, loadout.terrain);
+  state.pvpMyCommitHash = fallbackHash;
   if (typeof OnlinePvPEngine.computeCommitHashAsync === 'function') {
-    OnlinePvPEngine.computeCommitHashAsync(state.deck, state.doctrine, state.pvpMySalt).then(shaHash => {
-      if (shaHash) state.pvpMyCommitHash = shaHash;
-    }).catch(() => {});
+    try {
+      state.pvpMyCommitHash = await OnlinePvPEngine.computeCommitHashAsync(
+        state.deck,
+        state.doctrine,
+        state.pvpMySalt,
+        loadout.formations,
+        loadout.terrain
+      ) || fallbackHash;
+    } catch (_) {
+      state.pvpMyCommitHash = fallbackHash;
+    }
   }
   if (state.mode === 'bo3' && state.bo3) {
     state.bo3.locked = true;
@@ -6590,13 +6707,7 @@ function handleOnlinePvpSubmit() {
   // 2. Commit-Reveal：若對手尚未鎖定，僅發送 DECK_COMMIT 雜湊杜絕 F12 窺探；若對手已鎖定則直接揭曉 DECK_SUBMIT
   if (state.pvpOpponentReady) {
     state.pvpMyRevealed = true;
-    OnlinePvPEngine.sendPacket('DECK_SUBMIT', {
-      deck: state.deck.slice(),
-      doctrine: state.doctrine,
-      salt: state.pvpMySalt,
-      commitHash: state.pvpMyCommitHash,
-      round: state.bo3.round
-    });
+    sendOnlinePvpDeckReveal();
   } else {
     state.pvpMyRevealed = false;
     OnlinePvPEngine.sendPacket('DECK_COMMIT', {
@@ -6631,6 +6742,8 @@ function checkBothReadyAndStartCombat() {
       event,
       deck: state.deck.slice(),
       doctrine: state.doctrine,
+      formations: normalizeFormations(state.formations),
+      terrain: normalizeTerrain(state.terrain),
       salt: state.pvpMySalt,
       commitHash: state.pvpMyCommitHash
     });
@@ -6656,6 +6769,9 @@ function startOnlinePvpBattle(seed, event) {
   const guestDeck = (isHost ? state.pvpOpponentDeck : state.deck).slice();
   const hostDoc = isHost ? state.doctrine : (state.pvpOpponentDoc || 'defense');
   const guestDoc = isHost ? (state.pvpOpponentDoc || 'defense') : state.doctrine;
+  const hostFormations = isHost ? normalizeFormations(state.formations) : normalizeFormations(state.pvpOpponentFormations);
+  const guestFormations = isHost ? normalizeFormations(state.pvpOpponentFormations) : normalizeFormations(state.formations);
+  const battleTerrain = isHost ? normalizeTerrain(state.terrain) : normalizeTerrain(state.pvpOpponentTerrain);
 
   const opp = OnlinePvPEngine.getOpponent();
   state.enemy = state.pvpOpponentDeck.slice();
@@ -6670,7 +6786,10 @@ function startOnlinePvpBattle(seed, event) {
     seed,
     event: state.event,
     docA: hostDoc,
-    docB: guestDoc
+    docB: guestDoc,
+    formationsA: hostFormations,
+    formationsB: guestFormations,
+    terrain: battleTerrain
   });
   state.lastRes = res;
   showBattle(res);
@@ -6682,6 +6801,8 @@ OnlinePvPEngine.on('game_session_started', payload => {
   state.pvpMyReady = false;
   state.pvpOpponentReady = false;
   state.pvpOpponentDeck = null;
+  state.pvpOpponentFormations = null;
+  state.pvpOpponentTerrain = null;
   state.bo3.active = true;
   state.bo3.round = payload.round || 1;
   state.bo3.winsA = payload.winsA || 0;
@@ -6724,13 +6845,7 @@ OnlinePvPEngine.on('opponent_deck_committed', payload => {
   if (state.pvpMyReady) {
     if (!state.pvpMyRevealed) {
       state.pvpMyRevealed = true;
-      OnlinePvPEngine.sendPacket('DECK_SUBMIT', {
-        deck: state.deck.slice(),
-        doctrine: state.doctrine,
-        salt: state.pvpMySalt,
-        commitHash: state.pvpMyCommitHash,
-        round: state.bo3.round
-      });
+      sendOnlinePvpDeckReveal();
     }
     toast(`⚡ 對手已鎖定陣容！雙方正在交換戰術明文...`);
   } else {
@@ -6741,13 +6856,13 @@ OnlinePvPEngine.on('opponent_deck_committed', payload => {
 OnlinePvPEngine.on('opponent_deck_ready', payload => {
   if (state.pvpOpponentCommitHash && payload.salt) {
     if (String(state.pvpOpponentCommitHash).startsWith('sha256:') && typeof OnlinePvPEngine.computeCommitHashAsync === 'function') {
-      OnlinePvPEngine.computeCommitHashAsync(payload.deck, payload.doctrine, payload.salt).then(verifyHash => {
+      OnlinePvPEngine.computeCommitHashAsync(payload.deck, payload.doctrine, payload.salt, payload.formations, payload.terrain).then(verifyHash => {
         if (verifyHash !== state.pvpOpponentCommitHash) {
           console.warn('[Security] PvP SHA-256 Commit-Reveal hash mismatch detected!');
         }
       });
     } else {
-      const verifyHash = OnlinePvPEngine.computeCommitHash(payload.deck, payload.doctrine, payload.salt);
+      const verifyHash = OnlinePvPEngine.computeCommitHash(payload.deck, payload.doctrine, payload.salt, payload.formations, payload.terrain);
       if (verifyHash !== state.pvpOpponentCommitHash) {
         console.warn('[Security] PvP Commit-Reveal hash mismatch detected!');
       }
@@ -6755,6 +6870,12 @@ OnlinePvPEngine.on('opponent_deck_ready', payload => {
   }
   state.pvpOpponentDeck = payload.deck;
   state.pvpOpponentDoc = payload.doctrine || 'defense';
+  state.pvpOpponentFormations = normalizeFormations(payload.formations);
+  state.pvpOpponentTerrain = normalizeTerrain(payload.terrain);
+  if (!OnlinePvPEngine.isHostUser()) {
+    state.terrain = state.pvpOpponentTerrain;
+    syncActiveDeck();
+  }
   state.pvpOpponentReady = true;
 
   renderCommandDeck();
@@ -6763,13 +6884,7 @@ OnlinePvPEngine.on('opponent_deck_ready', payload => {
   if (state.pvpMyReady) {
     if (!state.pvpMyRevealed) {
       state.pvpMyRevealed = true;
-      OnlinePvPEngine.sendPacket('DECK_SUBMIT', {
-        deck: state.deck.slice(),
-        doctrine: state.doctrine,
-        salt: state.pvpMySalt,
-        commitHash: state.pvpMyCommitHash,
-        round: state.bo3.round
-      });
+      sendOnlinePvpDeckReveal();
     }
     toast(`⚡ 對手已完成配置！雙方就緒，即將開打！`);
     checkBothReadyAndStartCombat();
@@ -6784,6 +6899,8 @@ OnlinePvPEngine.on('combat_start_sync', payload => {
     state.pvpOpponentDoc = payload.doctrine || 'defense';
     state.pvpOpponentReady = true;
   }
+  if (Array.isArray(payload.formations)) state.pvpOpponentFormations = normalizeFormations(payload.formations);
+  if (payload.terrain) state.pvpOpponentTerrain = normalizeTerrain(payload.terrain);
   startOnlinePvpBattle(payload.seed, payload.event);
 });
 
@@ -6928,7 +7045,9 @@ function getTournamentPlayerProfile() {
     isMe: true,
     isAI: false,
     deck: state.deck.every(Boolean) ? state.deck.slice() : null,
-    doctrine: state.doctrine || 'defense'
+    doctrine: state.doctrine || 'defense',
+    formations: normalizeFormations(state.formations),
+    terrain: normalizeTerrain(state.terrain)
   };
 }
 
@@ -7005,8 +7124,7 @@ function renderTourneyDeckBar() {
     }
     if (d) {
       state.deck = d.slice();
-      if (state.deckSlot === 'B') state.dualDecks.B = d.slice();
-      else state.dualDecks.A = d.slice();
+      syncActiveDeck();
       renderTournamentView();
       toast('🎲 已由戰區軍火庫抽取並組建合法 15 元參賽部隊！');
     }
@@ -7034,6 +7152,8 @@ function renderTournamentView() {
       t.participants[0].flag = prof.flag;
       t.participants[0].deck = prof.deck;
       t.participants[0].doctrine = prof.doctrine;
+      t.participants[0].formations = prof.formations;
+      t.participants[0].terrain = prof.terrain;
     }
     isLobby = (t.status === 'registration');
   }
@@ -8761,7 +8881,7 @@ $('#btnTourneyStart')?.addEventListener('click', () => {
     toast(`⚠️ 參賽陣容尚未整備完畢（${errs[0]}），請先點選「隨機組隊」或前往軍火庫配置！`);
     return;
   }
-  TournamentEngine.start(state.deck, state.doctrine);
+  TournamentEngine.start(state.deck, state.doctrine, state.formations, state.terrain);
   renderTournamentView();
   toast('🏆 世界盃淘汰錦標賽正式開賽！世足對抗樹已生成！');
 });
@@ -8921,7 +9041,7 @@ $('#tourneyActionBox')?.addEventListener('click', async e => {
         return aIsMe || bIsMe;
       });
       if (myMatch) {
-        await FirebaseTourneyEngine.submitMatchDeck(onlineRoom.id, myMatch.id, prof.uid, state.deck, state.doctrine);
+        await FirebaseTourneyEngine.submitMatchDeck(onlineRoom.id, myMatch.id, prof.uid, state.deck, state.doctrine, state.formations);
         toast('🎯 陣容已鎖定並提交雲端！等待對手出擊...');
         renderTournamentView();
       }
@@ -9109,7 +9229,10 @@ $('#tourneySpectatorModal')?.addEventListener('click', e => {
       seed: h.seed,
       event: h.event,
       docA: h.docA || 'defense',
-      docB: h.docB || 'defense'
+      docB: h.docB || 'defense',
+      formationsA: normalizeFormations(h.formationsA || getRecommendedFormations(h.deckA, h.terrain || 'plain')),
+      formationsB: normalizeFormations(h.formationsB || getRecommendedFormations(h.deckB, h.terrain || 'plain')),
+      terrain: normalizeTerrain(h.terrain || 'plain')
     });
     $('#tourneySpectatorModal').hidden = true;
     currentActiveModal = null;
@@ -9222,10 +9345,13 @@ if (replayParam) {
   clearUrlSearchParam('replay');
   try {
     const raw = atob(replayParam.trim());
-    const [dA, dB, seedStr, evId, docA, docB] = raw.split('~');
+    const [dA, dB, seedStr, evId, docA, docB, formationAData, formationBData, terrainData] = raw.split('~');
     const deckA = dA.split('.').filter(id => UNIT_MAP[id]);
     const deckB = dB.split('.').filter(id => UNIT_MAP[id]);
     if (deckA.length === 5 && deckB.length === 5) {
+      const formationsA = normalizeFormations((formationAData || '').split('.'));
+      const formationsB = normalizeFormations((formationBData || '').split('.'));
+      const replayTerrain = normalizeTerrain(terrainData || 'plain');
       LS.set('wl15_seen', 1);
       const evObj = EVENTS.find(e => e.id === evId) || EVENTS[0];
       state.deck = deckA.slice();
@@ -9233,11 +9359,16 @@ if (replayParam) {
       state.event = evObj;
       state.doctrine = docA || 'defense';
       state.enemyDoc = docB || 'defense';
+      state.formations = formationsA.slice();
+      state.terrain = replayTerrain;
       const res = resolveBattle(deckA, deckB, {
         seed: Number(seedStr) >>> 0,
         event: evObj,
         docA: state.doctrine,
-        docB: state.enemyDoc
+        docB: state.enemyDoc,
+        formationsA,
+        formationsB,
+        terrain: replayTerrain
       });
       state.lastRes = res;
       setTimeout(() => {

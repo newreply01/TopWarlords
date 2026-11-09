@@ -424,9 +424,18 @@ const OnlinePvPEngine = (function () {
     return Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
   }
 
-  /* 計算雙階段 Commit-Reveal 戰術雜湊摘要（杜絕鎖定前 F12 窺探對手明文卡組） */
-  function computeCommitHash(deck, doctrine, salt) {
-    const raw = `${(deck || []).join('.')}|${doctrine || 'defense'}|${salt || ''}`;
+  function getCommitRaw(deck, doctrine, salt, formations, terrain) {
+    const roster = (deck || []).join('.');
+    if (formations === undefined && terrain === undefined) {
+      return `${roster}|${doctrine || 'defense'}|${salt || ''}`;
+    }
+    const formationKey = Array.isArray(formations) ? formations.join('.') : '';
+    return `${roster}|${doctrine || 'defense'}|${formationKey}|${terrain || 'plain'}|${salt || ''}`;
+  }
+
+  /* Commit-Reveal 覆蓋陣容、教條、陣形與地形，避免揭露後改動戰場配置。 */
+  function computeCommitHash(deck, doctrine, salt, formations, terrain) {
+    const raw = getCommitRaw(deck, doctrine, salt, formations, terrain);
     let h1 = 0x811c9dc5;
     let h2 = 0xcbf29ce4;
     for (let i = 0; i < raw.length; i++) {
@@ -439,8 +448,8 @@ const OnlinePvPEngine = (function () {
     return (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0');
   }
 
-  async function computeCommitHashAsync(deck, doctrine, salt) {
-    const raw = `${(deck || []).join('.')}|${doctrine || 'defense'}|${salt || ''}`;
+  async function computeCommitHashAsync(deck, doctrine, salt, formations, terrain) {
+    const raw = getCommitRaw(deck, doctrine, salt, formations, terrain);
     try {
       if (typeof crypto !== 'undefined' && crypto.subtle && typeof TextEncoder !== 'undefined') {
         const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
@@ -448,7 +457,7 @@ const OnlinePvPEngine = (function () {
         return 'sha256:' + hex;
       }
     } catch (_) { }
-    return computeCommitHash(deck, doctrine, salt);
+    return computeCommitHash(deck, doctrine, salt, formations, terrain);
   }
 
   return {

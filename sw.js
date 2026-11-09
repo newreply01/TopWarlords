@@ -1,4 +1,4 @@
-const APP_VERSION = '7.5.6';
+const APP_VERSION = '7.5.7';
 const CACHE_NAME = `topwarlords-v${APP_VERSION}`;
 const CORE_ASSETS = [
   './',
@@ -10,6 +10,24 @@ const CORE_ASSETS = [
   './assets/icons/icon-512.png',
   './assets/icons/icon-maskable-512.png',
   './assets/icons/apple-touch-icon.png',
+  `./assets/models/horse.glb?v=${APP_VERSION}`,
+  `./assets/models/horse_armored.glb?v=${APP_VERSION}`,
+  `./assets/models/infantry.glb?v=${APP_VERSION}`,
+  `./assets/models/strategist.glb?v=${APP_VERSION}`,
+  `./assets/models/spear.glb?v=${APP_VERSION}`,
+  `./assets/models/pike.glb?v=${APP_VERSION}`,
+  `./assets/models/katana.glb?v=${APP_VERSION}`,
+  `./assets/models/sword.glb?v=${APP_VERSION}`,
+  `./assets/models/bow.glb?v=${APP_VERSION}`,
+  `./assets/models/arrow.glb?v=${APP_VERSION}`,
+  `./assets/models/shield_tower.glb?v=${APP_VERSION}`,
+  `./assets/models/shield_round.glb?v=${APP_VERSION}`,
+  `./assets/models/banner.glb?v=${APP_VERSION}`,
+  `./assets/models/flag.glb?v=${APP_VERSION}`,
+  `./assets/models/tent.glb?v=${APP_VERSION}`,
+  `./assets/models/watchtower.glb?v=${APP_VERSION}`,
+  `./assets/models/rock_a.glb?v=${APP_VERSION}`,
+  `./assets/models/rock_b.glb?v=${APP_VERSION}`,
   `./js/data.js?v=${APP_VERSION}`,
   `./js/ladder-data.js?v=${APP_VERSION}`,
   `./js/engine.js?v=${APP_VERSION}`,

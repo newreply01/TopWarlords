@@ -99,6 +99,8 @@ const TournamentEngine = (() => {
       armoryRule: armoryRule || 'locked', // 'locked' (開戰鎖定) | 'free' (自由調撥)
       lockedDeck: null,
       lockedDoctrine: null,
+      lockedFormations: null,
+      lockedTerrain: 'plain',
       roundTheaters,
       currentRound: 1, // 1: 32強, 2: 16強, 3: 8強, 4: 準決賽(4強), 5: 決賽
       totalRounds, // 4強:2輪, 8強:3輪, 16強:4輪, 32強:5輪
@@ -262,11 +264,16 @@ const TournamentEngine = (() => {
   /**
    * 正式開賽：執行全域隨機抽籤（Fisher-Yates Shuffle），打破固定 1 號位限制
    */
-  function start(playerDeck = null, playerDoctrine = null) {
+  function start(playerDeck = null, playerDoctrine = null, playerFormations = null, playerTerrain = null) {
     if (!tourney) return;
+    const player = tourney.participants.find(pt => pt && pt.isMe);
+    const actualFormations = playerFormations || (player && player.formations) || (typeof state !== 'undefined' && state.formations) || Array(5).fill('fishscale');
+    tourney.lockedFormations = actualFormations.slice();
+    tourney.lockedTerrain = playerTerrain || (player && player.terrain) || (typeof state !== 'undefined' && state.terrain) || 'plain';
+
     // 1. 若為開戰鎖定賽制，於鳴槍開賽瞬間永久凍結我方陣容與教條
     if (tourney.armoryRule === 'locked') {
-      const p = tourney.participants.find(pt => pt && pt.isMe);
+      const p = player;
       const actualDeck = playerDeck || (p && p.deck) || (typeof state !== 'undefined' && state.deck) || generateLegalDeck();
       const actualDoc = playerDoctrine || (p && p.doctrine) || (typeof state !== 'undefined' && state.doctrine) || 'defense';
       tourney.lockedDeck = actualDeck.slice();
@@ -275,6 +282,10 @@ const TournamentEngine = (() => {
         p.deck = tourney.lockedDeck.slice();
         p.doctrine = tourney.lockedDoctrine;
       }
+    }
+    if (player) {
+      player.formations = tourney.lockedFormations.slice();
+      player.terrain = tourney.lockedTerrain;
     }
 
     // 2. 若未滿額自動補齊（大廳階段玩家維持在 1 號位）
@@ -383,6 +394,15 @@ const TournamentEngine = (() => {
       const eventObj = (tourney && tourney.roundTheaters && tourney.roundTheaters[roundIdx])
         ? tourney.roundTheaters[roundIdx]
         : ((typeof EVENTS !== 'undefined' && EVENTS.length) ? EVENTS[Math.floor(Math.random() * EVENTS.length)] : { id: 'storm', name: '暴風雨' });
+      const battleTerrain = tourney.lockedTerrain || 'plain';
+      const formationsA = match.teamA.isMe && Array.isArray(tourney.lockedFormations)
+        ? tourney.lockedFormations.slice()
+        : (Array.isArray(match.teamA.formations)
+          ? match.teamA.formations.slice()
+          : (typeof getRecommendedFormations === 'function' ? getRecommendedFormations(deckA, battleTerrain) : Array(5).fill('fishscale')));
+      const formationsB = Array.isArray(match.teamB.formations)
+        ? match.teamB.formations.slice()
+        : (typeof getRecommendedFormations === 'function' ? getRecommendedFormations(deckB, battleTerrain) : Array(5).fill('fishscale'));
 
       let res = null;
       if (typeof resolveBattle === 'function') {
@@ -390,7 +410,10 @@ const TournamentEngine = (() => {
           seed,
           event: eventObj,
           docA: match.teamA.doctrine || 'defense',
-          docB: match.teamB.doctrine || 'defense'
+          docB: match.teamB.doctrine || 'defense',
+          formationsA,
+          formationsB,
+          terrain: battleTerrain
         });
       } else {
         res = {
@@ -411,6 +434,9 @@ const TournamentEngine = (() => {
         deckB: deckB.slice(),
         docA: match.teamA.doctrine,
         docB: match.teamB.doctrine,
+        formationsA,
+        formationsB,
+        terrain: battleTerrain,
         seed,
         event: eventObj,
         scoreA: res.vp?.A?.total || 100,
@@ -492,6 +518,9 @@ const TournamentEngine = (() => {
       deckB: histDeckB.slice(),
       docA: match.teamA.doctrine,
       docB: match.teamB.doctrine,
+      formationsA,
+      formationsB,
+      terrain: battleTerrain,
       seed,
       event: eventObj,
       scoreA: singleRoundResult.vp?.A?.total || 100,

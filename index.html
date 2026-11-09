@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.5.6">
+<link rel="stylesheet" href="style.css?v=7.5.7">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
@@ -120,6 +120,11 @@
 <section class="mission-bar" id="missionBar">
   <div class="mission-content" id="missionContent"></div>
   <div class="mission-right-tools" id="missionRightTools">
+    <button class="formation-open-btn" id="btnOpenFormation" type="button" aria-haspopup="dialog" aria-controls="formationDialog">
+      <span class="formation-open-icon" aria-hidden="true">⚔</span>
+      <span>陣形編制</span>
+      <strong id="formationSummary">魚鱗</strong>
+    </button>
     <button class="btn-reroll-top" id="btnRerollMarket" title="隨機調撥 5 大兵種戰區軍火庫 (注意：將清空當前選取)">
       <span class="reroll-icon">🎲</span>
       <div class="reroll-texts">
@@ -1040,29 +1045,51 @@
   </div>
 </div>
 
+<dialog class="formation-dialog" id="formationDialog" aria-labelledby="formationDialogTitle">
+  <div class="formation-dialog-inner">
+    <header class="formation-dialog-header">
+      <div>
+        <p class="formation-eyebrow">BATTLE FORMATION</p>
+        <h2 id="formationDialogTitle">五軍陣形編制</h2>
+      </div>
+      <button class="formation-close-btn" id="btnCloseFormation" type="button" aria-label="關閉陣形編制">×</button>
+    </header>
+    <label class="formation-terrain-control" for="formationTerrain">
+      <span>戰場地形</span>
+      <select id="formationTerrain">
+        <option value="plain">平原</option>
+        <option value="mountain">山岳</option>
+        <option value="forest">森林</option>
+      </select>
+    </label>
+    <div class="formation-dialog-hint">陣形效果依部隊個別套用；山岳／森林強化長蛇與四夷，四夷限孟獲、沙摩柯。</div>
+    <div class="formation-rows" id="formationRows"></div>
+  </div>
+</dialog>
+
 <div class="toast" id="toast" role="status"></div>
 
-<script defer src="js/data.js?v=7.5.6"></script>
-<script defer src="js/ladder-data.js?v=7.5.6"></script>
-<script defer src="js/ladder.js?v=7.5.6"></script>
-<script defer src="js/engine.js?v=7.5.6"></script>
+<script defer src="js/data.js?v=7.5.7"></script>
+<script defer src="js/ladder-data.js?v=7.5.7"></script>
+<script defer src="js/ladder.js?v=7.5.7"></script>
+<script defer src="js/engine.js?v=7.5.7"></script>
 <!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script defer src="js/firebase-config.js?v=7.5.6"></script>
-<script defer src="js/firebase-tourney.js?v=7.5.6"></script>
-<script defer src="js/tournament.js?v=7.5.6"></script>
-<script defer src="js/online-pvp.js?v=7.5.6"></script>
-<script defer src="js/telemetry.js?v=7.5.6"></script>
-<script defer src="js/cloud-sync.js?v=7.5.6"></script>
-<script defer src="js/sound.js?v=7.5.6"></script>
-<script defer src="js/poster-help.js?v=7.5.6"></script>
-<script defer src="js/libs/three.min.js?v=7.5.6"></script>
-<script defer src="js/libs/GLTFLoader.js?v=7.5.6"></script>
-<script defer src="js/libs/SkeletonUtils.js?v=7.5.6"></script>
-<script defer src="js/battle-3d.js?v=7.5.6"></script>
-<script defer src="js/app.js?v=7.5.6"></script>
+<script defer src="js/firebase-config.js?v=7.5.7"></script>
+<script defer src="js/firebase-tourney.js?v=7.5.7"></script>
+<script defer src="js/tournament.js?v=7.5.7"></script>
+<script defer src="js/online-pvp.js?v=7.5.7"></script>
+<script defer src="js/telemetry.js?v=7.5.7"></script>
+<script defer src="js/cloud-sync.js?v=7.5.7"></script>
+<script defer src="js/sound.js?v=7.5.7"></script>
+<script defer src="js/poster-help.js?v=7.5.7"></script>
+<script defer src="js/libs/three.min.js?v=7.5.7"></script>
+<script defer src="js/libs/GLTFLoader.js?v=7.5.7"></script>
+<script defer src="js/libs/SkeletonUtils.js?v=7.5.7"></script>
+<script defer src="js/battle-3d.js?v=7.5.7"></script>
+<script defer src="js/app.js?v=7.5.7"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let refreshing = false;
@@ -1073,7 +1100,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.5.6').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.5.7').then(r => r.update()).catch(() => {});
   });
 }
 </script>

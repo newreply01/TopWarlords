@@ -9,10 +9,11 @@ E2E 測試：驗證 TopWarlords 3D 古戰場推演沙盤
 """
 import sys, time, subprocess
 from pathlib import Path
+from tempfile import gettempdir
 from playwright.sync_api import sync_playwright
 
 sys.stdout.reconfigure(encoding='utf-8')
-ROOT = Path("D:/TopWarlords")
+ROOT = Path(__file__).resolve().parents[1]
 PORT = 8299
 
 server = subprocess.Popen(
@@ -39,6 +40,14 @@ try:
         page.goto(f"http://localhost:{PORT}/index.html")
         page.wait_for_selector(".m-card", timeout=8000)
         time.sleep(1.0)
+
+        page.evaluate("""() => {
+            document.querySelector('#btnOpenFormation').click();
+            const terrain = document.querySelector('#formationTerrain');
+            terrain.value = 'mountain';
+            terrain.dispatchEvent(new Event('change', { bubbles: true }));
+            document.querySelector('#btnCloseFormation').click();
+        }""")
 
         # 隨機補滿陣容 (使用 evaluate 杜絕引導模態窗指針攔截)
         page.evaluate("() => document.querySelector('#btnRand').click()")
@@ -68,11 +77,16 @@ try:
         is_engine_ready = page.evaluate("() => typeof Battle3DEngine !== 'undefined'")
         print(f"[TEST 3] Three.js 就緒: {is_three_ready}, Battle3DEngine 就緒: {is_engine_ready}")
         assert is_three_ready and is_engine_ready, "Three.js 或 Battle3DEngine 未載入！"
+        page.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", timeout=10000)
+        terrain_state = page.evaluate("() => Battle3DEngine.getDebugState()")
+        assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
+        assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
 
         # 擷取 3D 沙盤對戰截圖
         time.sleep(1.0)
-        page.screenshot(path="D:/TopWarlords/screenshot_3d_battle.png")
-        print("[TEST 4] 3D 沙盤截圖成功保存至 D:/TopWarlords/screenshot_3d_battle.png")
+        screenshot_path = Path(gettempdir()) / "topwarlords-3d-battle.png"
+        page.screenshot(path=str(screenshot_path))
+        print(f"[TEST 4] 3D 沙盤截圖成功保存至 {screenshot_path}")
 
         # 測試切換 3D/2D 按鈕
         page.evaluate("() => document.querySelector('#btnToggle3DView').click()")
@@ -90,7 +104,58 @@ try:
         time.sleep(0.5)
         print("[TEST 7] 戰鬥秒速結算完成！")
 
-        print("\n🎉 TopWarlords 3D 古戰場推演沙盤 E2E 測試 100% 成功通過！")
+        context.close()
+        mobile_context = browser.new_context(viewport={'width': 600, 'height': 900}, service_workers='block')
+        mobile_context.add_init_script("""
+            localStorage.setItem('wl15_seen', '1');
+            localStorage.setItem('wl15_onboard_done', 'true');
+            localStorage.setItem('wl15_help_dismissed', 'true');
+            localStorage.setItem('topwarlords_cached_global_visits', '100');
+        """)
+        mobile = mobile_context.new_page()
+        mobile_errors = []
+        mobile.on('pageerror', lambda err: mobile_errors.append(str(err)))
+        mobile.on('console', lambda msg: mobile_errors.append(msg.text) if msg.type == 'error' else None)
+        mobile.on('requestfailed', lambda request: mobile_errors.append(f"{request.url}: {request.failure}"))
+        mobile.goto(f"http://localhost:{PORT}/index.html")
+        mobile.wait_for_selector("#btnRand", state='visible', timeout=8000)
+        mobile.evaluate("() => document.querySelector('#btnRand').click()")
+        mobile.wait_for_function("() => !document.querySelector('#btnGo').disabled", timeout=5000)
+        mobile_start = mobile.evaluate("""() => {
+            const button = document.querySelector('#btnGo');
+            button.click();
+            return {
+                disabled: button.disabled,
+                viewHidden: document.querySelector('#viewBattle').hidden,
+                bodyClass: document.body.className,
+                deck: JSON.parse(localStorage.getItem('wl15_deck') || '[]')
+            };
+        }""")
+        print('[MOBILE START]', mobile_start)
+        assert not mobile_start['viewHidden'], f"手機出擊未開啟戰場：{mobile_start}; browser errors: {mobile_errors}"
+        try:
+            mobile.wait_for_selector("#battle3DCanvas canvas", timeout=8000)
+        except Exception as error:
+            mobile_state = mobile.evaluate("""() => ({
+                battleVisible: !document.querySelector('#viewBattle').hidden,
+                containerSize: [document.querySelector('#battle3DCanvas').clientWidth, document.querySelector('#battle3DCanvas').clientHeight],
+                webgl: Boolean(document.createElement('canvas').getContext('webgl')),
+                engine: typeof Battle3DEngine === 'undefined' ? null : Battle3DEngine.getDebugState()
+            })""")
+            raise AssertionError(f"手機 3D canvas 未初始化：{mobile_state}; browser errors: {mobile_errors}") from error
+        try:
+            mobile.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", timeout=12000)
+        except Exception as error:
+            debug_state = mobile.evaluate("() => Battle3DEngine.getDebugState()")
+            raise AssertionError(f"手機兵群未完成載入：{debug_state}; browser errors: {mobile_errors}") from error
+        mobile_state = mobile.evaluate("() => Battle3DEngine.getDebugState()")
+        assert mobile_state['lowPowerDevice'], f"手機未使用低功耗渲染：{mobile_state}"
+        assert mobile_state['pixelRatio'] <= 1.15, f"手機 DPR 未受限：{mobile_state}"
+        assert len(mobile_errors) == 0, f"手機戰場瀏覽器錯誤：{mobile_errors}"
+        print("[TEST 8] 手機低功耗渲染、DPR 與實例化兵群通過！")
+        mobile_context.close()
+
+        print("\n🎉 TopWarlords desktop/mobile 3D 戰場 E2E 測試成功通過！")
         browser.close()
 finally:
     server.terminate()

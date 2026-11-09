@@ -2,13 +2,16 @@
 """
 測試 TopWarlords 名將點將錄 (armory.html)
 驗證：
-1. 初始渲染 200 位名將
-2. 兵團篩選 (如 奔雷突騎 40 位)
-3. 國別篩選 (🇨🇳 100, 🇯🇵 65, 🇰🇷 35)
+1. 初始渲染 164 位名將
+2. 兵團篩選 (如 奔雷突騎 35 位)
+3. 國別篩選 (🇨🇳 98, 🇯🇵 49, 🇰🇷 17)
 4. 點擊名將卡片展開全息模態窗
 """
 import asyncio
+from pathlib import Path
 from playwright.async_api import async_playwright
+
+ROOT = Path(__file__).resolve().parents[1]
 
 async def main():
     async with async_playwright() as p:
@@ -16,21 +19,21 @@ async def main():
         context = await browser.new_context(viewport={'width': 1280, 'height': 800})
         page = await context.new_page()
 
-        await page.goto("file:///D:/TopWarlords/armory.html")
+        await page.goto((ROOT / "armory.html").as_uri())
         await page.wait_for_selector(".unit-card", timeout=10000)
 
         # 1. 初始總數
         cards = await page.locator(".unit-card").count()
         filtered_text = await page.locator("#filteredCount").inner_text()
         print(f"[TEST 1] 初始名將卡片渲染數量: {cards} 張，計數標籤: {filtered_text}")
-        assert cards == 200, f"預期 200 張卡片，實際得到 {cards}"
+        assert cards == 164, f"預期 164 張卡片，實際得到 {cards}"
 
         # 2. 兵團篩選 (奔雷突騎)
         await page.locator("button[data-cat='air']").click()
         await page.wait_for_timeout(300)
         air_cards = await page.locator(".unit-card").count()
         print(f"[TEST 2] 篩選奔雷突騎 (air) 數量: {air_cards} 張")
-        assert air_cards == 40, f"預期 40 位奔雷突騎，實際得到 {air_cards}"
+        assert air_cards == 35, f"預期 35 位奔雷突騎，實際得到 {air_cards}"
 
         # 切回全部
         await page.locator("button[data-cat='all']").click()
@@ -42,21 +45,21 @@ async def main():
         await page.wait_for_timeout(300)
         cn_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-1] 篩選 🇨🇳 中國名將數量: {cn_cards} 張")
-        assert cn_cards == 114, f"預期 100 位中國名將，實際得到 {cn_cards}"
+        assert cn_cards == 98, f"預期 98 位中國名將，實際得到 {cn_cards}"
 
         # 🇯🇵 日本
         await page.locator("button[data-nat='🇯🇵']").click()
         await page.wait_for_timeout(300)
         jp_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-2] 篩選 🇯🇵 日本名將數量: {jp_cards} 張")
-        assert jp_cards == 48, f"預期 65 位日本名將，實際得到 {jp_cards}"
+        assert jp_cards == 49, f"預期 49 位日本名將，實際得到 {jp_cards}"
 
         # 🇰🇷 韓國
         await page.locator("button[data-nat='🇰🇷']").click()
         await page.wait_for_timeout(300)
         kr_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-3] 篩選 🇰🇷 韓國名將數量: {kr_cards} 張")
-        assert kr_cards == 38, f"預期 35 位韓國名將，實際得到 {kr_cards}"
+        assert kr_cards == 17, f"預期 17 位韓國名將，實際得到 {kr_cards}"
 
         # 切回全部國籍
         await page.locator("button[data-nat='all']").click()

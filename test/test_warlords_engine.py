@@ -9,7 +9,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 sys.stdout.reconfigure(encoding='utf-8')
-ROOT = Path("D:/TopWarlords")
+ROOT = Path(__file__).resolve().parents[1]
 PORT = 8128
 
 server = subprocess.Popen(
@@ -31,6 +31,7 @@ try:
 <body>
 <script src="http://localhost:{PORT}/js/data.js"></script>
 <script src="http://localhost:{PORT}/js/engine.js"></script>
+<script src="http://localhost:{PORT}/js/online-pvp.js"></script>
 </body>
 </html>"""
         (ROOT / "test_sandbox.html").write_text(test_html, encoding="utf-8")
@@ -41,7 +42,7 @@ try:
         page.on("console", lambda msg: print("PAGE LOG:", msg.text))
         page.on("pageerror", lambda err: print("PAGE ERROR:", err))
 
-        res = page.evaluate("""() => {
+        res = page.evaluate("""async () => {
             const errs = [];
             const units = (typeof UNITS !== 'undefined') ? UNITS : window.UNITS;
             const unitMap = (typeof UNIT_MAP !== 'undefined') ? UNIT_MAP : window.UNIT_MAP;
@@ -76,6 +77,104 @@ try:
             if (!battle || !battle.winner) errs.push('戰鬥推演無結果');
             if (!battle.vp || !battle.vp.A || !battle.vp.B) errs.push('VP 結算失敗');
 
+            const formationCats = ['air', 'armor', 'air_defense', 'naval', 'support'];
+            const formationDeck = formationCats.map(cat => units.find(unit => unit.cat === cat).id);
+            const neutralFormations = Array(5).fill('fishscale');
+            const gooseBattle = resolveBattle(formationDeck, formationDeck, {
+                seed: 0,
+                formationsA: ['fishscale', 'fishscale', 'goose', 'fishscale', 'fishscale'],
+                formationsB: neutralFormations
+            });
+            const enemyById = new Map(gooseBattle.final.B.map(unit => [unit.uid, unit]));
+            const gooseRearHit = gooseBattle.frames.flatMap(frame => frame.lines).some(line =>
+                line.auid === formationDeck[2] + '-A2' && ['support', 'air_defense'].includes(enemyById.get(line.tuid)?.cat)
+            );
+            if (!gooseRearHit) errs.push('雁行未能攻擊敵軍後列');
+            const gooseCannotCapture = !gooseBattle.frames.flatMap(frame => frame.lines).some(line =>
+                line.auid === formationDeck[2] + '-A2' && line.kind === 'capture'
+            );
+            if (!gooseCannotCapture) errs.push('雁行部隊不應俘虜敵將');
+            const normalCaptureBattle = resolveBattle(formationDeck, formationDeck, {
+                seed: 0,
+                formationsA: neutralFormations,
+                formationsB: neutralFormations
+            });
+            if (!normalCaptureBattle.frames.flatMap(frame => frame.lines).some(line => line.kind === 'capture')) {
+                errs.push('一般陣形未產生戰鬥俘虜事件');
+            }
+
+            const craneBattle = resolveBattle(formationDeck, formationDeck, {
+                seed: 10,
+                formationsA: ['fishscale', 'crane', 'fishscale', 'fishscale', 'fishscale'],
+                formationsB: neutralFormations
+            });
+            if (craneBattle.vp.A.occupationCtl <= 0) errs.push('存活鶴翼未取得區域控制分');
+
+            const mountainBattle = resolveBattle(formationDeck, formationDeck, {
+                seed: 1,
+                formationsA: ['longsnake', ...neutralFormations.slice(1)],
+                formationsB: neutralFormations,
+                terrain: 'mountain'
+            });
+            if (mountainBattle.final.A[0].formationAttack !== 1.5 || mountainBattle.final.A[0].formationDefense !== 1.5) {
+                errs.push('長蛇山地攻防加成不是 1.5');
+            }
+
+            const barbarianDeck = formationDeck.slice();
+            barbarianDeck[3] = 'MENGHUO';
+            const fourYiBattle = resolveBattle(barbarianDeck, formationDeck, {
+                seed: 12,
+                formationsA: ['fishscale', 'fishscale', 'fishscale', 'fourYi', 'fishscale'],
+                formationsB: neutralFormations,
+                terrain: 'forest'
+            });
+            if (fourYiBattle.final.A[3].formation !== 'fourYi' || fourYiBattle.final.A[3].formationAttack !== 1.5) {
+                errs.push('孟獲四夷森林加成未套用');
+            }
+            const fourYiMountain = resolveBattle(barbarianDeck, formationDeck, {
+                seed: 12,
+                formationsA: ['fishscale', 'fishscale', 'fishscale', 'fourYi', 'fishscale'],
+                formationsB: neutralFormations,
+                terrain: 'mountain'
+            });
+            if (fourYiMountain.final.A[3].formationAttack !== 1.5) errs.push('孟獲四夷山岳加成未套用');
+            if (fourYiBattle.final.A[0].formationTacticChance !== 0.06) errs.push('魚鱗基礎戰法率未提高');
+            const ineligibleFourYi = resolveBattle(formationDeck, formationDeck, {
+                seed: 12,
+                formationsA: ['fourYi', ...neutralFormations.slice(1)],
+                formationsB: neutralFormations,
+                terrain: 'forest'
+            });
+            if (ineligibleFourYi.final.A[0].formation !== 'fishscale') errs.push('非異族武將不應使用四夷');
+
+            const duelBattle = resolveBattle(formationDeck, formationDeck, {
+                seed: 1,
+                formationsA: neutralFormations,
+                formationsB: neutralFormations
+            });
+            const squareBattle = resolveBattle(formationDeck, formationDeck, {
+                seed: 1,
+                formationsA: Array(5).fill('square'),
+                formationsB: neutralFormations
+            });
+            const duels = result => result.frames.flatMap(frame => frame.lines).filter(line => line.duel).length;
+            if (duels(duelBattle) !== 1 || duels(squareBattle) !== 0) errs.push('方圓單挑免疫判定錯誤');
+            if (squareBattle.final.A.some(unit => unit.formationDuelImmune !== true)) errs.push('方圓免單挑狀態未進入結算單位');
+
+            const hashFormations = Array(5).fill('fishscale');
+            const baseHash = await OnlinePvPEngine.computeCommitHashAsync(deckA, 'strike', 'test-salt', hashFormations, 'plain');
+            const repeatHash = await OnlinePvPEngine.computeCommitHashAsync(deckA, 'strike', 'test-salt', hashFormations, 'plain');
+            const formationHash = await OnlinePvPEngine.computeCommitHashAsync(deckA, 'strike', 'test-salt', ['cone', ...hashFormations.slice(1)], 'plain');
+            const terrainHash = await OnlinePvPEngine.computeCommitHashAsync(deckA, 'strike', 'test-salt', hashFormations, 'forest');
+            const pvpHashChecks = {
+                stable: baseHash === repeatHash,
+                includesFormation: baseHash !== formationHash,
+                includesTerrain: baseHash !== terrainHash
+            };
+            if (!pvpHashChecks.stable || !pvpHashChecks.includesFormation || !pvpHashChecks.includesTerrain) {
+                errs.push('PvP commit hash 未完整涵蓋陣形／地形');
+            }
+
             // 測試 100 場快速批次推演
             let aWins = 0, bWins = 0, draws = 0;
             for (let i = 0; i < 100; i++) {
@@ -96,19 +195,29 @@ try:
                 vpA: battle ? battle.vp.A.total : 0,
                 vpB: battle ? battle.vp.B.total : 0,
                 framesCount: battle ? battle.frames.length : 0,
+                formationMobility: BATTLE_FORMATION_DEFS.find(formation => formation.id === 'cone').mobility,
+                fourYi: [fourYiBattle.final.A[3].formation, fourYiBattle.final.A[3].formationAttack],
+                fourYiMountain: fourYiMountain.final.A[3].formationAttack,
+                gooseRearHit,
+                gooseCannotCapture,
+                normalCaptures: normalCaptureBattle.frames.flatMap(frame => frame.lines).filter(line => line.kind === 'capture').length,
+                craneOccupation: craneBattle.vp.A.occupationCtl,
+                duelCounts: { normal: duels(duelBattle), square: duels(squareBattle) },
+                pvpHashChecks,
                 batch100: { aWins, bWins, draws },
                 errs
             };
         }""")
 
         assert len(res["errs"]) == 0, f"推演測試失敗: {res['errs']}"
-        print("[PASS] 1. 200 位日韓中純歷史名將全鑑載入成功：共", res["unitCount"], "位")
+        print("[PASS] 1. 164 位日韓中純歷史名將全鑑載入成功：共", res["unitCount"], "位")
         print("[PASS] 2. 諸葛亮定位成功驗證：", res["zhugeLiang"]["name"], f"(${res['zhugeLiang']['cost']} {res['zhugeLiang']['cat']}) 稱號: {res['zhugeLiang']['tag']}")
         print("[PASS] 3. 隨機合法隊伍生成通過：")
         print("   隊伍 A:", " / ".join(res["deckA"]))
         print("   隊伍 B:", " / ".join(res["deckB"]))
         print("[PASS] 4. 單場古戰場推演成功！勝者:", res["battleWinner"], f"(VP: {res['vpA']} vs {res['vpB']}) 總回合幀數:", res["framesCount"])
-        print("[PASS] 5. 100 場隨機名將陣容大數據批次模擬成功！戰果:", res["batch100"])
+        print("[PASS] 5. 野戰陣形規則通過：雁行後列", res["gooseRearHit"], "鶴翼佔領", res["craneOccupation"], "單挑", res["duelCounts"], "錐行機動", res["formationMobility"])
+        print("[PASS] 6. 100 場隨機名將陣容大數據批次模擬成功！戰果:", res["batch100"])
 
         browser.close()
 finally:

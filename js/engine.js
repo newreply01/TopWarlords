@@ -132,32 +132,89 @@ function resolveBrevityAndSfx(at, t, tier) {
   return { brv: '親衛死守', sfxOverride: 'blade_clash', isC4isr: false };
 }
 
-/* ---------- 隊伍建立 ---------- */
-function makeTeam(ids, side) {
+/* ---------- 主戰鬥函式 ---------- */
+const DMG_SCALE = 1.0;
+
+
+const BATTLE_FORMATION_DEFS = [
+  { id: 'fishscale', name: '魚鱗', desc: '野戰均衡、攻守穩定，戰法發動率提高。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.06, tacticDamage: 1.08, layout: 'line' },
+  { id: 'spearhead', name: '鋒矢', desc: '突擊高傷、戰法較易發動，但承受傷害增加。', attack: 1.12, damageTaken: 1.08, hit: 0.03, tacticChance: 0.12, tacticDamage: 1.2, layout: 'wedge' },
+  { id: 'square', name: '方圓', desc: '穩守持久，減少承受傷害；不易發動戰法。', attack: 0.9, damageTaken: 0.78, hit: -0.02, tacticChance: 0, tacticDamage: 1, layout: 'square', duelImmune: true },
+  { id: 'goose', name: '雁行', desc: '遠距火力與命中提升，但防禦較弱，無法俘虜敵將。', attack: 1.1, damageTaken: 1.12, hit: 0.04, tacticChance: 0.03, tacticDamage: 1.15, layout: 'staggered', ranged: true, canCapture: false },
+  { id: 'crane', name: '鶴翼', desc: '展開兩翼包抄，略增命中與攻勢。', attack: 1.05, damageTaken: 1, hit: 0.02, tacticChance: 0.04, tacticDamage: 1.15, layout: 'wings', occupation: true },
+  { id: 'longsnake', name: '長蛇', desc: '山地、森林中攻防能力提升 50%。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.02, tacticDamage: 1.15, layout: 'column', terrainMultiplier: 1.5 },
+  { id: 'cone', name: '錐行', desc: '高速穿插；戰鬥力較弱且無法發動戰法。', attack: 0.78, damageTaken: 1.05, hit: -0.02, tacticChance: 0, tacticDamage: 1, layout: 'cone', mobility: 1.5 },
+  { id: 'fourYi', name: '四夷', desc: '孟獲、沙摩柯專用；山岳、森林中攻防提升 50%，容易發動戰法。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.14, tacticDamage: 1.2, layout: 'wedge', terrainMultiplier: 1.5, eligibleUnitIds: ['MENGHUO', 'SHAMOKE'] }
+];
+
+const BATTLE_TERRAINS = [
+  { id: 'plain', name: '平原' },
+  { id: 'mountain', name: '山岳' },
+  { id: 'forest', name: '森林' }
+];
+
+function getBattleFormation(id) {
+  return BATTLE_FORMATION_DEFS.find(formation => formation.id === id) || BATTLE_FORMATION_DEFS[0];
+}
+
+function getRecommendedFormations(deck, terrain = 'plain') {
+  return (deck || []).map(id => {
+    const unit = UNIT_MAP[id];
+    if (!unit) return 'fishscale';
+    if ((terrain === 'mountain' || terrain === 'forest') && ['MENGHUO', 'SHAMOKE'].includes(id)) return 'fourYi';
+    if (terrain === 'mountain' || terrain === 'forest') return 'longsnake';
+    return ({ air: 'spearhead', armor: 'square', air_defense: 'goose', naval: 'spearhead', support: 'fishscale' })[unit.cat] || 'fishscale';
+  });
+}
+
+function makeTeam(ids, side, formationIds, terrain) {
   return ids.map((id, i) => {
     const d = UNIT_MAP[id] || {
       name: '主力名將', cat: 'air', cost: 1, v: 'A',
       traits: [], roleFlags: [], hp: 120, atk: 60, def: 0, st: 0, ew: 0
     };
+    const selectedFormation = getBattleFormation(formationIds && formationIds[i]);
+    const formation = selectedFormation.eligibleUnitIds && !selectedFormation.eligibleUnitIds.includes(id)
+      ? BATTLE_FORMATION_DEFS[0]
+      : selectedFormation;
+    const terrainMultiplier = ((formation.id === 'longsnake' || formation.id === 'fourYi') && (terrain === 'mountain' || terrain === 'forest'))
+      ? formation.terrainMultiplier
+      : 1;
     return {
       uid: `${id}-${side}${i}`, side, id, name: d.name, cat: d.cat, cost: d.cost, v: d.v,
       traits: d.traits || [], roleFlags: d.roleFlags || [], hpMax: d.hp, hp: d.hp, atk: d.atk, def: d.def,
       stealth: d.st || 0, ew: d.ew || 0, alive: true, apsUsed: false, abmUsed: false,
-      shots: 0, dmgDone: 0, killedBy: null
+      shots: 0, dmgDone: 0, killedBy: null,
+      formation: formation.id,
+      formationName: formation.name,
+      formationAttack: formation.attack * terrainMultiplier,
+      formationDefense: terrainMultiplier,
+      formationDamageTaken: formation.damageTaken,
+      formationHit: formation.hit,
+      formationTacticChance: formation.tacticChance,
+      formationTacticDamage: formation.tacticDamage,
+      formationLayout: formation.layout,
+      formationMobility: formation.mobility || 1,
+      formationRanged: Boolean(formation.ranged),
+      formationOccupation: Boolean(formation.occupation || formation.id === 'cone'),
+      formationDuelImmune: Boolean(formation.duelImmune),
+      formationCanCapture: formation.canCapture !== false,
+      captured: false,
+      duelUsed: false
     };
   });
 }
-
-/* ---------- 主戰鬥函式 ---------- */
-const DMG_SCALE = 1.0;
-
 function resolveBattle(deckA, deckB, opts) {
   opts = opts || {};
   const seed = opts.seed == null ? (Math.random() * 4294967296) >>> 0 : opts.seed;
   const rng = mulberry32(seed);
   const ev = opts.event || EVENTS[EVENTS.length - 1];
   const m = Object.assign({ armorDmg: 1, navalDmg: 1, artyDmg: 1, droneDmg: 1, airHit: 0, ewMult: 1, stealthAdd: 0 }, ev.mod || {});
-  const T = { A: makeTeam(deckA, 'A'), B: makeTeam(deckB, 'B') };
+  const terrain = BATTLE_TERRAINS.some(item => item.id === opts.terrain) ? opts.terrain : 'plain';
+  const T = {
+    A: makeTeam(deckA, 'A', opts.formationsA, terrain),
+    B: makeTeam(deckB, 'B', opts.formationsB, terrain)
+  };
   const normDoc = d => (d === 'electronic' ? 'deception' : d === 'air_sup' ? 'strike' : (DOC_FX[d] ? d : 'defense'));
   const docs = { A: normDoc(opts.docA), B: normDoc(opts.docB) };
   const S = {
@@ -206,7 +263,7 @@ function resolveBattle(deckA, deckB, opts) {
   }
   function hitP(att, tgt, base, w, extra, stealthScale) {
     const sc = stealthScale == null ? 1 : stealthScale;
-    return base - (((tgt.stealth + m.stealthAdd) * sc) / 100) * w - S[att.side].hitPen + (extra || 0);
+    return base - (((tgt.stealth + m.stealthAdd) * sc) / 100) * w - S[att.side].hitPen + (extra || 0) + (att.formationHit || 0);
   }
 
   /* 同步結算：先全部擲骰，再統一套用傷害 */
@@ -217,7 +274,19 @@ function resolveBattle(deckA, deckB, opts) {
     for (const a of attacks) {
       if (!a.tgt) continue;
       const p = clamp(a.hit, 0.08, 0.96);
-      rolled.push({ a, p, ok: rng() < p, raw: a.dmg * (0.85 + rng() * 0.3) * DMG_SCALE * (S[a.att.side].atkAll || 1) });
+      const ok = rng() < p;
+      const tacticProc = ok && a.att.formationTacticChance > 0 && rng() < a.att.formationTacticChance;
+      const canDuel = vOpts.allowDuels && ok && ['air', 'armor', 'naval'].includes(a.att.cat) && ['air', 'armor', 'naval'].includes(a.tgt.cat)
+        && !a.att.formationDuelImmune && !a.tgt.formationDuelImmune && !a.att.duelUsed && !a.tgt.duelUsed;
+      const duelProc = Boolean(canDuel && rng() < 0.12);
+      if (duelProc) {
+        a.att.duelUsed = true;
+        a.tgt.duelUsed = true;
+      }
+      rolled.push({
+        a, p, ok, tacticProc, duelProc,
+        raw: a.dmg * (0.85 + rng() * 0.3) * DMG_SCALE * (S[a.att.side].atkAll || 1) * a.att.formationAttack * (tacticProc ? a.att.formationTacticDamage : 1) * (duelProc ? 1.12 : 1)
+      });
     }
     for (const r of rolled) {
       const a = r.a, t = a.tgt, at = a.att;
@@ -286,39 +355,54 @@ function resolveBattle(deckA, deckB, opts) {
         addKey(3, `${t.name} 的重盾格擋阻斷了 ${at.name} 的首波攻勢`, t.side);
         continue;
       }
-      const d = r.raw * (a.trueDmg ? 1 : (1 - t.def)) * S[t.side].taken;
+      const d = r.raw * (a.trueDmg ? 1 : (1 - Math.min(0.9, t.def * t.formationDefense))) * S[t.side].taken * t.formationDamageTaken;
       t.hp -= d;
       at.dmgDone += d;
       if (t.hp <= 0) {
         t.hp = 0; t.alive = false; t.killedBy = at;
+        const captured = at.formationCanCapture && rng() < 0.18;
+        t.captured = captured;
         const killCode = (t.cat === 'air') ? '陣斬落馬' : (t.cat === 'armor') ? '重創破陣' : '力竭戰死';
         const killLabel = (t.cat === 'air') ? '斬落馬下' : (t.cat === 'armor') ? '潰敗破陣' : '陣前討取';
         const actionVerb = meta.isC4isr ? '指揮聯合圍剿討取' : '擊破討取';
         lines.push({
           side: at.side,
-          kind: 'kill',
+          kind: captured ? 'capture' : 'kill',
+          duel: r.duelProc,
+          captured,
           auid: at.uid,
           tuid: t.uid,
           brevity: killCode,
           ammoTier: tier,
           sfxOverride: meta.sfxOverride,
           dmg: Math.round(d),
-          text: `[${killCode} ${killLabel}] ${at.name} ${actionVerb} ${t.name}！`,
+          text: captured
+            ? `[俘虜] ${at.name} 擒獲 ${t.name}！`
+            : r.duelProc
+            ? `[一騎單挑] ${at.name} 與 ${t.name} 正面交鋒後 ${actionVerb}！`
+            : `[${killCode} ${killLabel}] ${at.name} ${actionVerb} ${t.name}！`,
           hpAfter: 0
         });
-        addKey(t.cost * 2 + Math.max(0, t.cost - at.cost) * 2, `${at.name}（$${at.cost}）陣斬 ${t.name}（$${t.cost}）`, at.side);
+        addKey(t.cost * 2 + Math.max(0, t.cost - at.cost) * 2, captured
+          ? `${at.name}（$${at.cost}）擒獲 ${t.name}（$${t.cost}）`
+          : `${at.name}（$${at.cost}）陣斬 ${t.name}（$${t.cost}）`, at.side);
       } else {
         const hitArrow = meta.isC4isr ? '調兵圍攻 →' : '→';
         lines.push({
           side: at.side,
           kind: 'hit',
+          duel: r.duelProc,
           auid: at.uid,
           tuid: t.uid,
-          brevity: brv,
+          formation: at.formation,
+          formationTactic: r.tacticProc,
+          brevity: r.duelProc ? '一騎單挑' : brv,
           ammoTier: tier,
           sfxOverride: meta.sfxOverride,
           dmg: Math.round(d),
-          text: `[${brv}] ${at.name} ${hitArrow} ${t.name}：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）`,
+          text: r.duelProc
+            ? `[一騎單挑] ${at.name} 與 ${t.name} 近身交鋒：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）`
+            : `[${brv}] ${at.name} ${hitArrow} ${t.name}：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）`,
           hpAfter: Math.round(t.hp)
         });
       }
@@ -331,6 +415,10 @@ function resolveBattle(deckA, deckB, opts) {
   const ewA = ewOf('A'), ewB = ewOf('B');
   let advSide = null;
   const l1 = [];
+  const terrainName = BATTLE_TERRAINS.find(item => item.id === terrain).name;
+  l1.push({ side: 'N', kind: 'info', text: `戰場地形：${terrainName}` });
+  l1.push({ side: 'A', kind: 'info', text: `我軍布陣：${T.A.map(unit => unit.formationName).join('、')}` });
+  l1.push({ side: 'B', kind: 'info', text: `敵軍布陣：${T.B.map(unit => unit.formationName).join('、')}` });
   if (syn.A.length) l1.push({ side: 'A', kind: 'info', text: `我方啟動軍陣協同體系：${syn.A.map(x => x.icon + ' ' + x.name).join('、')}` });
   if (syn.B.length) l1.push({ side: 'B', kind: 'info', text: `敵方啟動軍陣協同體系：${syn.B.map(x => x.icon + ' ' + x.name).join('、')}` });
   l1.push({ side: 'N', kind: 'info', text: `全軍謀略值：我方 ${ewA.toFixed(0)} ／ 敵方 ${ewB.toFixed(0)}` });
@@ -480,15 +568,30 @@ function resolveBattle(deckA, deckB, opts) {
       const enemyArmor = alive(e, x => x.cat === 'armor');
       const enemyAir = alive(e, x => x.cat === 'air');
       const enemyNaval = alive(e, x => x.cat === 'naval');
-      const ground = enemyArmor.length ? enemyArmor : enemyAlive;
+      const frontlineGround = enemyArmor.length ? enemyArmor : enemyAlive;
+      const rearGround = alive(e, x => x.cat === 'support' || x.cat === 'air_defense');
       const adAlive = alive(e, x => x.cat === 'air_defense').length;
       
       const hasIdleAbmRadar = !enemyAir.length && myAlive.some(x => hasRoleFlag(x, 'FORMATION_SHIELD'));
       const spot = (myAlive.some(x => x.traits.includes('SPOT')) || hasIdleAbmRadar) ? 1.15 : 1;
       const abmTrackBonus = hasIdleAbmRadar ? 0.04 : 0;
       const ciws = alive(e, x => x.traits.includes('CIWS')).length > 0;
+      if (r === 1 && myAlive.some(unit => unit.formation === 'cone') && !S[e].supplyCut) {
+        S[e].atkAll = (typeof S[e].atkAll === 'number' ? S[e].atkAll : 1) * 0.92;
+        S[e].supplyCut = true;
+        prefixLines.push({
+          side: s,
+          kind: 'info',
+          brevity: '截斷糧道',
+          text: `${s === 'A' ? '我軍' : '敵軍'}錐行部隊高速穿插敵後，截斷糧道！敵軍全軍攻勢減弱 8%。`
+        });
+        addKey(3, `${s === 'A' ? '我軍' : '敵軍'}錐行部隊截斷敵軍糧道，削弱其持續作戰能力`, s);
+      }
 
       for (const u of myAlive) {
+        const ground = u.cat === 'air_defense' && u.formationRanged && rearGround.length
+          ? rearGround
+          : frontlineGround;
         if (u.cat === 'air') {
           // 突騎繞後側翼包抄重甲
           const ammo = getAmmoProfile(u);
@@ -507,7 +610,7 @@ function resolveBattle(deckA, deckB, opts) {
         } else if (u.cat === 'naval') {
           // 先登奇兵進攻
           const ammo = getAmmoProfile(u);
-          const pool = enemyNaval.length ? enemyNaval : ground;
+          const pool = !u.formationRanged && enemyNaval.length ? enemyNaval : ground;
           const ts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
           u.shots++;
           for (const t of ts) {
@@ -606,7 +709,7 @@ function resolveBattle(deckA, deckB, opts) {
     const phaseLabel = r <= 5
       ? `階段三 · 中軍死鬥合圍（第 ${r} 輪）`
       : (r <= 7 ? `階段三 · 短兵相接鏖戰（第 ${r} 輪）` : `階段三 · 氣力見底苦戰（第 ${r} 輪）`);
-    pushFrame(3, phaseLabel, volley(at, { prefixLines }));
+    pushFrame(3, phaseLabel, volley(at, { prefixLines, allowDuels: true }));
     r++;
   }
 
@@ -620,11 +723,13 @@ function resolveBattle(deckA, deckB, opts) {
     const armorCtl = 15 * Math.min(1, armorHp); // 中軍戰線分 15 分
     const airSup = airPow(us) > airPow(en) ? 10 : 0; // 先機突騎分 10 分
     const navCtl = navPow(us) > navPow(en) ? 5 : 0;  // 先登奇兵分 5 分
+    const occupationStrength = us.filter(u => u.formationOccupation && u.alive).reduce((sum, u) => sum + u.hp / u.hpMax, 0);
+    const occupationCtl = 6 * Math.min(1, occupationStrength / 2);
     let upset = 0; // 以小博大越級戰功
     for (const u of en) if (!u.alive && u.killedBy && u.killedBy.side === s) upset += Math.max(0, u.cost - u.killedBy.cost) * 2;
     upset = Math.min(12, upset);
     const control = armorCtl + airSup + navCtl;
-    return { remain, armorCtl, airSup, navCtl, control, upset, total: remain + control + upset };
+    return { remain, armorCtl, airSup, navCtl, occupationCtl, control, upset, total: remain + control + occupationCtl + upset };
   }
   const vp = { A: calcVP('A'), B: calcVP('B') };
   const aDead = alive('A').length === 0, bDead = alive('B').length === 0;
@@ -650,7 +755,7 @@ function resolveBattle(deckA, deckB, opts) {
   for (const s of ['A', 'B']) mvp[s] = T[s].slice().sort((a, b) => b.dmgDone - a.dmgDone)[0];
   const key = keys.slice().sort((a, b) => b.imp - a.imp).slice(0, 4).sort((a, b) => a.frame - b.frame);
 
-  return { seed, winner, wipeout, ammoDepleted, vp, frames, key, mvp, ev, docs, ewA, ewB, advSide, syn, final: T };
+  return { seed, winner, wipeout, ammoDepleted, vp, frames, key, mvp, ev, docs, ewA, ewB, advSide, syn, terrain, formationDefs: BATTLE_FORMATION_DEFS, final: T };
 }
 
 /* ---------- 陣容驗證 / 代碼 ---------- */

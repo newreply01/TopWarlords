@@ -64,6 +64,16 @@ const FirebaseTourneyEngine = (function() {
     return [];
   }
 
+  function normalizeBattleFormations(formations, deck, terrain) {
+    const recommended = typeof getRecommendedFormations === 'function'
+      ? getRecommendedFormations(deck, terrain)
+      : Array(5).fill('fishscale');
+    const validIds = new Set(typeof BATTLE_FORMATION_DEFS !== 'undefined' ? BATTLE_FORMATION_DEFS.map(item => item.id) : ['fishscale']);
+    return Array.from({ length: 5 }, (_, i) => validIds.has(formations && formations[i])
+      ? formations[i]
+      : (recommended[i] || 'fishscale'));
+  }
+
   function getRequiredWinsForMatch(match, format, totalRounds) {
     const isFinalOrBronze = (match.round === totalRounds || match.isBronze);
     // 1. ⚡ 極速單淘汰：決賽前為 BO1 (1勝)，決賽/季軍賽為 BO3 (2勝)
@@ -198,6 +208,8 @@ const FirebaseTourneyEngine = (function() {
 
     const shortCode = generateRoomCode();
     const now = Date.now();
+    const battleTerrain = ['plain', 'mountain', 'forest'].includes(playerProfile.terrain) ? playerProfile.terrain : 'plain';
+    const hostFormations = Array.isArray(playerProfile.formations) ? playerProfile.formations.slice(0, 5) : Array(5).fill('fishscale');
     const roomRef = db.ref(`tournaments/${shortCode}`);
 
     // 初始化席位 (Slot 0 為房主)
@@ -213,7 +225,8 @@ const FirebaseTourneyEngine = (function() {
       isHost: true,
       ready: true,
       deck: (playerProfile.deck && playerProfile.deck.every(Boolean)) ? playerProfile.deck.slice() : null,
-      doctrine: playerProfile.doctrine || 'defense'
+      doctrine: playerProfile.doctrine || 'defense',
+      formations: hostFormations
     };
 
     // 建立世足對抗樹結構
@@ -247,6 +260,7 @@ const FirebaseTourneyEngine = (function() {
       currentRound: 1,
       totalRounds,
       roundTheaters,
+      battleTerrain,
       participants,
       matches: bracket.matches,
       leftWingMatchIds: bracket.leftWingMatchIds,
@@ -301,7 +315,8 @@ const FirebaseTourneyEngine = (function() {
           isHost: false,
           ready: true,
           deck: (playerProfile.deck && playerProfile.deck.every(Boolean)) ? playerProfile.deck.slice() : null,
-          doctrine: playerProfile.doctrine || 'defense'
+          doctrine: playerProfile.doctrine || 'defense',
+          formations: Array.isArray(playerProfile.formations) ? playerProfile.formations.slice(0, 5) : Array(5).fill('fishscale')
         };
       }
       mySlotIdx = idx;
@@ -385,7 +400,10 @@ const FirebaseTourneyEngine = (function() {
               seed: h.seed,
               event: h.event,
               docA: h.docA,
-              docB: h.docB
+              docB: h.docB,
+              formationsA: h.formationsA || (typeof getRecommendedFormations === 'function' ? getRecommendedFormations(h.deckA, h.terrain || 'plain') : undefined),
+              formationsB: h.formationsB || (typeof getRecommendedFormations === 'function' ? getRecommendedFormations(h.deckB, h.terrain || 'plain') : undefined),
+              terrain: h.terrain || 'plain'
             });
           } else {
             res = {
@@ -662,8 +680,15 @@ const FirebaseTourneyEngine = (function() {
     return Math.random().toString(36).slice(2, 12);
   }
 
-  function computeCommitHash(deck, doc, salt) {
-    const raw = `${(deck || []).join('.')}|${doc || 'defense'}|${salt}`;
+  function getCommitRaw(deck, doc, salt, formations, terrain) {
+    const roster = (deck || []).join('.');
+    if (formations === undefined && terrain === undefined) return `${roster}|${doc || 'defense'}|${salt || ''}`;
+    const formationKey = Array.isArray(formations) ? formations.join('.') : '';
+    return `${roster}|${doc || 'defense'}|${formationKey}|${terrain || 'plain'}|${salt || ''}`;
+  }
+
+  function computeCommitHash(deck, doc, salt, formations, terrain) {
+    const raw = getCommitRaw(deck, doc, salt, formations, terrain);
     let h = 2166136261;
     for (let i = 0; i < raw.length; i++) {
       h ^= raw.charCodeAt(i);
@@ -672,8 +697,8 @@ const FirebaseTourneyEngine = (function() {
     return (h >>> 0).toString(16).padStart(8, '0');
   }
 
-  async function computeCommitHashAsync(deck, doc, salt) {
-    const raw = `${(deck || []).join('.')}|${doc || 'defense'}|${salt}`;
+  async function computeCommitHashAsync(deck, doc, salt, formations, terrain) {
+    const raw = getCommitRaw(deck, doc, salt, formations, terrain);
     try {
       if (typeof crypto !== 'undefined' && crypto.subtle && typeof TextEncoder !== 'undefined') {
         const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
@@ -681,11 +706,11 @@ const FirebaseTourneyEngine = (function() {
         return 'sha256:' + hex;
       }
     } catch (_) {}
-    return computeCommitHash(deck, doc, salt);
+    return computeCommitHash(deck, doc, salt, formations, terrain);
   }
 
   /* 雙階段盲提提交 (Commit-Reveal)：先提交雜湊摘要與就緒狀態，待雙方皆就緒才揭曉明文陣容 */
-  async function submitMatchDeck(roomCode, matchId, playerUid, deck, doctrine) {
+  async function submitMatchDeck(roomCode, matchId, playerUid, deck, doctrine, formations) {
     if (!db || !currentRoomData) return;
     const roomRef = db.ref(`tournaments/${roomCode}`);
     const match = currentRoomData.matches[matchId];
@@ -703,9 +728,17 @@ const FirebaseTourneyEngine = (function() {
 
     const cleanDeck = ensureArray(deck);
     const cleanDoc = doctrine || 'defense';
+    const terrain = currentRoomData.battleTerrain || 'plain';
+    const validFormationIds = new Set(typeof BATTLE_FORMATION_DEFS !== 'undefined' ? BATTLE_FORMATION_DEFS.map(item => item.id) : []);
+    const defaultFormations = typeof getRecommendedFormations === 'function'
+      ? getRecommendedFormations(cleanDeck, terrain)
+      : Array(5).fill('fishscale');
+    const cleanFormations = Array.from({ length: 5 }, (_, i) =>
+      validFormationIds.has(formations && formations[i]) ? formations[i] : (defaultFormations[i] || 'fishscale')
+    );
     const salt = generateSecureSalt();
-    const commitHash = await computeCommitHashAsync(cleanDeck, cleanDoc, salt);
-    const subPayload = { deck: cleanDeck, doc: cleanDoc, salt, commitHash };
+    const commitHash = await computeCommitHashAsync(cleanDeck, cleanDoc, salt, cleanFormations, terrain);
+    const subPayload = { deck: cleanDeck, doc: cleanDoc, formations: cleanFormations, terrain, salt, commitHash };
 
     // 1. 本地暫存真實出陣
     pendingSubmissions[matchId + '_' + slotKey] = subPayload;
@@ -763,8 +796,8 @@ const FirebaseTourneyEngine = (function() {
       const rawDeck = ensureArray(sub && sub.deck);
       if (expectedHash && sub && sub.salt) {
         const actualHash = String(expectedHash).startsWith('sha256:')
-          ? await computeCommitHashAsync(rawDeck, sub.doc, sub.salt)
-          : computeCommitHash(rawDeck, sub.doc, sub.salt);
+          ? await computeCommitHashAsync(rawDeck, sub.doc, sub.salt, sub.formations, sub.terrain)
+          : computeCommitHash(rawDeck, sub.doc, sub.salt, sub.formations, sub.terrain);
         if (actualHash !== expectedHash) {
           console.warn('[Security] Commit-Reveal hash mismatch detected, using fallback deck.');
           return generateFallbackDeck();
@@ -782,6 +815,11 @@ const FirebaseTourneyEngine = (function() {
 
     const deckA = await verifySub(subA, match.commitHashA);
     const deckB = await verifySub(subB, match.commitHashB);
+    const battleTerrain = ['plain', 'mountain', 'forest'].includes(currentRoomData.battleTerrain)
+      ? currentRoomData.battleTerrain
+      : 'plain';
+    const formationsA = normalizeBattleFormations(subA.formations, deckA, battleTerrain);
+    const formationsB = normalizeBattleFormations(subB.formations, deckB, battleTerrain);
 
     let res = null;
     if (typeof resolveBattle === 'function') {
@@ -789,7 +827,10 @@ const FirebaseTourneyEngine = (function() {
         seed,
         event: eventObj,
         docA: subA.doc,
-        docB: subB.doc
+        docB: subB.doc,
+        formationsA,
+        formationsB,
+        terrain: battleTerrain
       });
     } else {
       res = { winner: Math.random() > 0.5 ? 'A' : 'B', vp: { A: { total: 100 }, B: { total: 80 } } };
@@ -821,6 +862,9 @@ const FirebaseTourneyEngine = (function() {
         deckB: deckB,
         docA: subA.doc,
         docB: subB.doc,
+        formationsA,
+        formationsB,
+        terrain: battleTerrain,
         seed,
         event: eventObj,
         scoreA: res.vp?.A?.total || 100,
@@ -1232,7 +1276,10 @@ const FirebaseTourneyEngine = (function() {
           seed: h.seed,
           event: h.event,
           docA: h.docA,
-          docB: h.docB
+          docB: h.docB,
+          formationsA: normalizeBattleFormations(h.formationsA, ensureArray(h.deckA), h.terrain || 'plain'),
+          formationsB: normalizeBattleFormations(h.formationsB, ensureArray(h.deckB), h.terrain || 'plain'),
+          terrain: h.terrain || 'plain'
         });
       }
       return {

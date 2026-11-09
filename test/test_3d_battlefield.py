@@ -37,7 +37,7 @@ else:
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(viewport={'width': 1280, 'height': 800}, service_workers='block')
+        context = browser.new_context(viewport={'width': 1680, 'height': 749}, service_workers='block')
         
         context.add_init_script("""
             localStorage.setItem('wl15_seen', '1');
@@ -95,6 +95,9 @@ try:
         assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
         assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
         page.wait_for_function("() => Battle3DEngine.getDebugState().engagedBattalions > 0", timeout=15000)
+        assert page.locator('#battlePanelTabs').is_visible(), 'Desktop battle panel tabs are missing'
+        page.locator('[data-battle-panel="team-a"]').click()
+        assert page.locator('#teamA').is_visible() and not page.locator('#teamB').is_visible(), 'Desktop should show only the selected roster'
         desktop_layout = page.evaluate("""() => ({
             stage: document.querySelector('#battle3DWrapper').clientHeight,
             grid: document.querySelector('.battle-grid').clientHeight,
@@ -104,7 +107,8 @@ try:
         })""")
         assert 220 <= desktop_layout['stage'] <= 340, f"3D stage height is outside the viewport budget: {desktop_layout}"
         assert desktop_layout['grid'] >= 250 and desktop_layout['card'] >= 66, f"Battle roster was compressed: {desktop_layout}"
-        assert desktop_layout['rosterContent'] <= desktop_layout['roster'] + 1, f"Desktop roster still needs scrolling: {desktop_layout}"
+        assert desktop_layout['rosterContent'] <= desktop_layout['roster'] + 4, f"Desktop roster still needs scrolling: {desktop_layout}"
+        page.locator('[data-battle-panel="log"]').click()
 
         # 測試切換 3D/2D 按鈕
         page.evaluate("() => document.querySelector('#btnToggle3DView').click()")

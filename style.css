@@ -19909,3 +19909,111 @@ select:focus-visible,
   .log-integrated-box { max-height: 48svh !important; }
   .log { min-height: 180px !important; max-height: 34svh !important; }
 }
+
+.battle {
+  height: calc(100dvh - 54px) !important;
+  max-height: calc(100dvh - 54px) !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.battle-3d-wrapper {
+  height: clamp(250px, 42dvh, 430px) !important;
+  min-height: 250px !important;
+  max-height: 430px !important;
+}
+.battle-panel-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  flex: 0 0 40px;
+  gap: 5px;
+  margin: 0 0 7px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+.battle-panel-tabs button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.battle-panel-tabs button[aria-pressed="true"] {
+  background: var(--cyan);
+  color: #06121c;
+}
+.battle-grid {
+  display: block !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.battle-grid > #teamA,
+.battle-grid > #teamB,
+.battle-grid > .log-col { display: none !important; }
+#viewBattle[data-battle-panel="team-a"] #teamA,
+#viewBattle[data-battle-panel="team-b"] #teamB,
+#viewBattle[data-battle-panel="log"] .log-col { display: flex !important; }
+.log-col,
+.team-col {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+.log-integrated-box { height: 100% !important; max-height: none !important; }
+.log { max-height: none !important; }
+
+@media (min-width: 769px) {
+  .battle-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .team-units-box {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+  .units-card-list {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  .units-card-list .bu {
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 9px !important;
+    gap: 8px !important;
+  }
+  .units-card-list .bu-thumb {
+    width: clamp(58px, 6vw, 88px) !important;
+    height: clamp(58px, 6vw, 88px) !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    flex: 0 0 clamp(58px, 6vw, 88px) !important;
+  }
+  .units-card-list .bu-body { min-width: 0 !important; }
+}
+
+@media (max-width: 768px) {
+  .battle {
+    height: auto !important;
+    max-height: none !important;
+    min-height: calc(100svh - 46px) !important;
+    overflow: visible !important;
+  }
+  .battle-3d-wrapper {
+    height: clamp(230px, 40svh, 370px) !important;
+    min-height: 230px !important;
+    max-height: 370px !important;
+  }
+  .battle-panel-tabs { flex: 0 0 40px; }
+  .battle-grid { flex: 0 0 auto !important; }
+}

@@ -111,7 +111,13 @@ try:
         # 5. 測試跳過動畫秒速結算 (#btnSkip)
         btn_skip = page.locator("#btnSkip")
         if btn_skip.is_visible():
-            btn_skip.click()
+            skip_is_topmost = page.evaluate("""() => {
+                const button = document.querySelector('#btnSkip');
+                const rect = button.getBoundingClientRect();
+                return document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2) === button;
+            }""")
+            assert skip_is_topmost, "Skip control is covered by another battle layer"
+            page.evaluate("document.querySelector('#btnSkip').click()")
             time.sleep(1.0)
             print("[TEST 5] 點擊跳過動畫，秒速完成戰略結算！")
 

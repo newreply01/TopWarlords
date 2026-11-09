@@ -6,7 +6,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.6.8';
+  const ASSET_VER = '7.6.9';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -387,7 +387,7 @@ const Battle3DEngine = (function () {
     scene.background = createSkyBackdropTexture('plain');
     scene.fog = new THREE.FogExp2(0x4a3d31, 0.0135);
 
-    camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 300);
+    camera = new THREE.PerspectiveCamera(getBattleCameraFov(width / height), width / height, 0.1, 300);
     updateCameraPosition();
 
     renderer = new THREE.WebGLRenderer({ antialias: !isLowPowerDevice, alpha: false, powerPreference: 'high-performance' });
@@ -2202,6 +2202,12 @@ const Battle3DEngine = (function () {
     step();
   }
 
+  function getBattleCameraFov(aspect) {
+    if (aspect <= 2.4) return 35;
+    const horizontalFov = 100 * Math.PI / 180;
+    return 2 * Math.atan(Math.tan(horizontalFov / 2) / aspect) * 180 / Math.PI;
+  }
+
   function updateCameraPosition() {
     if (!camera) return;
     const target = CAM_BASE_TARGET.clone().add(camFocusOffset).add(camShakeOffset);
@@ -2241,8 +2247,8 @@ const Battle3DEngine = (function () {
 
   function resetCamera() {
     camTheta = 0.0;
-    camPhi = 0.64;
-    camRadius = (container && container.clientWidth < 720) ? 25.5 : 20.5;
+    camPhi = (container && container.clientWidth >= 720) ? 1.02 : 0.9;
+    camRadius = (container && container.clientWidth < 720) ? 18.5 : 16.8;
     camFocusOffset.set(0, 0, 0);
     camShakeOffset.set(0, 0, 0);
     updateCameraPosition();
@@ -2440,6 +2446,7 @@ const Battle3DEngine = (function () {
     const height = container.clientHeight || 340;
     if (width <= 0 || height <= 0) return;
     camera.aspect = width / height;
+    camera.fov = getBattleCameraFov(camera.aspect);
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
   }

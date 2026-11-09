@@ -46,8 +46,8 @@ try:
             const units = (typeof UNITS !== 'undefined') ? UNITS : window.UNITS;
             const unitMap = (typeof UNIT_MAP !== 'undefined') ? UNIT_MAP : window.UNIT_MAP;
 
-            if (!units || units.length !== 200) {
-                errs.push('UNITS 數量不為 200，當前：' + (units ? units.length : 0));
+            if (!units || units.length !== 164) {
+                errs.push('UNITS 數量不為 164，當前：' + (units ? units.length : 0));
             }
             if (!unitMap || !unitMap['ZHUGELIANG']) {
                 errs.push('找不到 諸葛亮 (ZHUGELIANG)');

@@ -75,31 +75,6 @@
     "sfx": "blade_clash"
   },
   {
-    "id": "YUEYUN",
-    "name": "岳雲",
-    "cat": "air",
-    "cost": 5,
-    "v": "D",
-    "tag": "背嵬重騎·突陣碎甲",
-    "desc": "岳飛長子，岳家軍背嵬鐵騎先鋒，手持雙鐵椎重八十斤，每戰率先突擊踏碎敵陣。",
-    "st": 74,
-    "ew": 16,
-    "traits": [
-      "LR",
-      "TRUE_AT"
-    ],
-    "roleFlags": [
-      "HEAVY_AP"
-    ],
-    "hp": 224,
-    "atk": 128,
-    "def": 0.08,
-    "flag": "🇨🇳",
-    "origin": "中國 · 南宋",
-    "weapon": "雙鐵椎 + 背嵬重甲",
-    "sfx": "blade_clash"
-  },
-  {
     "id": "YOSHITSUNE",
     "name": "源義經",
     "cat": "air",

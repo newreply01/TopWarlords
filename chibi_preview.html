@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TopWarlords - 頂尖名將 Q 版立繪審查與品質對比台 (Chibi Showcase)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090d16;
+    --card-bg: #111827;
+    --card-border: #1f2937;
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+    --cyan: #38bdf8;
+    --amber: #fbbf24;
+    --purple: #c084fc;
+    --green: #4ade80;
+    --rose: #fb7185;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    padding: 32px 20px 80px;
+    min-height: 100vh;
+  }
+  .header {
+    max-width: 1240px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  .badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--cyan);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    margin-bottom: 12px;
+  }
+  h1 { font-size: 28px; margin-bottom: 8px; font-weight: 900; letter-spacing: 0.5px; }
+  p.subtitle { color: var(--muted); font-size: 14.5px; max-width: 820px; margin: 0 auto; line-height: 1.6; }
+  
+  .section-title {
+    max-width: 1240px;
+    margin: 40px auto 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 10px;
+  }
+  .section-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(74, 222, 128, 0.2);
+    color: var(--green);
+  }
+  .section-tag-gold {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(251, 191, 36, 0.2);
+    color: var(--amber);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 22px;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+
+  .showcase-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  .showcase-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--cyan);
+    box-shadow: 0 12px 28px rgba(56, 189, 248, 0.18);
+  }
+  .card-img-wrap {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #050810;
+    overflow: hidden;
+    position: relative;
+  }
+  .card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+  }
+  .showcase-card:hover .card-img {
+    transform: scale(1.04);
+  }
+  .card-body {
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .card-name {
+    font-size: 19px;
+    font-weight: 900;
+    color: #fff;
+  }
+  .card-cost {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--amber);
+  }
+  .card-tag {
+    font-size: 12.5px;
+    color: var(--cyan);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-top: auto;
+  }
+  .card-style-pill {
+    margin-top: 12px;
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .pill-new { background: rgba(74, 222, 128, 0.15); color: var(--green); border: 1px solid rgba(74, 222, 128, 0.35); }
+  .pill-benchmark { background: rgba(192, 132, 252, 0.15); color: var(--purple); border: 1px solid rgba(192, 132, 252, 0.35); }
+
+  .spec-box {
+    max-width: 1240px;
+    margin: 40px auto 0;
+    background: rgba(30, 41, 59, 0.45);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 24px;
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+  .spec-box strong { color: var(--text); }
+  .spec-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-right: 4px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--cyan);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">🎨 ANIME CHIBI CEL-SHADED STYLE A (384×384 HD)</div>
+  <h1>頂尖名將 Q 版立繪品質審查台</h1>
+  <p class="subtitle">
+    為確保達到手遊頂級品質，全數立繪採用商業級 AI 賽璐珞擴散渲染（2.5D Q版神韻、立體陰影層次、銳利眼神光與高辨識度經典武器）。<br>
+    以下為<strong>換帳號後全新重繪完成的 6 位名將</strong>（先登奇兵 5 大新將 + 奔雷突騎趙雲）與原旗艦黃金基準（關羽、諸葛亮等）的整體成果檢閱。
+  </p>
+</div>
+
+<!-- 第一區：換帳號後全新生成之 6 位名將 -->
+<div class="section-title">
+  <span>✨ 本次換帳號重試產出成果（6 位全新 Q 版名將立繪）</span>
+  <span class="section-tag">商業級 2.5D Cel-Shaded 完成</span>
+</div>
+
+<div class="grid">
+  <!-- 姜維 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/JIANGWEI.jpg" alt="姜維">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">姜維 (JIANGWEI)</span>
+        <span class="card-cost">$4 · 先登奇兵</span>
+      </div>
+      <div class="card-tag">天水麒麟兒 · 幼麟繼承志</div>
+      <div class="card-desc">英姿勃發少年儒將神韻，亮銀綠飾蜀漢札甲、肩披翠綠戰袍，手握麒麟槍，身後青藍色八陣圖星盤靈光護體。</div>
+      <div><span class="card-style-pill pill-new">✨ 全新 AI 商業級產出</span></div>
+    </div>
+  </div>
+
+  <!-- 沙摩柯 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/SHAMOKE.jpg" alt="沙摩柯">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">沙摩柯 (SHAMOKE)</span>
+        <span class="card-cost">$1 · 先登奇兵</span>
+      </div>
+      <div class="card-tag">五溪蠻王 · 夷陵破甘寧</div>
+      <div class="card-desc">古銅陽光膚色、威猛桀驁的狼性笑意、翡翠動漫雙瞳、獸牙項圈與刺繡獸皮短袍，單手扛著狼牙鐵蒺藜骨朵。</div>
+      <div><span class="card-style-pill pill-new">✨ 全新 AI 商業級產出</span></div>
+    </div>
+  </div>
+
+  <!-- 徐晃 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/XUHUANG.jpg" alt="徐晃">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">徐晃 (XUHUANG)</span>
+        <span class="card-cost">$2 · 先登奇兵</span>
+      </div>
+      <div class="card-tag">長驅直入 · 周亞夫之風</div>
+      <div class="card-desc">剛健沉穩名將面容、羽飾飛翼戰盔、獅首吞肩玄鐵甲，單手斜托精鋼八角開山巨斧，青黑城塞戰氣環繞。</div>
+      <div><span class="card-style-pill pill-new">✨ 全新 AI 商業級產出</span></div>
+    </div>
+  </div>
+
+  <!-- 孟獲 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/MENGHUO.jpg" alt="孟獲">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">孟獲 (MENGHUO)</span>
+        <span class="card-cost">$2 · 先登奇兵</span>
+      </div>
+      <div class="card-tag">南中夷王 · 象甲藤兵</div>
+      <div class="card-desc">健康古銅膚色、南蠻獸骨羽冠、精編老藤鎧甲、手持神木三叉戟，王者威嚴兼具野性魅力。</div>
+      <div><span class="card-style-pill pill-new">✨ 全新 AI 商業級產出</span></div>
+    </div>
+  </div>
+
+  <!-- 樂進 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/YUEJIN.jpg" alt="樂進">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">樂進 (YUEJIN)</span>
+        <span class="card-cost">$2 · 先登奇兵</span>
+      </div>
+      <div class="card-tag">五子良將 · 每戰先登</div>
+      <div class="card-desc">剛毅先登面容、紅纓戰翅鐵盔、暗鋼戰甲、雙持破城短柄雙斧，展現先鋒第一人的無畏氣勢。</div>
+      <div><span class="card-style-pill pill-new">✨ 全新 AI 商業級產出</span></div>
+    </div>
+  </div>
+
+  <!-- 趙雲 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/ZHAOYUN.jpg" alt="趙雲">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">趙雲 (ZHAOYUN)</span>
+        <span class="card-cost">$4 · 奔雷突騎</span>
+      </div>
+      <div class="card-tag">渾身是膽 · 七進七出</div>
+      <div class="card-desc">銀甲白袍、龍膽亮銀槍、澄澈英銳動漫雙瞳與立體賽璐珞光影，帥氣與威武兼具。</div>
+      <div><span class="card-style-pill pill-new">✨ 全新 AI 商業級產出</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第二區：原有旗艦黃金基準 -->
+<div class="section-title">
+  <span>🏛️ 原旗艦黃金基準（既有高品質 Q 版風格參照組）</span>
+  <span class="section-tag-gold">Ground Truth 基準</span>
+</div>
+
+<div class="grid">
+  <!-- 關羽 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/GUANYU.jpg" alt="關羽">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">關羽 (GUANYU)</span>
+        <span class="card-cost">$4 · 重甲陷陣</span>
+      </div>
+      <div class="card-tag">威震華夏 · 美髯公</div>
+      <div class="card-desc">美髯飄逸、青龍偃月刀、綠袍金鎧，經典指針性旗艦立繪。</div>
+      <div><span class="card-style-pill pill-benchmark">⭐ 旗艦基準 (Ground Truth)</span></div>
+    </div>
+  </div>
+
+  <!-- 諸葛亮 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/ZHUGELIANG.jpg" alt="諸葛亮">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">諸葛亮 (ZHUGELIANG)</span>
+        <span class="card-cost">$5 · 軍師奇謀</span>
+      </div>
+      <div class="card-tag">臥龍智聖 · 八陣通神</div>
+      <div class="card-desc">羽扇綸巾、仙鶴道袍、神機妙算超凡神情。</div>
+      <div><span class="card-style-pill pill-benchmark">⭐ 旗艦基準 (Ground Truth)</span></div>
+    </div>
+  </div>
+
+  <!-- 織田信長 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/NOBUNAGA.jpg" alt="織田信長">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">織田信長 (NOBUNAGA)</span>
+        <span class="card-cost">$5 · 神射強弩</span>
+      </div>
+      <div class="card-tag">長篠三段 · 天下布武</div>
+      <div class="card-desc">南蠻斗篷黑鐵鎧、三段火繩槍、霸氣梟雄風範。</div>
+      <div><span class="card-style-pill pill-benchmark">⭐ 旗艦基準 (Ground Truth)</span></div>
+    </div>
+  </div>
+
+  <!-- 武田信玄 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/SHINGEN.jpg" alt="武田信玄">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">武田信玄 (SHINGEN)</span>
+        <span class="card-cost">$5 · 奔雷突騎</span>
+      </div>
+      <div class="card-tag">甲斐之虎 · 風林火山</div>
+      <div class="card-desc">白熊毛兜鍪、軍配團扇、赤備主帥威嚴。</div>
+      <div><span class="card-style-pill pill-benchmark">⭐ 旗艦基準 (Ground Truth)</span></div>
+    </div>
+  </div>
+
+  <!-- 李舜臣 -->
+  <div class="showcase-card">
+    <div class="card-img-wrap">
+      <img class="card-img" src="assets/warlords/YISUNSIN.jpg" alt="李舜臣">
+    </div>
+    <div class="card-body">
+      <div class="card-header-row">
+        <span class="card-name">李舜臣 (YISUNSIN)</span>
+        <span class="card-cost">$5 · 先登奇兵</span>
+      </div>
+      <div class="card-tag">忠武公 · 鳴梁神話</div>
+      <div class="card-desc">三尺寶劍、朝鮮武官官笠、鎮定自若海神之姿。</div>
+      <div><span class="card-style-pill pill-benchmark">⭐ 旗艦基準 (Ground Truth)</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="spec-box">
+  <strong>📋 品質把關與架構標準：</strong><br>
+  1. <span class="spec-badge">尺寸規格</span> 384 × 384 px 正方形頭像胸像，LANCZOS 高階重採樣，JPEG 95 畫質。<br>
+  2. <span class="spec-badge">風格保證</span> 嚴格維持 Anime Chibi Cel-Shaded 2.5D 手遊立繪標準，杜絕簡陋幾何拼湊圖。<br>
+  3. <span class="spec-badge">獨立無重複</span> 每一張立繪皆具有獨立特徵 prompt、專屬武器飾品與兵種光環，全武將無重複立繪。<br>
+  4. <span class="spec-badge">部署位置</span> 本批 6 位全新立繪已同步部署至 <code>assets/warlords/</code> 及 <code>assets/warlords_chibi/</code>。
+</div>
+
+</body>
+</html>

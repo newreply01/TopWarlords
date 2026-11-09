@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.6.7">
+<link rel="stylesheet" href="style.css?v=7.6.8">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
@@ -227,6 +227,12 @@
       <span class="badge-3d-title">🏛️ 3D 古戰場沙盤推演台</span>
       <button class="btn-view-toggle" id="btnToggle3DView" type="button" title="切換 3D 沙盤與 2D 卡片視圖">切換 3D/2D</button>
     </div>
+  </div>
+
+  <div class="battle-panel-tabs" id="battlePanelTabs" role="group" aria-label="戰鬥資訊面板">
+    <button type="button" data-battle-panel="team-a" aria-pressed="false">我方</button>
+    <button type="button" data-battle-panel="log" aria-pressed="true">戰報</button>
+    <button type="button" data-battle-panel="team-b" aria-pressed="false">敵方</button>
   </div>
 
   <div class="battle-grid">
@@ -1069,27 +1075,27 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script defer src="js/data.js?v=7.6.7"></script>
-<script defer src="js/ladder-data.js?v=7.6.7"></script>
-<script defer src="js/ladder.js?v=7.6.7"></script>
-<script defer src="js/engine.js?v=7.6.7"></script>
+<script defer src="js/data.js?v=7.6.8"></script>
+<script defer src="js/ladder-data.js?v=7.6.8"></script>
+<script defer src="js/ladder.js?v=7.6.8"></script>
+<script defer src="js/engine.js?v=7.6.8"></script>
 <!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script defer src="js/firebase-config.js?v=7.6.7"></script>
-<script defer src="js/firebase-tourney.js?v=7.6.7"></script>
-<script defer src="js/tournament.js?v=7.6.7"></script>
-<script defer src="js/online-pvp.js?v=7.6.7"></script>
-<script defer src="js/telemetry.js?v=7.6.7"></script>
-<script defer src="js/cloud-sync.js?v=7.6.7"></script>
-<script defer src="js/sound.js?v=7.6.7"></script>
-<script defer src="js/poster-help.js?v=7.6.7"></script>
-<script defer src="js/libs/three.min.js?v=7.6.7"></script>
-<script defer src="js/libs/GLTFLoader.js?v=7.6.7"></script>
-<script defer src="js/libs/SkeletonUtils.js?v=7.6.7"></script>
-<script defer src="js/battle-3d.js?v=7.6.7"></script>
-<script defer src="js/app.js?v=7.6.7"></script>
+<script defer src="js/firebase-config.js?v=7.6.8"></script>
+<script defer src="js/firebase-tourney.js?v=7.6.8"></script>
+<script defer src="js/tournament.js?v=7.6.8"></script>
+<script defer src="js/online-pvp.js?v=7.6.8"></script>
+<script defer src="js/telemetry.js?v=7.6.8"></script>
+<script defer src="js/cloud-sync.js?v=7.6.8"></script>
+<script defer src="js/sound.js?v=7.6.8"></script>
+<script defer src="js/poster-help.js?v=7.6.8"></script>
+<script defer src="js/libs/three.min.js?v=7.6.8"></script>
+<script defer src="js/libs/GLTFLoader.js?v=7.6.8"></script>
+<script defer src="js/libs/SkeletonUtils.js?v=7.6.8"></script>
+<script defer src="js/battle-3d.js?v=7.6.8"></script>
+<script defer src="js/app.js?v=7.6.8"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let refreshing = false;
@@ -1100,7 +1106,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.6.7').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.6.8').then(r => r.update()).catch(() => {});
   });
 }
 </script>

@@ -6,7 +6,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.6.7';
+  const ASSET_VER = '7.6.8';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -1063,8 +1063,8 @@ const Battle3DEngine = (function () {
       });
     }
 
-    const count = isLowPowerDevice ? 12 : 20;
-    const columns = 5;
+    const count = isLowPowerDevice ? 24 : 36;
+    const columns = 6;
     const materials = crowdMaterials.get(token.side);
     const crowd = new THREE.Group();
     const body = new THREE.InstancedMesh(crowdBodyGeometry, materials.body, count);
@@ -1103,6 +1103,8 @@ const Battle3DEngine = (function () {
     weapons.castShadow = false;
     crowd.add(body, head, weapons);
     crowd.userData.isBattalionRanks = true;
+    crowd.userData.soldierCount = count;
+    crowd.userData.marchPhase = (token.uid || '').length * 0.63 + (token.side === 'A' ? 0 : 1.2);
     crowd.position.z = -0.18;
     token.troopsContainer.add(crowd);
   }
@@ -1245,6 +1247,7 @@ const Battle3DEngine = (function () {
       frontY: rootGroup.position.y,
       frontZ: coords.z,
       march: null,
+      engagement: null,
       chargeCommitted: false,
       currentHp: startHp,
       maxHp: startHp,
@@ -1719,9 +1722,9 @@ const Battle3DEngine = (function () {
     [...unitsMap.values()].forEach((token, index) => {
       const direction = token.side === 'A' ? -1 : 1;
       const frontDistance = {
-        armor: 1.65,
-        air: 1.8,
-        naval: 2.5,
+        armor: 0.82,
+        air: 0.82,
+        naval: 0.9,
         air_defense: 5.2,
         support: 7.6
       }[token.cat] || 2.5;
@@ -1753,6 +1756,30 @@ const Battle3DEngine = (function () {
     token.unitAnims.forEach((ctrl) => ctrl.playState(state, timeScale));
   }
 
+  function advanceBattalionToContact(token) {
+    if (!token || !token.alive || token.engagement || token.cat === 'support' || token.cat === 'air_defense') return;
+    const contactX = token.side === 'A' ? -0.82 : 0.82;
+    const targetX = token.side === 'A'
+      ? Math.max(token.mesh.position.x, contactX)
+      : Math.min(token.mesh.position.x, contactX);
+    const distance = Math.abs(targetX - token.mesh.position.x);
+    if (distance < 0.08) return;
+
+    token.engagement = {
+      fromX: token.mesh.position.x,
+      fromY: token.mesh.position.y,
+      fromZ: token.mesh.position.z,
+      targetX,
+      targetY: getBattleTerrainHeight(targetX, token.mesh.position.z),
+      targetZ: token.mesh.position.z,
+      startedAt: performance.now(),
+      duration: Math.min(1750, Math.max(520, distance * 620 / Math.max(0.75, token.formationMobility))),
+      lastDustAt: 0,
+      finished: false
+    };
+    triggerSquadAnim(token, 'move', token.cat === 'air' ? 1.45 : 1.1);
+  }
+
   function playEvent(ln) {
     if (!isInitialized || !isEnabled || !ln) return;
 
@@ -1772,6 +1799,10 @@ const Battle3DEngine = (function () {
       const midX = (aToken.mesh.position.x + tToken.mesh.position.x) * 0.14;
       const midZ = (aToken.mesh.position.z + tToken.mesh.position.z) * 0.14;
       camFocusOffset.set(midX, 0, midZ);
+      if (aToken.alive && tToken.alive) {
+        if (aToken.cat !== 'air' && aToken.cat !== 'naval') advanceBattalionToContact(aToken);
+        if (tToken.cat !== 'air' && tToken.cat !== 'naval') advanceBattalionToContact(tToken);
+      }
     }
 
     // 3. 依五大兵種執行全 3D 模型骨骼動畫與彈道特效
@@ -1832,7 +1863,7 @@ const Battle3DEngine = (function () {
     const orig = aToken.mesh.position.clone();
     const target = tToken.mesh.position.clone();
     const dir = target.clone().sub(orig).normalize();
-    const impactPos = orig.clone().add(dir.multiplyScalar(0.95));
+    const impactPos = orig.clone().add(dir.multiplyScalar(Math.max(0, orig.distanceTo(target) - 0.82)));
     impactPos.y = getBattleTerrainHeight(impactPos.x, impactPos.z);
 
     if (aToken.chargeCommitted) {
@@ -1921,8 +1952,9 @@ const Battle3DEngine = (function () {
   /* 先登奇兵：高速疾行騰躍突襲 */
   function performVanguardAssault(aToken, tToken) {
     const orig = aToken.mesh.position.clone();
-    const direction = tToken.mesh.position.clone().sub(orig).normalize();
-    const strikePos = orig.clone().add(direction.multiplyScalar(0.72));
+    const target = tToken.mesh.position.clone();
+    const direction = target.clone().sub(orig).normalize();
+    const strikePos = orig.clone().add(direction.multiplyScalar(Math.max(0, orig.distanceTo(target) - 0.78)));
     strikePos.y = getBattleTerrainHeight(strikePos.x, strikePos.z);
     if (aToken.chargeCommitted) {
       triggerSquadAnim(aToken, 'attack', 1.25);
@@ -2237,20 +2269,48 @@ const Battle3DEngine = (function () {
 
       unitsMap.forEach((token) => {
         const march = token.march;
-        if (!march || march.finished || now < march.startedAt) return;
-        if (!march.started) {
-          march.started = true;
-          triggerSquadAnim(token, 'move', 1.0);
-        }
-        const progress = Math.min(1, (now - march.startedAt) / march.duration);
-        const eased = progress * progress * (3 - 2 * progress);
-        token.mesh.position.x = march.fromX + (token.frontX - march.fromX) * eased;
-        token.mesh.position.y = march.fromY + (token.frontY - march.fromY) * eased;
-        token.mesh.position.z = march.fromZ + (token.frontZ - march.fromZ) * eased;
-        if (progress >= 1) {
-          march.finished = true;
+        if (march && !march.finished && now >= march.startedAt) {
+          if (!march.started) {
+            march.started = true;
+            triggerSquadAnim(token, 'move', 1.0);
+          }
+          const progress = Math.min(1, (now - march.startedAt) / march.duration);
+          const eased = progress * progress * (3 - 2 * progress);
+          token.mesh.position.x = march.fromX + (token.frontX - march.fromX) * eased;
+          token.mesh.position.y = march.fromY + (token.frontY - march.fromY) * eased;
+          token.mesh.position.z = march.fromZ + (token.frontZ - march.fromZ) * eased;
+          if (progress >= 1) {
+            march.finished = true;
             token.mesh.position.set(token.frontX, token.frontY, token.frontZ);
-          triggerSquadAnim(token, 'idle', 1.0);
+            triggerSquadAnim(token, 'idle', 1.0);
+          }
+        }
+
+        const engagement = token.engagement;
+        if (engagement && !engagement.finished && now >= engagement.startedAt) {
+          const progress = Math.min(1, (now - engagement.startedAt) / engagement.duration);
+          const eased = progress * progress * (3 - 2 * progress);
+          token.mesh.position.x = engagement.fromX + (engagement.targetX - engagement.fromX) * eased;
+          token.mesh.position.y = engagement.fromY + (engagement.targetY - engagement.fromY) * eased;
+          token.mesh.position.z = engagement.fromZ + (engagement.targetZ - engagement.fromZ) * eased;
+          if (progress < 0.9 && now - engagement.lastDustAt > 150) {
+            spawnDustPuff(token.mesh.position);
+            engagement.lastDustAt = now;
+          }
+          if (progress >= 1) {
+            engagement.finished = true;
+            token.mesh.position.set(engagement.targetX, engagement.targetY, engagement.targetZ);
+            triggerSquadAnim(token, 'idle', 1.0);
+          }
+        }
+
+        const ranks = token.troopsContainer.children.find(child => child.userData.isBattalionRanks);
+        if (ranks) {
+          const moving = Boolean((march && !march.finished) || (engagement && !engagement.finished));
+          const phase = ranks.userData.marchPhase || 0;
+          const gait = elapsed * (moving ? 13 : 3.8) + phase;
+          ranks.position.y = Math.sin(gait) * (moving ? 0.035 : 0.012);
+          ranks.rotation.x = Math.sin(gait * 0.72) * (moving ? 0.018 : 0.006);
         }
       });
       if (now - lastOccupationZoneUpdate > 180) {
@@ -2398,6 +2458,11 @@ const Battle3DEngine = (function () {
       modelsLoaded: modelsLoadedCount,
       plinthCount: unitsMap.size,
       activeMixers: activeMixers.length,
+      soldierCount: [...unitsMap.values()].reduce((sum, token) => sum + token.troopsContainer.children.reduce((count, child) => count + (child.userData.soldierCount || 0), 0), 0),
+      engagedBattalions: [...unitsMap.values()].filter(token =>
+        (token.engagement && token.engagement.finished) ||
+        (['air', 'armor', 'naval'].includes(token.cat) && token.march && token.march.finished)
+      ).length,
       envPropsChildren: envPropsGroup ? envPropsGroup.children.length : 0,
       lowPowerDevice: isLowPowerDevice,
       pixelRatio: renderer ? renderer.getPixelRatio() : 0,

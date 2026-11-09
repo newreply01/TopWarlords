@@ -32,7 +32,7 @@ try:
         # 預先在 storage 設定已看過幫助與新手引導，避免新手彈窗阻擋點擊
         context.add_init_script("""
             localStorage.setItem('wl15_onboard_done', 'true');
-            localStorage.setItem('wl15_help_dismissed', 'true');
+            localStorage.setItem('wl15_seen', '1');
             localStorage.setItem('topwarlords_cached_global_visits', '100');
         """)
 
@@ -47,8 +47,7 @@ try:
         time.sleep(0.5)
 
         # 關閉可能彈出的說明模態窗
-        page.keyboard.press("Escape")
-        time.sleep(0.3)
+        assert page.locator("#helpModal").is_hidden(), "Help modal should not cover gameplay"
 
         # 1. 檢查卡片渲染
         cards = page.locator(".m-card")
@@ -112,13 +111,31 @@ try:
         # 5. 測試跳過動畫秒速結算 (#btnSkip)
         btn_skip = page.locator("#btnSkip")
         if btn_skip.is_visible():
-            btn_skip.click(force=True)
+            btn_skip.click()
             time.sleep(1.0)
             print("[TEST 5] 點擊跳過動畫，秒速完成戰略結算！")
 
         # 檢查結算戰報海報按鈕
         btn_poster = page.locator("#btnPoster")
         is_finished = btn_poster.is_visible()
+        page.wait_for_selector("#rReview", state="visible", timeout=10000)
+        assert page.locator("#rReview").is_visible(), "AAR result did not render"
+        assert page.locator("#rExitBattle").is_visible(), "Direct battle exit action is missing"
+        page.locator("#rExitBattle").click()
+        assert page.locator("#viewBattle").evaluate("el => el.hidden"), "Battle view stayed open after AAR exit"
+        assert page.locator("#viewBuild").is_visible(), "Build view did not return after AAR exit"
+
+        page.locator("#btnRand").click()
+        page.wait_for_function("() => !document.querySelector('#btnGo').disabled", timeout=5000)
+        page.locator("#btnGo").click()
+        page.wait_for_function("() => !document.querySelector('#viewBattle').hidden", timeout=5000)
+        page.locator("#btnSkip").click()
+        page.wait_for_selector("#rReview", state="visible", timeout=10000)
+        page.locator("#rReview").click()
+        assert page.locator("#btnBattleExit").is_visible(), "Battle exit control is missing"
+        page.locator("#btnBattleExit").click()
+        assert page.locator("#viewBattle").evaluate("el => el.hidden"), "Battle view stayed open after exit"
+        assert page.locator("#viewBuild").is_visible(), "Build view did not return after exit"
         print(f"[TEST 6] 戰鬥結算完成，戰報海報按鈕可見: {is_finished}")
 
         # 檢查過程是否有 JS 報錯

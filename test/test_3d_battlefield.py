@@ -90,8 +90,21 @@ try:
         assert is_three_ready and is_engine_ready, "Three.js 或 Battle3DEngine 未載入！"
         page.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", timeout=10000)
         terrain_state = page.evaluate("() => Battle3DEngine.getDebugState()")
+        expected_soldiers = 240 if terrain_state['lowPowerDevice'] else 360
+        assert terrain_state['soldierCount'] == expected_soldiers, f"Unexpected visible soldier count: {terrain_state}"
         assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
         assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
+        page.wait_for_function("() => Battle3DEngine.getDebugState().engagedBattalions > 0", timeout=15000)
+        desktop_layout = page.evaluate("""() => ({
+            stage: document.querySelector('#battle3DWrapper').clientHeight,
+            grid: document.querySelector('.battle-grid').clientHeight,
+            roster: document.querySelector('#unitsCardListA').clientHeight,
+            rosterContent: document.querySelector('#unitsCardListA').scrollHeight,
+            card: document.querySelector('#unitsCardListA .bu')?.getBoundingClientRect().height || 0
+        })""")
+        assert 220 <= desktop_layout['stage'] <= 340, f"3D stage height is outside the viewport budget: {desktop_layout}"
+        assert desktop_layout['grid'] >= 250 and desktop_layout['card'] >= 66, f"Battle roster was compressed: {desktop_layout}"
+        assert desktop_layout['rosterContent'] <= desktop_layout['roster'] + 1, f"Desktop roster still needs scrolling: {desktop_layout}"
 
         # 測試切換 3D/2D 按鈕
         page.evaluate("() => document.querySelector('#btnToggle3DView').click()")
@@ -138,6 +151,13 @@ try:
         }""")
         print('[MOBILE START]', mobile_start)
         assert not mobile_start['viewHidden'], f"手機出擊未開啟戰場：{mobile_start}; browser errors: {mobile_errors}"
+        assert mobile.locator('#battlePanelTabs').is_visible(), 'Mobile battle panel tabs are missing'
+        mobile.locator('[data-battle-panel="team-a"]').click()
+        assert mobile.locator('#teamA').is_visible(), 'Friendly roster panel did not open'
+        mobile.locator('[data-battle-panel="team-b"]').click()
+        assert mobile.locator('#teamB').is_visible(), 'Enemy roster panel did not open'
+        mobile.locator('[data-battle-panel="log"]').click()
+        assert mobile.locator('.log-col').is_visible(), 'Battle log panel did not open'
         try:
             mobile.wait_for_selector("#battle3DCanvas canvas", timeout=8000)
         except Exception as error:

@@ -2523,6 +2523,7 @@ function exitActiveBattle() {
   const modals = [
     $('#resultModal'),
     $('#ladderResultModal'),
+    $('#bo3CounterModal'),
     $('#bo3SeriesModal'),
     $('#bo3RoundModal')
   ];
@@ -2531,6 +2532,10 @@ function exitActiveBattle() {
   });
   if (typeof currentActiveModal !== 'undefined' && currentActiveModal) {
     currentActiveModal.hidden = true;
+  }
+  currentActiveModal = null;
+  if (typeof PvPTimerManager !== 'undefined' && typeof PvPTimerManager.stop === 'function') {
+    PvPTimerManager.stop();
   }
 
   // 重置右上角戰鬥控制按鈕
@@ -2559,6 +2564,16 @@ $('#btnToggle3DView')?.addEventListener('click', () => {
 });
 
 /* ---------- 模式切換與預算修剪 ---------- */
+$('#battlePanelTabs')?.addEventListener('click', event => {
+  const button = event.target.closest('[data-battle-panel]');
+  const viewBattle = $('#viewBattle');
+  if (!button || !viewBattle) return;
+  viewBattle.dataset.battlePanel = button.dataset.battlePanel;
+  $('#battlePanelTabs').querySelectorAll('[data-battle-panel]').forEach(tab => {
+    tab.setAttribute('aria-pressed', String(tab === button));
+  });
+});
+
 $('#modeTabs').addEventListener('click', e => {
   const b = e.target.closest('[data-mode]'); if (!b) return;
   setMode(b.dataset.mode);
@@ -4174,7 +4189,16 @@ async function showBattle(res, opts = {}) {
   const viewTournament = $('#viewTournament'); if (viewTournament) viewTournament.hidden = true;
   hideTooltip();
   $('#viewBattle').hidden = false;
+  $('#viewBattle').dataset.battlePanel = 'log';
+  $('#battlePanelTabs')?.querySelectorAll('[data-battle-panel]').forEach(tab => {
+    tab.setAttribute('aria-pressed', String(tab.dataset.battlePanel === 'log'));
+  });
+  if ($('#helpModal')) $('#helpModal').hidden = true;
   $('#resultModal').hidden = true;
+  if ($('#ladderResultModal')) $('#ladderResultModal').hidden = true;
+  if ($('#bo3CounterModal')) $('#bo3CounterModal').hidden = true;
+  if ($('#bo3SeriesModal')) $('#bo3SeriesModal').hidden = true;
+  if ($('#bo3RoundModal')) $('#bo3RoundModal').hidden = true;
   if ($('#btnPause')) {
     $('#btnPause').hidden = false;
     $('#btnPause').textContent = '⏸ 暫停';
@@ -5865,6 +5889,8 @@ function showResult(res, bo3Custom) {
     const survivalLabelB = `${aliveCountB}/5 存活${capturedCountB ? ` · ${capturedCountB} 被俘` : ''}`;
     const enemySide = mySide === 'A' ? 'B' : 'A';
     const myAlive = mySide === 'A' ? aliveCountA : aliveCountB;
+    const enemyAlive = enemySide === 'A' ? aliveCountA : aliveCountB;
+    const myTotalVP = Number((mySide === 'A' ? A : B).total) || 0;
     const enemyTotalVP = (res.vp && res.vp[enemySide] && typeof res.vp[enemySide].total === 'number') ? res.vp[enemySide].total : 0;
     const diffVP = myTotalVP - enemyTotalVP;
     const enemyWiped = enemyAlive === 0;
@@ -6184,6 +6210,20 @@ function showResult(res, bo3Custom) {
 
     currentActiveModal = $('#resultModal');
     $('#resultModal').hidden = false;
+
+    const resultActions = $('#resultCard .aar-actions');
+    if (resultActions && !$('#rExitBattle')) {
+      const exitButton = document.createElement('button');
+      exitButton.type = 'button';
+      exitButton.className = 'btn ghost aar-btn-sub';
+      exitButton.id = 'rExitBattle';
+      exitButton.textContent = '離開戰場';
+      exitButton.addEventListener('click', () => {
+        if (typeof PvPTimerManager !== 'undefined') PvPTimerManager.stop();
+        handleExitBattleToCurrentMode();
+      });
+      resultActions.append(exitButton);
+    }
 
     const isMultiRoundMatch = Boolean(state.isOnlinePvp || state.mode === 'tournament' || bo3Custom);
     if (isMultiRoundMatch) {

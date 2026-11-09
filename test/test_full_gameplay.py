@@ -27,7 +27,7 @@ time.sleep(1.2)
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
+        context = browser.new_context(service_workers='block')
 
         # 預先在 storage 設定已看過幫助與新手引導，避免新手彈窗阻擋點擊
         context.add_init_script("""

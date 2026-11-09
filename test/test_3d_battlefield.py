@@ -7,26 +7,37 @@ E2E 測試：驗證 TopWarlords 3D 古戰場推演沙盤
 4. 驗證 Three.js 戰棋對象已正常載入
 5. 驗證切換 3D/2D 按鈕功能
 """
-import sys, time, subprocess
+import sys, time, subprocess, socket
 from pathlib import Path
-from tempfile import gettempdir
 from playwright.sync_api import sync_playwright
 
 sys.stdout.reconfigure(encoding='utf-8')
 ROOT = Path(__file__).resolve().parents[1]
-PORT = 8299
+with socket.socket() as port_socket:
+    port_socket.bind(('127.0.0.1', 0))
+    PORT = port_socket.getsockname()[1]
 
 server = subprocess.Popen(
-    [sys.executable, "-m", "http.server", str(PORT), "--directory", str(ROOT)],
+    [sys.executable, "-m", "http.server", str(PORT), "--bind", "127.0.0.1", "--directory", str(ROOT)],
     stdout=subprocess.DEVNULL,
     stderr=subprocess.DEVNULL,
 )
-time.sleep(1.2)
+for _ in range(80):
+    if server.poll() is not None:
+        raise RuntimeError('Test HTTP server exited before becoming ready')
+    try:
+        with socket.create_connection(('127.0.0.1', PORT), timeout=0.1):
+            break
+    except OSError:
+        time.sleep(0.1)
+else:
+    server.terminate()
+    raise RuntimeError('Test HTTP server did not become ready')
 
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(viewport={'width': 1280, 'height': 800})
+        context = browser.new_context(viewport={'width': 1280, 'height': 800}, service_workers='block')
         
         context.add_init_script("""
             localStorage.setItem('wl15_seen', '1');
@@ -81,12 +92,6 @@ try:
         terrain_state = page.evaluate("() => Battle3DEngine.getDebugState()")
         assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
         assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
-
-        # 擷取 3D 沙盤對戰截圖
-        time.sleep(1.0)
-        screenshot_path = Path(gettempdir()) / "topwarlords-3d-battle.png"
-        page.screenshot(path=str(screenshot_path))
-        print(f"[TEST 4] 3D 沙盤截圖成功保存至 {screenshot_path}")
 
         # 測試切換 3D/2D 按鈕
         page.evaluate("() => document.querySelector('#btnToggle3DView').click()")

@@ -6,7 +6,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.6.6';
+  const ASSET_VER = '7.6.7';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 

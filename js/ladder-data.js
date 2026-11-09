@@ -121,7 +121,7 @@ const LADDER_PRESETS = [
       "YUWENTAI",
       "XIANGYU",
       "ZONGZE",
-      "DONGXI",
+      "MENGHUO",
       "WEIXIAOKUAN"
     ],
     "title": "殺神威嚴破軍攻勢"
@@ -241,7 +241,7 @@ const LADDER_PRESETS = [
       "HUO",
       "MENGGONG",
       "ZONGZE",
-      "LUFAN",
+      "XUHUANG",
       "WEIXIAOKUAN"
     ],
     "title": "太宗親衛千里奔襲"
@@ -406,7 +406,7 @@ const LADDER_PRESETS = [
       "ZHAOSHE",
       "GYEBAEK",
       "CHOIMUSEON",
-      "LUFAN",
+      "XUHUANG",
       "PANGTONG"
     ],
     "title": "十面埋伏天羅地網"
@@ -451,7 +451,7 @@ const LADDER_PRESETS = [
       "LUBU",
       "YUJIN",
       "GENGYAN",
-      "LUFAN",
+      "XUHUANG",
       "ZHANGLIANG"
     ],
     "title": "先登奇兵暗夜刺殺"
@@ -496,7 +496,7 @@ const LADDER_PRESETS = [
       "ZHANGLIAO",
       "MENGTIAN",
       "GENGYAN",
-      "LUFAN",
+      "XUHUANG",
       "PANGTONG"
     ],
     "title": "伏波龍骨水陸破暗"
@@ -586,7 +586,7 @@ const LADDER_PRESETS = [
       "GONGSUNDU",
       "YANGYE",
       "YANGYOUJI",
-      "DONGXI",
+      "MENGHUO",
       "PANGTONG"
     ],
     "title": "神射強弩封鎖全場"
@@ -601,7 +601,7 @@ const LADDER_PRESETS = [
       "EULJI",
       "GYEBAEK",
       "MATSUNAGA",
-      "LUFAN",
+      "XUHUANG",
       "PANGTONG"
     ],
     "title": "先制斬首千里破陣"
@@ -661,7 +661,7 @@ const LADDER_PRESETS = [
       "GONGSUNDU",
       "DIANWEI",
       "ZONGZE",
-      "DONGXI",
+      "MENGHUO",
       "LUSU"
     ],
     "title": "登高觀瞻精確校射"
@@ -676,7 +676,7 @@ const LADDER_PRESETS = [
       "CAOCHUN",
       "LIANPO",
       "HUANGZHONG",
-      "JIANGQIN",
+      "YUEJIN",
       "LUXUN"
     ],
     "title": "步騎火砲協同合圍"
@@ -751,7 +751,7 @@ const LADDER_PRESETS = [
       "ZHAOYUN",
       "MENGTIAN",
       "GENGGONG",
-      "LUFAN",
+      "XUHUANG",
       "XUNYU"
     ],
     "title": "先制斬首千里破陣"
@@ -781,7 +781,7 @@ const LADDER_PRESETS = [
       "DENGAI",
       "XUCHU",
       "ZONGZE",
-      "WANGJUN",
+      "JIANGWEI",
       "CHENGYU"
     ],
     "title": "八陣帷幄奇謀致勝"
@@ -961,7 +961,7 @@ const LADDER_PRESETS = [
       "HULU",
       "BAIQI",
       "ZHANGHE",
-      "LUFAN",
+      "XUHUANG",
       "WEIXIAOKUAN"
     ],
     "title": "奔雷突襲極致先手"
@@ -1171,7 +1171,7 @@ const LADDER_PRESETS = [
       "KIMYUSHIN",
       "CAOREN",
       "YANGMANCHUN",
-      "LUFAN",
+      "XUHUANG",
       "PANGTONG"
     ],
     "title": "玄甲重盾正面死鬥"
@@ -1216,7 +1216,7 @@ const LADDER_PRESETS = [
       "CHENQINGZHI",
       "DIANWEI",
       "PANGJUAN",
-      "LUFAN",
+      "XUHUANG",
       "PANGTONG"
     ],
     "title": "重鎧陣線寸步不讓"
@@ -1246,7 +1246,7 @@ const LADDER_PRESETS = [
       "EULJI",
       "CAOREN",
       "CHOIMUSEON",
-      "LUFAN",
+      "XUHUANG",
       "PANGTONG"
     ],
     "title": "多路並進漫天火矢"
@@ -1261,7 +1261,7 @@ const LADDER_PRESETS = [
       "MACHO",
       "DIANWEI",
       "ZHANGHE",
-      "DONGXI",
+      "MENGHUO",
       "PANGTONG"
     ],
     "title": "十面埋伏天羅地網"
@@ -1291,7 +1291,7 @@ const LADDER_PRESETS = [
       "DENGAI",
       "ZHANGFEI",
       "GENGYAN",
-      "LUFAN",
+      "XUHUANG",
       "PANGTONG"
     ],
     "title": "十面埋伏天羅地網"

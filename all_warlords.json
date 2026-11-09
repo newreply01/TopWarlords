@@ -2577,26 +2577,28 @@
     "sfx": "fire_attack"
   },
   {
-    "id": "WANGJUN",
-    "name": "王濬",
+    "id": "JIANGWEI",
+    "name": "姜維",
     "cat": "naval",
     "cost": 4,
     "v": "D",
-    "tag": "樓船下蜀·千尋鐵鎖沉",
-    "desc": "西晉名將，建造方百二十步容二千人之巨型樓船，順長江直下破鐵鎖滅吳。",
-    "st": 26,
-    "ew": 10,
+    "tag": "天水麒麟·九伐奇謀",
+    "desc": "蜀漢大將軍，諸葛亮親傳弟子，智勇雙全，善出奇兵險道穿插隴右九伐中原，劍閣據險挫敵十萬。",
+    "st": 32,
+    "ew": 30,
     "traits": [
-      "ASW",
-      "AEGIS"
+      "EW",
+      "AMBUSH"
     ],
-    "roleFlags": [],
-    "hp": 278,
-    "atk": 96,
-    "def": 0.12,
+    "roleFlags": [
+      "STAMINA_DEEP"
+    ],
+    "hp": 276,
+    "atk": 100,
+    "def": 0.1,
     "flag": "🇨🇳",
-    "origin": "中國 · 晉朝",
-    "weapon": "連環大樓船 + 破鎖巨斧",
+    "origin": "中國 · 三國",
+    "weapon": "天水綠沉長槍 + 蜀錦奇兵袍",
     "sfx": "war_drum"
   },
   {
@@ -2820,47 +2822,52 @@
     "sfx": "fire_attack"
   },
   {
-    "id": "JIANGQIN",
-    "name": "蔣欽",
+    "id": "YUEJIN",
+    "name": "樂進",
     "cat": "naval",
     "cost": 2,
     "v": "A",
-    "tag": "濡須遏浪·先登力戰",
-    "desc": "東吳水軍名將，善使艨艟衝擊敵陣，濡須口抵禦曹操大軍功勳卓著。",
-    "st": 30,
-    "ew": 6,
+    "tag": "五子良將·每戰先登",
+    "desc": "曹魏五子良將，容貌短小而膽勇過人，從征官渡、烏桓、合肥，每戰必先登陷陣斬將搴旗。",
+    "st": 20,
+    "ew": 16,
     "traits": [
-      "ASW"
+      "AMBUSH"
     ],
-    "roleFlags": [],
-    "hp": 190,
-    "atk": 66,
-    "def": 0.12,
+    "roleFlags": [
+      "HEAVY_AP"
+    ],
+    "hp": 188,
+    "atk": 72,
+    "def": 0.08,
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "吳水師重矛 + 護手短刀",
+    "weapon": "短柄破城大斧 + 先登飛爪",
     "sfx": "blade_clash"
   },
   {
-    "id": "DONGXI",
-    "name": "董襲",
+    "id": "MENGHUO",
+    "name": "孟獲",
     "cat": "naval",
     "cost": 2,
     "v": "B",
-    "tag": "濡須斷鎖·死守巨艦",
-    "desc": "東吳猛將，濡須塢戰役夜遇暴風，堅守五層巨樓船拒絕避難力戰溺死。",
-    "st": 28,
-    "ew": 6,
+    "tag": "南中夷王·象甲藤兵",
+    "desc": "南中蠻夷各部大姓渠帥，聚南中各洞勇士以生藤重甲與象兵據險固守，山川泥沼間赤身跳蕩突擊。",
+    "st": 45,
+    "ew": 10,
     "traits": [
-      "ASW"
+      "AMBUSH",
+      "SUB"
     ],
-    "roleFlags": [],
+    "roleFlags": [
+      "STAMINA_DEEP"
+    ],
     "hp": 192,
-    "atk": 65,
-    "def": 0.12,
+    "atk": 66,
+    "def": 0.1,
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "斬索雙斧 + 樓船重甲",
+    "weapon": "南中神木三叉戟 + 獸皮生藤甲",
     "sfx": "blade_clash"
   },
   {
@@ -2886,27 +2893,27 @@
     "sfx": "blade_clash"
   },
   {
-    "id": "LUFAN",
-    "name": "呂範",
+    "id": "XUHUANG",
+    "name": "徐晃",
     "cat": "naval",
     "cost": 2,
     "v": "D",
-    "tag": "生牛皮蒙衝·破浪撞擊",
-    "desc": "東吳名將大司馬，統水軍前部督率五艦大拒曹丕大軍於洞口，風濤之中沉著破敵。",
-    "st": 26,
-    "ew": 10,
+    "tag": "長驅直入·聲東破陣",
+    "desc": "曹魏五子良將，樊城之戰聲東擊西長驅直入大破關羽四塚連營，曹操讚其「有周亞夫之風，長驅直入古今未有」。",
+    "st": 22,
+    "ew": 20,
     "traits": [
-      "AMBUSH",
-      "ASW"
+      "TRUE_AT",
+      "AMBUSH"
     ],
     "roleFlags": [],
-    "hp": 142,
-    "atk": 68,
-    "def": 0.04,
+    "hp": 186,
+    "atk": 70,
+    "def": 0.08,
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "東吳督軍古錠刀 + 巨艦",
-    "sfx": "war_drum",
+    "weapon": "宣花開山大斧 + 破陣鎧",
+    "sfx": "heavy_strike",
     "title": "水軍前部·江表巨艦",
     "stealth": 24,
     "strategy": 18
@@ -2963,25 +2970,25 @@
     "strategy": 22
   },
   {
-    "id": "ZHUHUAN",
-    "name": "朱桓",
+    "id": "SHAMOKE",
+    "name": "沙摩柯",
     "cat": "naval",
     "cost": 1,
     "v": "A",
-    "tag": "水底無聲·龍骨鑿穿",
-    "desc": "東吳名將，濡須塢以五千水陸精兵抵擋曹仁大軍，斬將破城以寡敵眾。",
-    "st": 62,
-    "ew": 0,
+    "tag": "五溪蠻王·鐵蒺首登",
+    "desc": "五溪蠻夷首領，面如噀血碧眼突出，率蠻兵助劉備伐吳，手使鐵蒺藜骨朵，身披五色錦衣威震山谷。",
+    "st": 48,
+    "ew": 10,
     "traits": [
       "AMBUSH"
     ],
     "roleFlags": [],
-    "hp": 98,
+    "hp": 102,
     "atk": 48,
-    "def": 0,
+    "def": 0.02,
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "佩刀 + 濡須防禦柵船",
+    "weapon": "鐵蒺藜骨朵 + 蠻夷硬角弓",
     "sfx": "blade_clash",
     "title": "濡須水壁·以寡敵眾",
     "stealth": 26,

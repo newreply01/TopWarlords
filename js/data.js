@@ -153,7 +153,7 @@ const RAW_UNITS = [
   ["LUMENG", "呂蒙", 'naval', 4, 'A', "白衣渡江·神速襲南郡", "東吳大都督，精妙偽裝商船「白衣渡江」無聲奪取烽火台，襲取荊州擒殺關羽。", 78, 16, ["SUB", "DEEP"], [], 274, 102, 0.1],
   ["GANNING", "甘寧", 'naval', 4, 'B', "百騎夜襲·錦帆鈴聲", "東吳猛將，頭插鳥羽腰繫銅鈴，濡須之戰親率百名死士夜襲曹操四十萬大營全身而退。", 48, 12, ["ASW", "AMBUSH"], ["STAMINA_DEEP"], 276, 104, 0.12],
   ["HUANGGAI", "黃蓋", 'naval', 4, 'C', "苦肉火船·赤壁烈焰", "東吳老將，行苦肉計駕十艘滿載膏油柴草之艨艟火船直撞曹軍連環巨艦。", 46, 10, ["AMBUSH", "SWARM"], [], 268, 106, 0.1],
-  ["WANGJUN", "王濬", 'naval', 4, 'D', "樓船下蜀·千尋鐵鎖沉", "西晉名將，建造方百二十步容二千人之巨型樓船，順長江直下破鐵鎖滅吳。", 26, 10, ["ASW", "AEGIS"], [], 278, 96, 0.12],
+  ["JIANGWEI", "姜維", 'naval', 4, 'D', "天水麒麟·九伐奇謀", "蜀漢大將軍，諸葛亮親傳弟子，智勇雙全，善出奇兵險道穿插隴右九伐中原，劍閣據險挫敵十萬。", 32, 30, ["EW", "AMBUSH"], ["STAMINA_DEEP"], 276, 100, 0.1],
   ["YANGSU", "楊素", 'naval', 4, 'E', "五牙巨艦·威平江南", "隋朝開國名將，監造五牙巨艦高達百餘尺，拍竿擊碎敵船平定南陳。", 25, 12, ["AEGIS", "EW"], [], 274, 98, 0.1],
   ["ZUTI", "祖逖", 'naval', 4, 'B', "中流擊楫·北伐光復", "東晉名將，聞雞起舞，中流擊楫誓復中原，率水陸先登健兒北渡長江收復黃河以南失地。", 30, 22, ["AMBUSH", "ASW"], [], 248, 98, 0.08],
   ["MURAKAMI", "村上武吉", 'naval', 4, 'G', "能島水軍·焙烙玉焚艦", "瀨戶內海霸主村上水軍統帥，善用陶罐投擲炸藥「焙烙玉」焚毀敵艦。", 48, 12, ["ASW", "AMBUSH"], [], 266, 100, 0.1],
@@ -163,13 +163,13 @@ const RAW_UNITS = [
   ["MOURI_MOTO", "毛利元就", 'naval', 3, 'E', "西國謀神·嚴島水陸奇襲", "日本戰國第一智將，嚴島之戰暴風雨夜水陸奇襲陶晴賢兩萬大軍，三矢之訓一統中國地方。", 32, 30, ["SUB", "AMBUSH"], [], 194, 82, 0.06],
   ["HATTORI", "服部半藏", 'naval', 3, 'F', "鬼半藏·伊賀忍軍統領", "德川家康麾下伊賀忍者統領，擅於潛入、暗殺、情報蒐集與陣前開道。", 75, 12, ["SUB", "AMBUSH"], [], 208, 82, 0.1],
   ["JEONGJI", "鄭地", 'naval', 3, 'G', "鎮浦火砲·水師斬寇", "高麗水軍將領，於鎮浦海戰首創以艦載火砲轟碎倭寇五百餘艘戰船。", 30, 8, ["AEGIS", "ASW"], [], 228, 76, 0.1],
-  ["JIANGQIN", "蔣欽", 'naval', 2, 'A', "濡須遏浪·先登力戰", "東吳水軍名將，善使艨艟衝擊敵陣，濡須口抵禦曹操大軍功勳卓著。", 30, 6, ["ASW"], [], 190, 66, 0.12],
-  ["DONGXI", "董襲", 'naval', 2, 'B', "濡須斷鎖·死守巨艦", "東吳猛將，濡須塢戰役夜遇暴風，堅守五層巨樓船拒絕避難力戰溺死。", 28, 6, ["ASW"], [], 192, 65, 0.12],
+  ["YUEJIN", "樂進", 'naval', 2, 'A', "五子良將·每戰先登", "曹魏五子良將，容貌短小而膽勇過人，從征官渡、烏桓、合肥，每戰必先登陷陣斬將搴旗。", 20, 16, ["AMBUSH"], ["HEAVY_AP"], 188, 72, 0.08],
+  ["MENGHUO", "孟獲", 'naval', 2, 'B', "南中夷王·象甲藤兵", "南中蠻夷各部大姓渠帥，聚南中各洞勇士以生藤重甲與象兵據險固守，山川泥沼間赤身跳蕩突擊。", 45, 10, ["AMBUSH", "SUB"], ["STAMINA_DEEP"], 192, 66, 0.1],
   ["DINGFENG", "丁奉", 'naval', 2, 'C', "雪中奮短兵·東興破敵", "東吳晚期名將，東興之戰率三千敢死隊頂風冒雪脫去兜鍪短兵突入魏軍。", 40, 8, ["AMBUSH"], [], 184, 70, 0.1],
-  ["LUFAN", "呂範", 'naval', 2, 'B', "水軍前部·江表巨艦", "東吳名將大司馬，統水軍前部督率五艦大拒曹丕大軍於洞口，風濤之中沉著破敵。", 24, 18, ["AMBUSH", "ASW"], [], 142, 68, 0.04],
+  ["XUHUANG", "徐晃", 'naval', 2, 'D', "長驅直入·聲東破陣", "曹魏五子良將，樊城之戰聲東擊西長驅直入大破關羽四塚連營，曹操讚其「有周亞夫之風，長驅直入古今未有」。", 22, 20, ["TRUE_AT", "AMBUSH"], [], 186, 70, 0.08],
   ["WAKIZAKA", "脇坂安治", 'naval', 2, 'E', "賤岳槍名·淡路水軍首領", "賤岳七本槍之一，淡路水軍頭領，關原之戰機敏調度，兼備陸戰與海戰將才。", 26, 16, ["AMBUSH"], [], 144, 66, 0.04],
   ["TOUDO", "藤堂高虎", 'naval', 2, 'F', "水軍大將·築城宗師", "戰國名將，掌管德川家水軍大陣，築城與水陸攻防皆臻極致，歷事七主終成一方霸主。", 24, 22, ["AMBUSH", "EW"], [], 146, 66, 0.04],
-  ["ZHUHUAN", "朱桓", 'naval', 1, 'A', "濡須水壁·以寡敵眾", "東吳名將，濡須塢以五千水陸精兵抵擋曹仁大軍，斬將破城以寡敵眾。", 26, 18, ["AMBUSH"], [], 98, 48, 0],
+  ["SHAMOKE", "沙摩柯", 'naval', 1, 'A', "五溪蠻王·鐵蒺首登", "五溪蠻夷首領，面如噀血碧眼突出，率蠻兵助劉備伐吳，手使鐵蒺藜骨朵，身披五色錦衣威震山谷。", 48, 10, ["AMBUSH"], [], 102, 48, 0.02],
   ["HEQI", "賀齊", 'naval', 1, 'B', "艨艟華彩·百越先登", "東吳名將，戰船艨艟精工甲刃照耀江面，每戰必先登陷陣，平定山越威震江東。", 24, 16, ["AMBUSH", "ASW"], [], 100, 46, 0],
   ["CAOBIN", "曹彬", 'naval', 1, 'C', "渡江名帥·不殺仁將", "北宋開國第一良將，採石磯架設浮橋大渡長江擊破南唐水軍，平江南不妄殺一人。", 20, 22, ["AMBUSH", "EW"], [], 102, 44, 0],
   ["WANGBA", "王霸", 'naval', 1, 'D', "昆陽先登·破敵無前", "東漢雲台二十八將，昆陽之戰率敢死先登直衝王莽中軍大旗，屢破強敵。", 26, 14, ["AMBUSH"], [], 98, 48, 0],
@@ -321,7 +321,7 @@ HUO: { flag: '🇨🇳', origin: '中國 · 西漢', weapon: '漢軍玄甲鐵騎
   LUMENG: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '白衣偽裝袍 + 吳地雙手劍', sfx: 'blade_clash', img: 'assets/warlords/LUMENG.jpg?v=7.4.0' },
   GANNING: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '短戟飛刀 + 銅鈴錦帆', sfx: 'blade_clash', img: 'assets/warlords/GANNING.jpg?v=7.4.0' },
   HUANGGAI: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '火攻燃引火箭 + 艨艟衝角', sfx: 'fire_attack', img: 'assets/warlords/HUANGGAI.jpg?v=7.4.0' },
-  WANGJUN: { flag: '🇨🇳', origin: '中國 · 晉朝', weapon: '連環大樓船 + 破鎖巨斧', sfx: 'war_drum', img: 'assets/warlords/WANGJUN.jpg?v=7.4.0' },
+  JIANGWEI: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '天水綠沉長槍 + 蜀錦奇兵袍', sfx: 'war_drum', img: 'assets/warlords/JIANGWEI.jpg?v=7.5.0' },
   YANGSU: { flag: '🇨🇳', origin: '中國 · 隋朝', weapon: '五牙大艦拍竿 + 隋軍重劍', sfx: 'war_drum', img: 'assets/warlords/YANGSU.jpg?v=7.4.0' },
   ZUTI: { flag: '🇨🇳', origin: '中國 · 兩晉', weapon: '中流擊楫大劍 + 渡江快艇', sfx: 'blade_clash', img: 'assets/warlords/ZUTI.jpg?v=7.4.0' },
   MURAKAMI: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '焙烙火玉 + 鯨船快櫓', sfx: 'fire_attack', img: 'assets/warlords/MURAKAMI.jpg?v=7.4.0' },
@@ -331,13 +331,13 @@ HUO: { flag: '🇨🇳', origin: '中國 · 西漢', weapon: '漢軍玄甲鐵騎
   MOURI_MOTO: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '一文字太刀 + 村上嚴島樓船', sfx: 'strategy_gong', img: 'assets/warlords/MOURI_MOTO.jpg?v=7.4.0' },
   HATTORI: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '伊賀鎖鎌 + 漆黑忍衣', sfx: 'blade_clash', img: 'assets/warlords/HATTORI.jpg?v=7.4.0' },
   JEONGJI: { flag: '🇰🇷', origin: '韓國 · 高麗', weapon: '高麗火銃銅管 + 海上長矛', sfx: 'fire_attack', img: 'assets/warlords/JEONGJI.jpg?v=7.4.0' },
-  JIANGQIN: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '吳水師重矛 + 護手短刀', sfx: 'blade_clash', img: 'assets/warlords/JIANGQIN.jpg?v=7.4.0' },
-  DONGXI: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '斬索雙斧 + 樓船重甲', sfx: 'blade_clash', img: 'assets/warlords/DONGXI.jpg?v=7.4.0' },
+  YUEJIN: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '短柄破城大斧 + 先登飛爪', sfx: 'blade_clash', img: 'assets/warlords/YUEJIN.jpg?v=7.5.0' },
+  MENGHUO: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '南中神木三叉戟 + 獸皮生藤甲', sfx: 'blade_clash', img: 'assets/warlords/MENGHUO.jpg?v=7.5.0' },
   DINGFENG: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '雪夜白刃 + 短皮小盾', sfx: 'blade_clash', img: 'assets/warlords/DINGFENG.jpg?v=7.4.0' },
-  LUFAN: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '東吳督軍古錠刀 + 巨艦', sfx: 'blade_clash', img: 'assets/warlords/LUFAN.jpg?v=7.4.0' },
+  XUHUANG: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '宣花開山大斧 + 破陣鎧', sfx: 'heavy_strike', img: 'assets/warlords/XUHUANG.jpg?v=7.5.0' },
   WAKIZAKA: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '賤岳長槍 + 淡路戰船', sfx: 'blade_clash', img: 'assets/warlords/WAKIZAKA.jpg?v=7.4.0' },
   TOUDO: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '築城大銃 + 水軍旗艦', sfx: 'war_drum', img: 'assets/warlords/TOUDO.jpg?v=7.4.0' },
-  ZHUHUAN: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '佩刀 + 濡須防禦柵船', sfx: 'blade_clash', img: 'assets/warlords/ZHUHUAN.jpg?v=7.4.0' },
+  SHAMOKE: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '鐵蒺藜骨朵 + 蠻夷硬角弓', sfx: 'blade_clash', img: 'assets/warlords/SHAMOKE.jpg?v=7.5.0' },
   HEQI: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '精鋼短戟 + 先登皮鎧', sfx: 'blade_clash', img: 'assets/warlords/HEQI.jpg?v=7.4.0' },
   CAOBIN: { flag: '🇨🇳', origin: '中國 · 北宋', weapon: '北宋大纛軍刀 + 浮橋長索', sfx: 'war_drum', img: 'assets/warlords/CAOBIN.jpg?v=7.4.0' },
   WANGBA: { flag: '🇨🇳', origin: '中國 · 東漢', weapon: '精鐵破陣矛 + 護臂甲', sfx: 'blade_clash', img: 'assets/warlords/WANGBA.jpg?v=7.4.0' },
@@ -405,7 +405,7 @@ const UNIT_MAP = {};
 UNITS.forEach(u => { UNIT_MAP[u.id] = u; });
 
 /* ---------- 古代軍陣協同羈絆 (Ancient Battle Formations) ---------- */
-const DRONE_IDS = new Set(['TIANDAN', 'SUNWU', 'LEYI', 'CHENTANG', 'MASANOBU', 'YAMAMOTO', 'KIMBUSHIK', 'TOKUGAWA', 'ZHUHUAN', 'KUKI_MORI']);
+const DRONE_IDS = new Set(['TIANDAN', 'SUNWU', 'LEYI', 'CHENTANG', 'MASANOBU', 'YAMAMOTO', 'KIMBUSHIK', 'TOKUGAWA', 'SHAMOKE', 'KUKI_MORI']);
 
 const SYNERGIES = [
   {
@@ -620,9 +620,9 @@ function recordUnitMasteryFromBattle(res, mySide = 'A') {
 
 /* ---------- 推薦經典名將陣容 (Recommended Historical Formations) ---------- */
 const TEMPLATES = [
-  { name: '八陣神機', note: '諸葛奇謀＋八陣合圍', ids: ['CAOZHANG', 'DIANWEI', 'MANCHONG', 'ZHUHUAN', 'ZHUGELIANG'] },
+  { name: '八陣神機', note: '諸葛奇謀＋八陣合圍', ids: ['CAOZHANG', 'DIANWEI', 'MANCHONG', 'SHAMOKE', 'ZHUGELIANG'] },
   { name: '封狼居胥', note: '霍去病千里奔襲破敵', ids: ['HUO', 'BYEOLMUBAN', 'HATTORI', 'PANGTONG'] },
-  { name: '殺神陷陣', note: '武安君白起正面破陣', ids: ['DENGAI', 'BAIQI', 'CHOIMUSEON', 'JIANGQIN', 'FANLI'] },
+  { name: '殺神陷陣', note: '武安君白起正面破陣', ids: ['DENGAI', 'BAIQI', 'CHOIMUSEON', 'YUEJIN', 'FANLI'] },
   { name: '鳴梁伏波', note: '忠武公李舜臣水陸連環', ids: ['LINGTONG', 'KATOKIYOMASA', 'CHOIMUSEON', 'YISUNSIN', 'CHENGYU'] },
   { name: '天下布武', note: '織田信長三段火器齊射', ids: ['DATE', 'SHIMAZUY', 'NOBUNAGA', 'DINGFENG', 'LUSU'] }
 ];

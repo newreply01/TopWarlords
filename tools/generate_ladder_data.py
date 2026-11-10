@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-生成 TopWarlords 天梯 100 席位名冊 (D:/TopWarlords/js/ladder-data.js)
+生成 TopWarlords 天梯 100 席位名冊
 包含 11 級古代軍銜、100 支歷史合法防守軍團
 """
 import json, random
 from pathlib import Path
 
-ROOT = Path("D:/TopWarlords")
+ROOT = Path(__file__).resolve().parents[1]
 warlords = json.loads((ROOT / "all_warlords.json").read_text(encoding="utf-8"))
 w_map = {w['id']: w for w in warlords}
 
@@ -151,5 +151,4 @@ if (typeof module !== 'undefined' && module.exports) {{
 """
 
 (ROOT / "js" / "ladder-data.js").write_text(content, encoding="utf-8")
-print(f"成功生成 D:/TopWarlords/js/ladder-data.js，包含 100 位歷史軍團與 11 級古代軍階！")
-
+print(f"成功生成 {ROOT / 'js' / 'ladder-data.js'}，包含 100 位歷史軍團與 11 級古代軍階！")

@@ -30,16 +30,6 @@
     "weapon": "方天畫戟 + 赤兔馬"
   },
   {
-    "id": "YUEYUN",
-    "name": "岳雲",
-    "cat": "air",
-    "cost": 5,
-    "tag": "背嵬重騎·突陣碎甲",
-    "flag": "🇨🇳",
-    "origin": "中國 · 南宋",
-    "weapon": "雙鐵椎 + 背嵬重甲"
-  },
-  {
     "id": "YOSHITSUNE",
     "name": "源義經",
     "cat": "air",
@@ -140,6 +130,16 @@
     "weapon": "龍鳳環首刀 + 金花官服戰鎧"
   },
   {
+    "id": "SUNCE",
+    "name": "孫策",
+    "cat": "air",
+    "cost": 4,
+    "tag": "小霸王·席捲江東",
+    "flag": "🇨🇳",
+    "origin": "中國 · 東漢末",
+    "weapon": "霸王槍 + 江東戰旗"
+  },
+  {
     "id": "DENGAI",
     "name": "鄧艾",
     "cat": "air",
@@ -180,16 +180,6 @@
     "weapon": "黑漆弦月盔 + 騎鐵火繩槍"
   },
   {
-    "id": "KEIJI",
-    "name": "前田慶次",
-    "cat": "air",
-    "cost": 3,
-    "tag": "天下傾奇·朱槍突擊",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "朱柄槍 + 南蠻具足"
-  },
-  {
     "id": "EULJI",
     "name": "乙支文德",
     "cat": "air",
@@ -200,16 +190,6 @@
     "weapon": "高句麗環刀 + 輕步快騎"
   },
   {
-    "id": "CAOZHANG",
-    "name": "曹彰",
-    "cat": "air",
-    "cost": 2,
-    "tag": "黃鬚少俠·勇手格獸",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "重鋼長矛 + 雕翎弓"
-  },
-  {
     "id": "LINGTONG",
     "name": "凌統",
     "cat": "air",
@@ -218,36 +198,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "烈火大刀 + 隨身精短劍"
-  },
-  {
-    "id": "WENPING",
-    "name": "文聘",
-    "cat": "air",
-    "cost": 2,
-    "tag": "江夏鎮守·突騎襲壘",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "宣花長斧 + 精鐵兜鍪"
-  },
-  {
-    "id": "HULU",
-    "name": "斛律羨",
-    "cat": "air",
-    "cost": 2,
-    "tag": "幽州飛騎·馳射如神",
-    "flag": "🇨🇳",
-    "origin": "中國 · 南北朝",
-    "weapon": "角端長弓 + 馬槊"
-  },
-  {
-    "id": "YUWENTAI",
-    "name": "宇文泰",
-    "cat": "air",
-    "cost": 2,
-    "tag": "八柱國雄·沙苑銳騎",
-    "flag": "🇨🇳",
-    "origin": "中國 · 南北朝",
-    "weapon": "金絲馬槊 + 柱國印綬"
   },
   {
     "id": "YAMAGATA",
@@ -274,21 +224,10 @@
     "name": "趙奢",
     "cat": "air",
     "cost": 2,
-    "tag": "平岡將軍·突陣破周",
+    "tag": "狹路相逢·馬服奔馳",
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
-    "weapon": "趙國鐵騎長矛 + 馬服良駒",
-    "title": "狹路相逢·馬服奔馳",
-    "desc": "戰國名將馬服君，以「狹路相逢勇者勝」之膽魄千里疾馳救援閼與，出其不意大破秦軍主力。",
-    "stealth": 38,
-    "strategy": 22,
-    "traits": [
-      "LR",
-      "CAS"
-    ],
-    "hp": 136,
-    "atk": 82,
-    "def": 0
+    "weapon": "趙國鐵騎長矛 + 馬服良駒"
   },
   {
     "id": "PANGDE",
@@ -301,95 +240,14 @@
     "weapon": "截頭大刀 + 白馬重鐵鞍"
   },
   {
-    "id": "QUYI",
-    "name": "麴義",
-    "cat": "air",
-    "cost": 1,
-    "tag": "先登弩騎·破白馬義",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "先登強弩 + 衝鋒短盾"
-  },
-  {
-    "id": "CAOZHEN",
-    "name": "曹真",
-    "cat": "air",
-    "cost": 1,
-    "tag": "拒蜀名將·大破趙雲",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "百煉長刀 + 鐵鱗甲"
-  },
-  {
-    "id": "CAOCHUN",
-    "name": "曹純",
-    "cat": "air",
-    "cost": 1,
-    "tag": "虎豹統帥·南皮長驅",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "虎豹精鋼槊 + 輕騎快鞍"
-  },
-  {
-    "id": "FUMA",
-    "name": "風魔小太郎",
-    "cat": "air",
-    "cost": 1,
-    "tag": "暗夜騎襲·風魔黑影",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "忍者苦無 + 漆黑忍馬"
-  },
-  {
-    "id": "OBATA",
-    "name": "飯富虎昌",
-    "cat": "air",
-    "cost": 1,
-    "tag": "赤備元祖·烈火陣亡",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "大身槍 + 赤色大兜"
-  },
-  {
-    "id": "ZANGBA",
-    "name": "臧霸",
-    "cat": "air",
-    "cost": 1,
-    "tag": "具裝鎧馬·前線游動",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "泰山快矛 + 精良戰馬",
-    "title": "威虜將軍·泰山突騎",
-    "desc": "曹魏名將，統率泰山精銳輕騎，合肥之戰夾擊孫權，破吳軍陣線，威鎮江東。",
-    "stealth": 42,
-    "strategy": 12,
-    "traits": [
-      "LR"
-    ],
-    "hp": 96,
-    "atk": 62,
-    "def": 0
-  },
-  {
     "id": "MAEDATOSHI",
     "name": "前田利家",
     "cat": "air",
     "cost": 1,
-    "tag": "輕裝游擊·側翼牽制",
+    "tag": "槍之又左·赤母衣突擊",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "朱柄長槍 + 赤母衣良駒",
-    "title": "槍之又左·赤母衣突擊",
-    "desc": "戰國著名猛將，織田信長親兵赤母衣眾筆頭，勇冠三軍，以超絕騎槍技術開創加賀百萬石祖業。",
-    "stealth": 36,
-    "strategy": 16,
-    "traits": [
-      "LR",
-      "CAS"
-    ],
-    "hp": 98,
-    "atk": 64,
-    "def": 0
+    "weapon": "朱柄長槍 + 赤母衣良駒"
   },
   {
     "id": "BAIQI",
@@ -492,6 +350,26 @@
     "weapon": "丈八蛇矛 + 烏金鐵環甲"
   },
   {
+    "id": "HOJO_UJIYASU",
+    "name": "北條氏康",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "相模之獅·小田原堅守",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "采配 + 太刀"
+  },
+  {
+    "id": "XIAHOU_DUN",
+    "name": "夏侯惇",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "魏之元勳·親冒矢石",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "環首刀 + 曹魏軍旗"
+  },
+  {
     "id": "TACHIBANAD",
     "name": "立花道雪",
     "cat": "armor",
@@ -532,26 +410,6 @@
     "weapon": "虎頭大金刀 + 粗鐵皮甲"
   },
   {
-    "id": "GAOSHUN",
-    "name": "高順",
-    "cat": "armor",
-    "cost": 3,
-    "tag": "陷陣營·鎧甲精整每戰必破",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "陷陣大盾 + 破甲長矛"
-  },
-  {
-    "id": "DIQING",
-    "name": "狄青",
-    "cat": "armor",
-    "cost": 3,
-    "tag": "面涅將軍·銅面浴血",
-    "flag": "🇨🇳",
-    "origin": "中國 · 北宋",
-    "weapon": "青銅鬼臉面具 + 神機長刀"
-  },
-  {
     "id": "SHIMAZUY",
     "name": "島津義弘",
     "cat": "armor",
@@ -562,6 +420,16 @@
     "weapon": "野太刀 + 黑漆塗二枚胴"
   },
   {
+    "id": "SUNJIAN",
+    "name": "孫堅",
+    "cat": "armor",
+    "cost": 4,
+    "tag": "江東猛虎·破董先鋒",
+    "flag": "🇨🇳",
+    "origin": "中國 · 東漢末",
+    "weapon": "古錠刀 + 虎頭戰盔"
+  },
+  {
     "id": "GYEBAEK",
     "name": "階伯",
     "cat": "armor",
@@ -570,16 +438,6 @@
     "flag": "🇰🇷",
     "origin": "韓國 · 百濟",
     "weapon": "百濟環首大刀 + 鐵鱗背心"
-  },
-  {
-    "id": "MENGGONG",
-    "name": "孟珙",
-    "cat": "armor",
-    "cost": 2,
-    "tag": "機動防禦大師·襄陽抗蒙",
-    "flag": "🇨🇳",
-    "origin": "中國 · 南宋",
-    "weapon": "荊襄重步盾 + 鎢鋼長槍"
   },
   {
     "id": "YANGYE",
@@ -640,120 +498,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "鐵環長刀 + 堅木大盾"
-  },
-  {
-    "id": "LIDIAN",
-    "name": "李典",
-    "cat": "armor",
-    "cost": 1,
-    "tag": "長者好學·步陣拒敵",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "環首刀 + 督戰令旗"
-  },
-  {
-    "id": "PANMEI",
-    "name": "潘美",
-    "cat": "armor",
-    "cost": 1,
-    "tag": "前沿甲士·肉盾肉搏",
-    "flag": "🇨🇳",
-    "origin": "中國 · 北宋",
-    "weapon": "北宋步兵大斧 + 鐵葉鎧",
-    "title": "開國沉毅·重步連環",
-    "desc": "北宋開國名將，平定南漢、南唐，太原圍城伐北漢，身經百戰重甲陣列堅如磐石。",
-    "stealth": 10,
-    "strategy": 18,
-    "traits": [
-      "HEAVY",
-      "APS"
-    ],
-    "hp": 118,
-    "atk": 38,
-    "def": 0.08
-  },
-  {
-    "id": "WANGPING",
-    "name": "王平",
-    "cat": "armor",
-    "cost": 1,
-    "tag": "西方上兵·蜀漢親衛",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "百煉剛刀 + 鐵鱗鎧",
-    "title": "沉勇善守·無當鐵壁",
-    "desc": "蜀漢名將，統無當飛軍，街亭之戰鳴鼓自守阻斷張郃，興勢之戰以弱制強大破十萬魏軍。",
-    "stealth": 14,
-    "strategy": 18,
-    "traits": [
-      "HEAVY",
-      "TRUE_AT"
-    ],
-    "hp": 124,
-    "atk": 40,
-    "def": 0.08
-  },
-  {
-    "id": "SANADA_NOB",
-    "name": "真田信之",
-    "cat": "armor",
-    "cost": 1,
-    "tag": "大鎧猛者·鬼神力氣",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "太刀 + 堅固黑漆甲",
-    "title": "信濃之守·固本金湯",
-    "desc": "戰國真田家長子，以沉穩堅毅著稱，砥石城堅壁清野，保全真田家松代藩百年基業。",
-    "stealth": 12,
-    "strategy": 20,
-    "traits": [
-      "HEAVY"
-    ],
-    "hp": 122,
-    "atk": 36,
-    "def": 0.08
-  },
-  {
-    "id": "NIWA",
-    "name": "丹羽長秀",
-    "cat": "armor",
-    "cost": 1,
-    "tag": "笹之才藏·插竹取首",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "朱漆長槍 + 胴丸重鎧",
-    "title": "米五郎左·重鎧如山",
-    "desc": "織田四天王之一，以治軍嚴謹沉著稱「米五郎左」，安土城普請與大陣防守無懈可擊。",
-    "stealth": 10,
-    "strategy": 18,
-    "traits": [
-      "HEAVY",
-      "APS"
-    ],
-    "hp": 120,
-    "atk": 38,
-    "def": 0.08
-  },
-  {
-    "id": "GANGCHO",
-    "name": "康兆",
-    "cat": "armor",
-    "cost": 1,
-    "tag": "尹瓘編軍·破胡重步",
-    "flag": "🇰🇷",
-    "origin": "韓國 · 高麗",
-    "weapon": "高麗劍車長矛 + 鎖子甲",
-    "title": "劍車鐵壁·高麗大將",
-    "desc": "高麗名將，創制覆鐵劍車重甲大陣，於通州正面硬撼契丹十萬鐵騎，力戰不屈。",
-    "stealth": 10,
-    "strategy": 14,
-    "traits": [
-      "HEAVY",
-      "TRUE_AT"
-    ],
-    "hp": 126,
-    "atk": 38,
-    "def": 0.08
   },
   {
     "id": "LIGUANG",
@@ -840,21 +584,10 @@
     "name": "李牧",
     "cat": "air_defense",
     "cost": 4,
-    "tag": "陳倉箭石·拒諸葛二十萬",
+    "tag": "破胡武安·萬矢連環",
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
-    "weapon": "趙國鐵角硬弓 + 破甲箭陣",
-    "title": "破胡武安·萬矢連環",
-    "desc": "戰國四大名將，以神射弓弩與車陣大破匈奴十餘萬騎，肥之戰與番吾之戰兩挫強秦，戰功卓絕。",
-    "stealth": 18,
-    "strategy": 26,
-    "traits": [
-      "AA_LONG",
-      "SAT"
-    ],
-    "hp": 184,
-    "atk": 86,
-    "def": 0
+    "weapon": "趙國鐵角硬弓 + 破甲箭陣"
   },
   {
     "id": "AKECHI",
@@ -891,21 +624,10 @@
     "name": "斛律光",
     "cat": "air_defense",
     "cost": 4,
-    "tag": "忠臣射聲·鎮衛海關",
+    "tag": "落雕都督·百步穿石",
     "flag": "🇨🇳",
     "origin": "中國 · 南北朝",
-    "weapon": "黑角落雕強弓 + 鐵羽鑿子箭",
-    "title": "落雕都督·百步穿石",
-    "desc": "北齊軍事支柱，號「落雕都督」，神射天下第一，臨陣射箭無不應弦而倒，生平百戰未嘗一敗。",
-    "stealth": 16,
-    "strategy": 22,
-    "traits": [
-      "AA_LONG",
-      "TRUE_AT"
-    ],
-    "hp": 188,
-    "atk": 88,
-    "def": 0
+    "weapon": "黑角落雕強弓 + 鐵羽鑿子箭"
   },
   {
     "id": "ZHANGHE",
@@ -922,21 +644,10 @@
     "name": "周亞夫",
     "cat": "air_defense",
     "cost": 3,
-    "tag": "巴郡老將·斷頭將軍",
+    "tag": "細柳嚴軍·強弩堅陣",
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
-    "weapon": "漢軍武剛弩 + 精鋼大箭",
-    "title": "細柳嚴軍·強弩堅陣",
-    "desc": "西漢名將條侯，細柳營號令嚴整「軍中聞將軍令不聞天子之詔」，平定七國之亂箭陣固若金湯。",
-    "stealth": 14,
-    "strategy": 24,
-    "traits": [
-      "AA_LONG",
-      "CIWS"
-    ],
-    "hp": 158,
-    "atk": 74,
-    "def": 0
+    "weapon": "漢軍武剛弩 + 精鋼大箭"
   },
   {
     "id": "ZONGZE",
@@ -953,42 +664,10 @@
     "name": "鳥居元忠",
     "cat": "air_defense",
     "cost": 3,
-    "tag": "頑固鐵壁·美濃鐵砲隊",
+    "tag": "三河武士·伏見鐵砲血戰",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "三河火繩槍 + 伏見箭矢",
-    "title": "三河武士·伏見鐵砲血戰",
-    "desc": "德川忠臣，伏見城以少數守軍搭配鐵砲長弓死守半月，拖住西軍四萬主力，壯烈殉節。",
-    "stealth": 12,
-    "strategy": 18,
-    "traits": [
-      "AA_LONG",
-      "CIWS"
-    ],
-    "hp": 160,
-    "atk": 72,
-    "def": 0
-  },
-  {
-    "id": "SHIMOTSUMA",
-    "name": "下間賴廉",
-    "cat": "air_defense",
-    "cost": 3,
-    "tag": "紀州狙擊·伏擊破敵",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "一向一揆鐵砲 + 佛號令旗",
-    "title": "石山軍配·門徒鐵砲總指揮",
-    "desc": "本願寺軍事總帥，組織石山合戰一向一揆鐵砲大陣，多次以三段連射重創織田信長大軍。",
-    "stealth": 16,
-    "strategy": 20,
-    "traits": [
-      "AA_LONG",
-      "SAT"
-    ],
-    "hp": 156,
-    "atk": 76,
-    "def": 0
+    "weapon": "三河火繩槍 + 伏見箭矢"
   },
   {
     "id": "CHOIMUSEON",
@@ -1005,251 +684,85 @@
     "name": "耿弇",
     "cat": "air_defense",
     "cost": 2,
-    "tag": "敦厚武勇·單手貫盾",
+    "tag": "雲台神將·圍城破援",
     "flag": "🇨🇳",
     "origin": "中國 · 東漢",
-    "weapon": "雲台強弩 + 破甲箭匣",
-    "title": "雲台神將·圍城破援",
-    "desc": "東漢雲台二十八將第四，連下四十六郡，精通強弩大陣與圍城打援，光武帝譽其戰功可比韓信。",
-    "stealth": 18,
-    "strategy": 20,
-    "traits": [
-      "AA_LONG"
-    ],
-    "hp": 126,
-    "atk": 62,
-    "def": 0
+    "weapon": "雲台強弩 + 破甲箭匣"
   },
   {
     "id": "PANGJUAN",
     "name": "龐涓",
-    "cat": "air_defense",
+    "cat": "support",
     "cost": 2,
-    "tag": "冀州勁弩·延津射張",
+    "tag": "魏武上將·馬陵伏誅",
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
-    "weapon": "魏武卒十二石大弩",
-    "title": "魏武上將·勁弩列陣",
-    "desc": "戰國魏國大將軍，統帥精銳魏武卒與強勁連弩，連克諸侯，威震中原。",
-    "stealth": 14,
-    "strategy": 20,
-    "traits": [
-      "AA_LONG",
-      "TRUE_AT"
-    ],
-    "hp": 130,
-    "atk": 64,
-    "def": 0
+    "weapon": "魏武卒十二石大弩"
   },
   {
     "id": "FENGYI",
     "name": "馮異",
     "cat": "air_defense",
     "cost": 2,
-    "tag": "步射精嫻·連珠百發",
+    "tag": "大樹將軍·巧設強弩",
     "flag": "🇨🇳",
     "origin": "中國 · 東漢",
-    "weapon": "大樹長弓 + 伏射箭列",
-    "title": "大樹將軍·巧設強弩",
-    "desc": "東漢開國名將大樹將軍，善於以險阻地形設伏弩大陣，崤底之戰大破赤眉主力。",
-    "stealth": 16,
-    "strategy": 22,
-    "traits": [
-      "AA_LONG",
-      "CIWS"
-    ],
-    "hp": 128,
-    "atk": 60,
-    "def": 0
+    "weapon": "大樹長弓 + 伏射箭列"
   },
   {
     "id": "ASAKURA_SOT",
     "name": "朝倉宗滴",
     "cat": "air_defense",
     "cost": 2,
-    "tag": "竹束馬防·三段連響",
+    "tag": "越前軍神·鐵砲先驅",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "越前早期火繩銃",
-    "title": "越前軍神·鐵砲先驅",
-    "desc": "越前朝倉家軍事支柱，九頭龍川大破三十萬一揆，晚年率先在實戰中裝備火繩槍連連告捷。",
-    "stealth": 14,
-    "strategy": 22,
-    "traits": [
-      "AA_LONG",
-      "CIWS"
-    ],
-    "hp": 128,
-    "atk": 62,
-    "def": 0
+    "weapon": "越前早期火繩銃"
   },
   {
     "id": "MATSUNAGA",
     "name": "松永久秀",
     "cat": "air_defense",
     "cost": 2,
-    "tag": "傳來初火·百步穿鎧",
+    "tag": "亂世梟雄·火藥大陣",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "南蠻炸藥引線 + 短鐵砲",
-    "title": "亂世梟雄·火藥大陣",
-    "desc": "戰國梟雄，最早在戰場大規模部署鐵砲與火藥炸裂戰術之大名，智勇機敏。",
-    "stealth": 16,
-    "strategy": 24,
-    "traits": [
-      "AA_LONG",
-      "SAT"
-    ],
-    "hp": 126,
-    "atk": 64,
-    "def": 0
-  },
-  {
-    "id": "MANCHONG",
-    "name": "滿寵",
-    "cat": "air_defense",
-    "cost": 1,
-    "tag": "元戎十矢·連發神機",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "折威守城弩 + 拒馬樁",
-    "title": "築城折威·伏弩拒吳",
-    "desc": "曹魏名將，合肥新城設計射程極遠之「折威弩」與伏擊陷阱，射殺吳軍大將大破孫權十萬大軍。",
-    "stealth": 16,
-    "strategy": 20,
-    "traits": [
-      "AA_LONG"
-    ],
-    "hp": 98,
-    "atk": 46,
-    "def": 0
+    "weapon": "南蠻炸藥引線 + 短鐵砲"
   },
   {
     "id": "TANDAOJI",
     "name": "檀道濟",
     "cat": "air_defense",
     "cost": 1,
-    "tag": "踏張神弩·遠貫重鎧",
+    "tag": "唱籌量沙·強弩退魏",
     "flag": "🇨🇳",
     "origin": "中國 · 南北朝",
-    "weapon": "宋軍神臂大弓 + 鐵羽矢",
-    "title": "唱籌量沙·強弩退魏",
-    "desc": "劉宋第一名將，唱籌量沙以退敵兵，以強弩大陣壓制北魏鐵騎，自豪「毀汝萬里長城」。",
-    "stealth": 14,
-    "strategy": 22,
-    "traits": [
-      "AA_LONG",
-      "CIWS"
-    ],
-    "hp": 100,
-    "atk": 46,
-    "def": 0
-  },
-  {
-    "id": "GENGGONG",
-    "name": "耿恭",
-    "cat": "air_defense",
-    "cost": 1,
-    "tag": "聽聲辨位·盲射鎖魂",
-    "flag": "🇨🇳",
-    "origin": "中國 · 東漢",
-    "weapon": "漢代漆角硬弩 + 毒鏃箭",
-    "title": "疏勒節烈·萬弩拒胡",
-    "desc": "東漢名將，疏勒城以毒箭硬弩連環射殺敵軍，率數百人堅守數月抗擊匈奴數萬，十三將士歸玉門。",
-    "stealth": 18,
-    "strategy": 16,
-    "traits": [
-      "AA_LONG"
-    ],
-    "hp": 96,
-    "atk": 48,
-    "def": 0
+    "weapon": "宋軍神臂大弓 + 鐵羽矢"
   },
   {
     "id": "KUANGZHANG",
     "name": "匡章",
     "cat": "air_defense",
     "cost": 1,
-    "tag": "機巧連發·矢如飛蝗",
+    "tag": "齊國元戎·垂沙破楚",
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
-    "weapon": "齊國臨淄強弩 + 箭陣纛旗",
-    "title": "齊國元戎·垂沙破楚",
-    "desc": "戰國齊國名將，統帥齊國萬弩之陣五國伐秦攻破函谷關，垂沙之役大破楚軍，威震列國。",
-    "stealth": 14,
-    "strategy": 22,
-    "traits": [
-      "AA_LONG",
-      "SAT"
-    ],
-    "hp": 98,
-    "atk": 46,
-    "def": 0
-  },
-  {
-    "id": "TSUDA_SAN",
-    "name": "津田算長",
-    "cat": "air_defense",
-    "cost": 1,
-    "tag": "鐵砲之里·散彈火網",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "津田流定制火繩槍",
-    "title": "銃術開山·根來射手",
-    "desc": "日本火繩槍術開創者，引進種子島火器並創立津田流銃術，使紀州鐵砲名揚天下。",
-    "stealth": 16,
-    "strategy": 18,
-    "traits": [
-      "AA_LONG"
-    ],
-    "hp": 96,
-    "atk": 48,
-    "def": 0
+    "weapon": "齊國臨淄強弩 + 箭陣纛旗"
   },
   {
     "id": "HONDA_TADATSUGU",
     "name": "本多忠次",
     "cat": "air_defense",
     "cost": 1,
-    "tag": "紀州鐵砲僧·神準狙射",
+    "tag": "鐵砲先鋒·三河老將",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "三河軍制鐵砲 + 火藥袋",
-    "title": "鐵砲先鋒·三河老將",
-    "desc": "德川家老將，本多忠勝之叔父，長篠之戰指揮三河足輕鐵砲輪射立下首功。",
-    "stealth": 14,
-    "strategy": 16,
-    "traits": [
-      "AA_LONG"
-    ],
-    "hp": 98,
-    "atk": 46,
-    "def": 0
-  },
-  {
-    "id": "MILYU",
-    "name": "密友",
-    "cat": "air_defense",
-    "cost": 1,
-    "tag": "密林偽裝·破甲伏殺",
-    "flag": "🇰🇷",
-    "origin": "韓國 · 高句麗",
-    "weapon": "高句麗白角獵弓 + 鐵鏃箭",
-    "title": "捨身挽弓·決死突圍",
-    "desc": "高句麗猛將，母丘儉伐高句麗之際，密友率死士引弓衝殺斬將突圍，救出東川王。",
-    "stealth": 20,
-    "strategy": 14,
-    "traits": [
-      "AA_LONG"
-    ],
-    "hp": 98,
-    "atk": 48,
-    "def": 0
+    "weapon": "三河軍制鐵砲 + 火藥袋"
   },
   {
     "id": "ZHOUYU",
     "name": "周瑜",
-    "cat": "naval",
+    "cat": "support",
     "cost": 5,
     "tag": "雅量江東·赤壁連環火",
     "flag": "🇨🇳",
@@ -1277,46 +790,14 @@
     "weapon": "海賊大太刀 + 安宅鐵甲船"
   },
   {
-    "id": "LIUYU",
-    "name": "劉裕",
-    "cat": "naval",
-    "cost": 5,
-    "tag": "陰平天降·奇兵直搗",
-    "flag": "🇨🇳",
-    "origin": "中國 · 南北朝",
-    "weapon": "天子神鋒劍 + 卻月水陸戰船",
-    "title": "氣吞萬里·卻月奇陣",
-    "desc": "宋武帝劉裕，金戈鐵馬氣吞萬里如虎！開創水陸聯動「卻月陣」殲滅北魏萬餘騎，南征北伐滅南燕後秦。",
-    "stealth": 32,
-    "strategy": 28,
-    "traits": [
-      "AMBUSH",
-      "AEGIS"
-    ],
-    "hp": 348,
-    "atk": 130,
-    "def": 0.12
-  },
-  {
     "id": "CHOSOKABE",
     "name": "長宗我部元親",
     "cat": "naval",
     "cost": 5,
-    "tag": "釣野伏·敵中突破先登",
+    "tag": "土佐之蝠·一領具足",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "長槍 + 一領具足兩棲甲",
-    "title": "土佐之蝠·一領具足",
-    "desc": "四國霸主，創立水陸兩棲「一領具足」強襲軍團，橫掃四國，海陸突襲所向披靡。",
-    "stealth": 36,
-    "strategy": 24,
-    "traits": [
-      "AMBUSH",
-      "SUB"
-    ],
-    "hp": 352,
-    "atk": 128,
-    "def": 0.12
+    "weapon": "長槍 + 一領具足兩棲甲"
   },
   {
     "id": "JANGPOGO",
@@ -1359,45 +840,14 @@
     "weapon": "火攻燃引火箭 + 艨艟衝角"
   },
   {
-    "id": "WANGJUN",
-    "name": "王濬",
+    "id": "JIANGWEI",
+    "name": "姜維",
     "cat": "naval",
     "cost": 4,
-    "tag": "樓船下蜀·千尋鐵鎖沉",
+    "tag": "天水麒麟·九伐奇謀",
     "flag": "🇨🇳",
-    "origin": "中國 · 晉朝",
-    "weapon": "連環大樓船 + 破鎖巨斧"
-  },
-  {
-    "id": "YANGSU",
-    "name": "楊素",
-    "cat": "naval",
-    "cost": 4,
-    "tag": "五牙巨艦·威平江南",
-    "flag": "🇨🇳",
-    "origin": "中國 · 隋朝",
-    "weapon": "五牙大艦拍竿 + 隋軍重劍"
-  },
-  {
-    "id": "ZUTI",
-    "name": "祖逖",
-    "cat": "naval",
-    "cost": 4,
-    "tag": "暴風渡海·急襲屋島",
-    "flag": "🇨🇳",
-    "origin": "中國 · 兩晉",
-    "weapon": "中流擊楫大劍 + 渡江快艇",
-    "title": "中流擊楫·北伐光復",
-    "desc": "東晉名將，聞雞起舞，中流擊楫誓復中原，率水陸先登健兒北渡長江收復黃河以南失地。",
-    "stealth": 30,
-    "strategy": 22,
-    "traits": [
-      "AMBUSH",
-      "ASW"
-    ],
-    "hp": 248,
-    "atk": 98,
-    "def": 0.08
+    "origin": "中國 · 三國",
+    "weapon": "天水綠沉長槍 + 蜀錦奇兵袍"
   },
   {
     "id": "MURAKAMI",
@@ -1414,42 +864,20 @@
     "name": "謝玄",
     "cat": "naval",
     "cost": 3,
-    "tag": "披甲持戟·首登破城",
+    "tag": "北府都督·淝水奇捷",
     "flag": "🇨🇳",
     "origin": "中國 · 兩晉",
-    "weapon": "北府精鋼斬馬刀 + 艨艟",
-    "title": "北府都督·淝水奇捷",
-    "desc": "東晉北府兵創立者，淝水之戰以八萬北府水陸奇兵過河突擊，大破前秦八十萬大軍。",
-    "stealth": 26,
-    "strategy": 26,
-    "traits": [
-      "AMBUSH",
-      "ASW"
-    ],
-    "hp": 196,
-    "atk": 82,
-    "def": 0.06
+    "weapon": "北府精鋼斬馬刀 + 艨艟"
   },
   {
     "id": "YUYUNWEN",
     "name": "虞允文",
     "cat": "naval",
     "cost": 3,
-    "tag": "黃天蕩阻擊·鐵索截江",
+    "tag": "采石折衝·書生大捷",
     "flag": "🇨🇳",
     "origin": "中國 · 南宋",
-    "weapon": "采石督師劍 + 海鰍踏浪船",
-    "title": "采石折衝·書生大捷",
-    "desc": "南宋名臣，采石磯戰役臨危督師，指揮樓船水軍以海鰍船水陸火攻大破完顏亮六十萬金軍。",
-    "stealth": 22,
-    "strategy": 28,
-    "traits": [
-      "AMBUSH",
-      "EW"
-    ],
-    "hp": 192,
-    "atk": 84,
-    "def": 0.06
+    "weapon": "采石督師劍 + 海鰍踏浪船"
   },
   {
     "id": "WEIYAN",
@@ -1466,21 +894,10 @@
     "name": "毛利元就",
     "cat": "naval",
     "cost": 3,
-    "tag": "大雨嚴島·夜度奇襲",
+    "tag": "西國謀神·嚴島水陸奇襲",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "一文字太刀 + 村上嚴島樓船",
-    "title": "西國謀神·嚴島水陸奇襲",
-    "desc": "日本戰國第一智將，嚴島之戰暴風雨夜水陸奇襲陶晴賢兩萬大軍，三矢之訓一統中國地方。",
-    "stealth": 32,
-    "strategy": 30,
-    "traits": [
-      "SUB",
-      "AMBUSH"
-    ],
-    "hp": 194,
-    "atk": 82,
-    "def": 0.06
+    "weapon": "一文字太刀 + 村上嚴島樓船"
   },
   {
     "id": "HATTORI",
@@ -1503,24 +920,24 @@
     "weapon": "高麗火銃銅管 + 海上長矛"
   },
   {
-    "id": "JIANGQIN",
-    "name": "蔣欽",
+    "id": "YUEJIN",
+    "name": "樂進",
     "cat": "naval",
     "cost": 2,
-    "tag": "濡須遏浪·先登力戰",
+    "tag": "五子良將·每戰先登",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "吳水師重矛 + 護手短刀"
+    "weapon": "短柄破城大斧 + 先登飛爪"
   },
   {
-    "id": "DONGXI",
-    "name": "董襲",
+    "id": "MENGHUO",
+    "name": "孟獲",
     "cat": "naval",
     "cost": 2,
-    "tag": "濡須斷鎖·死守巨艦",
+    "tag": "南中夷王·象甲藤兵",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "斬索雙斧 + 樓船重甲"
+    "weapon": "南中神木三叉戟 + 獸皮生藤甲"
   },
   {
     "id": "DINGFENG",
@@ -1533,210 +950,64 @@
     "weapon": "雪夜白刃 + 短皮小盾"
   },
   {
-    "id": "LUFAN",
-    "name": "呂範",
+    "id": "XUHUANG",
+    "name": "徐晃",
     "cat": "naval",
     "cost": 2,
-    "tag": "生牛皮蒙衝·破浪撞擊",
+    "tag": "長驅直入·聲東破陣",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "東吳督軍古錠刀 + 巨艦",
-    "title": "水軍前部·江表巨艦",
-    "desc": "東吳名將大司馬，統水軍前部督率五艦大拒曹丕大軍於洞口，風濤之中沉著破敵。",
-    "stealth": 24,
-    "strategy": 18,
-    "traits": [
-      "AMBUSH",
-      "ASW"
-    ],
-    "hp": 142,
-    "atk": 68,
-    "def": 0.04
+    "weapon": "宣花開山大斧 + 破陣鎧"
   },
   {
     "id": "WAKIZAKA",
     "name": "脇坂安治",
     "cat": "naval",
     "cost": 2,
-    "tag": "水遁暗殺·鑿穿舟底",
+    "tag": "賤岳槍名·淡路水軍首領",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "賤岳長槍 + 淡路戰船",
-    "title": "賤岳槍名·淡路水軍首領",
-    "desc": "賤岳七本槍之一，淡路水軍頭領，關原之戰機敏調度，兼備陸戰與海戰將才。",
-    "stealth": 26,
-    "strategy": 16,
-    "traits": [
-      "AMBUSH"
-    ],
-    "hp": 144,
-    "atk": 66,
-    "def": 0.04
+    "weapon": "賤岳長槍 + 淡路戰船"
   },
   {
     "id": "TOUDO",
     "name": "藤堂高虎",
     "cat": "naval",
     "cost": 2,
-    "tag": "一番隊先登·神速登陸",
+    "tag": "水軍大將·築城宗師",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "築城大銃 + 水軍旗艦",
-    "title": "水軍大將·築城宗師",
-    "desc": "戰國名將，掌管德川家水軍大陣，築城與水陸攻防皆臻極致，歷事七主終成一方霸主。",
-    "stealth": 24,
-    "strategy": 22,
-    "traits": [
-      "AMBUSH",
-      "EW"
-    ],
-    "hp": 146,
-    "atk": 66,
-    "def": 0.04
+    "weapon": "築城大銃 + 水軍旗艦"
   },
   {
-    "id": "ZHUHUAN",
-    "name": "朱桓",
+    "id": "SHAMOKE",
+    "name": "沙摩柯",
     "cat": "naval",
     "cost": 1,
-    "tag": "水底無聲·龍骨鑿穿",
+    "tag": "五溪蠻王·鐵蒺首登",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "佩刀 + 濡須防禦柵船",
-    "title": "濡須水壁·以寡敵眾",
-    "desc": "東吳名將，濡須塢以五千水陸精兵抵擋曹仁大軍，斬將破城以寡敵眾。",
-    "stealth": 26,
-    "strategy": 18,
-    "traits": [
-      "AMBUSH"
-    ],
-    "hp": 98,
-    "atk": 48,
-    "def": 0
+    "weapon": "鐵蒺藜骨朵 + 蠻夷硬角弓"
   },
   {
     "id": "HEQI",
     "name": "賀齊",
     "cat": "naval",
     "cost": 1,
-    "tag": "短兵相接·首登奪旗",
+    "tag": "艨艟華彩·百越先登",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "精鋼短戟 + 先登皮鎧",
-    "title": "艨艟華彩·百越先登",
-    "desc": "東吳名將，戰船艨艟精工甲刃照耀江面，每戰必先登陷陣，平定山越威震江東。",
-    "stealth": 24,
-    "strategy": 16,
-    "traits": [
-      "AMBUSH",
-      "ASW"
-    ],
-    "hp": 100,
-    "atk": 46,
-    "def": 0
+    "weapon": "精鋼短戟 + 先登皮鎧"
   },
   {
     "id": "CAOBIN",
     "name": "曹彬",
     "cat": "naval",
     "cost": 1,
-    "tag": "風蕭蕭兮·圖窮匕見",
+    "tag": "渡江名帥·不殺仁將",
     "flag": "🇨🇳",
     "origin": "中國 · 北宋",
-    "weapon": "北宋大纛軍刀 + 浮橋長索",
-    "title": "渡江名帥·不殺仁將",
-    "desc": "北宋開國第一良將，採石磯架設浮橋大渡長江擊破南唐水軍，平江南不妄殺一人。",
-    "stealth": 20,
-    "strategy": 22,
-    "traits": [
-      "AMBUSH",
-      "EW"
-    ],
-    "hp": 102,
-    "atk": 44,
-    "def": 0
-  },
-  {
-    "id": "WANGBA",
-    "name": "王霸",
-    "cat": "naval",
-    "cost": 1,
-    "tag": "魚腸古劍·近身暗刺",
-    "flag": "🇨🇳",
-    "origin": "中國 · 東漢",
-    "weapon": "精鐵破陣矛 + 護臂甲",
-    "title": "昆陽先登·破敵無前",
-    "desc": "東漢雲台二十八將，昆陽之戰率敢死先登直衝王莽中軍大旗，屢破強敵。",
-    "stealth": 26,
-    "strategy": 14,
-    "traits": [
-      "AMBUSH"
-    ],
-    "hp": 98,
-    "atk": 48,
-    "def": 0
-  },
-  {
-    "id": "KUKI_MORI",
-    "name": "九鬼守隆",
-    "cat": "naval",
-    "cost": 1,
-    "tag": "紀州小艇·狼群蜂擁",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "水軍大薙刀 + 快船",
-    "title": "志摩水軍·大坂破水",
-    "desc": "九鬼嘉隆之子，繼承志摩鐵甲水軍總帥，大坂之戰指揮水軍突破木津川大立戰功。",
-    "stealth": 22,
-    "strategy": 16,
-    "traits": [
-      "AMBUSH"
-    ],
-    "hp": 98,
-    "atk": 48,
-    "def": 0
-  },
-  {
-    "id": "MIURA",
-    "name": "三浦義澄",
-    "cat": "naval",
-    "cost": 1,
-    "tag": "密林潛伏·毒刃夜襲",
-    "flag": "🇯🇵",
-    "origin": "日本 · 源平",
-    "weapon": "三浦水軍太刀 + 小早船",
-    "title": "相模水軍·壇之浦先驅",
-    "desc": "源平合戰相模三浦水軍總帥，壇之浦海戰率大船隊先登衝陣，全殲平氏水軍。",
-    "stealth": 26,
-    "strategy": 14,
-    "traits": [
-      "AMBUSH",
-      "SUB"
-    ],
-    "hp": 96,
-    "atk": 48,
-    "def": 0
-  },
-  {
-    "id": "BAEJEONG",
-    "name": "裴仲孫",
-    "cat": "naval",
-    "cost": 1,
-    "tag": "濟州健兒·弄潮搏殺",
-    "flag": "🇰🇷",
-    "origin": "韓國 · 高麗",
-    "weapon": "高麗水軍長刀 + 木板護船",
-    "title": "三別抄元帥·珍島抗擊",
-    "desc": "高麗三別抄水陸軍隊總帥，以珍島為基地統領千艘戰船海陸游擊抵抗蒙古大軍。",
-    "stealth": 28,
-    "strategy": 16,
-    "traits": [
-      "AMBUSH",
-      "ASW"
-    ],
-    "hp": 98,
-    "atk": 46,
-    "def": 0
+    "weapon": "北宋大纛軍刀 + 浮橋長索"
   },
   {
     "id": "ZHUGELIANG",
@@ -1779,6 +1050,26 @@
     "weapon": "宣帝佩劍 + 陣列令旗"
   },
   {
+    "id": "TOYOTOMI",
+    "name": "豐臣秀吉",
+    "cat": "support",
+    "cost": 5,
+    "tag": "太閤天下·統一大將",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "采配 + 陣太刀"
+  },
+  {
+    "id": "CAOCAO",
+    "name": "曹操",
+    "cat": "support",
+    "cost": 5,
+    "tag": "亂世雄略·官渡制勝",
+    "flag": "🇨🇳",
+    "origin": "中國 · 東漢末／三國",
+    "weapon": "環首刀 + 丞相令旗"
+  },
+  {
     "id": "HANBEI",
     "name": "竹中半兵衛",
     "cat": "support",
@@ -1797,16 +1088,6 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "合子形兜 + 水攻策圖卷"
-  },
-  {
-    "id": "GANGGAMCHAN",
-    "name": "姜邯贊",
-    "cat": "support",
-    "cost": 5,
-    "tag": "龜州大捷·以水代兵",
-    "flag": "🇰🇷",
-    "origin": "韓國 · 高麗",
-    "weapon": "高麗宰相笏板 + 水攻令旗"
   },
   {
     "id": "SUNBIN",
@@ -1869,24 +1150,14 @@
     "weapon": "夷陵火計箭符 + 吳都督佩劍"
   },
   {
-    "id": "MASASHIGE",
-    "name": "楠木正成",
+    "id": "SHIMAZU_YOSHIHISA",
+    "name": "島津義久",
     "cat": "support",
     "cost": 4,
-    "tag": "軍神大謀·千早城智守",
+    "tag": "薩摩之雄·九州統帥",
     "flag": "🇯🇵",
-    "origin": "日本 · 南北朝",
-    "weapon": "菊水紋旗 + 守城落石機巧"
-  },
-  {
-    "id": "SEOHUI",
-    "name": "徐熙",
-    "cat": "support",
-    "cost": 4,
-    "tag": "唇槍舌劍·不戰屈兵",
-    "flag": "🇰🇷",
-    "origin": "韓國 · 高麗",
-    "weapon": "高麗國書 + 談判舌鋒卷軸"
+    "origin": "日本 · 戰國",
+    "weapon": "采配 + 島津家旗印"
   },
   {
     "id": "PANGTONG",
@@ -1909,36 +1180,6 @@
     "weapon": "定軍指旗 + 蜀川圖誌"
   },
   {
-    "id": "CHENGONG",
-    "name": "陳宮",
-    "cat": "support",
-    "cost": 3,
-    "tag": "剛直智計·下邳奇計",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "下邳布防圖 + 智囊拂塵"
-  },
-  {
-    "id": "WEIXIAOKUAN",
-    "name": "韋孝寬",
-    "cat": "support",
-    "cost": 3,
-    "tag": "玉璧守城·地道神算",
-    "flag": "🇨🇳",
-    "origin": "中國 · 南北朝",
-    "weapon": "玉璧守備圖 + 掘地聽甕"
-  },
-  {
-    "id": "SESSAI",
-    "name": "太原雪齋",
-    "cat": "support",
-    "cost": 3,
-    "tag": "今川黑衣宰相·三國同盟",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "臨濟宗念珠 + 三國同盟盟約"
-  },
-  {
     "id": "SANADAMASA",
     "name": "真田昌幸",
     "cat": "support",
@@ -1947,16 +1188,6 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "上田城地圖 + 誘敵令旗"
-  },
-  {
-    "id": "TAKAKAGE",
-    "name": "小早川隆景",
-    "cat": "support",
-    "cost": 3,
-    "tag": "毛利兩川·智慮深沉",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "毛利三箭令 + 陣羽織"
   },
   {
     "id": "LUSU",
@@ -1969,60 +1200,9 @@
     "weapon": "榻上策竹簡 + 結盟令劍"
   },
   {
-    "id": "CHENGYU",
-    "name": "程昱",
-    "cat": "support",
-    "cost": 2,
-    "tag": "剛戾深謀·十面設伏",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "十面埋伏符 + 籌糧算盤"
-  },
-  {
-    "id": "FANLI",
-    "name": "范蠡",
-    "cat": "support",
-    "cost": 2,
-    "tag": "東興大捷·乘雪大破",
-    "flag": "🇨🇳",
-    "origin": "中國 · 春秋",
-    "weapon": "范蠡兵策竹簡 + 越王佩劍",
-    "title": "臥薪嘗膽·興越滅吳",
-    "desc": "春秋著名軍事家與謀略宗師，輔佐越王勾踐制定二十年滅吳戰略，廟算深沉長策制勝。",
-    "stealth": 36,
-    "strategy": 26,
-    "traits": [
-      "EW",
-      "SEAD"
-    ],
-    "hp": 118,
-    "atk": 56,
-    "def": 0
-  },
-  {
-    "id": "NAOIE",
-    "name": "宇喜多直家",
-    "cat": "support",
-    "cost": 2,
-    "tag": "暗殺暗略·備前梟雄",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "毒匕暗器 + 離間密函"
-  },
-  {
-    "id": "EKEI",
-    "name": "安國寺惠瓊",
-    "cat": "support",
-    "cost": 2,
-    "tag": "外交僧侶·精準斷命",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "僧袍袈裟 + 各國密卷"
-  },
-  {
     "id": "TIANDAN",
     "name": "田單",
-    "cat": "support",
+    "cat": "naval",
     "cost": 1,
     "tag": "火牛奇陣·齊國破燕",
     "flag": "🇨🇳",
@@ -2030,127 +1210,43 @@
     "weapon": "火牛蘆葦火把 + 衝角雙刃"
   },
   {
+    "id": "LIUBOWEN",
+    "name": "劉伯溫",
+    "cat": "support",
+    "cost": 4,
+    "tag": "神機妙算·佐明開國",
+    "flag": "🇨🇳",
+    "origin": "中國 · 明初",
+    "weapon": "軍師羽扇 + 明軍令旗"
+  },
+  {
     "id": "SUNWU",
     "name": "孫武",
     "cat": "support",
     "cost": 1,
-    "tag": "劉曄神算·巨石破樓",
+    "tag": "兵聖大宗·知彼知己",
     "flag": "🇨🇳",
     "origin": "中國 · 春秋",
-    "weapon": "孫子兵法十三篇 + 吳王授鉞",
-    "title": "兵聖大宗·知彼知己",
-    "desc": "春秋兵聖，著《孫子兵法》十三篇，輔佐吳王五戰五捷攻入郢都大破強楚，天下兵家之始祖。",
-    "stealth": 40,
-    "strategy": 30,
-    "traits": [
-      "EW",
-      "SPOT"
-    ],
-    "hp": 88,
-    "atk": 46,
-    "def": 0
+    "weapon": "孫子兵法十三篇 + 吳王授鉞"
   },
   {
     "id": "LEYI",
     "name": "樂毅",
     "cat": "support",
     "cost": 1,
-    "tag": "狼煙四起·火控標定",
+    "tag": "昌國拔城·連克七十",
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
-    "weapon": "昌國君佩劍 + 五國聯軍令旗",
-    "title": "昌國拔城·連克七十",
-    "desc": "戰國名將，拜為燕昭王上將軍，率五國聯軍濟西破齊，半年連克齊國七十餘城，算無遺策。",
-    "stealth": 36,
-    "strategy": 26,
-    "traits": [
-      "EW",
-      "SEAD"
-    ],
-    "hp": 86,
-    "atk": 48,
-    "def": 0
-  },
-  {
-    "id": "CHENTANG",
-    "name": "陳湯",
-    "cat": "support",
-    "cost": 1,
-    "tag": "犯強漢者·假節出奇",
-    "flag": "🇨🇳",
-    "origin": "中國 · 西漢",
-    "weapon": "漢節虎符 + 西域長戈"
-  },
-  {
-    "id": "MASANOBU",
-    "name": "本多正信",
-    "cat": "support",
-    "cost": 1,
-    "tag": "德川智囊·佐渡守陰謀",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "佐渡守印信 + 密謀折扇"
-  },
-  {
-    "id": "YAMAMOTO",
-    "name": "山本勘助",
-    "cat": "support",
-    "cost": 1,
-    "tag": "密林潛聽·敵情盡收",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "軍配團扇 + 築城陣圖",
-    "title": "啄木鳥智謀·晴幸軍師",
-    "desc": "武田信玄傳奇軍師，精通築城、陣形與奇謀，獻「啄木鳥戰法」揚名川中島。",
-    "stealth": 38,
-    "strategy": 26,
-    "traits": [
-      "EW",
-      "SPOT"
-    ],
-    "hp": 86,
-    "atk": 46,
-    "def": 0
-  },
-  {
-    "id": "KIMBUSHIK",
-    "name": "金富軾",
-    "cat": "support",
-    "cost": 1,
-    "tag": "巨石破壘·摧枯拉朽",
-    "flag": "🇰🇷",
-    "origin": "韓國 · 高麗",
-    "weapon": "高麗宰相令旗 + 筆牘",
-    "title": "平亂元戎·三國史策",
-    "desc": "高麗名相兼統帥，指揮官軍平定妙清西京叛亂，著《三國史記》，文治武略兼備。",
-    "stealth": 30,
-    "strategy": 24,
-    "traits": [
-      "EW"
-    ],
-    "hp": 90,
-    "atk": 44,
-    "def": 0
+    "weapon": "昌國君佩劍 + 五國聯軍令旗"
   },
   {
     "id": "TOKUGAWA",
     "name": "德川家康",
     "cat": "support",
     "cost": 1,
-    "tag": "金鼓齊鳴·三軍奮勇",
+    "tag": "三河忍耐·天下霸業",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
-    "weapon": "葵紋軍配 + 三河統帥刀",
-    "title": "三河忍耐·天下霸業",
-    "desc": "戰國三傑之一，沉著隱忍，關原之戰與大坂之戰運籌帷幄決勝千里，開創江戶幕府二百六十年基業。",
-    "stealth": 36,
-    "strategy": 28,
-    "traits": [
-      "EW",
-      "SEAD"
-    ],
-    "hp": 88,
-    "atk": 46,
-    "def": 0
+    "weapon": "葵紋軍配 + 三河統帥刀"
   }
 ]

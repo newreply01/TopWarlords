@@ -30,6 +30,7 @@ try:
 <head><meta charset="utf-8"></head>
 <body>
 <script src="http://localhost:{PORT}/js/data.js"></script>
+<script src="http://localhost:{PORT}/js/ladder-data.js"></script>
 <script src="http://localhost:{PORT}/js/engine.js"></script>
 <script src="http://localhost:{PORT}/js/online-pvp.js"></script>
 </body>
@@ -47,8 +48,62 @@ try:
             const units = (typeof UNITS !== 'undefined') ? UNITS : window.UNITS;
             const unitMap = (typeof UNIT_MAP !== 'undefined') ? UNIT_MAP : window.UNIT_MAP;
 
-            if (!units || units.length !== 164) {
-                errs.push('UNITS 數量不為 164，當前：' + (units ? units.length : 0));
+            if (!units || units.length !== 125) {
+                errs.push('UNITS 數量不為 125，當前：' + (units ? units.length : 0));
+            }
+            const categoryCounts = Object.fromEntries(
+                ['air', 'armor', 'air_defense', 'naval', 'support'].map(cat =>
+                    [cat, units.filter(unit => unit.cat === cat).length]
+                )
+            );
+            if (Object.values(categoryCounts).some(count => count !== 25)) {
+                errs.push('五大兵團未各有 25 位：' + JSON.stringify(categoryCounts));
+            }
+            if (!window.LADDER_PRESETS || window.LADDER_PRESETS.length !== 100) {
+                errs.push('天梯預設軍團數量錯誤');
+            } else {
+                for (const preset of window.LADDER_PRESETS) {
+                    const presetCats = preset.deck.map(id => unitMap[id]?.cat);
+                    if (presetCats.length !== 5 || presetCats.some(cat => !cat) || new Set(presetCats).size !== 5) {
+                        errs.push('天梯預設陣容不完整或引用無效武將：' + preset.id);
+                    }
+                }
+            }
+            for (const template of TEMPLATES) {
+                for (const id of template.ids) {
+                    if (!unitMap[id]) errs.push('陣容範本引用無效武將：' + id);
+                }
+            }
+            for (const [id, flag] of [
+                ['TOYOTOMI', '🇯🇵'],
+                ['HOJO_UJIYASU', '🇯🇵'],
+                ['SHIMAZU_YOSHIHISA', '🇯🇵'],
+                ['CAOCAO', '🇨🇳'],
+                ['XIAHOU_DUN', '🇨🇳']
+            ]) {
+                if (!unitMap || !unitMap[id] || unitMap[id].flag !== flag) {
+                    errs.push('新增名將缺漏或國籍錯誤：' + id);
+                }
+            }
+            if (unitMap.CAOCAO && (unitMap.CAOCAO.cost !== 5 || unitMap.CAOCAO.cat !== 'support')) {
+                errs.push('曹操定位錯誤');
+            }
+            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 4 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
+                errs.push('夏侯惇定位錯誤');
+            }
+            for (const [id, cat] of [['ZHOUYU', 'support'], ['PANGJUAN', 'support'], ['TIANDAN', 'naval'], ['SUNCE', 'air'], ['SUNJIAN', 'armor'], ['LIUBOWEN', 'support']]) {
+                if (!unitMap[id] || unitMap[id].cat !== cat) errs.push(id + ' 分類錯誤或缺漏');
+            }
+            const removedIds = [
+                'FUMA', 'KEIJI', 'OBATA', 'HULU', 'ZANGBA', 'CAOZHANG', 'DIQING', 'LIDIAN', 'PANMEI', 'NIWA',
+                'LIUYU', 'YANGSU', 'CHENTANG', 'WEIXIAOKUAN', 'SEOHUI', 'KIMBUSHIK', 'EKEI', 'MASANOBU',
+                'FANLI', 'CHENGYU', 'YAMAMOTO', 'NAOIE', 'SESSAI', 'MASASHIGE', 'WENPING', 'QUYI', 'CAOZHEN',
+                'CAOCHUN', 'MENGGONG', 'ZUTI', 'GAOSHUN', 'MANCHONG', 'YUWENTAI', 'GANGCHO', 'SANADA_NOB',
+                'WANGPING', 'MILYU', 'TSUDA_SAN', 'GENGGONG', 'SHIMOTSUMA', 'WANGBA', 'KUKI_MORI', 'MIURA',
+                'BAEJEONG', 'TAKAKAGE', 'CHENGONG', 'GANGGAMCHAN'
+            ];
+            for (const id of removedIds) {
+                if (unitMap[id]) errs.push('已移除武將仍存在：' + id);
             }
             if (!unitMap || !unitMap['ZHUGELIANG']) {
                 errs.push('找不到 諸葛亮 (ZHUGELIANG)');
@@ -77,8 +132,7 @@ try:
             if (!battle || !battle.winner) errs.push('戰鬥推演無結果');
             if (!battle.vp || !battle.vp.A || !battle.vp.B) errs.push('VP 結算失敗');
 
-            const formationCats = ['air', 'armor', 'air_defense', 'naval', 'support'];
-            const formationDeck = formationCats.map(cat => units.find(unit => unit.cat === cat).id);
+            const formationDeck = ['HUO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'];
             const neutralFormations = Array(5).fill('fishscale');
             const gooseBattle = resolveBattle(formationDeck, formationDeck, {
                 seed: 0,
@@ -103,8 +157,9 @@ try:
                 errs.push('一般陣形未產生戰鬥俘虜事件');
             }
 
-            const craneBattle = resolveBattle(formationDeck, formationDeck, {
-                seed: 10,
+            const craneDeck = ['HUO', 'XIANGYU', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'];
+            const craneBattle = resolveBattle(craneDeck, craneDeck, {
+                seed: 16,
                 formationsA: ['fishscale', 'crane', 'fishscale', 'fishscale', 'fishscale'],
                 formationsB: neutralFormations
             });
@@ -210,7 +265,7 @@ try:
         }""")
 
         assert len(res["errs"]) == 0, f"推演測試失敗: {res['errs']}"
-        print("[PASS] 1. 164 位日韓中純歷史名將全鑑載入成功：共", res["unitCount"], "位")
+        print("[PASS] 1. 125 位日韓中歷史名將全鑑載入成功：共", res["unitCount"], "位")
         print("[PASS] 2. 諸葛亮定位成功驗證：", res["zhugeLiang"]["name"], f"(${res['zhugeLiang']['cost']} {res['zhugeLiang']['cat']}) 稱號: {res['zhugeLiang']['tag']}")
         print("[PASS] 3. 隨機合法隊伍生成通過：")
         print("   隊伍 A:", " / ".join(res["deckA"]))

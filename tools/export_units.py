@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import json, re
+from pathlib import Path
 
-with open('D:/TopWarlords/js/data.js', 'r', encoding='utf-8') as f:
+ROOT = Path(__file__).resolve().parents[1]
+
+with (ROOT / 'js' / 'data.js').open('r', encoding='utf-8') as f:
     text = f.read()
 
 # 擷取 RAW_UNITS 列表
-raw_matches = re.findall(r'\[\s*"([A-Z0-9_]+)"\s*,\s*"([^"]+)"\s*,\s*\'([a-z_]+)\'\s*,\s*(\d+)\s*,\s*\'([A-H])\'\s*,\s*"([^"]+)"', text)
+raw_matches = re.findall(r'\[\s*"([A-Z0-9_]+)"\s*,\s*"([^"]+)"\s*,\s*\'([a-z_]+)\'\s*,\s*(\d+)\s*,\s*\'([A-Z])\'\s*,\s*"([^"]+)"', text)
 print(f"Total units in data.js: {len(raw_matches)}")
 
 # 擷取 UNIT_META
@@ -31,8 +34,7 @@ for uid, name, cat, cost, variant, tag in raw_matches:
         'weapon': meta['weapon']
     })
 
-with open('D:/TopWarlords/tools/all_units.json', 'w', encoding='utf-8') as f:
+with (ROOT / 'tools' / 'all_units.json').open('w', encoding='utf-8') as f:
     json.dump(units_data, f, ensure_ascii=False, indent=2)
 
 print(f"Exported {len(units_data)} units to all_units.json")
-

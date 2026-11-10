@@ -37,6 +37,7 @@ const Battle3DEngine = (function () {
   let camera = null;
   let renderer = null;
   let animFrameId = null;
+  let isAnimationPaused = false;
   let isInitialized = false;
   let isLowPowerDevice = false;
   let lastTimestamp = 0;
@@ -2381,12 +2382,12 @@ const Battle3DEngine = (function () {
      8. 主渲染與骨骼動畫更新迴圈
      ---------------------------------------------------- */
   function startAnimationLoop() {
+    if (isAnimationPaused) return;
     if (animFrameId) cancelAnimationFrame(animFrameId);
 
     function animate(now) {
       animFrameId = requestAnimationFrame(animate);
       if (!isEnabled) return;
-      if (now - lastTimestamp < 1000 / 30) return;
       const dt = Math.min(0.05, Math.max(0.001, (now - lastTimestamp) / 1000));
       lastTimestamp = now;
       const elapsed = now * 0.001;
@@ -2561,6 +2562,16 @@ const Battle3DEngine = (function () {
     animate(performance.now());
   }
 
+  function pauseAnimationLoop(paused = true) {
+    isAnimationPaused = Boolean(paused);
+    if (isAnimationPaused && animFrameId) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    } else if (!isAnimationPaused && isInitialized && !animFrameId) {
+      startAnimationLoop();
+    }
+  }
+
   function clearAllTokens() {
     unitsMap.forEach((t) => {
       if (scene && t.mesh) scene.remove(t.mesh);
@@ -2604,6 +2615,7 @@ const Battle3DEngine = (function () {
     return {
       isInitialized,
       isEnabled,
+      animationPaused: isAnimationPaused,
       modelsTotal: Object.keys(MODEL_MANIFEST).length,
       modelsLoaded: modelsLoadedCount,
       plinthCount: unitsMap.size,
@@ -2637,6 +2649,7 @@ const Battle3DEngine = (function () {
     loadBattle,
     playEvent,
     beginFinalCharge,
+    pauseAnimationLoop,
     toggleMode,
     clearAllTokens,
     resetCamera,

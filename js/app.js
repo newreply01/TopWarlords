@@ -4256,6 +4256,7 @@ async function showBattle(res, opts = {}) {
     if (c3d && typeof Battle3DEngine !== 'undefined') {
       Battle3DEngine.init(c3d);
       Battle3DEngine.loadBattle(res);
+      Battle3DEngine.pauseAnimationLoop(false);
     }
   } catch (e3d) {
     console.warn('Battle3DEngine init warning:', e3d);
@@ -5049,6 +5050,7 @@ $('#btnSpeed').onclick = () => {
 };
 
 function enterBattlefieldReviewState() {
+  if (typeof Battle3DEngine !== 'undefined') Battle3DEngine.pauseAnimationLoop(true);
   if ($('#btnPause')) $('#btnPause').hidden = true;
   if ($('#btnSpeed')) $('#btnSpeed').hidden = true;
   if ($('#btnSkip')) $('#btnSkip').hidden = true;

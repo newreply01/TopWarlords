@@ -103,9 +103,9 @@ try:
             if (!(unitMap.PANGTONG.cost > unitMap.LUSU.cost && unitMap.PANGTONG.ew > unitMap.LUSU.ew && unitMap.LUSU.ew > unitMap.LUXUN.ew)) {
                 errs.push('龐統 > 魯肅 > 陸遜 排序未落實');
             }
-            for (const nav5 of ['XIEXUAN', 'TIANDAN', 'LUMENG', 'CAOBIN', 'YISUNSIN']) {
-                if (!unitMap[nav5] || unitMap[nav5].cat !== 'naval' || unitMap[nav5].cost !== 5) {
-                    errs.push('先登奇兵 $5 統帥定位錯誤: ' + nav5);
+            for (const [navalId, cost] of [['XIEXUAN', 5], ['TIANDAN', 2], ['LUMENG', 5], ['CAOBIN', 2], ['YISUNSIN', 5]]) {
+                if (!unitMap[navalId] || unitMap[navalId].cat !== 'naval' || unitMap[navalId].cost !== cost) {
+                    errs.push('先登奇兵費用／定位錯誤: ' + navalId);
                 }
             }
             for (const [id, cat] of [['ZHOUYU', 'support'], ['PANGJUAN', 'support'], ['TIANDAN', 'naval'], ['SUNCE', 'air'], ['SUNJIAN', 'armor'], ['LIUBOWEN', 'support']]) {

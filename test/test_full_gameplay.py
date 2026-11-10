@@ -134,7 +134,7 @@ try:
         page.locator("#btnRand").click()
         page.wait_for_function("() => !document.querySelector('#btnGo').disabled", timeout=5000)
         page.locator("#btnGo").click()
-        page.wait_for_function("() => !document.querySelector('#viewBattle').hidden", timeout=5000)
+        assert not page.locator("#viewBattle").evaluate("el => el.hidden"), "Second battle did not open"
         page.locator("#btnSkip").click()
         page.wait_for_selector("#rReview", state="visible", timeout=10000)
         page.locator("#rReview").click()

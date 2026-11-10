@@ -127,6 +127,8 @@ try:
 
         # 點擊跳過秒速完成結算
         page.evaluate("() => document.querySelector('#btnSkip').click()")
+        page.wait_for_function("() => Battle3DEngine.getDebugState().animationPaused", timeout=5000)
+        assert page.locator("#rReview").is_visible(), "Battle result report did not render after skip"
         time.sleep(0.5)
         print("[TEST 7] 戰鬥秒速結算完成！")
 
@@ -166,16 +168,14 @@ try:
         assert mobile.locator('#teamB').is_visible(), 'Enemy roster panel did not open'
         mobile.locator('[data-battle-panel="log"]').click()
         assert mobile.locator('.log-col').is_visible(), 'Battle log panel did not open'
-        try:
-            mobile.wait_for_selector("#battle3DCanvas canvas", timeout=8000)
-        except Exception as error:
-            mobile_state = mobile.evaluate("""() => ({
-                battleVisible: !document.querySelector('#viewBattle').hidden,
-                containerSize: [document.querySelector('#battle3DCanvas').clientWidth, document.querySelector('#battle3DCanvas').clientHeight],
-                webgl: Boolean(document.createElement('canvas').getContext('webgl')),
-                engine: typeof Battle3DEngine === 'undefined' ? null : Battle3DEngine.getDebugState()
-            })""")
-            raise AssertionError(f"手機 3D canvas 未初始化：{mobile_state}; browser errors: {mobile_errors}") from error
+        mobile_canvas = mobile.locator("#battle3DCanvas canvas")
+        mobile_canvas_state = mobile.evaluate("""() => ({
+            count: document.querySelectorAll('#battle3DCanvas canvas').length,
+            visible: Boolean(document.querySelector('#battle3DCanvas canvas')?.getClientRects().length),
+            webgl: Boolean(document.createElement('canvas').getContext('webgl'))
+        })""")
+        assert mobile_canvas.count() == 1 and mobile_canvas.is_visible() and mobile_canvas_state['webgl'], \
+            f"手機 3D canvas 未初始化：{mobile_canvas_state}; browser errors: {mobile_errors}"
         try:
             mobile.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", timeout=12000)
         except Exception as error:

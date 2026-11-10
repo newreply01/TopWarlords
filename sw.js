@@ -1,4 +1,4 @@
-const APP_VERSION = '7.7.7';
+const APP_VERSION = '7.7.10';
 const CACHE_NAME = `topwarlords-v${APP_VERSION}`;
 const CORE_ASSETS = [
   './',

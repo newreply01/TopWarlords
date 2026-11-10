@@ -85,11 +85,28 @@ try:
                     errs.push('新增名將缺漏或國籍錯誤：' + id);
                 }
             }
-            if (unitMap.CAOCAO && (unitMap.CAOCAO.cost !== 5 || unitMap.CAOCAO.cat !== 'support')) {
+            for (const cat of ['air', 'armor', 'air_defense', 'naval', 'support']) {
+                for (let c = 1; c <= 5; c++) {
+                    const cnt = units.filter(u => u.cat === cat && u.cost === c).length;
+                    if (cnt !== 5) errs.push(`${cat} $${c} 數量不為 5: ${cnt}`);
+                }
+            }
+            if (units.some(u => !u.skill || !u.skill.name || !u.skill.desc)) {
+                errs.push('存在缺少專屬戰法 (skill) 之武將');
+            }
+            if (unitMap.CAOCAO && (unitMap.CAOCAO.cost !== 4 || unitMap.CAOCAO.cat !== 'support')) {
                 errs.push('曹操定位錯誤');
             }
-            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 4 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
+            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 3 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
                 errs.push('夏侯惇定位錯誤');
+            }
+            if (!(unitMap.PANGTONG.cost > unitMap.LUSU.cost && unitMap.PANGTONG.ew > unitMap.LUSU.ew && unitMap.LUSU.ew > unitMap.LUXUN.ew)) {
+                errs.push('龐統 > 魯肅 > 陸遜 排序未落實');
+            }
+            for (const nav5 of ['XIEXUAN', 'TIANDAN', 'LUMENG', 'CAOBIN', 'YISUNSIN']) {
+                if (!unitMap[nav5] || unitMap[nav5].cat !== 'naval' || unitMap[nav5].cost !== 5) {
+                    errs.push('先登奇兵 $5 統帥定位錯誤: ' + nav5);
+                }
             }
             for (const [id, cat] of [['ZHOUYU', 'support'], ['PANGJUAN', 'support'], ['TIANDAN', 'naval'], ['SUNCE', 'air'], ['SUNJIAN', 'armor'], ['LIUBOWEN', 'support']]) {
                 if (!unitMap[id] || unitMap[id].cat !== cat) errs.push(id + ' 分類錯誤或缺漏');
@@ -241,6 +258,26 @@ try:
                 else draws++;
             }
 
+            let finaleBattle = null;
+            for (let i = 0; i < 1000 && !finaleBattle; i++) {
+                const dA = randomDeck(mulberry32(i * 2 + 1701));
+                const dB = randomDeck(mulberry32(i * 2 + 1702));
+                const candidate = resolveBattle(dA, dB, { seed: i * 997 + 41 });
+                if (candidate.finale) finaleBattle = candidate;
+            }
+            if (!finaleBattle) {
+                errs.push('未能找到觸發總衝鋒的確定性測試戰局');
+            } else {
+                const finaleKills = finaleBattle.frames.flatMap(frame => frame.lines).filter(line => line.finale && line.kind === 'kill');
+                const remainingA = finaleBattle.final.A.filter(unit => unit.alive).length;
+                const remainingB = finaleBattle.final.B.filter(unit => unit.alive).length;
+                if (!finaleBattle.frames.some(frame => frame.finale === 'charge')) errs.push('總衝鋒事件框缺漏');
+                if (!finaleBattle.wipeout || finaleKills.length === 0) errs.push('總衝鋒未記錄有效殲滅事件');
+                if (finaleBattle.winner === 'A' && remainingB !== 0) errs.push('總衝鋒後敵軍仍有存活將領');
+                if (finaleBattle.winner === 'B' && remainingA !== 0) errs.push('總衝鋒後我軍仍有存活將領');
+                if (finaleBattle.winner === 'draw' && (remainingA !== 0 || remainingB !== 0)) errs.push('平手總衝鋒未以雙方覆滅收場');
+            }
+
             return {
                 unitCount: units ? units.length : 0,
                 zhugeLiang: unitMap ? unitMap['ZHUGELIANG'] : null,
@@ -260,6 +297,10 @@ try:
                 duelCounts: { normal: duels(duelBattle), square: duels(squareBattle) },
                 pvpHashChecks,
                 batch100: { aWins, bWins, draws },
+                finale: finaleBattle ? {
+                    winner: finaleBattle.winner,
+                    annihilationKills: finaleBattle.frames.flatMap(frame => frame.lines).filter(line => line.finale && line.kind === 'kill').length
+                } : null,
                 errs
             };
         }""")
@@ -273,6 +314,7 @@ try:
         print("[PASS] 4. 單場古戰場推演成功！勝者:", res["battleWinner"], f"(VP: {res['vpA']} vs {res['vpB']}) 總回合幀數:", res["framesCount"])
         print("[PASS] 5. 野戰陣形規則通過：雁行後列", res["gooseRearHit"], "鶴翼佔領", res["craneOccupation"], "單挑", res["duelCounts"], "錐行機動", res["formationMobility"])
         print("[PASS] 6. 100 場隨機名將陣容大數據批次模擬成功！戰果:", res["batch100"])
+        print("[PASS] 7. 十輪未分勝負時，總衝鋒殲滅流程通過：", res["finale"])
 
         browser.close()
 finally:

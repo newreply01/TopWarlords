@@ -91,24 +91,28 @@ try:
         page.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", timeout=10000)
         terrain_state = page.evaluate("() => Battle3DEngine.getDebugState()")
         expected_soldiers = 240 if terrain_state['lowPowerDevice'] else 360
+        assert terrain_state['modelsLoaded'] == terrain_state['modelsTotal'], f"兵種模型未完整載入：{terrain_state}"
         assert terrain_state['soldierCount'] == expected_soldiers, f"Unexpected visible soldier count: {terrain_state}"
         assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
         assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
         page.wait_for_function("() => Battle3DEngine.getDebugState().engagedBattalions > 0", timeout=15000)
-        assert page.locator('#battlePanelTabs').is_visible(), 'Desktop battle panel tabs are missing'
-        page.locator('[data-battle-panel="team-a"]').click()
-        assert page.locator('#teamA').is_visible() and not page.locator('#teamB').is_visible(), 'Desktop should show only the selected roster'
+        assert not page.locator('#battlePanelTabs').is_visible(), 'Desktop should use the three-panel command layout'
+        assert page.locator('#teamA').is_visible() and page.locator('#teamB').is_visible(), 'Desktop should show both team rosters'
+        assert page.locator('.log-col').is_visible(), 'Desktop battle log is missing'
         desktop_layout = page.evaluate("""() => ({
             stage: document.querySelector('#battle3DWrapper').clientHeight,
             grid: document.querySelector('.battle-grid').clientHeight,
             roster: document.querySelector('#unitsCardListA').clientHeight,
             rosterContent: document.querySelector('#unitsCardListA').scrollHeight,
-            card: document.querySelector('#unitsCardListA .bu')?.getBoundingClientRect().height || 0
+            card: document.querySelector('#unitsCardListA .bu')?.getBoundingClientRect().height || 0,
+            log: document.querySelector('.log-col').clientWidth
         })""")
-        assert 220 <= desktop_layout['stage'] <= 340, f"3D stage height is outside the viewport budget: {desktop_layout}"
-        assert desktop_layout['grid'] >= 250 and desktop_layout['card'] >= 66, f"Battle roster was compressed: {desktop_layout}"
+        assert 340 <= desktop_layout['stage'] <= 460, f"3D stage height is outside the viewport budget: {desktop_layout}"
+        assert desktop_layout['grid'] >= 220 and desktop_layout['card'] >= 48, f"Battle roster was compressed: {desktop_layout}"
+        assert desktop_layout['log'] >= 280, f"Battle log column is too narrow: {desktop_layout}"
         assert desktop_layout['rosterContent'] <= desktop_layout['roster'] + 4, f"Desktop roster still needs scrolling: {desktop_layout}"
-        page.locator('[data-battle-panel="log"]').click()
+        charge_finished = page.evaluate("async () => await Battle3DEngine.beginFinalCharge(280)")
+        assert charge_finished and not page.evaluate("() => Battle3DEngine.getDebugState().finalChargeActive"), 'Final charge animation did not settle cleanly'
 
         # 測試切換 3D/2D 按鈕
         page.evaluate("() => document.querySelector('#btnToggle3DView').click()")

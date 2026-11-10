@@ -72,10 +72,13 @@ function getAmmoProfile(u) {
 
 function resolveBrevityAndSfx(at, t, tier) {
   if (hasRoleFlag(at, 'STRATEGIST') || (hasRoleFlag(at, 'FORMATION_SHIELD') && t && t.cat !== 'air')) {
-    const label = tier === 1 ? '軍師號令' : (tier === 2 ? '謀略調度' : '運籌決勝');
+    const label = tier === 1 ? (at.skill && at.skill.name ? at.skill.name : '軍師號令') : (tier === 2 ? '謀略調度' : '運籌決勝');
     return { brv: label, sfxOverride: 'strategy_gong', isC4isr: true };
   }
   if (tier === 1) {
+    if (at.skill && at.skill.name) {
+      return { brv: at.skill.name, sfxOverride: null, isC4isr: false };
+    }
     let brv = '絕技破敵';
     if (at.cat === 'air') {
       brv = (t.cat === 'air') ? (at.traits.includes('LR') ? '馳騎奔射' : '騎兵交鋒') : '側翼突襲';
@@ -183,7 +186,7 @@ function makeTeam(ids, side, formationIds, terrain) {
     return {
       uid: `${id}-${side}${i}`, side, id, name: d.name, cat: d.cat, cost: d.cost, v: d.v,
       traits: d.traits || [], roleFlags: d.roleFlags || [], hpMax: d.hp, hp: d.hp, atk: d.atk, def: d.def,
-      stealth: d.st || 0, ew: d.ew || 0, alive: true, apsUsed: false, abmUsed: false,
+      stealth: d.st || 0, ew: d.ew || 0, skill: d.skill || null, alive: true, apsUsed: false, abmUsed: false,
       shots: 0, dmgDone: 0, killedBy: null,
       formation: formation.id,
       formationName: formation.name,
@@ -242,9 +245,9 @@ function resolveBattle(deckA, deckB, opts) {
   const alive = (s, f) => T[s].filter(u => u.alive && (!f || f(u)));
   const over = () => alive('A').length === 0 || alive('B').length === 0;
   const snap = () => { const o = {}; for (const s of ['A', 'B']) for (const u of T[s]) o[u.uid] = Math.round(u.hp); return o; };
-  const pushFrame = (phase, title, lines) => {
+  const pushFrame = (phase, title, lines, metadata) => {
     if (!lines.length) lines = [{ side: 'N', kind: 'info', text: '本輪無有效交鋒。' }];
-    frames.push({ phase, title, lines, hp: snap() });
+    frames.push(Object.assign({ phase, title, lines, hp: snap() }, metadata || {}));
   };
   const addKey = (imp, text, side) => keys.push({ frame: frames.length, imp, text, side });
 
@@ -733,29 +736,76 @@ function resolveBattle(deckA, deckB, opts) {
   }
   const vp = { A: calcVP('A'), B: calcVP('B') };
   const aDead = alive('A').length === 0, bDead = alive('B').length === 0;
-  let winner, wipeout = false, ammoDepleted = false;
+  let winner, wipeout = false, ammoDepleted = false, finale = false;
   if (aDead && bDead) { winner = 'draw'; wipeout = true; }
   else if (aDead && !bDead) { winner = 'B'; wipeout = true; }
   else if (bDead && !aDead) { winner = 'A'; wipeout = true; }
   else {
     ammoDepleted = true;
     const d = vp.A.total - vp.B.total;
-    winner = Math.abs(d) < 0.5 ? 'draw' : (d > 0 ? 'A' : 'B');
-    pushFrame(3, '階段三終結 · 鳴金收兵戰功議和', [{
-      side: winner === 'draw' ? 'N' : winner,
-      kind: 'info',
-      brevity: '鳴金收兵',
-      text: `激戰十輪兵糧將盡，雙方鳴金收兵！移交戰略戰功積分裁定（${vp.A.total.toFixed(1)} : ${vp.B.total.toFixed(1)} 戰功）！`
-    }]);
-    if (winner !== 'draw') {
-      addKey(5, `鳴金收兵戰功議和，${winner === 'A' ? '我方' : '敵方'}以 ${vp[winner].total.toFixed(1)} 戰功勝出`, winner);
+    let tieBrokenByFinalCharge = false;
+    if (Math.abs(d) < 0.5) {
+      const remainingStrength = side => alive(side).reduce((sum, unit) => sum + unit.hp / unit.hpMax, 0);
+      const strengthDelta = remainingStrength('A') - remainingStrength('B');
+      winner = Math.abs(strengthDelta) < 0.01 ? (rng() < 0.5 ? 'A' : 'B') : (strengthDelta > 0 ? 'A' : 'B');
+      tieBrokenByFinalCharge = true;
+    } else {
+      winner = d > 0 ? 'A' : 'B';
     }
+    finale = true;
+    pushFrame(3, '終章 · 兩軍總衝鋒', [{
+      side: 'N',
+      kind: 'info',
+      finaleStart: true,
+      brevity: '總衝鋒',
+      text: tieBrokenByFinalCharge
+        ? `十輪戰功難分高下，兩軍主將親率殘部總衝鋒；以戰線保存與最後一擊決出勝負！（${vp.A.total.toFixed(1)} : ${vp.B.total.toFixed(1)} 戰功）`
+        : `十輪鏖戰後戰線全面崩解，${winner === 'A' ? '我軍' : '敵軍'}主將率殘部發起最後衝鋒！（戰功 ${vp.A.total.toFixed(1)} : ${vp.B.total.toFixed(1)}）`
+    }], { finale: 'charge' });
+
+    const sidesToFinish = [winner];
+    const finalLines = [];
+    const finalStrikes = [];
+    for (const winningSide of sidesToFinish) {
+      const attackers = alive(winningSide);
+      const defeatedSide = other(winningSide);
+      const targets = alive(defeatedSide).sort((a, b) =>
+        Number(b.cat === 'support') - Number(a.cat === 'support') ||
+        b.cost - a.cost ||
+        a.uid.localeCompare(b.uid)
+      );
+      targets.forEach((target, index) => {
+        const attacker = attackers[index % attackers.length];
+        finalStrikes.push({ winningSide, attacker, target });
+      });
+    }
+    finalStrikes.forEach(({ winningSide, attacker, target }) => {
+      const damage = Math.round(target.hp);
+      target.hp = 0;
+      target.alive = false;
+      target.killedBy = attacker;
+      attacker.dmgDone += damage;
+      finalLines.push({
+        side: winningSide,
+        kind: 'kill',
+        finale: true,
+        auid: attacker.uid,
+        tuid: target.uid,
+        brevity: '總衝鋒殲滅',
+        dmg: damage,
+        text: `[總衝鋒殲滅] ${attacker.name} 率軍突入敵陣，陣斬 ${target.name}！`,
+        hpAfter: 0
+      });
+    });
+    pushFrame(3, '終章 · 敗軍全線潰滅', finalLines);
+    wipeout = true;
+    addKey(10, `${winner === 'A' ? '我軍' : '敵軍'}發起總衝鋒，殲滅敵方殘部`, winner);
   }
   const mvp = {};
   for (const s of ['A', 'B']) mvp[s] = T[s].slice().sort((a, b) => b.dmgDone - a.dmgDone)[0];
   const key = keys.slice().sort((a, b) => b.imp - a.imp).slice(0, 4).sort((a, b) => a.frame - b.frame);
 
-  return { seed, winner, wipeout, ammoDepleted, vp, frames, key, mvp, ev, docs, ewA, ewB, advSide, syn, terrain, formationDefs: BATTLE_FORMATION_DEFS, final: T };
+  return { seed, winner, wipeout, ammoDepleted, finale, vp, frames, key, mvp, ev, docs, ewA, ewB, advSide, syn, terrain, formationDefs: BATTLE_FORMATION_DEFS, final: T };
 }
 
 /* ---------- 陣容驗證 / 代碼 ---------- */

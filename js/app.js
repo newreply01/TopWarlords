@@ -4350,7 +4350,7 @@ async function showBattle(res, opts = {}) {
   }
   $('#battleMeta').innerHTML = metaHtml;
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph');
-  await sleep(1900);
+  await sleep(1100);
   let curPhase = 0, sec = 0;
   const log = $('#battleLog');
   try {
@@ -4362,6 +4362,9 @@ async function showBattle(res, opts = {}) {
         if (curPhase === 1 && radarEl) radarEl.classList.add('emp-active');
         else if (radarEl) radarEl.classList.remove('emp-active');
         updateHoloPhase(curPhase);
+      }
+      if (f.finale === 'charge' && typeof Battle3DEngine !== 'undefined') {
+        await Battle3DEngine.beginFinalCharge(skip ? 0 : 1150);
       }
       sec++;
       const timerEl = $('#camTimer');
@@ -5966,7 +5969,7 @@ function showResult(res, bo3Custom) {
     else if (state.mode === 'ladder') subtitle += ' · 天梯競技爭鋒';
     else subtitle += ' · 快速交鋒 · 聯合戰術推演';
 
-    const isWinchester = Boolean(res.ammoDepleted) || (!enemyWiped && myAlive > 0 && enemyAlive > 0);
+    const isWinchester = Boolean(res.ammoDepleted && !res.finale) || (!enemyWiped && myAlive > 0 && enemyAlive > 0);
     if (isWinchester) {
       if (won) {
         gradeTitle = diffVP >= 12 ? '彈盡裁定大勝' : '彈盡戰略勝出';
@@ -5982,11 +5985,13 @@ function showResult(res, bo3Custom) {
 
     const modeTagText = (myAlive === 0 && enemyAlive === 0)
       ? '⚔️ 同歸於盡'
+      : (res.finale
+          ? (won ? '⚔️ 總衝鋒 · 全殲勝局' : '⚔️ 總衝鋒 · 敵軍全殲')
       : (isWinchester
           ? (won ? '📦 彈藥耗盡 · VP 勝出' : (draw ? '📦 彈藥耗盡 · 平局' : '📦 彈藥耗盡 · VP 惜敗'))
           : (won 
               ? (enemyWiped ? '🎯 全殲勝局' : '⭐ 戰略大勝') 
-              : (myAlive === 0 ? '💥 部隊覆滅' : (draw ? '⚖️ 平局握手' : '🛡️ 戰略受挫'))));
+              : (myAlive === 0 ? '💥 部隊覆滅' : (draw ? '⚖️ 平局握手' : '🛡️ 戰略受挫')))));
 
     $('#resultCard').innerHTML = `
       <button class="modal-x" id="rCloseX" title="關閉彈窗並檢視戰場情形">✕</button>
@@ -6340,10 +6345,18 @@ function buildWhy(res) {
   const B = res.vp?.B || { remain: 0, control: 0 };
   const out = [];
   const won = res.winner === 'A';
-  if (res.ammoDepleted) {
+  if (res.ammoDepleted && !res.finale) {
     out.push({
       t: won ? 'good' : (res.winner === 'draw' ? '' : 'bad'),
       s: `彈藥耗盡裁定（WINCHESTER）：雙方激戰滿 10 輪後彈藥與油料見底脫離接觸，依戰略積分 ${ (A.total || 0).toFixed(1) } : ${ (B.total || 0).toFixed(1) } VP 裁定勝負。`
+    });
+  }
+  if (res.finale) {
+    out.push({
+      t: won ? 'good' : (res.winner === 'draw' ? '' : 'bad'),
+      s: res.winner === 'draw'
+        ? '十輪戰功仍未分出勝負，兩軍在最後總衝鋒中同歸於盡。'
+        : `十輪戰功決定衝鋒主動權，${won ? '我軍' : '敵軍'}發起最後總衝鋒並殲滅對方殘部。`
     });
   }
   const ewA = Number(res.ewA) || 0;

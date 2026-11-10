@@ -115,7 +115,8 @@
           u.origin.toLowerCase().includes(q) ||
           u.weapon.toLowerCase().includes(q) ||
           u.tag.toLowerCase().includes(q) ||
-          u.desc.toLowerCase().includes(q);
+          u.desc.toLowerCase().includes(q) ||
+          (u.skill && (u.skill.name.toLowerCase().includes(q) || u.skill.desc.toLowerCase().includes(q)));
         if (!match) return false;
       }
       return true;
@@ -179,6 +180,7 @@
             </div>
             <div class="card-tagline">🎯 ${u.tag}</div>
             <div class="card-weapon">⚔️ ${u.weapon}</div>
+            ${u.skill ? `<div class="card-skill" title="${esc(u.skill.desc)}" style="margin:6px 0 8px;padding:6px 10px;border-radius:8px;background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.35);font-size:12px;line-height:1.4;"><b style="color:var(--amber);">🔥 專屬戰法【${esc(u.skill.name)}】</b><span style="color:var(--text);display:block;font-size:11.5px;margin-top:2px;">${esc(u.skill.desc)}</span></div>` : ''}
             <p class="card-desc" title="${u.desc}">${u.desc}</p>
             <div class="card-traits">${traitsHtml}</div>
             <div class="card-stats">
@@ -204,7 +206,7 @@
               </div>
               <div class="stat-row">
                 <span class="stat-name">謀略</span>
-                <div class="stat-bar-track"><div class="stat-bar-fill ew" style="width: ${Math.min(100, (u.ew / 50) * 100)}%"></div></div>
+                <div class="stat-bar-track"><div class="stat-bar-fill ew" style="width: ${Math.min(100, (u.ew / 82) * 100)}%"></div></div>
                 <span class="stat-val">${u.ew}</span>
               </div>
             </div>

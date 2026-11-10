@@ -28,6 +28,17 @@ async def main():
         print(f"[TEST 1] 初始名將卡片渲染數量: {cards} 張，計數標籤: {filtered_text}")
         assert cards == 125, f"預期 125 張卡片，實際得到 {cards}"
 
+        image_refs = await page.evaluate("""() => UNITS.map(({ id, img }) => ({ id, img }))""")
+        empty_images = [unit["id"] for unit in image_refs if not unit["img"]]
+        broken_images = [
+            unit["id"]
+            for unit in image_refs
+            if unit["img"] and not (ROOT / unit["img"].split("?")[0]).is_file()
+        ]
+        print(f"[TEST 1-1] 空白肖像待補: {empty_images}")
+        assert empty_images == ["TOYOTOMI"], f"出現未盤點空白肖像: {empty_images}"
+        assert not broken_images, f"肖像檔案不存在: {broken_images}"
+
         # 2. 兵團篩選 (奔雷突騎)
         await page.locator("button[data-cat='air']").click()
         await page.wait_for_timeout(300)
@@ -80,13 +91,23 @@ async def main():
             ("SUNCE", "孫策"),
             ("SUNJIAN", "孫堅"),
             ("PANGJUAN", "龐涓"),
+            ("JIAXU", "賈詡"),
             ("LIUBOWEN", "劉伯溫"),
         ]:
             await page.locator("#searchInput").fill(name)
             await page.wait_for_timeout(200)
             assert await page.locator(f".unit-card[data-unit-id='{unit_id}']").count() == 1, f"未找到新增名將：{name}"
 
-        for unit_id, name in (("SUNCE", "孫策"), ("SUNJIAN", "孫堅"), ("PANGJUAN", "龐涓")):
+        for unit_id, name in (
+            ("SUNCE", "孫策"),
+            ("SUNJIAN", "孫堅"),
+            ("PANGJUAN", "龐涓"),
+            ("HOJO_UJIYASU", "北條氏康"),
+            ("SHIMAZU_YOSHIHISA", "島津義久"),
+            ("XIAHOU_DUN", "夏侯惇"),
+            ("CAOCAO", "曹操"),
+            ("JIAXU", "賈詡"),
+        ):
             await page.locator("#searchInput").fill(name)
             await page.wait_for_timeout(200)
             image = page.locator(f".unit-card[data-unit-id='{unit_id}'] img.card-img")

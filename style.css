@@ -1400,10 +1400,6 @@ body:has(.battle:not([hidden])) .command-deck,
 .fx-smoke-cloud{position:absolute;width:54px;height:54px;margin-left:-27px;margin-top:-27px;border-radius:50%;pointer-events:none;z-index:36;background:radial-gradient(circle,rgba(30,41,59,.85) 0%,rgba(71,85,105,.55) 60%,transparent 100%);animation:smokeRise .62s ease-out forwards}
 @keyframes smokeRise{0%{opacity:.85;transform:scale(.4) translateY(0)}100%{opacity:0;transform:scale(2.1) translateY(-34px)}}
 
-/* 重型單位擊毀時戰場畫面微震動 (Tactical Screen Micro-Shake) */
-.battle-screen-shake{animation:battleScreenShake .26s cubic-bezier(.36,.07,.19,.97)}
-@keyframes battleScreenShake{0%,100%{transform:none}20%{transform:translate(-4px,3px)}40%{transform:translate(4px,-3px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)}}
-
 /* 主動防護蜂巢能量護盾 (APS Shield) */
 .fx-shield{position:absolute;width:76px;height:76px;margin-left:-38px;margin-top:-38px;pointer-events:none;z-index:38;border-radius:50%;border:3px solid var(--violet);background:radial-gradient(circle,rgba(167,139,250,.45) 0%,transparent 70%);box-shadow:0 0 28px var(--violet);animation:shieldPulse .42s ease-out forwards}
 @keyframes shieldPulse{0%{opacity:1;transform:scale(.3)}50%{transform:scale(1.35);opacity:1}100%{transform:scale(1.6);opacity:0}}

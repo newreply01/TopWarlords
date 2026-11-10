@@ -6,7 +6,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.7.6';
+  const ASSET_VER = '7.7.7';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -81,7 +81,8 @@ const Battle3DEngine = (function () {
   let camTheta = 0.0, camPhi = 0.64, camRadius = 25.5;
   const CAM_BASE_TARGET = new THREE.Vector3(0, 0.55, 0.35);
   const camFocusOffset = new THREE.Vector3(0, 0, 0);
-  const camShakeOffset = new THREE.Vector3(0, 0, 0);
+  const camFocusTarget = new THREE.Vector3(0, 0, 0);
+  let lastFocusAt = 0;
 
   // 五大兵種方陣托盤陣位 (A軍在西岸 X<0 朝東，B軍在東岸 X>0 朝西)
   const SLOT_COORDS = {
@@ -1249,6 +1250,9 @@ const Battle3DEngine = (function () {
       march: null,
       engagement: null,
       chargeCommitted: false,
+      chargeInProgress: false,
+      chargeImpactCallbacks: [],
+      impact: null,
       currentHp: startHp,
       maxHp: startHp,
       alive: true,
@@ -1337,6 +1341,7 @@ const Battle3DEngine = (function () {
       [-0.68, 0.0, 0.68].forEach((xPos, idx) => {
         const front = new THREE.Group();
         front.position.set(xPos, 0, 0.50);
+        front.userData.isShieldLine = true;
         const w = spawnModelInstance('infantry', {
           targetHeight: idx === 1 ? 1.04 : 0.96,
           tintHex: idx === 1 ? goldColor : heavyArmorTint,
@@ -1718,6 +1723,8 @@ const Battle3DEngine = (function () {
     });
 
     resetCamera();
+    camFocusTarget.set(0, 0, 0);
+    lastFocusAt = 0;
     const now = performance.now();
     [...unitsMap.values()].forEach((token, index) => {
       const direction = token.side === 'A' ? -1 : 1;
@@ -1798,19 +1805,22 @@ const Battle3DEngine = (function () {
     if (aToken && tToken) {
       const midX = (aToken.mesh.position.x + tToken.mesh.position.x) * 0.14;
       const midZ = (aToken.mesh.position.z + tToken.mesh.position.z) * 0.14;
-      camFocusOffset.set(midX, 0, midZ);
+      camFocusTarget.set(midX, 0, midZ);
+      lastFocusAt = nowMs;
       if (aToken.alive && tToken.alive) {
         if (aToken.cat !== 'air' && aToken.cat !== 'naval') advanceBattalionToContact(aToken);
         if (tToken.cat !== 'air' && tToken.cat !== 'naval') advanceBattalionToContact(tToken);
       }
     }
 
+    let deferTargetEffects = false;
+
     // 3. 依五大兵種執行全 3D 模型骨骼動畫與彈道特效
     if (ln.duel && aToken && tToken && aToken.alive && tToken.alive) {
       performDuelClash(aToken, tToken);
     } else if (aToken && tToken && aToken.alive) {
       if (aToken.cat === 'air') {
-        performCavalryCharge(aToken, tToken);
+        deferTargetEffects = performCavalryCharge(aToken, tToken, playTargetEffects);
       } else if (aToken.cat === 'air_defense' || (ln.text && ln.text.includes('箭'))) {
         triggerSquadAnim(aToken, 'attack', 1.25);
         spawn3DArrowVolley(aToken.mesh.position, tToken.mesh.position, aToken.side);
@@ -1824,7 +1834,10 @@ const Battle3DEngine = (function () {
     }
 
     // 4. 受擊反應、盾牆格擋與 3D 浮動兵損數字
-    if (tToken) {
+    if (!deferTargetEffects) playTargetEffects();
+
+    function playTargetEffects() {
+      if (!tToken) return;
       if (ln.kind === 'block') {
         performShieldBlockDome(tToken);
         spawnFloatingDamagePopup(tToken.mesh.position, '🛡️ 鐵壁格擋', '#fbbf24', false);
@@ -1840,7 +1853,6 @@ const Battle3DEngine = (function () {
           isKill
         );
       }
-
       if (ln.hpAfter !== undefined) {
         updateTokenHp(tToken, ln.hpAfter);
       }
@@ -1855,11 +1867,24 @@ const Battle3DEngine = (function () {
     triggerSquadAnim(tToken, 'attack', 1.15);
     const midpoint = aToken.mesh.position.clone().lerp(tToken.mesh.position, 0.5);
     spawnSparkBurst(midpoint.add(new THREE.Vector3(0, 0.85, 0)), 22, 0xfbbf24);
-    triggerCameraShake(0.2);
+    applyImpactReaction(tToken, 0.10);
+  }
+
+  function applyImpactReaction(token, distance = 0.16) {
+    if (!token || !token.alive) return;
+    token.impact = {
+      startedAt: performance.now(),
+      duration: 300,
+      distance
+    };
   }
 
   /* 奔雷突騎：戰馬切換 Gallop 奔馳動畫衝向敵陣，騎將揮槊斬擊 */
-  function performCavalryCharge(aToken, tToken) {
+  function performCavalryCharge(aToken, tToken, onImpact) {
+    if (aToken.chargeInProgress) {
+      aToken.chargeImpactCallbacks.push(onImpact);
+      return true;
+    }
     const orig = aToken.mesh.position.clone();
     const target = tToken.mesh.position.clone();
     const dir = target.clone().sub(orig).normalize();
@@ -1868,43 +1893,52 @@ const Battle3DEngine = (function () {
 
     if (aToken.chargeCommitted) {
       triggerSquadAnim(aToken, 'attack', 1.2);
-      spawnSparkBurst(target.clone().add(new THREE.Vector3(0, 0.8, 0)), 12, 0xfbbf24);
-      triggerCameraShake(0.12);
+      spawnSparkBurst(target.clone().add(new THREE.Vector3(0, 0.8, 0)), 9, 0xfbbf24);
+      applyImpactReaction(tToken, 0.12);
       return;
     }
 
+    aToken.chargeInProgress = true;
     triggerSquadAnim(aToken, 'move', 1.45);
-    let stepIdx = 0;
-    const total = 15;
+    const startedAt = performance.now();
+    const duration = 420;
 
-    function step() {
-      if (!aToken.alive) return;
-      stepIdx++;
-      if (stepIdx <= 12) {
-        const p = stepIdx / 12;
-        aToken.mesh.position.lerpVectors(orig, impactPos, p);
-        if (stepIdx % 2 === 0) spawnDustPuff(aToken.mesh.position);
-      } else if (stepIdx === 13) {
+    function step(now) {
+      if (aToken.epoch !== battleEpoch) {
+        aToken.chargeInProgress = false;
+        aToken.chargeImpactCallbacks = [];
+        return;
+      }
+      if (!aToken.alive) {
+        aToken.chargeInProgress = false;
+        aToken.chargeImpactCallbacks.splice(0).forEach((callback) => callback());
+        return;
+      }
+      const progress = Math.min(1, (now - startedAt) / duration);
+      const eased = progress * progress * (3 - 2 * progress);
+      aToken.mesh.position.lerpVectors(orig, impactPos, eased);
+      if (progress < 0.88 && Math.floor(progress * 12) !== Math.floor(Math.max(0, progress - 0.04) * 12)) {
+        spawnDustPuff(aToken.mesh.position);
+      }
+      if (progress >= 1) {
         aToken.chargeCommitted = true;
+        aToken.chargeInProgress = false;
         aToken.frontX = impactPos.x;
         aToken.frontZ = impactPos.z;
         aToken.frontY = impactPos.y;
         triggerSquadAnim(aToken, 'attack', 1.35);
-        spawnSparkBurst(target.clone().add(new THREE.Vector3(0, 0.8, 0)), 24, 0xfbbf24);
-        triggerCameraShake(0.24);
+        spawnSparkBurst(target.clone().add(new THREE.Vector3(0, 0.8, 0)), 16, 0xfbbf24);
+        applyImpactReaction(tToken, 0.22);
         if (tToken && tToken.alive) {
-          const targetPosition = tToken.mesh.position.clone();
-          tToken.mesh.position.x += (aToken.side === 'A' ? 0.42 : -0.42);
-          setTimeout(() => { if (tToken && tToken.alive) tToken.mesh.position.copy(targetPosition); }, 180);
+          spawnDustPuff(tToken.mesh.position);
         }
+        aToken.chargeImpactCallbacks.splice(0).forEach((callback) => callback());
+        return;
       }
-      if (stepIdx < total) {
-        requestAnimationFrame(step);
-      } else {
-        aToken.mesh.position.copy(impactPos);
-      }
+      requestAnimationFrame(step);
+      return true;
     }
-    step();
+    requestAnimationFrame(step);
   }
 
   /* 神射強弩：發射 16 支真實 3D 箭矢模型 + 火羽軌跡拋物線齊射 */
@@ -1976,7 +2010,7 @@ const Battle3DEngine = (function () {
         aToken.frontY = strikePos.y;
         triggerSquadAnim(aToken, 'attack', 1.4);
         spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.8, 0)), 18, 0x2dd4bf);
-        triggerCameraShake(0.15);
+        applyImpactReaction(tToken, 0.16);
       }
       if (frame < 12) requestAnimationFrame(step);
       else aToken.mesh.position.set(strikePos.x, strikePos.y, strikePos.z);
@@ -1988,7 +2022,7 @@ const Battle3DEngine = (function () {
   function performPhalanxClash(aToken, tToken) {
     triggerSquadAnim(aToken, 'attack', 1.25);
     spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.7, 0)), 16, 0xfde047);
-    triggerCameraShake(0.14);
+    applyImpactReaction(tToken, 0.10);
   }
 
   /* 軍師奇謀：八卦天雷／火計光柱與陣紋擴散 */
@@ -2084,8 +2118,6 @@ const Battle3DEngine = (function () {
     updateTokenHp(token, 0);
     triggerSquadAnim(token, 'death', 1.0);
     spawnSparkBurst(token.mesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)), captured ? 14 : 28, captured ? 0xfbbf24 : 0xef4444);
-    triggerCameraShake(0.26);
-
     // 托盤微沉並半透明黯淡，保留屍骸戰場滄桑感
     let f = 0;
     function sink() {
@@ -2188,20 +2220,6 @@ const Battle3DEngine = (function () {
     });
   }
 
-  function triggerCameraShake(intensity = 0.18) {
-    let f = 0;
-    function step() {
-      f++;
-      if (f < 8) {
-        camShakeOffset.set((Math.random() - 0.5) * intensity, (Math.random() - 0.5) * intensity * 0.7, 0);
-        requestAnimationFrame(step);
-      } else {
-        camShakeOffset.set(0, 0, 0);
-      }
-    }
-    step();
-  }
-
   function getBattleCameraFov(aspect) {
     if (aspect <= 2.4) return 35;
     const horizontalFov = 100 * Math.PI / 180;
@@ -2210,7 +2228,7 @@ const Battle3DEngine = (function () {
 
   function updateCameraPosition() {
     if (!camera) return;
-    const target = CAM_BASE_TARGET.clone().add(camFocusOffset).add(camShakeOffset);
+    const target = CAM_BASE_TARGET.clone().add(camFocusOffset);
     const x = target.x + camRadius * Math.sin(camPhi) * Math.sin(camTheta);
     const y = target.y + camRadius * Math.cos(camPhi);
     const z = target.z + camRadius * Math.sin(camPhi) * Math.cos(camTheta);
@@ -2250,7 +2268,7 @@ const Battle3DEngine = (function () {
     camPhi = (container && container.clientWidth >= 720) ? 1.02 : 0.9;
     camRadius = (container && container.clientWidth < 720) ? 18.5 : 16.8;
     camFocusOffset.set(0, 0, 0);
-    camShakeOffset.set(0, 0, 0);
+    camFocusOffset.set(0, 0, 0);
     updateCameraPosition();
   }
 
@@ -2325,7 +2343,27 @@ const Battle3DEngine = (function () {
       }
 
       // 2. 相機焦點平滑回中與呼吸感
-      camFocusOffset.lerp(new THREE.Vector3(0, 0, 0), 0.035);
+      if (lastFocusAt && now - lastFocusAt > 900) {
+        camFocusTarget.set(0, 0, 0);
+        lastFocusAt = 0;
+      }
+      camFocusOffset.lerp(camFocusTarget, 1 - Math.exp(-dt * 2.4));
+      unitsMap.forEach((token) => {
+        if (!token.impact) return;
+        const progress = Math.min(1, (now - token.impact.startedAt) / token.impact.duration);
+        const recoil = Math.sin(progress * Math.PI) * token.impact.distance;
+        token.formationRig.position.z = -recoil;
+        token.troopsContainer.children.forEach((troop) => {
+          if (troop.userData.isShieldLine) troop.rotation.x = -recoil * 0.65;
+        });
+        if (progress >= 1) {
+          token.formationRig.position.z = 0;
+          token.troopsContainer.children.forEach((troop) => {
+            if (troop.userData.isShieldLine) troop.rotation.x = 0;
+          });
+          token.impact = null;
+        }
+      });
       updateCameraPosition();
 
       // 3. 營寨火盆躍動與河水波光

@@ -4849,14 +4849,6 @@ function playFx(ln) {
       spawnFloater(tx, ty, '⚔️ 陣亡潰敗!', 'kill');
       SoundEngine.play('warlord_fall', targetSide);
 
-      // 擊毀大型目標時觸發戰場畫面微震動 (Micro Screen Shake)
-      const vb = $('#viewBattle');
-      if (vb) {
-        vb.classList.remove('battle-screen-shake');
-        void vb.offsetWidth;
-        vb.classList.add('battle-screen-shake');
-        setTimeout(() => vb.classList.remove('battle-screen-shake'), 280 / speed);
-      }
     } else if (ln.kind === 'hit') {
       tEl.classList.remove('hit-shake');
       void tEl.offsetWidth;
@@ -4987,7 +4979,6 @@ function fastForwardBattle(res, opts = {}) {
   const radarEl = $('.radar');
   if (radarEl) radarEl.classList.remove('emp-active');
   const vb = $('#viewBattle');
-  if (vb) vb.classList.remove('battle-screen-shake');
 
   // 1. 瞬發補齊日誌最後階段標題
   const log = $('#battleLog');

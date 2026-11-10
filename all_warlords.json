@@ -3965,5 +3965,131 @@
     "title": "三河忍耐·天下霸業",
     "stealth": 36,
     "strategy": 28
+  },
+  {
+    "id": "HOJO_UJIYASU",
+    "name": "北條氏康",
+    "cat": "armor",
+    "cost": 4,
+    "v": "E",
+    "tag": "相模之獅·小田原堅守",
+    "desc": "後北條氏第三代當主，長期經營相模與關東，於河越合戰等戰事展現防衛與統率能力。",
+    "st": 12,
+    "ew": 16,
+    "traits": [
+      "HEAVY",
+      "APS"
+    ],
+    "roleFlags": [
+      "STAMINA_DEEP"
+    ],
+    "hp": 296,
+    "atk": 96,
+    "def": 0.26,
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "采配 + 太刀",
+    "sfx": "war_drum"
+  },
+  {
+    "id": "XIAHOU_DUN",
+    "name": "夏侯惇",
+    "cat": "armor",
+    "cost": 4,
+    "v": "F",
+    "tag": "魏之元勳·親冒矢石",
+    "desc": "曹魏重要將領與宗室重臣，長期參與曹操征戰並任前線統帥，以忠勇和治軍著稱。",
+    "st": 12,
+    "ew": 8,
+    "traits": [
+      "HEAVY",
+      "TRUE_AT"
+    ],
+    "roleFlags": [
+      "HEAVY_AP"
+    ],
+    "hp": 286,
+    "atk": 98,
+    "def": 0.22,
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "環首刀 + 曹魏軍旗",
+    "sfx": "blade_clash"
+  },
+  {
+    "id": "TOYOTOMI",
+    "name": "豐臣秀吉",
+    "cat": "support",
+    "cost": 5,
+    "v": "E",
+    "tag": "太閤天下·統一大將",
+    "desc": "戰國三傑之一，從織田信長麾下崛起，經多場戰事完成日本大部分地區統一；其軍事才能以統帥與調度見長。",
+    "st": 16,
+    "ew": 76,
+    "traits": [
+      "EW",
+      "SPOT"
+    ],
+    "roleFlags": [
+      "STRATEGIST"
+    ],
+    "hp": 218,
+    "atk": 90,
+    "def": 0,
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "采配 + 陣太刀",
+    "sfx": "war_drum"
+  },
+  {
+    "id": "CAOCAO",
+    "name": "曹操",
+    "cat": "support",
+    "cost": 5,
+    "v": "I",
+    "tag": "亂世雄略·官渡制勝",
+    "desc": "東漢末年政治家、軍事家，挾天子以令諸侯，官渡之戰擊敗袁紹，奠定曹魏基業。",
+    "st": 48,
+    "ew": 74,
+    "traits": [
+      "EW",
+      "SPOT"
+    ],
+    "roleFlags": [
+      "STRATEGIST",
+      "STAMINA_DEEP"
+    ],
+    "hp": 224,
+    "atk": 96,
+    "def": 0.04,
+    "flag": "🇨🇳",
+    "origin": "中國 · 東漢末／三國",
+    "weapon": "環首刀 + 丞相令旗",
+    "sfx": "strategy_gong"
+  },
+  {
+    "id": "SHIMAZU_YOSHIHISA",
+    "name": "島津義久",
+    "cat": "support",
+    "cost": 4,
+    "v": "I",
+    "tag": "薩摩之雄·九州統帥",
+    "desc": "島津氏第十六代當主，與弟義弘等家族將領協力擴張，統率島津家在九州各地的軍事行動。",
+    "st": 28,
+    "ew": 54,
+    "traits": [
+      "EW",
+      "SPOT"
+    ],
+    "roleFlags": [
+      "STRATEGIST"
+    ],
+    "hp": 160,
+    "atk": 86,
+    "def": 0.04,
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "采配 + 島津家旗印",
+    "sfx": "strategy_gong"
   }
 ]

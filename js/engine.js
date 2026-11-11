@@ -70,15 +70,35 @@ function getAmmoProfile(u) {
   return { tier: 3, dmgMult: 0.52, hitMod: -0.06, canSat: false, canSwarm: false, canTrueAt: hasRoleFlag(u, 'HEAVY_AP') };
 }
 
-function resolveBrevityAndSfx(at, t, tier) {
+function getSkillAttackModifiers(attacker, target, phase, terrain = 'plain') {
+  const active = !attacker.skillUsed && attacker.skill?.phase === `P${phase}`;
+  const effects = active ? attacker.skill.effects : null;
+  const missingHp = clamp(1 - attacker.hp / attacker.hpMax, 0, 1);
+  const targetMissingHp = clamp(1 - target.hp / target.hpMax, 0, 1);
+  return {
+    damage: active ? (effects ? (effects.damage || 1)
+      + missingHp * (effects.missingHpDamage || 0)
+      + targetMissingHp * (effects.woundedTargetDamage || 0)
+      + (target.cost > attacker.cost ? effects.highCostDamage || 0 : 0)
+      + (['mountain', 'forest'].includes(terrain) ? effects.terrainDamage || 0 : 0)
+      + (effects.bonusVs?.[target.cat] || 0)
+      : ({ 1: 1.12, 2: 1.15, 3: 1.18 }[phase] || 1)) : 1,
+    armorPierce: effects?.armorPierce || 0,
+    hit: effects?.hit || 0
+  };
+}
+
+function resolveBrevityAndSfx(at, t, tier, skillProc = false) {
   if (hasRoleFlag(at, 'STRATEGIST') || (hasRoleFlag(at, 'FORMATION_SHIELD') && t && t.cat !== 'air')) {
-    const label = tier === 1 ? (at.skill && at.skill.name ? at.skill.name : '軍師號令') : (tier === 2 ? '謀略調度' : '運籌決勝');
+    const label = skillProc && at.skill && at.skill.name
+      ? at.skill.name
+      : (tier === 1 ? (at.skill && at.skill.name ? at.skill.name : '軍師號令') : (tier === 2 ? '謀略調度' : '運籌決勝'));
     return { brv: label, sfxOverride: 'strategy_gong', isC4isr: true };
   }
+  if (skillProc && at.skill && at.skill.name) {
+    return { brv: at.skill.name, sfxOverride: null, isC4isr: false };
+  }
   if (tier === 1) {
-    if (at.skill && at.skill.name) {
-      return { brv: at.skill.name, sfxOverride: null, isC4isr: false };
-    }
     let brv = '絕技破敵';
     if (at.cat === 'air') {
       brv = (t.cat === 'air') ? (at.traits.includes('LR') ? '馳騎奔射' : '騎兵交鋒') : '側翼突襲';
@@ -187,6 +207,7 @@ function makeTeam(ids, side, formationIds, terrain) {
       uid: `${id}-${side}${i}`, side, id, name: d.name, cat: d.cat, cost: d.cost, v: d.v,
       traits: d.traits || [], roleFlags: d.roleFlags || [], hpMax: d.hp, hp: d.hp, atk: d.atk, def: d.def,
       stealth: d.st || 0, ew: d.ew || 0, skill: d.skill || null, alive: true, apsUsed: false, abmUsed: false,
+      skillUsed: false, ambushUsed: false, skillGuard: 0,
       shots: 0, dmgDone: 0, killedBy: null,
       formation: formation.id,
       formationName: formation.name,
@@ -269,6 +290,22 @@ function resolveBattle(deckA, deckB, opts) {
     return base - (((tgt.stealth + m.stealthAdd) * sc) / 100) * w - S[att.side].hitPen + (extra || 0) + (att.formationHit || 0);
   }
 
+  function applySkillEffects(unit, lines) {
+    const effects = unit.skill?.effects || {};
+    unit.skillGuard = Math.max(unit.skillGuard, effects.guard || 0);
+    const hpBefore = unit.hp;
+    unit.hp = Math.min(unit.hpMax, unit.hp + unit.hpMax * (effects.heal || 0));
+    S[unit.side].skillGuard = Math.max(S[unit.side].skillGuard || 0, effects.teamGuard || 0);
+    S[unit.side].skillHit = Math.max(S[unit.side].skillHit || 0, effects.teamHit || 0);
+    S[other(unit.side)].skillHitPen = Math.max(S[other(unit.side)].skillHitPen || 0, effects.enemyHit || 0);
+    if (effects.commandAttack) S[unit.side].atkAll = (S[unit.side].atkAll || 1) * (1 + effects.commandAttack);
+    lines.push({
+      side: unit.side, kind: 'info', auid: unit.uid, brevity: unit.skill.name,
+      skillActivation: true, skillEffects: effects, hpRestored: unit.hp - hpBefore,
+      text: `[${unit.skill.name}] ${unit.name}：${unit.skill.desc}`
+    });
+  }
+
   /* 同步結算：先全部擲骰，再統一套用傷害 */
   function volley(attacks, vOpts) {
     vOpts = vOpts || {};
@@ -276,8 +313,14 @@ function resolveBattle(deckA, deckB, opts) {
     const rolled = [];
     for (const a of attacks) {
       if (!a.tgt) continue;
-      const p = clamp(a.hit, 0.08, 0.96);
+      const skillModifiers = getSkillAttackModifiers(a.att, a.tgt, vOpts.phase, terrain);
+      const p = clamp(a.hit + skillModifiers.hit + (S[a.att.side].skillHit || 0) - (S[a.att.side].skillHitPen || 0), 0.08, 0.96);
       const ok = rng() < p;
+      const skillPhase = Number(String(a.att.skill?.phase || '').replace('P', ''));
+      const skillProc = Boolean(ok && !a.att.skillUsed && skillPhase === vOpts.phase);
+      const ambushProc = Boolean(ok && !a.att.ambushUsed && a.att.traits.includes('AMBUSH') && a.tgt.cost >= a.att.cost + 2);
+      if (skillProc) a.att.skillUsed = true;
+      if (ambushProc) a.att.ambushUsed = true;
       const tacticProc = ok && a.att.formationTacticChance > 0 && rng() < a.att.formationTacticChance;
       const canDuel = vOpts.allowDuels && ok && ['air', 'armor', 'naval'].includes(a.att.cat) && ['air', 'armor', 'naval'].includes(a.tgt.cat)
         && !a.att.formationDuelImmune && !a.tgt.formationDuelImmune && !a.att.duelUsed && !a.tgt.duelUsed;
@@ -287,8 +330,16 @@ function resolveBattle(deckA, deckB, opts) {
         a.tgt.duelUsed = true;
       }
       rolled.push({
-        a, p, ok, tacticProc, duelProc,
-        raw: a.dmg * (0.85 + rng() * 0.3) * DMG_SCALE * (S[a.att.side].atkAll || 1) * a.att.formationAttack * (tacticProc ? a.att.formationTacticDamage : 1) * (duelProc ? 1.12 : 1)
+        a, p, ok, tacticProc, duelProc, skillProc, ambushProc, skillModifiers,
+        raw: a.dmg * (0.85 + rng() * 0.3) * DMG_SCALE * (S[a.att.side].atkAll || 1) * a.att.formationAttack * (tacticProc ? a.att.formationTacticDamage : 1) * (duelProc ? 1.12 : 1) * skillModifiers.damage * (ambushProc ? 1.25 : 1)
+      });
+    }
+    for (const roll of rolled) {
+      if (roll.skillProc) applySkillEffects(roll.a.att, lines);
+      if (roll.ambushProc) lines.push({
+        side: roll.a.att.side, kind: 'info', auid: roll.a.att.uid, tuid: roll.a.tgt.uid,
+        brevity: '奇襲突擊', ambushActivation: true,
+        text: `[奇襲突擊] ${roll.a.att.name} 對高價目標 ${roll.a.tgt.name} 發起一次性伏擊，本次傷害 ×1.25。`
       });
     }
     for (const r of rolled) {
@@ -296,8 +347,8 @@ function resolveBattle(deckA, deckB, opts) {
       if (!t.alive) continue;
       const pct = Math.round(r.p * 100);
       const tier = a.ammoTier || 1;
-      const meta = resolveBrevityAndSfx(at, t, tier);
-      const brv = meta.brv;
+      const meta = resolveBrevityAndSfx(at, t, tier, r.skillProc);
+      const brv = r.skillProc ? meta.brv : (r.ambushProc ? '奇襲突擊' : meta.brv);
 
       if (!r.ok) {
         const missCode = tier === 3 ? '力竭偏差' : '身法規避';
@@ -358,7 +409,7 @@ function resolveBattle(deckA, deckB, opts) {
         addKey(3, `${t.name} 的重盾格擋阻斷了 ${at.name} 的首波攻勢`, t.side);
         continue;
       }
-      const d = r.raw * (a.trueDmg ? 1 : (1 - Math.min(0.9, t.def * t.formationDefense))) * S[t.side].taken * t.formationDamageTaken;
+      const d = r.raw * (a.trueDmg ? 1 : (1 - Math.min(0.9, t.def * t.formationDefense * (1 - r.skillModifiers.armorPierce)))) * S[t.side].taken * t.formationDamageTaken * (1 - Math.max(t.skillGuard, S[t.side].skillGuard || 0));
       t.hp -= d;
       at.dmgDone += d;
       if (t.hp <= 0) {
@@ -375,15 +426,19 @@ function resolveBattle(deckA, deckB, opts) {
           captured,
           auid: at.uid,
           tuid: t.uid,
-          brevity: killCode,
+          brevity: r.skillProc ? at.skill.name : (r.ambushProc ? '奇襲突擊' : killCode),
           ammoTier: tier,
           sfxOverride: meta.sfxOverride,
           dmg: Math.round(d),
           text: captured
-            ? `[俘虜] ${at.name} 擒獲 ${t.name}！`
+            ? `[俘虜] ${r.skillProc ? `【${at.skill.name}】 ` : (r.ambushProc ? '[奇襲] ' : '')}${at.name} 擒獲 ${t.name}！`
             : r.duelProc
             ? `[一騎單挑] ${at.name} 與 ${t.name} 正面交鋒後 ${actionVerb}！`
-            : `[${killCode} ${killLabel}] ${at.name} ${actionVerb} ${t.name}！`,
+            : r.skillProc
+              ? `[${at.skill.name}] ${at.name} 施展專屬戰法，${actionVerb} ${t.name}！`
+              : r.ambushProc
+                ? `[奇襲突擊] ${at.name} 趁隙突襲 ${t.name}！`
+                : `[${killCode} ${killLabel}] ${at.name} ${actionVerb} ${t.name}！`,
           hpAfter: 0
         });
         addKey(t.cost * 2 + Math.max(0, t.cost - at.cost) * 2, captured
@@ -436,6 +491,13 @@ function resolveBattle(deckA, deckB, opts) {
   } else {
     l1.push({ side: 'N', kind: 'info', text: '雙方軍師旗鼓相當，謀略互不相讓。' });
   }
+
+  for (const s of ['A', 'B']) {
+    for (const commander of alive(s, unit => hasRoleFlag(unit, 'STRATEGIST') && unit.skill?.phase === 'P1' && !unit.skillUsed)) {
+      commander.skillUsed = true;
+      applySkillEffects(commander, l1);
+    }
+  }
   pushFrame(1, '階段一 · 軍師謀略博弈', l1);
 
   {
@@ -465,7 +527,7 @@ function resolveBattle(deckA, deckB, opts) {
         });
       }
     }
-    pushFrame(1, '階段一 · 先制破陣（斬首／奇襲破陣）', volley(at, { allowAbm: true }));
+    pushFrame(1, '階段一 · 先制破陣（斬首／奇襲破陣）', volley(at, { allowAbm: true, phase: 1 }));
   }
 
   /* ===== 階段二：神射攔截、先鋒爭先與先登奇兵對決 ===== */
@@ -485,7 +547,7 @@ function resolveBattle(deckA, deckB, opts) {
         at.push({ att: u, tgt: t, ammoTier: ammo.tier, hit, dmg: u.atk * 2.5 * f * ammo.dmgMult });
       }
     }
-    pushFrame(2, '階段二 · 神射箭雨攔截', volley(at));
+    pushFrame(2, '階段二 · 神射箭雨攔截', volley(at, { phase: 2 }));
   }
   if (!over()) {
     // 2-2 奔雷突騎交鋒（爭奪先機權 10 分）
@@ -505,7 +567,7 @@ function resolveBattle(deckA, deckB, opts) {
         }
       }
     }
-    pushFrame(2, '階段二 · 奔雷突騎爭先', volley(at));
+    pushFrame(2, '階段二 · 奔雷突騎爭先', volley(at, { phase: 2 }));
   }
   if (!over()) {
     // 2-3 先登奇兵對決（虎賁破陣 vs 潛行夜襲，爭奪先登權 5 分）
@@ -526,8 +588,6 @@ function resolveBattle(deckA, deckB, opts) {
           if (t.traits.includes('SUB') && u.traits.includes('ASW')) mult *= 1.6;
           // SUB 潛行夜襲：對未設防目標造成 1.3 倍傷害
           if (u.traits.includes('SUB') && !t.traits.includes('SUB')) mult *= 1.3;
-          // AMBUSH 一番槍敢死伏擊：挑戰高費名將造成 1.25 倍傷害
-          if (u.traits.includes('AMBUSH') && t.cost >= u.cost + 2) mult *= 1.25;
           if (tgts.length > 1) mult *= 0.6;
           at.push({
             att: u, tgt: t, ammoTier: ammo.tier,
@@ -537,7 +597,7 @@ function resolveBattle(deckA, deckB, opts) {
         }
       }
     }
-    pushFrame(2, '階段二 · 先登奇兵交鋒', volley(at));
+    pushFrame(2, '階段二 · 先登奇兵交鋒', volley(at, { phase: 2 }));
   }
 
   /* ===== 階段三：中軍主力決戰與氣力三階消耗（上限 10 輪，未全殲則鳴金收兵由戰功 VP 裁定） ===== */
@@ -620,7 +680,6 @@ function resolveBattle(deckA, deckB, opts) {
             if (!t) continue;
             let nMult = 0.85 * S[s].navMult;
             if (t.traits.includes('SUB') && u.traits.includes('ASW')) nMult *= 1.35;
-            if (u.traits.includes('AMBUSH') && t.cost >= u.cost + 2) nMult *= 1.2;
             if (ts.length > 1) nMult *= 0.65;
             at.push({
               att: u, tgt: t, ammoTier: ammo.tier,
@@ -656,7 +715,7 @@ function resolveBattle(deckA, deckB, opts) {
                 dmg: u.atk * 2.2 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.5 : 1) * ammo.dmgMult
               });
             }
-          } else if (u.traits.includes('ARTY') || u.traits.includes('DEEP')) {
+          } else if (u.traits.includes('ARTY')) {
             const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [pickTop(ground)];
             for (const t of ts) {
               if (!t) continue;
@@ -712,7 +771,7 @@ function resolveBattle(deckA, deckB, opts) {
     const phaseLabel = r <= 5
       ? `階段三 · 中軍死鬥合圍（第 ${r} 輪）`
       : (r <= 7 ? `階段三 · 短兵相接鏖戰（第 ${r} 輪）` : `階段三 · 氣力見底苦戰（第 ${r} 輪）`);
-    pushFrame(3, phaseLabel, volley(at, { prefixLines, allowDuels: true }));
+    pushFrame(3, phaseLabel, volley(at, { prefixLines, allowDuels: true, phase: 3 }));
     r++;
   }
 
@@ -822,11 +881,11 @@ function validateDeck(ids, budget, banned) {
     if (!id) { errs.push(`${SLOTS[i].label}尚未配置`); return; }
     const u = UNIT_MAP[id];
     if (!u) { errs.push(`未知名將：${id}`); return; }
-    if (SLOTS[i].fixed && u.cat !== SLOTS[i].fixed) errs.push(`${SLOTS[i].label}只能配置${CATS[SLOTS[i].fixed].label}`);
+    if (SLOTS[i].fixed && u.cat !== SLOTS[i].fixed) errs.push(`兵種槽位錯誤：${SLOTS[i].label}`);
     if (banned.includes(id)) errs.push(`${u.name} 已被戰術禁用 (BANNED)`);
   });
   const cats = ids.filter(Boolean).map(id => UNIT_MAP[id] && UNIT_MAP[id].cat).filter(Boolean);
-  if (new Set(cats).size !== cats.length) errs.push('同一兵團職能不可重複選取');
+  if (new Set(cats).size !== cats.length) errs.push('同一軍種不可重複配置');
   if (new Set(ids.filter(Boolean)).size !== ids.filter(Boolean).length) errs.push('同一位名將不可重複配置');
   if (deckCost(ids.filter(id => id && UNIT_MAP[id])) > budget) errs.push(`軍令預算超標（上限 $${budget}）`);
   return errs;

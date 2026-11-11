@@ -1,40 +1,28 @@
 # -*- coding: utf-8 -*-
-import json, re
+import json
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-with (ROOT / 'js' / 'data.js').open('r', encoding='utf-8') as f:
-    text = f.read()
+result = subprocess.run(
+    ['node', '-e', 'process.stdout.write(JSON.stringify(require(process.argv[1]).UNITS))',
+     str(ROOT / 'js' / 'data.js')],
+    check=True,
+    capture_output=True,
+    encoding='utf-8',
+)
+units = json.loads(result.stdout)
+if len(units) != 125 or len({unit['id'] for unit in units}) != 125:
+    raise ValueError('Expected 125 distinct units from data.js')
 
-# 擷取 RAW_UNITS 列表
-raw_matches = re.findall(r'\[\s*"([A-Z0-9_]+)"\s*,\s*"([^"]+)"\s*,\s*\'([a-z_]+)\'\s*,\s*(\d+)\s*,\s*\'([A-Z])\'\s*,\s*"([^"]+)"', text)
-print(f"Total units in data.js: {len(raw_matches)}")
+fields = ('id', 'name', 'cat', 'cost', 'tag', 'flag', 'origin', 'weapon')
+units_data = [{field: unit[field] for field in fields} for unit in units]
 
-# 擷取 UNIT_META
-meta_dict = {}
-for m in re.finditer(r'([A-Z0-9_]+):\s*\{\s*flag:\s*\'([^\']+)\',\s*origin:\s*\'([^\']+)\',\s*weapon:\s*\'([^\']+)\'', text):
-    meta_dict[m.group(1)] = {
-        'flag': m.group(2),
-        'origin': m.group(3),
-        'weapon': m.group(4)
-    }
-
-units_data = []
-for uid, name, cat, cost, variant, tag in raw_matches:
-    meta = meta_dict.get(uid, {'flag': '🇨🇳', 'origin': '東亞名將', 'weapon': '百戰名刃'})
-    units_data.append({
-        'id': uid,
-        'name': name,
-        'cat': cat,
-        'cost': int(cost),
-        'tag': tag,
-        'flag': meta['flag'],
-        'origin': meta['origin'],
-        'weapon': meta['weapon']
-    })
+with (ROOT / 'all_warlords.json').open('w', encoding='utf-8') as f:
+    json.dump(units, f, ensure_ascii=False, indent=2)
 
 with (ROOT / 'tools' / 'all_units.json').open('w', encoding='utf-8') as f:
     json.dump(units_data, f, ensure_ascii=False, indent=2)
 
-print(f"Exported {len(units_data)} units to all_units.json")
+print(f"Exported {len(units_data)} units to all_warlords.json and tools/all_units.json")

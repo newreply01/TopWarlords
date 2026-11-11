@@ -639,14 +639,8 @@ function toggleVariant(cat, cost, e) {
 
 const CAT_TO_SLOT = { air: 0, armor: 1, air_defense: 2, naval: 3, support: 4 };
 
-function resolveTargetSlot(u) {
-  // 五大兵種嚴格一對一對應專屬槽位：
-  // 0: 制空打擊 (air)
-  // 1: 重裝鐵騎 (armor)
-  // 2: 區域防空 (air_defense)
-  // 3: 制海權威 (naval)
-  // 4: 情報／長程打擊 (support)
-  return CAT_TO_SLOT[u.cat] !== undefined ? CAT_TO_SLOT[u.cat] : 0;
+function resolveTargetSlot(unit) {
+  return CAT_TO_SLOT[unit.cat] !== undefined ? CAT_TO_SLOT[unit.cat] : 0;
 }
 
 function canPickForSlot(u, targetSlot) {
@@ -674,7 +668,7 @@ function handleMatrixCardClick(u) {
     return;
   }
 
-  // 2. 若隊伍中已有同兵種同價位的異型裝備（例如選了 B型颱風，點擊該格），點擊也是卸下
+  // 同兵種同價位的替代將領共用槽位，點擊目前型號即卸下。
   const sameTierIdx = state.deck.findIndex(id => id && UNIT_MAP[id].cat === u.cat && UNIT_MAP[id].cost === u.cost);
   if (sameTierIdx >= 0) {
     const oldU = UNIT_MAP[state.deck[sameTierIdx]];
@@ -686,7 +680,7 @@ function handleMatrixCardClick(u) {
     return;
   }
 
-  // 3. 正常裝備或替換
+  // 五類各一位，由兵種決定專屬編組槽。
   const targetSlot = resolveTargetSlot(u);
   const why = canPickForSlot(u, targetSlot);
   if (why) {

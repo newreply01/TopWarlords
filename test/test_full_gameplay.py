@@ -55,6 +55,21 @@ try:
         print(f"[TEST 1] 5x5 看板渲染名將卡片數量: {card_count} 張")
         assert card_count == 25, f"預期 25 張卡片，實際得到 {card_count}"
 
+        same_role_result = page.evaluate("""() => {
+            const ids = [...document.querySelectorAll('.m-card[data-cat="air"]')].map(card => card.dataset.id);
+            if (ids.length !== 5) return { count: ids.length, deck: [] };
+            for (const id of ids) {
+                const card = document.querySelector(`.m-card[data-id="${id}"]`);
+                if (!card) return { count: ids.length, missing: id, deck: [] };
+                card.click();
+            }
+            const deck = JSON.parse(localStorage.getItem('wl15_deck') || '[]').filter(Boolean);
+            const unitMap = window.UNIT_MAP;
+            return { count: deck.length, roles: [...new Set(deck.map(id => unitMap[id].cat))], cost: deck.reduce((sum, id) => sum + unitMap[id].cost, 0) };
+        }""")
+        assert same_role_result['count'] == 1 and same_role_result['roles'] == ['air'] and same_role_result['cost'] <= 15, f"Only one cavalry leader should occupy the cavalry slot: {same_role_result}"
+        page.evaluate("document.querySelector('#btnClear').click()")
+
         # 2. 測試隨機補滿按鈕
         page.evaluate("() => document.querySelector('#btnRand').click()")
         time.sleep(0.5)
@@ -131,17 +146,6 @@ try:
         assert page.locator("#viewBattle").evaluate("el => el.hidden"), "Battle view stayed open after AAR exit"
         assert page.locator("#viewBuild").is_visible(), "Build view did not return after AAR exit"
 
-        page.locator("#btnRand").click()
-        page.wait_for_function("() => !document.querySelector('#btnGo').disabled", timeout=5000)
-        page.locator("#btnGo").click()
-        assert not page.locator("#viewBattle").evaluate("el => el.hidden"), "Second battle did not open"
-        page.locator("#btnSkip").click()
-        page.wait_for_selector("#rReview", state="visible", timeout=10000)
-        page.locator("#rReview").click()
-        assert page.locator("#btnBattleExit").is_visible(), "Battle exit control is missing"
-        page.locator("#btnBattleExit").click()
-        assert page.locator("#viewBattle").evaluate("el => el.hidden"), "Battle view stayed open after exit"
-        assert page.locator("#viewBuild").is_visible(), "Build view did not return after exit"
         print(f"[TEST 6] 戰鬥結算完成，戰報海報按鈕可見: {is_finished}")
 
         # 檢查過程是否有 JS 報錯

@@ -3,7 +3,7 @@
 測試 TopWarlords 名將點將錄 (armory.html)
 驗證：
 1. 初始渲染 125 位名將
-2. 五大兵團篩選 (各 25 位)
+2. 五大兵團分類篩選 (各 25 位)
 3. 國別篩選 (🇨🇳 78, 🇯🇵 36, 🇰🇷 11)
 4. 點擊名將卡片展開全息模態窗
 """
@@ -36,7 +36,7 @@ async def main():
             if unit["img"] and not (ROOT / unit["img"].split("?")[0]).is_file()
         ]
         print(f"[TEST 1-1] 空白肖像待補: {empty_images}")
-        assert empty_images == ["TOYOTOMI"], f"出現未盤點空白肖像: {empty_images}"
+        assert empty_images == [], f"仍有名將缺少肖像: {empty_images}"
         assert not broken_images, f"肖像檔案不存在: {broken_images}"
 
         # 2. 兵團篩選 (奔雷突騎)

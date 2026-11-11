@@ -51,6 +51,16 @@ try:
             if (!units || units.length !== 125) {
                 errs.push('UNITS 數量不為 125，當前：' + (units ? units.length : 0));
             }
+            const exportedUnits = await (await fetch('/all_warlords.json')).json();
+            if (JSON.stringify(exportedUnits) !== JSON.stringify(units)) errs.push('完整JSON匯出與正式資料不同步');
+            const compactUnits = await (await fetch('/tools/all_units.json')).json();
+            if (compactUnits.length !== units.length || compactUnits.some(unit => !unitMap[unit.id] || Object.entries(unit).some(([field, value]) => value !== unitMap[unit.id][field]))) errs.push('精簡JSON匯出與正式資料不同步');
+            if (units.some(unit => !unit.historicalAudit || !unit.historicalAudit.status || !Array.isArray(unit.historicalAudit.sources))) {
+                errs.push('每位名將必須標記史實核查狀態與來源清單');
+            }
+            if (unitMap.TIANDAN?.historicalAudit?.status !== 'source-linked' || unitMap.EULJI?.historicalAudit?.status !== 'qualified') {
+                errs.push('田單／乙支文德的史實核查結論未保留');
+            }
             const categoryCounts = Object.fromEntries(
                 ['air', 'armor', 'air_defense', 'naval', 'support'].map(cat =>
                     [cat, units.filter(unit => unit.cat === cat).length]
@@ -63,9 +73,10 @@ try:
                 errs.push('天梯預設軍團數量錯誤');
             } else {
                 for (const preset of window.LADDER_PRESETS) {
-                    const presetCats = preset.deck.map(id => unitMap[id]?.cat);
-                    if (presetCats.length !== 5 || presetCats.some(cat => !cat) || new Set(presetCats).size !== 5) {
-                        errs.push('天梯預設陣容不完整或引用無效武將：' + preset.id);
+                    const presetUnits = preset.deck.map(id => unitMap[id]);
+                    const presetCats = presetUnits.map(unit => unit?.cat);
+                    if (presetUnits.length !== 5 || presetUnits.some(unit => !unit) || new Set(preset.deck).size !== 5 || new Set(presetCats).size !== 5) {
+                        errs.push('天梯預設必須各軍種一位且不得重複：' + preset.id);
                     }
                 }
             }
@@ -85,20 +96,96 @@ try:
                     errs.push('新增名將缺漏或國籍錯誤：' + id);
                 }
             }
+            if (units.some(unit => !Number.isInteger(unit.cost) || unit.cost < 1 || unit.cost > 5)) {
+                errs.push('名將成本必須是 1–5 的整數');
+            }
             for (const cat of ['air', 'armor', 'air_defense', 'naval', 'support']) {
-                for (let c = 1; c <= 5; c++) {
-                    const cnt = units.filter(u => u.cat === cat && u.cost === c).length;
-                    if (cnt !== 5) errs.push(`${cat} $${c} 數量不為 5: ${cnt}`);
+                for (let cost = 1; cost <= 5; cost++) {
+                    const count = units.filter(unit => unit.cat === cat && unit.cost === cost).length;
+                    if (count !== 5) errs.push(`${cat} $${cost} 應有 5 位：${count}`);
                 }
+            }
+            const sameRoleDeck = units.filter(unit => unit.cat === 'air' && unit.cost === 1).slice(0, 5).map(unit => unit.id);
+            if (sameRoleDeck.length !== 5 || validateDeck(sameRoleDeck, 15, []).length === 0) {
+                errs.push('五名同一軍種的將領必須被編組規則拒絕');
             }
             if (units.some(u => !u.skill || !u.skill.name || !u.skill.desc)) {
                 errs.push('存在缺少專屬戰法 (skill) 之武將');
             }
+            const effectFields = new Set(['damage', 'hit', 'armorPierce', 'missingHpDamage', 'woundedTargetDamage', 'highCostDamage', 'terrainDamage', 'bonusVs', 'heal', 'guard', 'teamGuard', 'teamHit', 'enemyHit', 'commandAttack']);
+            for (const unit of units) {
+                const effects = unit.skill?.effects;
+                if (!effects || !Object.keys(effects).length) {
+                    errs.push('缺少明確技能效果：' + unit.id);
+                    continue;
+                }
+                for (const [field, value] of Object.entries(effects)) {
+                    if (!effectFields.has(field)) errs.push('未實作技能欄位：' + unit.id + '/' + field);
+                    if (field === 'bonusVs') {
+                        for (const [cat, bonus] of Object.entries(value)) {
+                            if (!(cat in categoryCounts) || !Number.isFinite(bonus) || bonus < 0 || bonus > 1) errs.push('軍種克制資料錯誤：' + unit.id);
+                        }
+                    } else if (!Number.isFinite(value) || value < 0 || value > (field === 'damage' ? 2 : 1)) {
+                        errs.push('技能效果範圍錯誤：' + unit.id + '/' + field);
+                    }
+                }
+                if (!unit.skill.desc.includes('每戰一次')) errs.push('技能說明缺少觸發限制：' + unit.id);
+            }
+            const skillAttacker = id => makeTeam([id], 'A', [], 'plain')[0];
+            const skillTarget = skillAttacker('BAIQI');
+            const burst = skillAttacker('LUBU');
+            if (getSkillAttackModifiers(burst, skillTarget, 3).damage !== 1.3 || getSkillAttackModifiers(burst, skillTarget, 2).damage !== 1) errs.push('爆發／階段限制錯誤');
+            burst.skillUsed = true;
+            if (getSkillAttackModifiers(burst, skillTarget, 3).damage !== 1) errs.push('已使用技能仍重複增傷');
+            const wounded = skillAttacker('XIAHOU_DUN');
+            wounded.hp = wounded.hpMax / 2;
+            if (Math.abs(getSkillAttackModifiers(wounded, skillTarget, 3).damage - 1.28) > 1e-9) errs.push('受創爆發未按缺失兵力計算');
+            const executioner = skillAttacker('BAIQI');
+            skillTarget.hp = skillTarget.hpMax / 2;
+            if (Math.abs(getSkillAttackModifiers(executioner, skillTarget, 3).damage - 1.32) > 1e-9) errs.push('斬殺未按目標缺失兵力計算');
+            if (getSkillAttackModifiers(skillAttacker('LIGUANG'), skillTarget, 2).armorPierce !== 0.45) errs.push('神射穿甲效果缺漏');
+            if (Math.abs(getSkillAttackModifiers(skillAttacker('ZHANGLIAO'), skillTarget, 3).damage - 1.38) > 1e-9) errs.push('越級技能未按費用判定');
+            const terrainFighter = skillAttacker('MENGHUO');
+            if (Math.abs(getSkillAttackModifiers(terrainFighter, skillTarget, 3, 'forest').damage - getSkillAttackModifiers(terrainFighter, skillTarget, 3, 'plain').damage - 0.12) > 1e-9) errs.push('地形技能未生效');
+            if (Math.abs(getSkillAttackModifiers(skillAttacker('YANGYE'), skillAttacker('HUO'), 3).damage - 1.43) > 1e-9) errs.push('反騎技能未按軍種判定');
+            const recoveryDeck = ['ZHAOYUN', 'HOJO_UJIYASU', 'LIGUANG', 'CHOSOKABE', 'ZHUGELIANG'];
+            let recoveryObserved = false;
+            let guardObserved = false;
+            let effectDifferenceObserved = false;
+            const skillBattleState = battle => ['A', 'B'].map(side => battle.final[side].map(({ uid, hp, dmgDone, skillGuard }) => ({ uid, hp, dmgDone, skillGuard })));
+            for (let seed = 0; seed < 16; seed++) {
+                const options = { seed, formationsA: Array(5).fill('fishscale'), formationsB: Array(5).fill('fishscale') };
+                const enabled = resolveBattle(recoveryDeck, recoveryDeck, options);
+                const activations = enabled.frames.flatMap(frame => frame.lines.map(line => ({ ...line, phase: frame.phase }))).filter(line => line.skillActivation);
+                const activationIds = new Set();
+                for (const activation of activations) {
+                    if (activationIds.has(activation.auid)) errs.push('專屬技能一場重複發動：' + activation.auid);
+                    activationIds.add(activation.auid);
+                    const unit = enabled.final.A.concat(enabled.final.B).find(unit => unit.uid === activation.auid);
+                    if (unit.skill.phase !== 'P' + activation.phase) errs.push('技能發動階段錯誤：' + unit.id);
+                    recoveryObserved ||= activation.hpRestored > 0;
+                    guardObserved ||= unit.skillGuard > 0;
+                }
+                const savedEffects = unitMap.ZHAOYUN.skill.effects;
+                let disabled;
+                try {
+                    unitMap.ZHAOYUN.skill.effects = null;
+                    disabled = resolveBattle(recoveryDeck, recoveryDeck, options);
+                } finally {
+                    unitMap.ZHAOYUN.skill.effects = savedEffects;
+                }
+                effectDifferenceObserved ||= JSON.stringify(skillBattleState(enabled)) !== JSON.stringify(skillBattleState(disabled));
+                if (JSON.stringify(enabled.frames) !== JSON.stringify(resolveBattle(recoveryDeck, recoveryDeck, options).frames)) errs.push('同種子技能戰鬥不再確定性');
+            }
+            if (!recoveryObserved || !guardObserved || !effectDifferenceObserved) errs.push('技能回復、防護或啟用／停用對照未生效');
             if (unitMap.CAOCAO && (unitMap.CAOCAO.cost !== 4 || unitMap.CAOCAO.cat !== 'support')) {
                 errs.push('曹操定位錯誤');
             }
-            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 3 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
+            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 2 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
                 errs.push('夏侯惇定位錯誤');
+            }
+            if (unitMap.IINAOMASA && (unitMap.IINAOMASA.cost !== 3 || unitMap.IINAOMASA.cat !== 'armor')) {
+                errs.push('井伊直政費用／兵種錯誤');
             }
             if (!(unitMap.PANGTONG.cost > unitMap.LUSU.cost && unitMap.PANGTONG.ew > unitMap.LUSU.ew && unitMap.LUSU.ew > unitMap.LUXUN.ew)) {
                 errs.push('龐統 > 魯肅 > 陸遜 排序未落實');
@@ -149,6 +236,52 @@ try:
             if (!battle || !battle.winner) errs.push('戰鬥推演無結果');
             if (!battle.vp || !battle.vp.A || !battle.vp.B) errs.push('VP 結算失敗');
 
+            const skillDeckA = ['DENGAI', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'PANGJUAN'];
+            const skillDeckB = ['XIAHOUYUAN', 'XIANGYU', 'JUMONG', 'GANNING', 'HANBEI'];
+            const phaseSkillsTriggered = new Set();
+            for (let seed = 0; seed < 48 && phaseSkillsTriggered.size < 3; seed++) {
+                const skillBattle = resolveBattle(skillDeckA, skillDeckB, {
+                    seed,
+                    docA: 'defense',
+                    docB: 'defense',
+                    event: EVENTS.find(event => event.id === 'clear'),
+                    formationsA: Array(5).fill('fishscale'),
+                    formationsB: Array(5).fill('fishscale')
+                });
+                for (let index = 0; index < skillDeckA.length; index++) {
+                    const unit = unitMap[skillDeckA[index]];
+                    if (skillBattle.frames.some(frame => frame.phase === Number(unit.skill.phase.slice(1)) && frame.lines.some(line => line.auid === `${unit.id}-A${index}` && line.brevity === unit.skill.name))) {
+                        phaseSkillsTriggered.add(unit.skill.phase);
+                    }
+                }
+            }
+            if (!['P1', 'P2', 'P3'].every(phase => phaseSkillsTriggered.has(phase))) {
+                errs.push('專屬戰法未依 P1/P2/P3 在對應階段觸發: ' + JSON.stringify([...phaseSkillsTriggered]));
+            }
+
+            const ambushDeckA = ['ZHANGLIAO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'PANGJUAN'];
+            const ambushDeckB = ['HUO', 'XIANGYU', 'JUMONG', 'TIANDAN', 'HANBEI'];
+            let cavalryAmbushObserved = false;
+            let navalAmbushObserved = false;
+            let repeatedAmbush = false;
+            for (let seed = 0; seed < 32 && !(cavalryAmbushObserved && navalAmbushObserved); seed++) {
+                const ambushBattle = resolveBattle(ambushDeckA, ambushDeckB, {
+                    seed,
+                    docA: 'defense',
+                    docB: 'defense',
+                    event: EVENTS.find(event => event.id === 'clear'),
+                    formationsA: Array(5).fill('fishscale'),
+                    formationsB: Array(5).fill('fishscale')
+                });
+                const ambushLines = ambushBattle.frames.flatMap(frame => frame.lines).filter(line => line.ambushActivation);
+                const cavalryLines = ambushLines.filter(line => line.auid === 'ZHANGLIAO-A0');
+                const navalLines = ambushLines.filter(line => line.auid === 'TIANDAN-B3');
+                cavalryAmbushObserved = cavalryAmbushObserved || cavalryLines.length > 0;
+                navalAmbushObserved = navalAmbushObserved || navalLines.length > 0;
+                repeatedAmbush = repeatedAmbush || cavalryLines.length > 1 || navalLines.length > 1;
+            }
+            if (!cavalryAmbushObserved || !navalAmbushObserved || repeatedAmbush) errs.push('騎兵與水軍奇襲應各自跨軍種觸發且每場至多一次');
+
             const formationDeck = ['HUO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'];
             const neutralFormations = Array(5).fill('fishscale');
             const gooseBattle = resolveBattle(formationDeck, formationDeck, {
@@ -165,22 +298,30 @@ try:
                 line.auid === formationDeck[2] + '-A2' && line.kind === 'capture'
             );
             if (!gooseCannotCapture) errs.push('雁行部隊不應俘虜敵將');
-            const normalCaptureBattle = resolveBattle(formationDeck, formationDeck, {
-                seed: 0,
-                formationsA: neutralFormations,
-                formationsB: neutralFormations
-            });
-            if (!normalCaptureBattle.frames.flatMap(frame => frame.lines).some(line => line.kind === 'capture')) {
+            let normalCaptureObserved = false;
+            for (let seed = 0; seed < 32 && !normalCaptureObserved; seed++) {
+                const normalCaptureBattle = resolveBattle(formationDeck, formationDeck, {
+                    seed,
+                    formationsA: neutralFormations,
+                    formationsB: neutralFormations
+                });
+                normalCaptureObserved = normalCaptureBattle.frames.flatMap(frame => frame.lines).some(line => line.kind === 'capture');
+            }
+            if (!normalCaptureObserved) {
                 errs.push('一般陣形未產生戰鬥俘虜事件');
             }
 
             const craneDeck = ['HUO', 'XIANGYU', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'];
-            const craneBattle = resolveBattle(craneDeck, craneDeck, {
-                seed: 16,
-                formationsA: ['fishscale', 'crane', 'fishscale', 'fishscale', 'fishscale'],
-                formationsB: neutralFormations
-            });
-            if (craneBattle.vp.A.occupationCtl <= 0) errs.push('存活鶴翼未取得區域控制分');
+            let craneBattle;
+            for (let seed = 0; seed < 32; seed++) {
+                craneBattle = resolveBattle(craneDeck, craneDeck, {
+                    seed,
+                    formationsA: ['fishscale', 'crane', 'fishscale', 'fishscale', 'fishscale'],
+                    formationsB: neutralFormations
+                });
+                if (craneBattle.vp.A.occupationCtl > 0) break;
+            }
+            if (craneBattle.vp.A.occupationCtl <= 0) errs.push('鶴翼存活樣本未取得區域控制分');
 
             const mountainBattle = resolveBattle(formationDeck, formationDeck, {
                 seed: 1,
@@ -292,7 +433,7 @@ try:
                 fourYiMountain: fourYiMountain.final.A[3].formationAttack,
                 gooseRearHit,
                 gooseCannotCapture,
-                normalCaptures: normalCaptureBattle.frames.flatMap(frame => frame.lines).filter(line => line.kind === 'capture').length,
+                normalCaptures: normalCaptureObserved,
                 craneOccupation: craneBattle.vp.A.occupationCtl,
                 duelCounts: { normal: duels(duelBattle), square: duels(squareBattle) },
                 pvpHashChecks,

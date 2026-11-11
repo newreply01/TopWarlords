@@ -14,7 +14,7 @@ const CATS = {
   support:     { label: '軍師奇謀', short: 'STR', color: '#4ade80' }
 };
 
-/* 五大兵團專屬槽位 */
+/* 五軍種各一位將領；每隊預算仍為 15 */
 const SLOTS = [
   { id: 's1', label: '突騎槽', fixed: 'air' },
   { id: 's2', label: '重甲槽', fixed: 'armor' },
@@ -33,7 +33,7 @@ const TRAITS = {
   AEGIS:   '斷騎護陣：階段二可協同神射攔截敵方突騎（火力 55%）',
   SUB:     '潛行夜襲：隱匿極高；對未設防部隊傷害 ×1.3',
   ASW:     '看破反伏：專克潛行夜襲與忍者，傷害 ×1.6',
-  AMBUSH:  '一番槍先登：對高費（+2 費以上）敵將傷害 ×1.25',
+  AMBUSH:  '奇襲（跨軍種）：每場首次成功攻擊高費（+2 費以上）目標，傷害 ×1.25',
   SWARM:   '多路並進：同時攻擊兩個目標（單次傷害 ×0.6）',
   EW:      '運籌帷幄：謀略值領先越多，敵方命中最多 −15%、己方攻擊最多 +8%',
   SEAD:    '先制破陣：階段一先制打擊敵方神射箭陣',
@@ -64,7 +64,7 @@ const RAW_UNITS = [
   ["XIAHOUYUAN", "夏侯淵", 'air', 2, 'B', "虎步關右·三日五百", "曹魏名將，善於極速奔襲調動部隊，「典軍校尉夏侯淵，三日五百，六日一千」。", 48, 12, ["CAS", "LR"], [], 128, 74, 0],
   ["GONGSUNDU", "公孫瓚", 'air', 1, 'C', "白馬義從·塞外破胡", "幽州霸主，親自挑選百步穿楊之騎射勇士組建「白馬義從」，追殺胡虜威震塞北。", 34, 10, ["LR", "TRUE_AT"], [], 98, 54, 0],
   ["DATE", "伊達政宗", 'air', 3, 'F', "獨眼龍·騎鐵先驅", "奧羽霸主，創立裝備火繩槍與重甲之「騎馬鐵砲隊」，兼具機動性與毀滅齊射。", 58, 20, ["EW", "LR", "CAS"], ["STAMINA_DEEP"], 160, 92, 0.02],
-  ["EULJI", "乙支文德", 'air', 1, 'H', "神算佯敗·薩水奇襲", "高句麗名將，以退為進示弱誘隋軍三十萬深入，於薩水截水突擊斬殺殆盡。", 36, 20, ["EW", "LR"], [], 98, 54, 0],
+  ["EULJI", "乙支文德", 'air', 1, 'H', "佯退誘敵·薩水反擊", "高句麗將領，於隋軍深入後利用佯退與追擊取得薩水之戰勝利；截水築壩故事缺乏同時代來源支持。", 36, 20, ["EW", "LR"], [], 98, 54, 0],
   ["LINGTONG", "凌統", 'air', 1, 'B', "國士先鋒·親率死戰", "東吳名將，每戰皆身先士卒作為銳鋒，合肥之戰親率三百突騎捨命救孫權。", 32, 10, ["CAS", "TRUE_AT"], [], 96, 54, 0],
   ["YAMAGATA", "山縣昌景", 'air', 2, 'F', "赤備猛將·長驅衝鋒", "武田四天王之首，身穿鮮紅鎧甲之赤備隊衝入敵陣，威名震懾織田德川聯軍。", 46, 12, ["CAS", "LR"], [], 128, 74, 0.02],
   ["TACHIBANA", "立花宗茂", 'air', 4, 'G', "西國無雙·勇猛無匹", "九州戰神，被豐臣秀吉譽為「西國無雙」，無論野戰突擊或固守皆勇烈超群。", 70, 18, ["LR", "CAS", "TRUE_AT"], ["STAMINA_DEEP"], 202, 114, 0.03],
@@ -82,7 +82,7 @@ const RAW_UNITS = [
   ["GUANYU", "關羽", 'armor', 5, 'C', "威震華夏·萬人敵重將", "漢末名將，水淹七軍擒于禁斬龐德威震華夏，白馬坡斬顏良解白馬之圍。", 14, 18, ["APS", "TRUE_AT", "HEAVY"], ["HEAVY_AP"], 358, 132, 0.26],
   ["ZHANGFEI", "張飛", 'armor', 4, 'D', "據水斷橋·萬人敵猛張飛", "漢末勇將，長坂坡據水斷橋瞋目橫矛大喝退曹軍，葭萌關夜戰力挫張郃。", 10, 10, ["HEAVY", "TRUE_AT"], ["HEAVY_AP"], 298, 108, 0.24],
   ["HOJO_UJIYASU", "北條氏康", 'armor', 3, 'E', "相模之獅·小田原堅守", "後北條氏第三代當主，長期經營相模與關東，於河越合戰等戰事展現防衛與統率能力。", 12, 18, ["HEAVY", "APS"], ["STAMINA_DEEP"], 254, 84, 0.26],
-  ["XIAHOU_DUN", "夏侯惇", 'armor', 3, 'F', "魏之元勳·親冒矢石", "曹魏重要將領與宗室重臣，長期參與曹操征戰並任前線統帥，以忠勇和治軍著稱。", 10, 12, ["HEAVY", "TRUE_AT"], ["HEAVY_AP"], 250, 88, 0.24],
+  ["XIAHOU_DUN", "夏侯惇", 'armor', 2, 'F', "魏之元勳·親冒矢石", "曹魏重要將領與宗室重臣，長期參與曹操征戰並任前線統帥，以忠勇和治軍著稱。", 10, 12, ["HEAVY", "TRUE_AT"], ["HEAVY_AP"], 250, 88, 0.24],
   ["TACHIBANAD", "立花道雪", 'armor', 3, 'G', "雷神化身·斬雷鐵壁", "九州大名，傳說曾拔刀斬雷身患腿疾，坐轎指揮重甲步陣數十年未嘗一敗。", 10, 18, ["APS", "HEAVY"], ["STAMINA_DEEP"], 250, 86, 0.25],
   ["CHOIYOUNG", "崔瑩", 'armor', 2, 'H', "黃金如石·高麗柱石", "高麗末期名將，「視黃金如爛泥」，歷經百戰擊潰倭寇與紅巾軍，一生剛毅不屈。", 10, 14, ["APS", "HEAVY", "TRUE_AT"], [], 210, 68, 0.24],
   ["DIANWEI", "典韋", 'armor', 2, 'A', "古之惡來·重雙鐵戟", "曹操親隨猛將，勇力過人力抗大旗，宛城之戰手提雙鐵戟堵塞營門力戰至死。", 8, 6, ["HEAVY", "TRUE_AT"], ["HEAVY_AP"], 210, 72, 0.23],
@@ -93,7 +93,7 @@ const RAW_UNITS = [
   ["YANGYE", "楊業", 'armor', 2, 'B', "金刀楊無敵·雁門破遼", "北宋名將，雁門關大捷斬遼國節度使，陳家谷身中數十箭力竭被俘不食而死。", 10, 14, ["HEAVY", "APS", "TRUE_AT"], [], 208, 68, 0.24],
   ["CAOREN", "曹仁", 'armor', 2, 'C', "鐵壁天人·固守樊城", "曹魏第一防守大將，濡須與樊城數次面對絕境堅壁抗敵，被曹操譽為「天人之勇」。", 8, 16, ["HEAVY", "APS"], ["STAMINA_DEEP"], 212, 64, 0.26],
   ["ZHOUTAI", "周泰", 'armor', 1, 'D', "滿身傷疤·身如鐵石", "東吳猛將，宣城之戰以身代盾護衛孫權，身上傷口幾十處皮膚如刻畫。", 8, 4, ["HEAVY", "TRUE_AT"], [], 170, 52, 0.22],
-  ["IINAOMASA", "井伊直政", 'armor', 2, 'F', "井伊赤鬼·赤備先鋒", "德川四天王之一，身披赤紅厚甲勇猛善戰，長篠與關原奮勇作戰負傷不退。", 12, 10, ["APS", "HEAVY", "TRUE_AT"], [], 206, 68, 0.23],
+  ["IINAOMASA", "井伊直政", 'armor', 3, 'F', "井伊赤鬼·赤備先鋒", "德川四天王之一，身披赤紅厚甲勇猛善戰，長篠與關原奮勇作戰負傷不退。", 12, 10, ["APS", "HEAVY", "TRUE_AT"], [], 206, 68, 0.23],
   ["KATOKIYOMASA", "加藤清正", 'armor', 1, 'G', "賤岳七本槍·築城重將", "豐臣家猛將，朝鮮之役建立蔚山倭城抗明聯軍，手使片鎌槍防禦極堅。", 8, 8, ["HEAVY", "APS"], [], 170, 52, 0.23],
   ["YUJIN", "于禁", 'armor', 1, 'A', "毅重治軍·持節抗敵", "曹魏五子良將，行軍治軍最為威嚴沉穩，逢難必爭死守營陣。", 8, 14, ["HEAVY", "APS"], [], 170, 50, 0.24],
   ["LIGUANG", "李廣", 'air_defense', 5, 'A', "漢之飛將·射石沒羽", "西漢名將，射術通神，「林暗草驚風，將軍夜引弓；平明尋白羽，沒在石稜中」。", 18, 22, ["AA_LONG", "CIWS"], ["PASSIVE_VOLLEY"], 256, 132, 0.06],
@@ -109,7 +109,7 @@ const RAW_UNITS = [
   ["SAIKA", "雜賀孫市", 'air_defense', 3, 'F', "紀伊鐵砲·八咫烏之王", "雜賀眾首領鈴木重秀，率鐵砲傭兵重創織田信長大軍，火器游擊戰之宗師。", 20, 16, ["CIWS", "AA_LONG", "TRUE_AT"], ["PASSIVE_VOLLEY"], 162, 88, 0.04],
   ["YANGMANCHUN", "楊萬春", 'air_defense', 2, 'G', "安市神弓·射退太宗", "高句麗安市城城主，堅守城池數月，據傳於城頭開硬弓射傷敵方先鋒。", 14, 14, ["CIWS", "AA_LONG"], [], 132, 68, 0.06],
   ["HULUGUANG", "斛律光", 'air_defense', 4, 'H', "落雕都督·百步穿石", "北齊軍事支柱，號「落雕都督」，神射天下第一，臨陣射箭無不應弦而倒，生平百戰未嘗一敗。", 16, 24, ["AA_LONG", "CIWS", "TRUE_AT"], [], 202, 106, 0.06],
-  ["ZHANGHE", "張郃", 'air_defense', 3, 'A', "木門伏射·巧變良將", "曹魏五子良將，擅於利用地形設伏，街亭一戰斷蜀軍水源大破馬謖。", 22, 20, ["AA_LONG", "CIWS"], ["PASSIVE_VOLLEY"], 166, 86, 0.06],
+  ["ZHANGHE", "張郃", 'air_defense', 3, 'A', "巧變良將·街亭斷汲", "曹魏五子良將之一，善辨地形與軍勢；街亭之戰截斷馬謖軍水源取勝，後於木門追擊蜀軍時中伏身亡。", 22, 20, ["AA_LONG", "CIWS"], ["PASSIVE_VOLLEY"], 166, 86, 0.06],
   ["ZHOUYAFU", "周亞夫", 'air_defense', 4, 'C', "細柳嚴軍·強弩堅陣", "西漢名將條侯，細柳營號令嚴整「軍中聞將軍令不聞天子之詔」，平定七國之亂箭陣固若金湯。", 16, 30, ["AA_LONG", "CIWS", "EW"], ["FORMATION_SHIELD"], 206, 102, 0.08],
   ["ZONGZE", "宗澤", 'air_defense', 2, 'D', "汴京連弩·過河名將", "南宋初年抗金名臣，重整東京汴京城防，築連弩箭樓二十餘座阻截金騎。", 14, 20, ["AA_LONG", "CIWS"], [], 134, 66, 0.06],
   ["TORII", "鳥居元忠", 'air_defense', 1, 'E', "三河武士·伏見鐵砲血戰", "德川忠臣，伏見城以少數守軍搭配鐵砲長弓死守半月，拖住西軍四萬主力，壯烈殉節。", 12, 14, ["AA_LONG", "CIWS"], [], 104, 50, 0.06],
@@ -123,7 +123,7 @@ const RAW_UNITS = [
   ["KUANGZHANG", "匡章", 'air_defense', 1, 'D', "齊國元戎·垂沙破楚", "戰國齊國名將，統帥齊國萬弩之陣五國伐秦攻破函谷關，垂沙之役大破楚軍，威震列國。", 14, 18, ["AA_LONG", "SAT"], [], 102, 52, 0.04],
   ["HONDA_TADATSUGU", "本多忠次", 'air_defense', 1, 'F', "鐵砲先鋒·三河老將", "德川家老將，本多忠勝之叔父，長篠之戰指揮三河足輕鐵砲輪射立下首功。", 14, 14, ["AA_LONG", "CIWS"], [], 100, 48, 0.02],
   ["ZHOUYU", "周瑜", 'support', 3, 'A', "雅量江東·赤壁連環火", "東吳大都督，精研水戰與火攻奇策，赤壁之戰以少勝多一把大火焚盡曹軍樓船水寨。", 24, 64, ["EW", "DEEP"], ["STRATEGIST", "FORMATION_SHIELD"], 158, 88, 0.04],
-  ["YISUNSIN", "李舜臣", 'naval', 5, 'D', "忠武公·鳴梁神話龜船", "朝鮮海神，創制鐵甲覆頂之「龜甲船」，於鳴梁海峽以十二艘板屋船大破敵艦百餘艘。", 84, 24, ["SUB", "DEEP", "ASW"], ["STAMINA_DEEP"], 350, 132, 0.14],
+  ["YISUNSIN", "李舜臣", 'naval', 5, 'D', "忠武公·鳴梁扼流", "朝鮮水軍將領，鳴梁之戰以十三艘戰船利用海峽與潮流抗擊優勢敵軍；戰前奏報尚有十二艘，不與實戰船數或龜船事蹟混為一談。", 84, 24, ["SUB", "DEEP", "ASW"], ["STAMINA_DEEP"], 350, 132, 0.14],
   ["KUKI", "九鬼嘉隆", 'naval', 4, 'E', "海賊大名·鐵甲船破水", "織田家水軍統帥，建造外覆鐵皮以防箭火之巨型「鐵甲船」，第二次木津川口之戰大勝毛利水軍。", 32, 20, ["AEGIS", "ASW", "TRUE_AT"], ["STAMINA_DEEP"], 284, 108, 0.14],
   ["CHOSOKABE", "長宗我部元親", 'naval', 3, 'F', "土佐之蝠·一領具足", "四國霸主，創立水陸兩棲「一領具足」強襲軍團，橫掃四國，海陸突襲所向披靡。", 40, 22, ["AMBUSH", "SUB"], ["STAMINA_DEEP"], 222, 88, 0.1],
   ["JANGPOGO", "張保皐", 'naval', 3, 'H', "清海鎮霸·東亞海王", "新羅海上霸主，於清海鎮築城建立海上貿易與強大海軍，肅清黃海海盜。", 32, 24, ["AEGIS", "ASW"], ["STAMINA_DEEP"], 224, 86, 0.12],
@@ -362,7 +362,7 @@ const UNIT_SKILLS = {
   HULUGUANG: { name: '落雕都督', phase: 'P2', desc: '百步穿石未嘗一敗，開局精準狙擊敵方高速突擊名將' },
   HUANGZHONG: { name: '定軍神弦', phase: 'P2', desc: '老當益壯定軍斬帥，對高費用敵將造成額外斬首傷害' },
   JUMONG: { name: '東明神矢', phase: 'P2', desc: '高句麗開國神弓，無視敵方隱匿與夜色掩護精準命中' },
-  ZHANGHE: { name: '木門伏弩', phase: 'P2', desc: '巧變良將設伏木門道，對突進之敵方騎兵造成致命伏射' },
+  ZHANGHE: { name: '街亭斷汲', phase: 'P2', desc: '取材街亭斷水與善辨地形的記載；神射反騎效果屬遊戲職能設計' },
   ZONGZE: { name: '汴京連弩', phase: 'P2', desc: '東京留守築連弩機樓，加固全軍防線並阻截敵騎' },
   GENGYAN: { name: '雲台破齊', phase: 'P2', desc: '連下四十六郡圍城打援，強弩齊射壓制敵方側翼' },
   FENGYI: { name: '大樹伏弩', phase: 'P2', desc: '大樹將軍謙退設伏，隱蔽箭陣免遭點名並強化反擊' },
@@ -381,7 +381,7 @@ const UNIT_SKILLS = {
   TIANDAN: { name: '即墨火牛陣', phase: 'P2', desc: '千頭五彩火牛狂奔衝陣，以兩孤城復齊七十餘城，全場烈焰混亂' },
   LUMENG: { name: '白衣渡江', phase: 'P1', desc: '白衣商船無聲奪取烽火台，極高隱匿直襲敵方主帥與中軍' },
   CAOBIN: { name: '浮橋平江南', phase: 'P2', desc: '北宋開國第一元帥架浮橋渡長江，統帥全軍協同護陣並強化攻堅' },
-  YISUNSIN: { name: '鳴梁龜船', phase: 'P2', desc: '忠武公十二艘破百三十三艘，鐵甲龜船進退自如兼克潛行奇兵' },
+  YISUNSIN: { name: '鳴梁扼流', phase: 'P2', desc: '取材鳴梁海峽以潮流與地形抵禦優勢敵軍的戰役，不附會龜船參戰' },
   YUYUNWEN: { name: '采石霹靂', phase: 'P2', desc: '采石磯一萬八千破完顏亮四十萬大軍，海鰍船霹靂火砲轟碎敵陣' },
   JIANGWEI: { name: '九伐天水', phase: 'P2', desc: '天水麒麟文武兼備，兼具軍師謀略先機與險道穿插破甲' },
   XUHUANG: { name: '長驅破十屯', phase: 'P3', desc: '周亞夫之風長驅直入，連破關羽十重鹿角無視防禦工事' },
@@ -429,6 +429,203 @@ const UNIT_SKILLS = {
   SHIMAZU_YOSHIHISA: { name: '薩摩釣野伏', phase: 'P1', desc: '九州三州太守，配合先登與突騎設伏合圍敵軍' }
 };
 
+const UNIT_SKILL_EFFECTS = {
+  HUO: { damage: 1.22, highCostDamage: 0.12 },
+  WEI: { damage: 1.08, teamGuard: 0.06, teamHit: 0.03 },
+  CHENQINGZHI: { damage: 1.2, teamHit: 0.04 },
+  LUBU: { damage: 1.3 },
+  SHINGEN: { damage: 1.14, guard: 0.1, teamHit: 0.02 },
+  DENGAI: { damage: 1.2, hit: 0.12 },
+  ZHANGLIAO: { damage: 1.16, highCostDamage: 0.22 },
+  ZHAOYUN: { damage: 1.08, missingHpDamage: 0.3, guard: 0.1 },
+  YOSHITSUNE: { damage: 1.15, armorPierce: 0.5, hit: 0.06 },
+  KENSHIN: { damage: 1.12, armorPierce: 0.45, enemyHit: 0.03 },
+  ZHAOSHE: { damage: 1.12, highCostDamage: 0.2, hit: 0.04 },
+  SUNCE: { damage: 1.24, hit: 0.04 },
+  MACHO: { damage: 1.12, bonusVs: { armor: 0.18, air_defense: 0.12 } },
+  EULJI: { damage: 1.08, enemyHit: 0.06, guard: 0.08 },
+  GAISUWEN: { damage: 1.1, armorPierce: 0.4 },
+  XIAHOUYUAN: { damage: 1.18, hit: 0.1 },
+  GONGSUNDU: { damage: 1.1, armorPierce: 0.3, hit: 0.06 },
+  KIMYUSHIN: { damage: 1.08, teamGuard: 0.07, heal: 0.08 },
+  DATE: { damage: 1.14, armorPierce: 0.55 },
+  YUKIMURA: { damage: 1.14, highCostDamage: 0.26 },
+  PANGDE: { damage: 1.06, missingHpDamage: 0.5 },
+  LINGTONG: { damage: 1.08, teamGuard: 0.06, guard: 0.08 },
+  MAEDATOSHI: { damage: 1.08, armorPierce: 0.65 },
+  TACHIBANA: { damage: 1.12, armorPierce: 0.25, guard: 0.07 },
+  YAMAGATA: { damage: 1.18, teamHit: 0.02 },
+  BAIQI: { damage: 1.12, woundedTargetDamage: 0.4 },
+  WANGJIAN: { damage: 1.1, teamGuard: 0.1 },
+  XIANGYU: { damage: 1.28, missingHpDamage: 0.12 },
+  YUEFEI: { damage: 1.1, bonusVs: { air: 0.3 }, teamGuard: 0.06 },
+  GUANYU: { damage: 1.22, woundedTargetDamage: 0.16 },
+  LIANPO: { damage: 1, guard: 0.18 },
+  MENGTIAN: { damage: 1.04, teamGuard: 0.12 },
+  ZHANGFEI: { damage: 1.18, enemyHit: 0.04 },
+  SUNJIAN: { damage: 1.26, hit: 0.03 },
+  CHOIYOUNG: { damage: 1.1, guard: 0.14 },
+  CAOREN: { damage: 1.02, guard: 0.2 },
+  XIAHOU_DUN: { damage: 1.08, missingHpDamage: 0.4 },
+  YANGYE: { damage: 1.08, bonusVs: { air: 0.35 } },
+  HOJO_UJIYASU: { damage: 1.04, heal: 0.16, guard: 0.06 },
+  HONDA: { damage: 1.1, guard: 0.16, heal: 0.06 },
+  DIANWEI: { damage: 1.06, teamGuard: 0.09, guard: 0.04 },
+  XUCHU: { damage: 1.14, guard: 0.09 },
+  YUJIN: { damage: 1.02, teamGuard: 0.08, teamHit: 0.02 },
+  TACHIBANAD: { damage: 1.12, guard: 0.12 },
+  SHIMAZUY: { damage: 1.1, missingHpDamage: 0.32 },
+  ZHOUTAI: { damage: 1.02, guard: 0.16, heal: 0.1 },
+  GYEBAEK: { damage: 1, missingHpDamage: 0.4, guard: 0.12 },
+  SHIBATA: { damage: 1.22, hit: 0.02 },
+  KATOKIYOMASA: { damage: 1, teamGuard: 0.1, guard: 0.03 },
+  IINAOMASA: { damage: 1.2, hit: 0.08 },
+  LIMU: { damage: 1.12, bonusVs: { air: 0.24 }, teamHit: 0.03 },
+  ZHOUYAFU: { damage: 1.04, teamGuard: 0.1, enemyHit: 0.02 },
+  LIGUANG: { damage: 1.08, armorPierce: 0.45, hit: 0.05 },
+  YANGYOUJI: { damage: 1.06, hit: 0.18, armorPierce: 0.35 },
+  NOBUNAGA: { damage: 1.2, bonusVs: { air: 0.12, armor: 0.12 } },
+  HANSHIZHONG: { damage: 1.08, armorPierce: 0.6 },
+  TANDAOJI: { damage: 1.04, enemyHit: 0.07, guard: 0.04 },
+  HULUGUANG: { damage: 1.14, bonusVs: { air: 0.16 }, hit: 0.04 },
+  HUANGZHONG: { damage: 1.1, highCostDamage: 0.24 },
+  JUMONG: { damage: 1.1, hit: 0.2 },
+  ZHANGHE: { damage: 1.16, bonusVs: { air: 0.2 } },
+  ZONGZE: { damage: 1.04, teamGuard: 0.07, bonusVs: { air: 0.12 } },
+  GENGYAN: { damage: 1.14, enemyHit: 0.03, hit: 0.03 },
+  FENGYI: { damage: 1.08, guard: 0.1, hit: 0.04 },
+  KUANGZHANG: { damage: 1.06, armorPierce: 0.4, enemyHit: 0.02 },
+  TAISHICI: { damage: 1.16, guard: 0.06 },
+  AKECHI: { damage: 1.24, armorPierce: 0.1 },
+  ASAKURA_SOT: { damage: 1.08, hit: 0.12, teamHit: 0.02 },
+  YANGMANCHUN: { damage: 1.06, guard: 0.15 },
+  CHOIMUSEON: { damage: 1.26, armorPierce: 0.15 },
+  YOICHI: { damage: 1.04, hit: 0.2, armorPierce: 0.25 },
+  SAIKA: { damage: 1.12, bonusVs: { air: 0.14 }, hit: 0.05 },
+  MATSUNAGA: { damage: 1.28, missingHpDamage: 0.1 },
+  TORII: { damage: 1.02, guard: 0.12, heal: 0.08 },
+  HONDA_TADATSUGU: { damage: 1.1, bonusVs: { air: 0.18 }, teamHit: 0.01 },
+  XIEXUAN: { damage: 1.12, enemyHit: 0.06 },
+  TIANDAN: { damage: 1.24, enemyHit: 0.03 },
+  LUMENG: { damage: 1.16, hit: 0.14, armorPierce: 0.2 },
+  CAOBIN: { damage: 1.08, teamGuard: 0.08, teamHit: 0.02 },
+  YISUNSIN: { damage: 1.14, bonusVs: { naval: 0.16 }, guard: 0.08 },
+  YUYUNWEN: { damage: 1.16, bonusVs: { naval: 0.14 } },
+  JIANGWEI: { damage: 1.1, armorPierce: 0.35, teamHit: 0.02 },
+  XUHUANG: { damage: 1.18, armorPierce: 0.5 },
+  GANNING: { damage: 1.24, hit: 0.06 },
+  MOURI_MOTO: { damage: 1.1, enemyHit: 0.04, teamGuard: 0.04 },
+  YUEJIN: { damage: 1.12, armorPierce: 0.55 },
+  WEIYAN: { damage: 1.12, highCostDamage: 0.25 },
+  DINGFENG: { damage: 1.2, missingHpDamage: 0.15 },
+  HUANGGAI: { damage: 1.26, bonusVs: { naval: 0.1 } },
+  JANGPOGO: { damage: 1.08, bonusVs: { naval: 0.18 }, teamHit: 0.03 },
+  HEQI: { damage: 1.08, guard: 0.1, bonusVs: { naval: 0.08 } },
+  CHOSOKABE: { damage: 1.12, heal: 0.1 },
+  KUKI: { damage: 1.08, guard: 0.12, teamHit: 0.02 },
+  HATTORI: { damage: 1.08, highCostDamage: 0.28, hit: 0.06 },
+  JEONGJI: { damage: 1.12, bonusVs: { naval: 0.22 } },
+  MENGHUO: { damage: 1.1, guard: 0.14, terrainDamage: 0.12 },
+  SHAMOKE: { damage: 1.1, highCostDamage: 0.15, terrainDamage: 0.16 },
+  TOUDO: { damage: 1.04, teamGuard: 0.06, teamHit: 0.04 },
+  WAKIZAKA: { damage: 1.18, hit: 0.08 },
+  MURAKAMI: { damage: 1.22, armorPierce: 0.2 },
+  SUNWU: { commandAttack: 0.04, teamGuard: 0.08, enemyHit: 0.04 },
+  ZHUGELIANG: { commandAttack: 0.03, teamGuard: 0.1, teamHit: 0.03 },
+  HANXIN: { commandAttack: 0.08, teamHit: 0.04, enemyHit: 0.02 },
+  ZHANGLIANG: { commandAttack: 0.03, teamHit: 0.09 },
+  WUQI: { commandAttack: 0.06, teamGuard: 0.07, teamHit: 0.02 },
+  SUNBIN: { commandAttack: 0.04, enemyHit: 0.08 },
+  LEYI: { commandAttack: 0.05, teamHit: 0.05, teamGuard: 0.03 },
+  LIUBOWEN: { commandAttack: 0.02, teamHit: 0.05 },
+  CAOCAO: { commandAttack: 0.06, teamHit: 0.03, teamGuard: 0.03 },
+  SIMAYI: { commandAttack: 0.02, teamGuard: 0.09, enemyHit: 0.03 },
+  ZHOUYU: { commandAttack: 0.06, enemyHit: 0.04, teamHit: 0.02 },
+  XUNYU: { commandAttack: 0.02, teamGuard: 0.05, teamHit: 0.05 },
+  PANGTONG: { commandAttack: 0.05, teamHit: 0.04, enemyHit: 0.02 },
+  TOKUGAWA: { commandAttack: 0.02, teamGuard: 0.08, teamHit: 0.02 },
+  TOYOTOMI: { commandAttack: 0.05, teamHit: 0.06 },
+  LUSU: { commandAttack: 0.02, teamGuard: 0.04, teamHit: 0.04 },
+  GUOJIA: { commandAttack: 0.04, enemyHit: 0.05 },
+  JIAXU: { commandAttack: 0.02, enemyHit: 0.07 },
+  LUXUN: { commandAttack: 0.05, enemyHit: 0.03 },
+  FAZHENG: { commandAttack: 0.03, teamHit: 0.06 },
+  PANGJUAN: { commandAttack: 0.04, teamHit: 0.02 },
+  KANBEI: { commandAttack: 0.01, teamHit: 0.05, enemyHit: 0.01 },
+  HANBEI: { commandAttack: 0.02, enemyHit: 0.04 },
+  SANADAMASA: { commandAttack: 0.02, enemyHit: 0.03, teamGuard: 0.02 },
+  SHIMAZU_YOSHIHISA: { commandAttack: 0.01, enemyHit: 0.04, teamHit: 0.02 }
+};
+
+function describeSkillEffects(skill, effects, isCommand) {
+  const percent = value => Math.round(value * 100);
+  const categories = { air: '突騎', armor: '重甲', air_defense: '神射', naval: '奇兵', support: '軍師' };
+  const parts = [];
+  if (effects.damage && effects.damage !== 1) parts.push(`本次傷害 ×${effects.damage}`);
+  if (effects.hit) parts.push(`本次命中 +${percent(effects.hit)} 個百分點（上限 96%）`);
+  if (effects.armorPierce) parts.push(`本次忽略 ${percent(effects.armorPierce)}% 護甲（真實傷害不重複加成）`);
+  if (effects.missingHpDamage) parts.push(`每損失 10% 自身兵力，本次傷害倍率 +${percent(effects.missingHpDamage) / 10}%`);
+  if (effects.woundedTargetDamage) parts.push(`目標每損失 10% 兵力，本次傷害倍率 +${percent(effects.woundedTargetDamage) / 10}%`);
+  if (effects.highCostDamage) parts.push(`目標費用高於自身時，本次傷害倍率 +${percent(effects.highCostDamage)}%`);
+  if (effects.terrainDamage) parts.push(`山岳／森林本次傷害倍率 +${percent(effects.terrainDamage)}%`);
+  for (const [category, bonus] of Object.entries(effects.bonusVs || {})) parts.push(`對${categories[category]}本次傷害倍率 +${percent(bonus)}%`);
+  if (effects.heal) parts.push(`回復自身 ${percent(effects.heal)}% 最大兵力`);
+  if (effects.guard) parts.push(`自身後續受傷減少 ${percent(effects.guard)}%`);
+  if (effects.teamGuard) parts.push(`全軍後續受傷減少 ${percent(effects.teamGuard)}%（同類取最高）`);
+  if (effects.commandAttack) parts.push(`全軍後續傷害 ×${1 + effects.commandAttack}`);
+  if (effects.teamHit) parts.push(`全軍後續命中 +${percent(effects.teamHit)} 個百分點（同類取最高）`);
+  if (effects.enemyHit) parts.push(`敵軍後續命中 -${percent(effects.enemyHit)} 個百分點（同類取最高）`);
+  return `${skill.phase} ${isCommand ? '開局號令' : '首次命中時'}，每戰一次：${parts.join('；')}。持續效果至戰鬥結束。`;
+}
+
+const TACTICAL_ROLE_OVERRIDES = {
+  ZHANGLIAO: ['AMBUSH'],
+  EULJI: ['AMBUSH']
+};
+
+const HISTORICAL_AUDIT = {
+  GONGSUNDU: {
+    status: 'qualified',
+    note: '本條人物為公孫瓚，白馬義從歸屬公孫瓚；GONGSUNDU 僅為保留存檔相容性的舊 ID，不代表公孫度。',
+    sources: ['https://en.wikipedia.org/wiki/Gongsun_Zan', 'https://en.wikipedia.org/wiki/Gongsun_Du']
+  },
+  ZHANGHE: {
+    status: 'source-linked',
+    note: '街亭斷水有《三國志》卷十七所引記載；張郃在木門追擊時中伏身亡，並非木門設伏者。此核查僅涵蓋上述敘事，不證明其神射專長。',
+    sources: ['https://en.wikipedia.org/wiki/Zhang_He']
+  },
+  YISUNSIN: {
+    status: 'qualified',
+    note: '鳴梁實戰十三艘與戰前奏報十二艘須區分；海峽潮流為戰術要素，不以鳴梁龜船或鐵甲覆頂作已證實事實。敵艦數量有來源差異。',
+    sources: ['https://en.wikipedia.org/wiki/Battle_of_Myeongnyang']
+  },
+  TIANDAN: {
+    status: 'source-linked',
+    note: '即墨火牛陣屬陸上誘敵反擊；naval 槽是遊戲職能，不是史實水軍身分。',
+    sources: ['https://en.wikipedia.org/wiki/Tian_Dan']
+  },
+  ZHANGLIAO: {
+    status: 'source-linked',
+    note: '逍遙津先攻與八百敢死士有《三國志·張遼傳》所引記載。',
+    sources: ['https://en.wikipedia.org/wiki/Battle_of_Xiaoyao_Ford']
+  },
+  EULJI: {
+    status: 'qualified',
+    note: '誘敵深入與薩水追擊有史籍脈絡；放水／水壩故事未見同時代來源支持。',
+    sources: ['https://en.wikipedia.org/wiki/Battle_of_Salsu']
+  },
+  HANXIN: {
+    status: 'source-linked',
+    note: '暗度陳倉、井陘背水與伏兵可連結《史記·淮陰侯列傳》；部分後世成語化敘事仍需區分。',
+    sources: ['https://ctext.org/shiji/huai-yin-hou-lie-zhuan/zh']
+  },
+  SUNWU: {
+    status: 'needs-review',
+    note: '孫武生平與《孫子兵法》作者歸屬存在歷史研究爭議，不將傳統敘事當成已證實履歷。',
+    sources: ['https://en.wikipedia.org/wiki/Sun_Tzu']
+  }
+};
+
 const UNITS = RAW_UNITS.map(r => {
   const [id, name, cat, cost, v, tag, desc, st, ew, traits, roleFlags, hp, atk, def] = r;
   const meta = UNIT_META[id] || {
@@ -438,11 +635,18 @@ const UNITS = RAW_UNITS.map(r => {
     img: ''
   };
   const skill = UNIT_SKILLS[id] || { name: tag.split('·')[0] || '名將絕技', phase: 'P3', desc: desc };
+  const effects = UNIT_SKILL_EFFECTS[id];
   return {
-    id, name, cat, cost, v, tag, desc, traits, roleFlags,
+    id, name, cat, cost, v, tag, desc,
+    traits: [...new Set([...(traits || []), ...(TACTICAL_ROLE_OVERRIDES[id] || [])])],
+    roleFlags,
+    historicalAudit: HISTORICAL_AUDIT[id] || { status: 'unverified', note: '', sources: [] },
     st, ew,
     hp, atk, def,
-    skill,
+    skill: Object.assign({}, skill, {
+      effects: effects || null,
+      desc: effects ? describeSkillEffects(skill, effects, (roleFlags || []).includes('STRATEGIST') && skill.phase === 'P1') : skill.desc
+    }),
     flag: meta.flag,
     origin: meta.origin,
     weapon: meta.weapon,
@@ -688,6 +892,8 @@ if (typeof window !== 'undefined') {
   window.CAT_HINT = CAT_HINT;
   window.UNITS = UNITS;
   window.UNIT_SKILLS = UNIT_SKILLS;
+  window.TACTICAL_ROLE_OVERRIDES = TACTICAL_ROLE_OVERRIDES;
+  window.HISTORICAL_AUDIT = HISTORICAL_AUDIT;
   window.UNIT_MAP = UNIT_MAP;
   window.SYNERGIES = SYNERGIES;
   window.TEMPLATES = TEMPLATES;
@@ -699,7 +905,7 @@ if (typeof window !== 'undefined') {
 }
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    BUDGET, CATS, TRAITS, CAT_HINT, UNITS, UNIT_MAP, SYNERGIES, TEMPLATES,
+    BUDGET, CATS, TRAITS, CAT_HINT, UNITS, UNIT_MAP, SYNERGIES, TEMPLATES, TACTICAL_ROLE_OVERRIDES, HISTORICAL_AUDIT,
     getDeckSynergies, getUnitSynergyHints, getUnitRealismBadges,
     getUnitMasteryBadge, recordUnitMasteryFromBattle
   };

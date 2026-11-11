@@ -49,7 +49,11 @@ for (const cat of cats) {
   assert(Math.abs(body.instanceMatrix.array[13] - 0.3 - (cat === 'air' ? 0.57 * 0.94 : 0)) < 0.001,
     'Figures must follow the actual terrain height');
   token.currentHp = 50;
+  token.visualHp = 90;
   figures.animate(ranks, token, 1800, false, false, () => 0);
+  assert(ranks.userData.losses < 24, 'Casualties must follow interpolated visual HP, not jump to the final damage');
+  token.visualHp = 50;
+  figures.animate(ranks, token, 1900, false, false, () => 0);
   assert.equal(ranks.userData.casualtyAt.filter(value => value !== null).length, 24);
   figures.animate(ranks, token, 2500, false, false, () => 0);
   const fallen = new THREE.Matrix4().fromArray(body.instanceMatrix.array, 0);
@@ -65,6 +69,8 @@ for (const cat of cats) {
   figures.fall(ranks, token, 0.1, () => 0.3);
   assert(Math.abs(body.instanceMatrix.array[13] - 0.335) < 0.001,
     'Previously fallen soldiers must not stand up during defeat');
+  assert.notEqual(body.instanceMatrix.array[28 * 16 + 5], body.instanceMatrix.array[27 * 16 + 5],
+    'Surviving soldiers must collapse in staggered groups, not synchronously');
   figures.fall(ranks, token, 1, () => 0.3);
   assert(ranks.children.every(mesh => Array.from({ length: mesh.count }, (_, i) =>
     mesh.instanceMatrix.array[i * 16 + 13]).every(height => Math.abs(height - 0.335) < 0.001)),

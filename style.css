@@ -15,6 +15,9 @@
   --radar-bg:radial-gradient(circle at 50% 100%,rgba(61,224,255,.12),transparent 70%),rgba(5,10,17,.7);
   --log-bg:rgba(5,10,17,.6);
   --mission-bg:rgba(10,18,30,.88);
+  --battle-hud-bg:rgba(15,23,33,.94); --battle-hud-text:#eee7d7;
+  --battle-friendly:#a4d3e2; --battle-enemy:#e6ad95; --battle-edge:#82765f;
+  --skill-bg:linear-gradient(135deg,#303b48,#18212d); --skill-text:#f3dfb2; --skill-edge:#a68b56;
 }
 
 [data-theme="light"]{
@@ -31,6 +34,9 @@
   --radar-bg:radial-gradient(circle at 50% 100%,rgba(2,132,199,.12),transparent 70%),rgba(255,255,255,.95);
   --log-bg:rgba(255,255,255,.95);
   --mission-bg:rgba(255,255,255,.98);
+  --battle-hud-bg:rgba(250,248,241,.96); --battle-hud-text:#252d35;
+  --battle-friendly:#175976; --battle-enemy:#93412e; --battle-edge:#8f805f;
+  --skill-bg:linear-gradient(135deg,#fff8e7,#eee0be); --skill-text:#594119; --skill-edge:#95743b;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -19623,6 +19629,11 @@ select:focus-visible,
   position: absolute;
   inset: 0;
 }
+.battle-3d-canvas-container > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 .battle-3d-overlay-hud {
   position: absolute;
   top: 10px;
@@ -19702,8 +19713,8 @@ select:focus-visible,
   overflow: auto;
   border: 1px solid rgba(56, 189, 248, 0.32);
   border-radius: 12px;
-  background: linear-gradient(160deg, #101b2b, #0b111c 72%);
-  color: #e7eef8;
+  background: var(--bg2);
+  color: var(--text);
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.65);
 }
 .formation-dialog::backdrop { background: rgba(3, 8, 15, 0.76); backdrop-filter: blur(5px); }
@@ -19723,7 +19734,7 @@ select:focus-visible,
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.04);
-  color: #cbd5e1;
+  color: var(--text);
   font-size: 22px;
   cursor: pointer;
 }
@@ -19746,12 +19757,12 @@ select:focus-visible,
   padding: 6px 9px;
   border: 1px solid rgba(148, 163, 184, 0.3);
   border-radius: 6px;
-  background: #111d2c;
-  color: #e7eef8;
+  background: var(--bg2);
+  color: var(--text);
   font: inherit;
 }
 .formation-terrain-control select { width: 150px; }
-.formation-dialog-hint { margin: 10px 0; color: #9aaabd; font-size: 11px; line-height: 1.5; }
+.formation-dialog-hint { margin: 10px 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .formation-rows { display: grid; gap: 7px; }
 .formation-row {
   display: grid;
@@ -19763,8 +19774,8 @@ select:focus-visible,
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.025);
 }
-.formation-row-name { overflow: hidden; color: #e7eef8; font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.formation-row-desc { color: #9aaabd; font-size: 11px; line-height: 1.4; }
+.formation-row-name { overflow: hidden; color: var(--text); font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.formation-row-desc { color: var(--muted); font-size: 11px; line-height: 1.4; }
 .formation-row select { width: 100%; font-size: 12px; }
 
 @media (max-width: 760px) {
@@ -20067,20 +20078,30 @@ select:focus-visible,
 #matrixBoard .m-card {
   flex: 1 1 0 !important;
   min-height: 72px !important;
-  padding: 4px 6px !important;
-  gap: 2px !important;
+  padding: 0 !important;
+  gap: 0 !important;
   justify-content: flex-start !important;
   overflow: visible !important;
 }
-#matrixBoard .m-card-main-row { align-items: center; padding-right: 22px; min-height: 44px; gap: 6px; }
+#matrixBoard .m-card-main-row {
+  flex: 1 1 0; height: 100%; min-height: 0; min-width: 0;
+  align-items: stretch; padding-right: 0; gap: 6px;
+}
 #matrixBoard .m-avatar-wrap {
-  width: clamp(44px, 7.5dvh, 68px); height: clamp(44px, 7.5dvh, 68px);
-  flex-basis: clamp(44px, 7.5dvh, 68px); border-radius: 6px;
+  width: auto; max-width: 40%; height: 100%; aspect-ratio: 1; flex: 0 0 auto;
+  border: 0; border-radius: 6px 0 0 6px; box-shadow: none;
+}
+#matrixBoard .m-avatar-img { object-fit: cover !important; }
+#matrixBoard .m-card:hover .m-avatar-wrap,
+#matrixBoard .m-card.sel .m-avatar-wrap { transform: none; box-shadow: none !important; }
+#matrixBoard .m-card-info-col {
+  min-width: 0; padding: 5px 5px 3px 0; gap: 3px;
 }
 #matrixBoard .m-avatar-cost {
-  top: 4px; right: 4px; bottom: auto;
+  top: 4px; left: 4px; right: auto; bottom: auto;
   font-size: 13px; line-height: 20px; padding: 0 4px; border-radius: 4px;
 }
+#matrixBoard .m-top { padding-right: 0; flex-shrink: 0; }
 #matrixBoard .m-name { font-size: 14px !important; line-height: 1.3; white-space: nowrap; }
 #matrixBoard .m-info-btn { display: none; }
 #matrixBoard .m-tag { font-size: 12px; line-height: 1.4; white-space: normal; }
@@ -20088,11 +20109,16 @@ select:focus-visible,
 #matrixBoard .m-skill {
   display: inline-flex; align-self: flex-start; align-items: center;
   min-width: 0; width: fit-content; max-width: 100%; min-height: 22px; padding: 2px 5px;
-  margin-top: 2px;
-  border: 1px solid var(--c); border-radius: 5px;
-  background: var(--panel); color: var(--c); cursor: pointer;
-  font: inherit; font-size: 12px; line-height: 1.3; text-align: left;
+  margin-top: 0; gap: 5px;
+  border: 1px solid var(--skill-edge); border-radius: 3px;
+  background: var(--skill-bg); color: var(--skill-text); cursor: pointer;
+  box-shadow: inset 0 1px 0 #ffffff18, 0 1px 2px #14213026;
+  font: inherit; font-size: 12px; line-height: 1.3; text-align: left; letter-spacing: 0.02em;
   white-space: nowrap;
+}
+#matrixBoard .m-skill::before {
+  content: ''; width: 5px; height: 5px; flex: 0 0 5px;
+  border: 1px solid var(--skill-edge); transform: rotate(45deg);
 }
 #matrixBoard .m-skill strong { overflow: hidden; text-overflow: ellipsis; }
 #matrixBoard .m-skill:hover, #matrixBoard .m-skill:focus-visible {
@@ -20102,14 +20128,18 @@ select:focus-visible,
 .u-tt-skill strong { color: var(--amber); font-size: 15px; }
 .u-tt-skill p { margin: 4px 0 0; }
 .u-tt-role { font-size: 12px; color: var(--muted); }
-#matrixBoard .m-bot { margin-top: auto !important; flex-wrap: nowrap; gap: 3px; }
+#matrixBoard .m-bot { margin-top: auto !important; flex-wrap: nowrap; gap: 3px; width: 100%; }
 #matrixBoard .m-stats {
   display: flex; flex: 1; min-width: 0; align-items: center; justify-content: space-between;
-  gap: 4px !important; font-size: 11px !important; color: var(--muted); line-height: 16px;
+  gap: 2px !important; font-size: 11px !important; color: var(--muted); line-height: 16px;
 }
-#matrixBoard .m-stats span { display: inline-flex; align-items: baseline; gap: 3px; white-space: nowrap; }
-#matrixBoard .m-stats b { font-family: var(--mono); font-size: 12px; line-height: 16px; }
-#matrixBoard .m-bot > span { flex-shrink: 0; font-size: 9px; }
+#matrixBoard .m-stats span { display: inline-flex; align-items: baseline; gap: 2px; white-space: nowrap; }
+#matrixBoard .m-stats b { font-family: var(--mono); font-size: 12px; line-height: 16px; font-weight: 500; }
+#matrixBoard .m-stats, #matrixBoard .m-stats b { color: var(--muted) !important; }
+#matrixBoard .m-avatar-wrap > span {
+  position: absolute; bottom: 3px; left: 2px; max-width: calc(100% - 4px);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px;
+}
 .matchup-tag { display: inline-block; font-size: 12px; color: var(--amber); margin-left: 6px; }
 @media (min-width: 1500px) {
   #matrixBoard .m-name { font-size: 16px !important; }
@@ -20118,7 +20148,6 @@ select:focus-visible,
   #matrixBoard { overflow: visible !important; }
   #matrixBoard .col-category { height: auto !important; }
   #matrixBoard .m-card { flex: 0 0 auto !important; min-height: 82px !important; }
-  #matrixBoard .m-avatar-wrap { width: 52px; height: 52px; flex-basis: 52px; }
 }
 @media (min-width: 769px) and (max-height: 640px) {
   #matrixBoard .col-category { padding: 4px 6px; gap: 4px; }
@@ -20130,9 +20159,9 @@ select:focus-visible,
   #matrixBoard .col-category { gap: 3px; padding: 3px 5px; }
   #matrixBoard .cat-head { height: 18px; padding: 0; }
   #matrixBoard .cat-title { font-size: 11px; }
-  #matrixBoard .m-card { min-height: 52px !important; padding: 2px 4px !important; gap: 0 !important; }
-  #matrixBoard .m-card-main-row { min-height: 32px; padding-right: 17px; gap: 5px; }
-  #matrixBoard .m-avatar-wrap { width: 32px; height: 32px; flex-basis: 32px; }
+  #matrixBoard .m-card { min-height: 52px !important; }
+  #matrixBoard .m-card-main-row { gap: 5px; }
+  #matrixBoard .m-card-info-col { padding: 2px 3px 2px 0; gap: 1px; }
   #matrixBoard .m-avatar-cost { top: 2px; right: 2px; font-size: 11px; line-height: 16px; padding: 0 2px; }
   #matrixBoard .m-name { font-size: 13px !important; line-height: 15px; }
   #matrixBoard .m-skill { min-height: 16px; margin-top: 0; padding: 0 3px; font-size: 11px; line-height: 14px; }
@@ -20157,14 +20186,14 @@ select:focus-visible,
 }
 .battle-camera-controls { display: flex; gap: 5px; pointer-events: auto; margin-left: auto; }
 .battle-camera-controls button {
-  border: 1px solid #82765f; border-radius: 3px; padding: 6px 10px;
-  background: rgba(25, 28, 27, 0.88); color: #ddd5c2; cursor: pointer;
+  border: 1px solid var(--battle-edge); border-radius: 3px; padding: 6px 10px;
+  background: var(--battle-hud-bg); color: var(--battle-hud-text); cursor: pointer;
   font: inherit; font-size: 12px;
 }
-.battle-camera-controls button[aria-pressed="true"] { border-color: #b7a079; color: #f0dfb8; background: #454236; }
+.battle-camera-controls button[aria-pressed="true"] { border-color: var(--skill-edge); color: var(--skill-text); background: var(--skill-bg); }
 .battle-camera-controls button:focus-visible { outline: 2px solid #e8cf98; outline-offset: 2px; }
 .battle-3d-overlay-hud { right: 12px; }
-.badge-3d-title { color: #ded3ba; border-color: #756c59; background: rgba(25, 28, 27, 0.88); }
+.badge-3d-title { color: var(--battle-hud-text); border-color: var(--battle-edge); background: var(--battle-hud-bg); }
 @media (min-width: 1101px) {
   #viewBattle .battle-3d-wrapper {
     height: auto !important;
@@ -20212,4 +20241,75 @@ select:focus-visible,
 @media (max-width: 520px) {
   .badge-3d-title { display: none; }
   .battle-camera-controls button { padding: 6px 8px; }
+}
+
+/* The battlefield owns the viewport; detailed intelligence is an optional drawer. */
+#viewBattle.battle {
+  height: calc(100dvh - var(--battle-top-offset, 54px)) !important;
+  max-height: calc(100dvh - var(--battle-top-offset, 54px)) !important;
+  min-height: 0 !important; overflow: hidden !important; padding-bottom: 8px !important;
+}
+#viewBattle .battle-top { gap: 6px !important; margin-bottom: 4px !important; }
+#viewBattle .battle-ctl { flex-wrap: wrap; gap: 4px; }
+#viewBattle .battle-3d-wrapper {
+  flex: 1 1 0 !important; height: auto !important;
+  min-height: 0 !important; max-height: none !important; margin: 0 !important;
+}
+.battle-field-hud {
+  position: absolute; bottom: 10px; left: 12px; right: 12px;
+  z-index: 20; pointer-events: none; color: var(--battle-hud-text); font-size: 12px;
+}
+.battle-army-strength {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 10px; border: 1px solid var(--battle-edge); border-radius: 3px;
+  background: var(--battle-hud-bg);
+}
+.battle-army-strength > span:first-child { color: var(--battle-friendly); }
+.battle-army-strength > span:last-child { color: var(--battle-enemy); text-align: right; }
+.battle-army-strength strong { font-size: 12px; text-align: center; }
+.battle-recent-events { display: flex; gap: 8px; margin-top: 4px; }
+.battle-recent-events > div {
+  flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  padding: 3px 7px; background: var(--battle-hud-bg); border-radius: 3px;
+}
+#battleIntelDialog {
+  color: var(--text); background: var(--bg2); border: 1px solid var(--line2);
+  border-radius: 10px; padding: 12px; box-sizing: border-box;
+  width: min(660px, calc(100vw - 24px)); height: min(720px, calc(100dvh - 90px));
+  max-width: none; max-height: none; margin: auto 12px auto auto;
+  overflow: hidden; gap: 8px;
+}
+#battleIntelDialog:not([open]) { display: none !important; }
+#battleIntelDialog[open] { display: flex !important; flex-direction: column; }
+#battleIntelDialog::backdrop { background: rgba(8, 15, 23, 0.3); }
+.battle-intel-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 8px; }
+#viewBattle #battleIntelDialog .battle-panel-tabs { display: grid !important; flex: 0 0 38px; margin: 0; }
+#viewBattle #battleIntelDialog .battle-grid {
+  display: block !important; flex: 1 1 0 !important; min-height: 0 !important; height: auto !important;
+}
+#viewBattle #battleIntelDialog .battle-grid > #teamA,
+#viewBattle #battleIntelDialog .battle-grid > #teamB,
+#viewBattle #battleIntelDialog .battle-grid > .log-col { display: none !important; }
+#viewBattle[data-battle-panel="team-a"] #battleIntelDialog #teamA,
+#viewBattle[data-battle-panel="team-b"] #battleIntelDialog #teamB,
+#viewBattle[data-battle-panel="log"] #battleIntelDialog .log-col { display: flex !important; }
+#viewBattle #battleIntelDialog .units-card-list {
+  display: flex !important; flex-direction: column !important; height: auto !important; overflow-y: auto !important;
+}
+#viewBattle #battleIntelDialog .units-card-list .bu { flex: 0 0 auto !important; min-height: 76px !important; }
+#viewBattle:has(#battle3DWrapper[hidden]) #battleIntelDialog {
+  position: static; flex: 1 1 0; width: 100%; height: auto; margin: 0;
+}
+#viewBattle:has(#battle3DWrapper[hidden]) .battle-intel-heading { display: none; }
+@media (max-width: 1100px) {
+  #viewBattle .battle-meta { display: none; }
+  #viewBattle .battle-ctl { width: 100%; }
+}
+@media (max-width: 520px) {
+  #viewBattle .battle-ctl button { padding: 4px 6px; min-height: 30px; font-size: 11px; }
+  .battle-field-hud { left: 6px; right: 6px; bottom: 6px; font-size: 10px; }
+  .battle-army-strength { padding: 5px; gap: 3px; }
+  .battle-army-strength strong { font-size: 10px; }
+  .battle-recent-events { flex-direction: column; gap: 2px; }
+  #battleIntelDialog { margin: auto; }
 }

@@ -68,10 +68,7 @@ const FirebaseTourneyEngine = (function() {
     const recommended = typeof getRecommendedFormations === 'function'
       ? getRecommendedFormations(deck, terrain)
       : Array(5).fill('fishscale');
-    const validIds = new Set(typeof BATTLE_FORMATION_DEFS !== 'undefined' ? BATTLE_FORMATION_DEFS.map(item => item.id) : ['fishscale']);
-    return Array.from({ length: 5 }, (_, i) => validIds.has(formations && formations[i])
-      ? formations[i]
-      : (recommended[i] || 'fishscale'));
+    return normalizeArmyFormations(ensureArray(formations), deck, recommended[0] || 'fishscale');
   }
 
   function getRequiredWinsForMatch(match, format, totalRounds) {
@@ -729,13 +726,7 @@ const FirebaseTourneyEngine = (function() {
     const cleanDeck = ensureArray(deck);
     const cleanDoc = doctrine || 'defense';
     const terrain = currentRoomData.battleTerrain || 'plain';
-    const validFormationIds = new Set(typeof BATTLE_FORMATION_DEFS !== 'undefined' ? BATTLE_FORMATION_DEFS.map(item => item.id) : []);
-    const defaultFormations = typeof getRecommendedFormations === 'function'
-      ? getRecommendedFormations(cleanDeck, terrain)
-      : Array(5).fill('fishscale');
-    const cleanFormations = Array.from({ length: 5 }, (_, i) =>
-      validFormationIds.has(formations && formations[i]) ? formations[i] : (defaultFormations[i] || 'fishscale')
-    );
+    const cleanFormations = normalizeBattleFormations(formations, cleanDeck, terrain);
     const salt = generateSecureSalt();
     const commitHash = await computeCommitHashAsync(cleanDeck, cleanDoc, salt, cleanFormations, terrain);
     const subPayload = { deck: cleanDeck, doc: cleanDoc, formations: cleanFormations, terrain, salt, commitHash };
@@ -1302,4 +1293,3 @@ const FirebaseTourneyEngine = (function() {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = FirebaseTourneyEngine;
 }
-

@@ -18,7 +18,12 @@ ROOT = Path(__file__).resolve().parents[1]
 PORT = 8139
 
 server = subprocess.Popen(
-    [sys.executable, "-m", "http.server", str(PORT), "--directory", str(ROOT)],
+    [sys.executable, "-c",
+     "import functools, http.server, sys; "
+     "http.server.ThreadingHTTPServer.request_queue_size = 128; "
+     "http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[1])), "
+     "functools.partial(http.server.SimpleHTTPRequestHandler, directory=sys.argv[2])).serve_forever()",
+     str(PORT), str(ROOT)],
     stdout=subprocess.DEVNULL,
     stderr=subprocess.DEVNULL,
 )
@@ -28,6 +33,7 @@ try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(service_workers='block')
+        context.set_default_timeout(60000)
 
         # 預先在 storage 設定已看過幫助與新手引導，避免新手彈窗阻擋點擊
         context.add_init_script("""
@@ -42,7 +48,7 @@ try:
         page.on("pageerror", lambda err: errors.append(str(err)))
 
         # 訪問主頁並等待看板卡片渲染完成
-        page.goto(f"http://localhost:{PORT}/index.html")
+        page.goto(f"http://127.0.0.1:{PORT}/index.html")
         page.wait_for_selector(".m-card", timeout=10000)
         time.sleep(0.5)
 
@@ -54,6 +60,30 @@ try:
         card_count = cards.count()
         print(f"[TEST 1] 5x5 看板渲染名將卡片數量: {card_count} 張")
         assert card_count == 25, f"預期 25 張卡片，實際得到 {card_count}"
+        theme_colors = []
+        for theme in ['dark', 'light']:
+            if page.locator('html').get_attribute('data-theme') != theme:
+                page.locator('#btnTheme').click()
+            colors = page.evaluate("""() => {
+                const skill = getComputedStyle(document.querySelector('.m-skill'));
+                const stats = getComputedStyle(document.querySelector('.m-stats'));
+                const rgb = color => color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+                const luminance = channels => channels.map(v => {
+                    v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+                }).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+                const contrast = (a, b) => {
+                    const x = luminance(a), y = luminance(b);
+                    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+                };
+                const backgrounds = skill.backgroundImage.match(/rgb\\([^)]+\\)/g).map(rgb);
+                return { foreground: skill.color, background: skill.backgroundImage, stats: stats.color,
+                    contrast: Math.min(...backgrounds.map(bg => contrast(rgb(skill.color), bg))) };
+            }""")
+            assert colors['contrast'] >= 4.5, f"Skill plaque contrast failed in {theme}: {colors}"
+            theme_colors.append(colors)
+        assert theme_colors[0]['foreground'] != theme_colors[1]['foreground']
+        assert theme_colors[0]['background'] != theme_colors[1]['background']
+        assert theme_colors[0]['stats'] != theme_colors[1]['stats']
 
         for width, height in [(1680, 900), (1440, 900), (1366, 768), (1280, 720), (1273, 588), (1019, 470), (1100, 800), (390, 844), (320, 740)]:
             page.set_viewport_size({"width": width, "height": height})
@@ -82,7 +112,12 @@ try:
                         const statCells = [...card.querySelectorAll('.m-stats span')].map(cell => cell.getBoundingClientRect());
                         const bounds = card.getBoundingClientRect();
                         const compact = innerWidth > 768 && innerHeight <= 540;
-                        return avatar.width >= (compact ? 32 : 44) && avatar.height >= (compact ? 32 : 44)
+                        const portrait = card.querySelector('.m-avatar-img');
+                        return Math.abs(avatar.height - (bounds.height - 2 * parseFloat(getComputedStyle(card).borderTopWidth))) <= 1
+                            && Math.abs(avatar.width - Math.min(avatar.height,
+                                card.querySelector('.m-card-main-row').clientWidth * 0.4)) <= 1
+                            && getComputedStyle(portrait).objectFit === 'cover'
+                            && avatar.right <= info.left
                             && parseFloat(getComputedStyle(card.querySelector('.m-name')).fontSize) >= (compact ? 13 : 14)
                             && parseFloat(getComputedStyle(card.querySelector('.m-skill')).fontSize) >= (compact ? 11 : 12)
                             && skill.width < bounds.width * 0.7
@@ -91,6 +126,8 @@ try:
                             && stats.height > 0 && stats.height <= 18 && stats.bottom <= bounds.bottom
                             && statCells.every(cell => Math.abs(cell.top - statCells[0].top) < 1)
                             && statCells.every(cell => cell.right <= bounds.right && cell.left >= bounds.left)
+                            && stats.left >= info.left && stats.right <= info.right + 1
+                            && getComputedStyle(card.querySelector('.m-stats b')).color === getComputedStyle(card.querySelector('.m-stats')).color
                             && parseFloat(getComputedStyle(card.querySelector('.m-stats b')).fontSize) >= (compact ? 11 : 12);
                     }),
                     onePage: innerWidth <= 768 || cards.every(card => {
@@ -176,6 +213,16 @@ try:
         page.wait_for_function("() => !document.querySelector('#btnGo').disabled", timeout=5000)
         time.sleep(0.5)
 
+        page.locator('#btnOpenFormation').click()
+        assert page.locator('#armyFormation').count() == 1
+        assert page.locator('[data-formation-slot]').count() == 0
+        page.locator('#armyFormation').select_option('square')
+        assert page.evaluate("() => JSON.parse(localStorage.getItem('wl15_formations'))") == ['square'] * 5
+        assert page.locator('#formationSummary').inner_text() == '方圓'
+        page.locator('#btnCloseFormation').click()
+        page.locator('#btnWeatherDropdown').click()
+        page.locator('.weather-opt-item[data-val="strait"]').click()
+
         # 4. 點擊發動戰略出擊 (id 是 #btnGo)
         btn_go = page.locator("#btnGo")
         print(f"[TEST 4] 出擊按鈕文字: {btn_go.inner_text().strip()}")
@@ -200,6 +247,14 @@ try:
         view_battle = page.locator("#viewBattle")
         assert not click_res['viewBattleHidden'], "戰場推演畫面未展開"
         print("[TEST 4] 古戰場戰況推演畫面成功展開！三階段推演進行中...")
+        environment = page.evaluate("() => Battle3DEngine.getDebugState()")
+        assert environment['scene'] == 'canyon' and environment['terrain'] == 'mountain'
+        assert all(unit['layout'] == 'square' for unit in environment['battalions'] if unit['side'] == 'A'), \
+            'Formation selected in the UI did not apply to the whole army'
+        page.evaluate("""() => {
+            document.querySelector('#btnPause').click();
+            Battle3DEngine.pauseAnimationLoop(true);
+        }""")
 
         page.locator("#btnToggle3DView").click()
         assert page.locator("#battle3DWrapper").is_hidden()
@@ -207,8 +262,7 @@ try:
             page.set_viewport_size({"width": width, "height": height})
             page.wait_for_timeout(150)
             for panel, team in [("team-a", "#teamA"), ("team-b", "#teamB")]:
-                if width <= 1100:
-                    page.locator(f'[data-battle-panel="{panel}"]').click()
+                page.locator(f'button[data-battle-panel="{panel}"]').click()
                 vertical = page.locator(f"{team} .bu").evaluate_all("""cards => {
                     const rects = cards.map(card => ({
                         top: card.offsetTop, bottom: card.offsetTop + card.offsetHeight,

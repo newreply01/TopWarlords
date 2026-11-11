@@ -187,7 +187,7 @@ const BATTLE_FORMATION_DEFS = [
   { id: 'crane', name: '鶴翼', desc: '展開兩翼包抄，略增命中與攻勢。', attack: 1.05, damageTaken: 1, hit: 0.02, tacticChance: 0.04, tacticDamage: 1.15, layout: 'wings', occupation: true },
   { id: 'longsnake', name: '長蛇', desc: '山地、森林中攻防能力提升 50%。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.02, tacticDamage: 1.15, layout: 'column', terrainMultiplier: 1.5 },
   { id: 'cone', name: '錐行', desc: '高速穿插；戰鬥力較弱且無法發動戰法。', attack: 0.78, damageTaken: 1.05, hit: -0.02, tacticChance: 0, tacticDamage: 1, layout: 'cone', mobility: 1.5 },
-  { id: 'fourYi', name: '四夷', desc: '孟獲、沙摩柯專用；山岳、森林中攻防提升 50%，容易發動戰法。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.14, tacticDamage: 1.2, layout: 'wedge', terrainMultiplier: 1.5, eligibleUnitIds: ['MENGHUO', 'SHAMOKE'] }
+  { id: 'fourYi', name: '四夷', desc: '由孟獲或沙摩柯領軍解鎖；全軍在山岳、森林中攻防提升 50%，容易發動戰法。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.14, tacticDamage: 1.2, layout: 'wedge', terrainMultiplier: 1.5, eligibleUnitIds: ['MENGHUO', 'SHAMOKE'] }
 ];
 
 const BATTLE_TERRAINS = [
@@ -201,25 +201,40 @@ function getBattleFormation(id) {
 }
 
 function getRecommendedFormations(deck, terrain = 'plain') {
-  return (deck || []).map(id => {
-    const unit = UNIT_MAP[id];
-    if (!unit) return 'fishscale';
-    if ((terrain === 'mountain' || terrain === 'forest') && ['MENGHUO', 'SHAMOKE'].includes(id)) return 'fourYi';
-    if (terrain === 'mountain' || terrain === 'forest') return 'longsnake';
-    return ({ air: 'spearhead', armor: 'square', air_defense: 'goose', naval: 'spearhead', support: 'fishscale' })[unit.cat] || 'fishscale';
-  });
+  const rough = terrain === 'mountain' || terrain === 'forest';
+  const id = rough && (deck || []).some(unit => ['MENGHUO', 'SHAMOKE'].includes(unit)) ? 'fourYi'
+    : rough ? 'longsnake' : 'fishscale';
+  return (deck || []).map(() => id);
+}
+
+function normalizeArmyFormations(values, deck = null, fallback = 'fishscale') {
+  const choices = typeof values === 'string' ? [values] : Array.isArray(values) ? values : [];
+  const selected = choices.find(id => BATTLE_FORMATION_DEFS.some(formation => formation.id === id)) || fallback;
+  const formation = getBattleFormation(selected);
+  const id = formation.eligibleUnitIds && deck && !deck.some(unit => formation.eligibleUnitIds.includes(unit))
+    ? 'fishscale' : formation.id;
+  return Array(5).fill(id);
+}
+
+function getBattleEnvironment(event, terrain = 'plain') {
+  const weather = event?.id || 'clear';
+  const selected = BATTLE_TERRAINS.some(item => item.id === terrain) ? terrain : 'plain';
+  return {
+    scene: weather === 'strait' ? 'canyon' : weather === 'urban' ? 'city'
+      : weather === 'plain' ? 'grassland' : weather === 'em' ? 'fog' : weather === 'storm' ? 'storm' : selected,
+    terrain: weather === 'strait' ? 'mountain' : ['plain', 'urban'].includes(weather) ? 'plain' : selected,
+    weather
+  };
 }
 
 function makeTeam(ids, side, formationIds, terrain) {
+  const armyFormations = normalizeArmyFormations(formationIds, ids);
   return ids.map((id, i) => {
     const d = UNIT_MAP[id] || {
       name: '主力名將', cat: 'air', cost: 1, v: 'A',
       traits: [], roleFlags: [], hp: 120, atk: 60, def: 0, st: 0, ew: 0
     };
-    const selectedFormation = getBattleFormation(formationIds && formationIds[i]);
-    const formation = selectedFormation.eligibleUnitIds && !selectedFormation.eligibleUnitIds.includes(id)
-      ? BATTLE_FORMATION_DEFS[0]
-      : selectedFormation;
+    const formation = getBattleFormation(armyFormations[i]);
     const terrainMultiplier = ((formation.id === 'longsnake' || formation.id === 'fourYi') && (terrain === 'mountain' || terrain === 'forest'))
       ? formation.terrainMultiplier
       : 1;
@@ -254,7 +269,7 @@ function resolveBattle(deckA, deckB, opts) {
   const rng = mulberry32(seed);
   const ev = opts.event || EVENTS[EVENTS.length - 1];
   const m = Object.assign({ armorDmg: 1, navalDmg: 1, artyDmg: 1, droneDmg: 1, airHit: 0, ewMult: 1, stealthAdd: 0 }, ev.mod || {});
-  const terrain = BATTLE_TERRAINS.some(item => item.id === opts.terrain) ? opts.terrain : 'plain';
+  const terrain = getBattleEnvironment(ev, opts.terrain).terrain;
   const T = {
     A: makeTeam(deckA, 'A', opts.formationsA, terrain),
     B: makeTeam(deckB, 'B', opts.formationsB, terrain)

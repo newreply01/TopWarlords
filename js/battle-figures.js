@@ -268,7 +268,9 @@ const BattleFigures = (() => {
     ranks.children.forEach(mesh => {
       mesh.userData.standingMatrices.forEach((base, i) => {
         const fallen = ranks.userData.casualtyAt[i] !== null;
-        fallenMatrix(base, fallen ? 1 : progress, i, heights[i], matrix,
+        const stagger = (i % 7) * 0.055;
+        const collapse = Math.max(0, Math.min(1, (progress - stagger) / (1 - stagger)));
+        fallenMatrix(base, fallen ? 1 : collapse, i, heights[i], matrix,
           fallen ? ranks.userData.casualtyAdvance[i] : ranks.userData.advance);
         mesh.setMatrixAt(i, matrix);
       });
@@ -283,7 +285,7 @@ const BattleFigures = (() => {
     const mounted = token.cat === 'air';
     const attack = token.attackUntil > now;
     const losses = Math.max(ranks.userData.losses,
-      Math.floor(ranks.userData.soldierCount * Math.min(0.9, 1 - token.currentHp / token.maxHp)));
+      Math.floor(ranks.userData.soldierCount * Math.min(0.9, 1 - (token.visualHp ?? token.currentHp) / token.maxHp)));
     ranks.userData.losses = losses;
     for (let i = 0; i < losses; i++) {
       if (ranks.userData.casualtyAt[i] === null) {

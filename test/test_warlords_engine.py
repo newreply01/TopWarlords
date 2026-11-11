@@ -330,7 +330,7 @@ try:
             const neutralFormations = Array(5).fill('fishscale');
             const gooseBattle = resolveBattle(formationDeck, formationDeck, {
                 seed: 0,
-                formationsA: ['fishscale', 'fishscale', 'goose', 'fishscale', 'fishscale'],
+                formationsA: Array(5).fill('goose'),
                 formationsB: neutralFormations
             });
             const enemyById = new Map(gooseBattle.final.B.map(unit => [unit.uid, unit]));
@@ -360,7 +360,7 @@ try:
             for (let seed = 0; seed < 32; seed++) {
                 craneBattle = resolveBattle(craneDeck, craneDeck, {
                     seed,
-                    formationsA: ['fishscale', 'crane', 'fishscale', 'fishscale', 'fishscale'],
+                    formationsA: Array(5).fill('crane'),
                     formationsB: neutralFormations
                 });
                 if (craneBattle.vp.A.occupationCtl > 0) break;
@@ -369,7 +369,7 @@ try:
 
             const mountainBattle = resolveBattle(formationDeck, formationDeck, {
                 seed: 1,
-                formationsA: ['longsnake', ...neutralFormations.slice(1)],
+                formationsA: Array(5).fill('longsnake'),
                 formationsB: neutralFormations,
                 terrain: 'mountain'
             });
@@ -381,7 +381,7 @@ try:
             barbarianDeck[3] = 'MENGHUO';
             const fourYiBattle = resolveBattle(barbarianDeck, formationDeck, {
                 seed: 12,
-                formationsA: ['fishscale', 'fishscale', 'fishscale', 'fourYi', 'fishscale'],
+                formationsA: Array(5).fill('fourYi'),
                 formationsB: neutralFormations,
                 terrain: 'forest'
             });
@@ -390,12 +390,21 @@ try:
             }
             const fourYiMountain = resolveBattle(barbarianDeck, formationDeck, {
                 seed: 12,
-                formationsA: ['fishscale', 'fishscale', 'fishscale', 'fourYi', 'fishscale'],
+                formationsA: Array(5).fill('fourYi'),
                 formationsB: neutralFormations,
                 terrain: 'mountain'
             });
             if (fourYiMountain.final.A[3].formationAttack !== 1.5) errs.push('孟獲四夷山岳加成未套用');
-            if (fourYiBattle.final.A[0].formationTacticChance !== 0.06) errs.push('魚鱗基礎戰法率未提高');
+            if (fourYiBattle.final.A.some(unit => unit.formation !== 'fourYi' || unit.formationTacticChance !== 0.14)) errs.push('四夷未套用全軍');
+            if (makeTeam(formationDeck, 'A', neutralFormations, 'plain').some(unit => unit.formationTacticChance !== 0.06)) errs.push('魚鱗基礎戰法率未提高');
+            const migrated = makeTeam(formationDeck, 'A', ['square', 'goose', 'cone', 'crane', 'longsnake'], 'plain');
+            if (migrated.some(unit => unit.formation !== 'square')) errs.push('舊混合陣形未統一為首個有效陣形');
+            if (new Set(getRecommendedFormations(barbarianDeck, 'forest')).size !== 1) errs.push('AI推薦仍混用陣形');
+            if (getBattleEnvironment(EVENTS.find(event => event.id === 'strait'), 'plain').terrain !== 'mountain'
+                || getBattleEnvironment(EVENTS.find(event => event.id === 'urban'), 'forest').scene !== 'city'
+                || getBattleEnvironment(EVENTS.find(event => event.id === 'plain'), 'mountain').terrain !== 'plain') {
+                errs.push('場景選項與實際地貌不一致');
+            }
             const ineligibleFourYi = resolveBattle(formationDeck, formationDeck, {
                 seed: 12,
                 formationsA: ['fourYi', ...neutralFormations.slice(1)],

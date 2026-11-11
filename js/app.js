@@ -86,9 +86,7 @@ function calcRankTitle(rp) {
 const savedDoctrine = LS.get('wl15_doc', 'strike');
 LS.set('wl15_deck', [null, null, null, null, null]);
 const validFormationIds = new Set(BATTLE_FORMATION_DEFS.map(formation => formation.id));
-const normalizeFormations = values => Array.from({ length: 5 }, (_, i) =>
-  validFormationIds.has(values && values[i]) ? values[i] : 'fishscale'
-);
+const normalizeFormations = values => normalizeArmyFormations(values);
 const savedFormations = normalizeFormations(LS.get('wl15_formations', []));
 const normalizeTerrain = value => BATTLE_TERRAINS.some(terrain => terrain.id === value) ? value : 'plain';
 const savedTerrain = normalizeTerrain(LS.get('wl15_terrain', 'plain'));
@@ -1160,6 +1158,9 @@ function renderMatrix() {
         <div class="m-card-main-row">
           <div class="m-avatar-wrap">
             <img class="m-avatar-img" src="${u.img || ''}" width="48" height="48" loading="lazy" decoding="async" alt="${esc(u.name)}" onerror="this.style.display='none'" />
+            ${showWhy
+              ? `<span class="m-why ${isBanned ? 'why-banned' : 'why-budget'}" title="${esc(why)}">${why}</span>`
+              : (envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}">${envMod.short}</span>` : '')}
           </div>
           <span class="m-avatar-cost">$${u.cost}</span>
           <div class="m-card-info-col">
@@ -1174,17 +1175,14 @@ function renderMatrix() {
             <button type="button" class="m-skill" data-info-id="${u.id}" aria-label="${esc(u.name)}：${esc(u.skill?.name || '未配置戰法')}，查看詳情">
               <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
             </button>
+            <div class="m-bot">
+              <div class="m-stats" aria-label="基本數值">
+                <span title="生命" aria-label="生命 ${u.hp}">生 <b>${u.hp}</b></span>
+                <span title="攻擊" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
+                <span title="${u.ew > u.st ? '謀略' : '隱匿'}" aria-label="${u.ew > u.st ? '謀略' : '隱匿'} ${Math.max(u.ew, u.st)}">${u.ew > u.st ? '謀' : '隱'} <b>${Math.max(u.ew, u.st)}</b></span>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="m-bot">
-          <div class="m-stats" aria-label="基本數值">
-            <span title="生命" aria-label="生命 ${u.hp}">生 <b>${u.hp}</b></span>
-            <span title="攻擊" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
-            <span title="${u.ew > u.st ? '謀略' : '隱匿'}" aria-label="${u.ew > u.st ? '謀略' : '隱匿'} ${Math.max(u.ew, u.st)}">${u.ew > u.st ? '謀' : '隱'} <b>${Math.max(u.ew, u.st)}</b></span>
-          </div>
-          ${showWhy
-            ? `<span class="m-why ${isBanned ? 'why-banned' : 'why-budget'}">${why}</span>`
-            : (envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}">${envMod.short}</span>` : '')}
         </div>
       </div>`;
     }).join('');
@@ -1310,39 +1308,31 @@ function renderFormationEditor() {
   const button = $('#btnOpenFormation');
   if (!rows || !summary || !button) return;
 
-  const selectedIds = normalizeFormations(state.formations);
-  let needsSave = false;
-  selectedIds.forEach((id, index) => {
-    const formation = getBattleFormation(id);
-    const unitId = state.deck[index];
-    if (formation.eligibleUnitIds && (!unitId || !formation.eligibleUnitIds.includes(unitId))) {
-      selectedIds[index] = 'fishscale';
-      state.formations[index] = 'fishscale';
-      needsSave = true;
-    }
-  });
-  if (needsSave) syncActiveDeck();
-  const selectedNames = [...new Set(selectedIds.map(id => getBattleFormation(id).name))];
+  const selectedIds = normalizeArmyFormations(state.formations, state.deck);
+  if (selectedIds.some((id, i) => id !== state.formations[i])) {
+    state.formations = selectedIds;
+    syncActiveDeck();
+  }
   const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
   const terrainLockedByRoom = state.isOnlinePvp && !OnlinePvPEngine.isHostUser();
-  summary.textContent = selectedNames.length === 1 ? selectedNames[0] : `${selectedNames.length} 種陣形`;
+  summary.textContent = getBattleFormation(selectedIds[0]).name;
   button.disabled = formationEditingLocked;
-  button.title = formationEditingLocked ? '陣容已鎖定，本局陣形已提交' : '設定各部隊陣形與戰場地形';
+  button.title = formationEditingLocked ? '陣容已鎖定，本局陣形已提交' : '設定全軍統一陣形與戰場地形';
 
-  rows.innerHTML = selectedIds.map((id, i) => {
-    const unit = state.deck[i] ? UNIT_MAP[state.deck[i]] : null;
+  {
+    const id = selectedIds[0];
     const formation = getBattleFormation(id);
     const availableFormations = BATTLE_FORMATION_DEFS.filter(option =>
-      !option.eligibleUnitIds || (unit && option.eligibleUnitIds.includes(unit.id))
+      !option.eligibleUnitIds || state.deck.some(unitId => option.eligibleUnitIds.includes(unitId))
     );
-    return `<label class="formation-row">
-      <span class="formation-row-name">${unit ? esc(unit.name) : `第 ${i + 1} 槽 · 待部署`}</span>
-      <select data-formation-slot="${i}" aria-label="${unit ? esc(unit.name) : `第 ${i + 1} 槽`}陣形" ${formationEditingLocked ? 'disabled' : ''}>
+    rows.innerHTML = `<label class="formation-row">
+      <span class="formation-row-name">全軍共同出征陣形</span>
+      <select id="armyFormation" aria-label="全軍陣形" ${formationEditingLocked ? 'disabled' : ''}>
         ${availableFormations.map(option => `<option value="${option.id}" title="${esc(option.desc)}" ${option.id === id ? 'selected' : ''}>${esc(option.name)}</option>`).join('')}
       </select>
       <span class="formation-row-desc">${esc(formation.desc)}</span>
     </label>`;
-  }).join('');
+  }
 
   const terrainSelect = $('#formationTerrain');
   if (terrainSelect) {
@@ -1793,11 +1783,10 @@ document.addEventListener('click', event => {
 document.addEventListener('change', event => {
   const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
   const terrainLockedByRoom = state.isOnlinePvp && !OnlinePvPEngine.isHostUser();
-  const formationSelect = event.target.closest('[data-formation-slot]');
+  const formationSelect = event.target.closest('#armyFormation');
   if (formationSelect && !formationEditingLocked) {
-    const slot = Number(formationSelect.dataset.formationSlot);
-    if (Number.isInteger(slot) && slot >= 0 && slot < 5 && validFormationIds.has(formationSelect.value)) {
-      state.formations[slot] = formationSelect.value;
+    if (validFormationIds.has(formationSelect.value)) {
+      state.formations = normalizeArmyFormations(formationSelect.value, state.deck);
       syncActiveDeck();
       renderFormationEditor();
     }
@@ -2504,6 +2493,11 @@ $('#missionBar').addEventListener('change', e => {
 /* ---------- 離開/清理戰鬥推演與檢視戰場 ---------- */
 function exitActiveBattle() {
   playToken++; // 中止推演循環
+  $('#battleIntelDialog')?.close();
+  if (typeof Battle3DEngine !== 'undefined') {
+    Battle3DEngine.clearAllTokens();
+    Battle3DEngine.pauseAnimationLoop(true);
+  }
   document.body.classList.remove('in-battle');
   const vb = $('#viewBattle');
   if (vb) vb.hidden = true;
@@ -2541,6 +2535,30 @@ function exitActiveBattle() {
 
 // 3D 古戰場沙盤視圖切換
 let is3DVisible = true;
+function fitBattleViewport() {
+  const view = $('#viewBattle');
+  if (!view || view.hidden) return;
+  view.style.setProperty('--battle-top-offset', `${Math.max(0, view.getBoundingClientRect().top)}px`);
+}
+window.addEventListener('resize', fitBattleViewport);
+function syncBattleIntelMode() {
+  const dialog = $('#battleIntelDialog');
+  dialog.close();
+  if (!is3DVisible && !$('#viewBattle').hidden) dialog.show();
+  $('#btnBattleIntel').hidden = !is3DVisible;
+  $('#btnBattleIntel').setAttribute('aria-expanded', 'false');
+}
+$('#btnBattleIntel')?.addEventListener('click', () => {
+  $('#battleIntelDialog').showModal();
+  $('#btnBattleIntel').setAttribute('aria-expanded', 'true');
+});
+$('#btnCloseBattleIntel')?.addEventListener('click', () => $('#battleIntelDialog').close());
+$('#battleIntelDialog')?.addEventListener('close', () => {
+  $('#btnBattleIntel').setAttribute('aria-expanded', 'false');
+});
+$('#battleIntelDialog')?.addEventListener('cancel', event => {
+  if (!is3DVisible) event.preventDefault();
+});
 $('#btnToggle3DView')?.addEventListener('click', () => {
   is3DVisible = !is3DVisible;
   const wrap = $('#battle3DWrapper');
@@ -2553,6 +2571,7 @@ $('#btnToggle3DView')?.addEventListener('click', () => {
   if (typeof Battle3DEngine !== 'undefined') {
     Battle3DEngine.toggleMode(is3DVisible);
   }
+  syncBattleIntelMode();
 });
 
 /* ---------- 模式切換與預算修剪 ---------- */
@@ -3981,7 +4000,8 @@ function startBattle() {
     updateRerollMarketButtonState();
   }
   const seed = state.mode === 'daily' ? hashStr(dateKey() + deck.join('.') + state.doctrine) : (Math.random() * 4294967296) >>> 0;
-  const enemyFormations = getRecommendedFormations(state.enemy, state.terrain);
+  const battleTerrain = getBattleEnvironment(state.event, state.terrain).terrain;
+  const enemyFormations = getRecommendedFormations(state.enemy, battleTerrain);
   const res = resolveBattle(deck, state.enemy, {
     seed,
     event: state.event,
@@ -4181,6 +4201,8 @@ async function showBattle(res, opts = {}) {
   const viewTournament = $('#viewTournament'); if (viewTournament) viewTournament.hidden = true;
   hideTooltip();
   $('#viewBattle').hidden = false;
+  syncBattleIntelMode();
+  fitBattleViewport();
   $('#viewBattle').dataset.battlePanel = 'log';
   $('#battlePanelTabs')?.querySelectorAll('[data-battle-panel]').forEach(tab => {
     tab.setAttribute('aria-pressed', String(tab.dataset.battlePanel === 'log'));
@@ -4273,6 +4295,18 @@ async function showBattle(res, opts = {}) {
   if (sVec) sVec.textContent = '⚡ 兩軍對峙列陣 ➔';
 
   const maxHp = {}; [...T.A, ...T.B].forEach(u => { maxHp[u.uid] = u.maxHp || u.hpMax || u.hp; });
+  const fieldHp = { ...maxHp };
+  const updateFieldStrength = () => {
+    for (const side of ['A', 'B']) {
+      const living = T[side].filter(unit => fieldHp[unit.uid] > 0).length;
+      const current = T[side].reduce((sum, unit) => sum + fieldHp[unit.uid], 0);
+      const total = T[side].reduce((sum, unit) => sum + maxHp[unit.uid], 0);
+      $('#fieldArmy' + side).textContent = `${side === 'A' ? '我軍' : '敵軍'} ${living}/${T[side].length} · ${Math.round(current / total * 100)}%`;
+    }
+  };
+  updateFieldStrength();
+  $('#fieldPhase').textContent = '兩軍列陣';
+  $('#battleRecentEvents').replaceChildren();
   $('#battleLog').innerHTML = '';
   $('#phaseTitle').textContent = '戰 場 就 緒';
   const initTimer = $('#camTimer');
@@ -4376,6 +4410,7 @@ async function showBattle(res, opts = {}) {
         timerEl.textContent = `${String(tm).padStart(2, '0')}:${String(ts).padStart(2, '0')}`;
       }
       $('#phaseTitle').textContent = f.title;
+      $('#fieldPhase').textContent = ['', '先制破陣', '突騎與箭雨', '全軍白刃交鋒'][f.phase];
       const h = document.createElement('div'); h.className = 'head'; h.textContent = '▌' + f.title;
       log.prepend(h);
       for (const ln of f.lines) {
@@ -4387,20 +4422,35 @@ async function showBattle(res, opts = {}) {
         // 反敘倒序插入：最新戰況出現在最上方
         log.prepend(d);
         log.scrollTop = 0;
-        if (ln.tuid) {
+      }
+      const onImpact = ln => {
+        if (token !== playToken || res._finished || skip) return;
+        if (ln.tuid && ln.hpAfter !== undefined) {
           setHp(ln.tuid, ln.hpAfter, maxHp[ln.tuid]);
+          fieldHp[ln.tuid] = ln.hpAfter;
+          updateFieldStrength();
         }
         playFx(ln);
-        if (typeof Battle3DEngine !== 'undefined') {
-          await Battle3DEngine.playEvent(ln);
-        }
-        if (!skip) {
-          const waitTime = ln.kind === 'miss' ? 140 : ln.kind === 'kill' ? 320 : 220;
-          await sleep(waitTime / speed);
-        }
-      }
-      Object.keys(f.hp).forEach(uid => setHp(uid, f.hp[uid], maxHp[uid]));
-      if (!skip) await sleep(400 / speed);
+        if (ln.kind === 'info' && !ln.skillActivation) return;
+        const event = document.createElement('div');
+        const attacker = UNIT_MAP[ln.auid?.split('-')[0]];
+        const target = UNIT_MAP[ln.tuid?.split('-')[0]];
+        event.textContent = ln.skillActivation ? `${attacker?.name || ''} · ${ln.brevity}`
+          : `${attacker?.name || ''} → ${target?.name || ''} · ${ln.kind === 'miss' ? 'MISS' : ln.kind === 'block' ? '格擋' : ['kill', 'capture'].includes(ln.kind) ? '擊破' : `−${ln.dmg || 0}`}`;
+        event.title = ln.text;
+        const recent = $('#battleRecentEvents');
+        recent.prepend(event);
+        while (recent.children.length > 2) recent.lastElementChild.remove();
+      };
+      if (typeof Battle3DEngine !== 'undefined') await Battle3DEngine.playVolley(f.lines, onImpact, speed, f.hp);
+      else f.lines.forEach(onImpact);
+      if (token !== playToken || res._finished) return;
+      Object.keys(f.hp).forEach(uid => {
+        setHp(uid, f.hp[uid], maxHp[uid]);
+        fieldHp[uid] = f.hp[uid];
+      });
+      updateFieldStrength();
+      if (!skip) await sleep(650);
     }
   } catch (loopErr) {
     console.error('showBattle animation loop caught unexpected error:', loopErr);
@@ -4413,6 +4463,8 @@ async function showBattle(res, opts = {}) {
   if (radarEl) radarEl.classList.remove('emp-active');
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph done');
   $('#phaseTitle').textContent = '交 戰 結 束';
+  $('#fieldPhase').textContent = '交戰結束';
+  if (is3DVisible) $('#battleIntelDialog').close();
   if (opts && opts.isReplay) {
     enterBattlefieldReviewState();
     if (res) {
@@ -4450,6 +4502,7 @@ function playFx(ln) {
   try {
     const fxLayer = $('#combatFxLayer');
     if (!fxLayer) return;
+    if (is3DVisible) return;
 
   const aEl = ln.auid ? $('#bu-' + ln.auid) : null;
   const tEl = ln.tuid ? $('#bu-' + ln.tuid) : null;
@@ -4597,6 +4650,8 @@ function playFx(ln) {
 
   const layerRect = fxLayer.getBoundingClientRect();
   const tRect = tEl.getBoundingClientRect();
+  // Hidden intelligence panels have zero-sized cards, not battlefield coordinates.
+  if (!tRect.width || !tRect.height || !layerRect.width || !layerRect.height) return;
   const tx = tRect.left + tRect.width / 2 - layerRect.left;
   const ty = tRect.top + tRect.height / 2 - layerRect.top;
 
@@ -4604,7 +4659,7 @@ function playFx(ln) {
   spawnLockReticle(tx, ty, wType);
 
   // 4. 7 大兵種實體 SVG 武器模型與物理彈道動畫
-  if (aEl) {
+  if (aEl && aEl.getClientRects().length) {
     const aRect = aEl.getBoundingClientRect();
     const ax = (ln.side === 'A' ? aRect.right - 12 : aRect.left + 12) - layerRect.left;
     const ay = aRect.top + aRect.height / 2 - layerRect.top;
@@ -4722,6 +4777,7 @@ function playFx(ln) {
     const proj = document.createElement('div');
     proj.className = `fx-projectile fx-w-${wType} ${side === 'A' ? 'fx-side-a' : 'fx-side-b'}`;
     proj.innerHTML = getWeaponSvgHtml(wType, side);
+    proj.style.transform = `translate(${ax}px, ${ay}px) rotate(${Math.atan2(ty - ay, tx - ax) * 180 / Math.PI}deg)`;
     fxLayer.appendChild(proj);
 
     const dx = tx - ax, dy = ty - ay;
@@ -4977,6 +5033,7 @@ $('#btnPause')?.addEventListener('click', () => {
 function fastForwardBattle(res, opts = {}) {
   if (!res) res = lastBattleRes;
   if (!res) return;
+  if (is3DVisible) $('#battleIntelDialog').close();
   paused = false;
   skip = true;
   wakeSleep();
@@ -5018,6 +5075,13 @@ function fastForwardBattle(res, opts = {}) {
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph done');
   const pTitle = $('#phaseTitle');
   if (pTitle) pTitle.textContent = '交 戰 結 束';
+  $('#fieldPhase').textContent = '交戰結束';
+  for (const side of ['A', 'B']) {
+    const units = res.final[side];
+    const current = units.reduce((sum, unit) => sum + unit.hp, 0);
+    const total = units.reduce((sum, unit) => sum + (unit.maxHp || unit.hpMax), 0);
+    $('#fieldArmy' + side).textContent = `${side === 'A' ? '我軍' : '敵軍'} ${units.filter(unit => unit.alive).length}/${units.length} · ${Math.round(current / total * 100)}%`;
+  }
   const timerEl = $('#camTimer');
   if (timerEl) timerEl.textContent = '00:15';
 
@@ -5054,6 +5118,8 @@ $('#btnSpeed').onclick = () => {
 };
 
 function enterBattlefieldReviewState() {
+  $('#battleIntelDialog').close();
+  syncBattleIntelMode();
   if (typeof Battle3DEngine !== 'undefined') Battle3DEngine.pauseAnimationLoop(true);
   if ($('#btnPause')) $('#btnPause').hidden = true;
   if ($('#btnSpeed')) $('#btnSpeed').hidden = true;
@@ -6477,6 +6543,7 @@ $('#btnHelp').onclick = () => showHelp('rules');
 function applyTheme(theme, showNotice = false) {
   state.theme = theme;
   document.documentElement.setAttribute('data-theme', theme);
+  if (typeof Battle3DEngine !== 'undefined') Battle3DEngine.refreshTheme();
   const iconEl = $('#themeIcon');
   const btn = $('#btnTheme');
   if (iconEl) iconEl.textContent = theme === 'light' ? '🌙' : '☀️';

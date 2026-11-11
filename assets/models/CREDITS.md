@@ -14,6 +14,11 @@ From 7.9.0, simplified reserve silhouettes and pennants in the background are
 also original procedural geometry. These decorative reserves are not additional
 combatants in the simulation. No third-party game character assets are used.
 
+From 7.10.0, layered canyon walls, distant ridges, city fortifications and
+terrain textures are original procedural geometry and canvas artwork in
+[`battle-3d.js`](../../js/battle-3d.js). They do not use scanned landscapes or
+assets extracted from commercial games.
+
 | File | Original Title | Author | License | Source |
 | :--- | :--- | :--- | :--- | :--- |
 | `horse.glb` | Horse (Rigged & Animated) | Quaternius | CC0 1.0 | https://poly.pizza/m/F8HAAcLeBL |

@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.9.0">
+<link rel="stylesheet" href="style.css?v=7.10.0">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
@@ -201,6 +201,7 @@
     <div class="battle-meta" id="battleMeta"></div>
     <div class="battle-ctl" id="battleCtl">
       <button class="btn ghost sm" id="btnToggle3DView" type="button" aria-controls="battle3DWrapper" aria-expanded="true" title="切換 3D 沙盤與 2D 卡片視圖">切換至 2D</button>
+      <button class="btn ghost sm" id="btnBattleIntel" type="button" aria-haspopup="dialog" aria-controls="battleIntelDialog">部隊／戰報</button>
       <button class="btn ghost sm" id="btnPause" title="暫停或繼續戰場推演">⏸ 暫停</button>
       <button class="btn ghost sm" id="btnSpeed">速度 ×1</button>
       <button class="btn ghost sm" id="btnSkip">跳過動畫 ⏭</button>
@@ -232,8 +233,17 @@
         <button type="button" id="btnBattleLabels" aria-pressed="false">軍旗資訊</button>
       </div>
     </div>
+    <div class="battle-field-hud">
+      <div class="battle-army-strength"><span id="fieldArmyA">我軍</span><strong id="fieldPhase">兩軍列陣</strong><span id="fieldArmyB">敵軍</span></div>
+      <div id="battleRecentEvents" class="battle-recent-events" role="log" aria-live="polite"></div>
+    </div>
   </div>
 
+  <dialog id="battleIntelDialog" class="battle-intel-dialog" aria-labelledby="battleIntelTitle">
+    <div class="battle-intel-heading">
+      <strong id="battleIntelTitle">部隊與完整戰報</strong>
+      <button type="button" id="btnCloseBattleIntel" class="btn ghost sm" aria-label="關閉部隊與戰報">關閉 ✕</button>
+    </div>
   <div class="battle-panel-tabs" id="battlePanelTabs" role="group" aria-label="戰鬥資訊面板">
     <button type="button" data-battle-panel="team-a" aria-pressed="false">我方</button>
     <button type="button" data-battle-panel="log" aria-pressed="true">戰報</button>
@@ -296,7 +306,7 @@
           <span class="strip-vector" id="stripVector">⚡ 戰術交鋒 ➔</span>
           <span class="strip-who b" id="stripTarget">敵方特遣部隊</span>
         </div>
-        <div class="log" id="battleLog" aria-live="polite"></div>
+        <div class="log" id="battleLog"></div>
       </div>
     </div>
 
@@ -311,6 +321,7 @@
       </div>
     </div>
   </div>
+  </dialog>
 </section>
 
 <!-- =====================================================
@@ -1061,7 +1072,7 @@
     <header class="formation-dialog-header">
       <div>
         <p class="formation-eyebrow">BATTLE FORMATION</p>
-        <h2 id="formationDialogTitle">五軍陣形編制</h2>
+        <h2 id="formationDialogTitle">全軍陣形編制</h2>
       </div>
       <button class="formation-close-btn" id="btnCloseFormation" type="button" aria-label="關閉陣形編制">×</button>
     </header>
@@ -1073,35 +1084,35 @@
         <option value="forest">森林</option>
       </select>
     </label>
-    <div class="formation-dialog-hint">陣形效果依部隊個別套用；山岳／森林強化長蛇與四夷，四夷限孟獲、沙摩柯。</div>
+    <div class="formation-dialog-hint">五支部隊依同一陣形列陣出征；山岳／森林強化長蛇與四夷，孟獲或沙摩柯領軍可解鎖四夷。場景選擇的曠野、峽谷、城下會優先決定地貌，其餘天候搭配此處地形。</div>
     <div class="formation-rows" id="formationRows"></div>
   </div>
 </dialog>
 
 <div class="toast" id="toast" role="status"></div>
 
-<script defer src="js/data.js?v=7.9.0"></script>
-<script defer src="js/ladder-data.js?v=7.9.0"></script>
-<script defer src="js/ladder.js?v=7.9.0"></script>
-<script defer src="js/engine.js?v=7.9.0"></script>
+<script defer src="js/data.js?v=7.10.0"></script>
+<script defer src="js/ladder-data.js?v=7.10.0"></script>
+<script defer src="js/ladder.js?v=7.10.0"></script>
+<script defer src="js/engine.js?v=7.10.0"></script>
 <!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script defer src="js/firebase-config.js?v=7.9.0"></script>
-<script defer src="js/firebase-tourney.js?v=7.9.0"></script>
-<script defer src="js/tournament.js?v=7.9.0"></script>
-<script defer src="js/online-pvp.js?v=7.9.0"></script>
-<script defer src="js/telemetry.js?v=7.9.0"></script>
-<script defer src="js/cloud-sync.js?v=7.9.0"></script>
-<script defer src="js/sound.js?v=7.9.0"></script>
-<script defer src="js/poster-help.js?v=7.9.0"></script>
-<script defer src="js/libs/three.min.js?v=7.9.0"></script>
-<script defer src="js/libs/GLTFLoader.js?v=7.9.0"></script>
-<script defer src="js/libs/SkeletonUtils.js?v=7.9.0"></script>
-<script defer src="js/battle-figures.js?v=7.9.0"></script>
-<script defer src="js/battle-3d.js?v=7.9.0"></script>
-<script defer src="js/app.js?v=7.9.0"></script>
+<script defer src="js/firebase-config.js?v=7.10.0"></script>
+<script defer src="js/firebase-tourney.js?v=7.10.0"></script>
+<script defer src="js/tournament.js?v=7.10.0"></script>
+<script defer src="js/online-pvp.js?v=7.10.0"></script>
+<script defer src="js/telemetry.js?v=7.10.0"></script>
+<script defer src="js/cloud-sync.js?v=7.10.0"></script>
+<script defer src="js/sound.js?v=7.10.0"></script>
+<script defer src="js/poster-help.js?v=7.10.0"></script>
+<script defer src="js/libs/three.min.js?v=7.10.0"></script>
+<script defer src="js/libs/GLTFLoader.js?v=7.10.0"></script>
+<script defer src="js/libs/SkeletonUtils.js?v=7.10.0"></script>
+<script defer src="js/battle-figures.js?v=7.10.0"></script>
+<script defer src="js/battle-3d.js?v=7.10.0"></script>
+<script defer src="js/app.js?v=7.10.0"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let refreshing = false;
@@ -1112,7 +1123,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.9.0').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.10.0').then(r => r.update()).catch(() => {});
   });
 }
 </script>

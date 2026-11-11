@@ -4237,6 +4237,12 @@ async function showBattle(res, opts = {}) {
   const uBoxB = $('#unitsCardListB') || $('#teamUnitsB');
   if (uBoxA) uBoxA.innerHTML = teamHtml(T.A, 'A', res.docs?.A);
   if (uBoxB) uBoxB.innerHTML = teamHtml(T.B, 'B', res.docs?.B);
+  for (const list of [uBoxA, uBoxB]) {
+    if (!list?.classList.contains('units-card-list')) continue;
+    list.parentElement.querySelector(':scope > h3')?.remove();
+    const heading = list.querySelector(':scope > h3');
+    if (heading) list.before(heading);
+  }
 
   // 初始化並載入 3D 古戰場推演沙盤與合戰鼓角配樂
   try {
@@ -4960,6 +4966,7 @@ function playFx(ln) {
 
 $('#btnPause')?.addEventListener('click', () => {
   paused = !paused;
+  if (typeof Battle3DEngine !== 'undefined') Battle3DEngine.setAudioPaused(paused);
   const btn = $('#btnPause');
   if (btn) {
     btn.textContent = paused ? '▶ 繼續' : '⏸ 暫停';

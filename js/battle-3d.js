@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.8.2';
+  const ASSET_VER = '7.9.0';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -50,6 +50,11 @@ const Battle3DEngine = (function () {
   let occupationZones = [];
   let lastOccupationZoneUpdate = 0;
   let groundCover = null;
+  let reserveArmy = null;
+  let dustTexture = null;
+  let lastMarchSoundAt = 0;
+  let lastMeleeSoundAt = 0;
+  let audioPaused = false;
 
   const unitsMap = new Map();      // uid -> battalion token
   let activeMixers = [];           // { mixer, actions, currentState }
@@ -411,7 +416,11 @@ const Battle3DEngine = (function () {
     labelsButton.onclick = () => {
       showUnitLabels = !showUnitLabels;
       labelsButton.setAttribute('aria-pressed', String(showUnitLabels));
-      unitsMap.forEach(token => { token.hud.sprite.visible = showUnitLabels; });
+      unitsMap.forEach(token => {
+        token.hud.redraw(token.currentHp);
+        token.hud.tex.needsUpdate = true;
+      });
+      updateCommanderLabels();
       if (isAnimationPaused) renderer.render(scene, camera);
     };
     injectCutinLayer();
@@ -567,20 +576,20 @@ const Battle3DEngine = (function () {
     waterwayGroup.add(riverMeshRef);
 
     // 3. 三座古木戰橋橫跨淺灘 (北橋 z=-3.8、中軍大橋 z=0、南橋 z=+3.8)
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.78, metalness: 0.08 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x62523b, roughness: 0.95, metalness: 0.02 });
     const railMat = new THREE.MeshStandardMaterial({ color: 0x4a2e16, roughness: 0.82 });
     [-3.8, 0.0, 3.8].forEach((bz, idx) => {
-      const bw = idx === 1 ? 2.1 : 1.55;
+      const bw = idx === 1 ? 1.45 : 1.10;
       const bridge = new THREE.Group();
-      const deck = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.14, bw), woodMat);
-      deck.position.set(0, 0.06, bz);
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(3.45, 0.08, bw), woodMat);
+      deck.position.set(0, 0.015, bz);
       deck.castShadow = true;
       deck.receiveShadow = true;
       bridge.add(deck);
 
       [-bw / 2 + 0.08, bw / 2 - 0.08].forEach((rz) => {
-        const rail = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.24, 0.10), railMat);
-        rail.position.set(0, 0.22, bz + rz);
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(3.45, 0.08, 0.05), railMat);
+        rail.position.set(0, 0.09, bz + rz);
         rail.castShadow = true;
         bridge.add(rail);
       });
@@ -660,6 +669,16 @@ const Battle3DEngine = (function () {
     }));
     groundCover.receiveShadow = true;
     scene.add(groundCover);
+    reserveArmy = new THREE.Group();
+    for (const side of ['A', 'B']) {
+      reserveArmy.add(BattleFigures.createReserveRanks(isLowPowerDevice ? 192 : 384, side));
+    }
+    const flagCount = isLowPowerDevice ? 16 : 32;
+    const reserveFlags = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.30, 0.65),
+      new THREE.MeshLambertMaterial({ color: 0x8c8167, side: THREE.DoubleSide }), flagCount);
+    reserveFlags.userData.reserveFlags = true;
+    reserveArmy.add(reserveFlags);
+    scene.add(reserveArmy);
 
     // 4. 東西大營篝火火盆
     const campBraziers = [
@@ -723,6 +742,26 @@ const Battle3DEngine = (function () {
       });
     }
     updateEnvironmentLayout();
+    if (reserveArmy) {
+      const soldier = new THREE.Object3D();
+      reserveArmy.children.forEach(mesh => {
+        const flags = mesh.userData.reserveFlags;
+        for (let i = 0; i < mesh.count; i++) {
+          const sign = flags ? (i < mesh.count / 2 ? -1 : 1) : mesh.userData.reserveSide === 'A' ? -1 : 1;
+          const slot = flags ? i % (mesh.count / 2) * 24 + (i % 2) * 12 : i;
+          const x = sign * (7.5 + (slot % 24) * 0.34);
+          const z = -8.7 - Math.floor(slot / 24) * 0.42;
+          soldier.position.set(x, getBattleTerrainHeight(x, z) + (flags ? 1.3 : 0), z);
+          soldier.rotation.y = flags ? sign * 0.25 : -sign * Math.PI / 2;
+          soldier.scale.setScalar(flags ? 1 : 0.9 + (i % 3) * 0.035);
+          soldier.updateMatrix();
+          mesh.setMatrixAt(i, soldier.matrix);
+          if (flags) mesh.setColorAt(i, new THREE.Color(sign < 0 ? 0x819ba4 : 0xa47460));
+        }
+        mesh.instanceMatrix.needsUpdate = true;
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      });
+    }
     if (groundCover) {
       const tuft = new THREE.Object3D();
       groundCover.userData.positions.forEach(({ x, z, size }, i) => {
@@ -947,7 +986,7 @@ const Battle3DEngine = (function () {
       const faceY = sx < 0 ? Math.PI / 2 : -Math.PI / 2;
 
       [-4.8, 4.8].forEach((zPos) => {
-        const tower = spawnModelInstance('watchtower', { targetHeight: 3.1, tintHex: tint, tintStrength: 0.14 });
+        const tower = spawnModelInstance('watchtower', { targetHeight: 2.25, tintHex: tint, tintStrength: 0.14 });
         if (tower) {
           tower.group.position.set(sx * 13.0, 0, zPos);
           tower.group.rotation.y = faceY;
@@ -957,7 +996,7 @@ const Battle3DEngine = (function () {
       });
 
       [-1.9, 1.9].forEach((zPos) => {
-        const tent = spawnModelInstance('tent', { targetHeight: 1.85, tintHex: tint, tintStrength: 0.25 });
+        const tent = spawnModelInstance('tent', { targetHeight: 1.35, tintHex: tint, tintStrength: 0.25 });
         if (tent) {
           tent.group.position.set(sx * 13.4, 0, zPos);
           tent.group.rotation.y = faceY;
@@ -1151,7 +1190,7 @@ const Battle3DEngine = (function () {
     const startHp = Math.max(1, Number(unit.maxHp || unit.hpMax || unit.hp || 200));
     const hud = buildWarlordCrestHud(unit, isSideA, meta, startHp, startHp);
     hud.sprite.position.set(0, cat === 'air' ? 1.95 : 1.35, 0);
-    hud.sprite.visible = showUnitLabels;
+    hud.sprite.visible = true;
     rootGroup.add(hud.sprite);
 
     scene.add(rootGroup);
@@ -1257,6 +1296,24 @@ const Battle3DEngine = (function () {
       const hp = Math.max(0, hpVal);
       const ratio = Math.max(0, Math.min(1, hp / Math.max(1, maxHp)));
       ctx.clearRect(0, 0, 512, 176);
+      if (!showUnitLabels) {
+        roundRectPath(ctx, 4, 20, 504, 136, 8);
+        ctx.fillStyle = 'rgba(20, 24, 25, 0.90)';
+        ctx.fill();
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = isSideA ? '#8bbdd1' : '#dc9a82';
+        ctx.stroke();
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.font = 'bold 32px "Microsoft JhengHei", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(isSideA ? '我軍' : '敵軍', 24, 63);
+        ctx.fillStyle = '#fff4df';
+        ctx.font = 'bold 64px "Microsoft JhengHei", sans-serif';
+        ctx.fillText(unit.name || '無名武將', 24, 121, 460);
+        ctx.fillStyle = '#9b916d';
+        ctx.fillRect(22, 140, 468 * ratio, 5);
+        return;
+      }
 
       // 1. 黑金漆器銘牌底板
       roundRectPath(ctx, 88, 26, 408, 124, 18);
@@ -1416,6 +1473,7 @@ const Battle3DEngine = (function () {
     battleEpoch++;
     clearAllTokens();
     battleSettled = false;
+    audioPaused = false;
 
     applyBattleTerrain(res && res.terrain);
     const wKey = res?.ev?.id || res?.weather || 'clear';
@@ -1469,6 +1527,8 @@ const Battle3DEngine = (function () {
     });
     finalChargeActive = false;
     meleeActive = false;
+    lastMarchSoundAt = now;
+    lastMeleeSoundAt = now;
     updateOccupationZones();
   }
 
@@ -1496,7 +1556,7 @@ const Battle3DEngine = (function () {
       token.march = null;
       token.engagement = null;
       triggerSquadAnim(token, 'move', token.cat === 'air' ? 1.55 : 1.25);
-      return { token, start, target, ranged };
+      return { token, start, target, ranged, flank: ranged ? 0 : flank };
     });
 
     camFocusTarget.set(0, 0, 0);
@@ -1512,9 +1572,11 @@ const Battle3DEngine = (function () {
         }
         const progress = chargeDuration === 0 ? 1 : Math.min(1, (now - startedAt) / chargeDuration);
         const eased = progress * progress * (3 - 2 * progress);
-        moves.forEach(({ token, start, target, ranged }) => {
+        moves.forEach(({ token, start, target, ranged, flank }) => {
           if (!token.alive) return;
           token.mesh.position.lerpVectors(start, target, eased);
+          token.mesh.position.z += Math.sin(progress * Math.PI) * flank * (token.side === 'A' ? 1 : -1);
+          token.mesh.position.y = getBattleTerrainHeight(token.mesh.position.x, token.mesh.position.z);
           if (progress === 1) {
             token.frontX = target.x;
             token.frontY = target.y;
@@ -1807,7 +1869,7 @@ const Battle3DEngine = (function () {
         mesh: projMesh,
         start,
         end,
-        startedAt: performance.now() + i * 12,
+        startedAt: performance.now() + Math.floor(i / 4) * 90 + (i % 4) * 12,
         duration: 450,
         arcHeight: Math.min(3.2, fromPos.distanceTo(toPos) * 0.15) + Math.random() * 0.3,
         isGLB: Boolean(arrowInst)
@@ -1923,12 +1985,13 @@ const Battle3DEngine = (function () {
     token.troopsContainer.children.forEach(troop => {
       if (troop.userData.isFormationTroop) troop.rotation.z = progress * Math.PI / 2;
     });
-    if (token.hud?.sprite?.material) token.hud.sprite.material.opacity = 1 - progress * 0.8;
+    if (token.hud?.sprite?.material) token.hud.sprite.material.opacity = 1 - progress * 0.45;
     token.fallen = progress === 1;
   }
 
   function syncBattleResult(res) {
     battleSettled = true;
+    window.SoundEngine?.stopSpatial?.();
     for (const unit of [...res.final.A, ...res.final.B]) {
       const token = unitsMap.get(unit.uid);
       if (!token) continue;
@@ -2014,19 +2077,30 @@ const Battle3DEngine = (function () {
   }
 
   function spawnDustPuff(pos) {
-    const geo = new THREE.SphereGeometry(0.22, 6, 6);
-    const mat = new THREE.MeshBasicMaterial({ color: 0xd6c3a5, transparent: true, opacity: 0.48 });
-    const m = new THREE.Mesh(geo, mat);
-    m.position.set(pos.x + (Math.random() - 0.5) * 0.5, 0.22, pos.z + (Math.random() - 0.5) * 0.5);
+    if (!dustTexture) {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(32, 32, 2, 32, 32, 30);
+      gradient.addColorStop(0, 'rgba(255,255,255,0.65)');
+      gradient.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 64, 64);
+      dustTexture = new THREE.CanvasTexture(canvas);
+    }
+    const mat = new THREE.SpriteMaterial({ map: dustTexture, color: 0xb9a68c, opacity: 0.22, depthWrite: false });
+    const m = new THREE.Sprite(mat);
+    m.scale.set(0.9, 0.4, 1);
+    m.position.set(pos.x + (Math.random() - 0.5) * 0.5, pos.y + 0.18, pos.z + (Math.random() - 0.5) * 0.5);
     scene.add(m);
     particleSystems.push({
       mesh: m,
       vx: (Math.random() - 0.5) * 0.04,
-      vy: 0.035,
+      vy: 0.008,
       vz: (Math.random() - 0.5) * 0.04,
       startedAt: performance.now(),
-      duration: 335,
-      opacity: 0.48,
+      duration: 650,
+      opacity: 0.22,
       gravity: 0,
       scaleGrowth: 0.045
     });
@@ -2046,6 +2120,7 @@ const Battle3DEngine = (function () {
     const z = target.z + camRadius * Math.sin(camPhi) * Math.cos(camTheta);
     camera.position.set(x, y, z);
     camera.lookAt(target);
+    camera.updateMatrixWorld();
   }
 
   function setupCameraControls() {
@@ -2077,14 +2152,15 @@ const Battle3DEngine = (function () {
 
   function resetCamera() {
     camTheta = cameraView === 'cinematic' ? -0.12 : 0;
-    camPhi = cameraView === 'cinematic' ? 1.08 : 0.78;
-    camRadius = (container && container.clientWidth < 720) ? 22 : cameraView === 'cinematic' ? 14.5 : 25;
+    camPhi = cameraView === 'cinematic' ? 1.0 : 0.78;
+    camRadius = (container && container.clientWidth < 720) ? 22 : cameraView === 'cinematic' ? 18.5 : 25;
     camFocusOffset.set(0, 0, 0);
     if (camera) {
       camera.fov = getBattleCameraFov(camera.aspect);
       camera.updateProjectionMatrix();
     }
     updateCameraPosition();
+    updateCommanderLabels();
     if (renderer && isAnimationPaused) renderer.render(scene, camera);
   }
 
@@ -2096,6 +2172,82 @@ const Battle3DEngine = (function () {
     });
     updateOccupationZones();
     resetCamera();
+  }
+
+  function updateCommanderLabels() {
+    if (!camera || !container) return;
+    const height = container.clientHeight || 340;
+    const width = container.clientWidth || 960;
+    const topInset = 40;
+    const labelAreaHeight = Math.max(1, height - topInset);
+    const placed = [];
+    const narrow = width < 520;
+    const sideRows = { A: 0, B: 0 };
+    const sideIndex = { A: 0, B: 0 };
+    unitsMap.forEach(token => { sideRows[token.side]++; });
+    unitsMap.forEach(token => {
+      const sprite = token.hud.sprite;
+      const desiredWidth = showUnitLabels ? Math.min(190, width * 0.4)
+        : Math.max(124, Math.min(168, token.name.length * 16 + 44, (width - 12) / 2));
+      const pixels = narrow ? Math.min(desiredWidth, Math.max(1, labelAreaHeight / sideRows[token.side] - 4) * 512 / 176) : desiredWidth;
+      const labelHeight = pixels * 176 / 512;
+      const anchor = token.mesh.position.clone().add(new THREE.Vector3(
+        token.side === 'A' ? -0.3 : 0.3, token.cat === 'air' ? 1.95 : 1.4, 0));
+      const point = anchor.clone().project(camera);
+      let x = Math.max(pixels / 2 + 3, Math.min(width - pixels / 2 - 3, (point.x + 1) * width / 2));
+      const startY = Math.max(topInset + labelHeight / 2 + 3, Math.min(height - labelHeight / 2 - 3, (1 - point.y) * height / 2));
+      let y = startY;
+      if (narrow) {
+        x = token.side === 'A' ? pixels / 2 + 3 : width - pixels / 2 - 3;
+        y = topInset + (++sideIndex[token.side] - 0.5) * labelAreaHeight / sideRows[token.side];
+      }
+      let found = false;
+      for (const candidateX of narrow ? [] : [x, x - pixels - 4, x + pixels + 4, pixels / 2 + 3, width - pixels / 2 - 3]) {
+        if (candidateX < pixels / 2 || candidateX > width - pixels / 2) continue;
+        for (let step = 0; step < 20; step++) {
+          const offset = step === 0 ? 0 : Math.ceil(step / 2) * (labelHeight + 3) * (step % 2 ? -1 : 1);
+          const candidateY = startY + offset;
+          if (candidateY < topInset + labelHeight / 2 || candidateY > height - labelHeight / 2) continue;
+          const overlaps = placed.some(rect => Math.abs(candidateX - rect.x) < (pixels + rect.width) / 2 + 2
+            && Math.abs(candidateY - rect.y) < (labelHeight + rect.height) / 2 + 2);
+          if (!overlaps) { x = candidateX; y = candidateY; found = true; break; }
+        }
+        if (found) break;
+      }
+      placed.push({ x, y, width: pixels, height: labelHeight });
+      point.set(x / width * 2 - 1, 1 - y / height * 2, point.z).unproject(camera);
+      sprite.position.copy(point.sub(token.mesh.position));
+      const depth = anchor.clone().applyMatrix4(camera.matrixWorldInverse).z;
+      const perPixel = -2 * depth * Math.tan(camera.fov * Math.PI / 360) / height;
+      sprite.scale.set(pixels * perPixel, pixels * perPixel * 176 / 512, 1);
+      sprite.userData.screenRect = placed[placed.length - 1];
+    });
+  }
+
+  function playFieldSound(type, token, gain = 1) {
+    if (!token || audioPaused || document.hidden || !window.SoundEngine?.playSpatial) return;
+    const position = token.mesh.position.clone().project(camera);
+    window.SoundEngine.playSpatial(type, token.side, {
+      distance: camera.position.distanceTo(token.mesh.position),
+      pan: Math.max(-0.85, Math.min(0.85, position.x)),
+      gain
+    });
+  }
+
+  function updateFieldAudio(now) {
+    if (battleSettled || audioPaused) return;
+    const living = [...unitsMap.values()].filter(token => token.alive);
+    if (now - lastMarchSoundAt > 1100) {
+      const cavalry = living.find(token => token.cat === 'air' && token.figureState === 'move');
+      if (cavalry) playFieldSound('cavalry_hooves', cavalry, 0.45);
+      lastMarchSoundAt = now;
+    }
+    if (meleeActive && now - lastMeleeSoundAt > 1700) {
+      const front = living.filter(token => !['air_defense', 'support'].includes(token.cat) && !token.formationRanged);
+      const nearest = front.sort((a, b) => camera.position.distanceTo(a.mesh.position) - camera.position.distanceTo(b.mesh.position))[0];
+      if (nearest) playFieldSound(Math.floor(now / 1700) % 2 ? 'shield_block' : 'blade_clash', nearest, 0.28);
+      lastMeleeSoundAt = now;
+    }
   }
 
   /* ----------------------------------------------------
@@ -2191,6 +2343,9 @@ const Battle3DEngine = (function () {
       });
       updateCameraPosition();
 
+      updateCommanderLabels();
+      updateFieldAudio(now);
+
       // 3. 營寨火盆躍動與河水波光
       for (let i = 0; i < brazierLights.length; i++) {
         const b = brazierLights[i];
@@ -2248,7 +2403,7 @@ const Battle3DEngine = (function () {
         if (pt.mesh.material) pt.mesh.material.opacity = remaining * pt.opacity;
         if (remaining === 0) {
           scene.remove(pt.mesh);
-          pt.mesh.geometry.dispose();
+          if (!pt.mesh.isSprite) pt.mesh.geometry.dispose();
           pt.mesh.material.dispose();
           particleSystems.splice(i, 1);
         }
@@ -2278,6 +2433,7 @@ const Battle3DEngine = (function () {
 
   function pauseAnimationLoop(paused = true) {
     isAnimationPaused = Boolean(paused);
+    if (isAnimationPaused) window.SoundEngine?.stopSpatial?.();
     if (isAnimationPaused && animFrameId) {
       cancelAnimationFrame(animFrameId);
       animFrameId = null;
@@ -2287,6 +2443,7 @@ const Battle3DEngine = (function () {
   }
 
   function clearAllTokens() {
+    window.SoundEngine?.stopSpatial?.();
     unitsMap.forEach((t) => {
       if (scene && t.mesh) scene.remove(t.mesh);
       if (t.hud && t.hud.tex) t.hud.tex.dispose();
@@ -2312,7 +2469,7 @@ const Battle3DEngine = (function () {
 
     particleSystems.forEach(pt => {
       if (scene && pt.mesh) scene.remove(pt.mesh);
-      pt.mesh.geometry.dispose();
+      if (!pt.mesh.isSprite) pt.mesh.geometry.dispose();
       pt.mesh.material.dispose();
     });
     particleSystems = [];
@@ -2334,11 +2491,13 @@ const Battle3DEngine = (function () {
     camera.fov = getBattleCameraFov(camera.aspect);
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
+    updateCommanderLabels();
     if (isAnimationPaused && isEnabled) renderer.render(scene, camera);
   }
 
   function toggleMode(enabled) {
     isEnabled = Boolean(enabled);
+    if (!isEnabled) window.SoundEngine?.stopSpatial?.();
     if (container) container.hidden = !isEnabled;
     if (isEnabled) setTimeout(onWindowResize, 30);
   }
@@ -2353,6 +2512,9 @@ const Battle3DEngine = (function () {
       drawCalls: renderer ? renderer.info.render.calls : 0,
       triangles: renderer ? renderer.info.render.triangles : 0,
       activeEffects: projectiles.length + particleSystems.length + floatingPopups.length,
+      reserveSoldiers: reserveArmy ? reserveArmy.children.filter(mesh => !mesh.userData.reserveFlags).reduce((sum, mesh) => sum + mesh.count, 0) : 0,
+      reserveFlags: reserveArmy ? reserveArmy.children.find(mesh => mesh.userData.reserveFlags).count : 0,
+      audioPaused,
       animationPaused: isAnimationPaused,
       modelsTotal: Object.keys(MODEL_MANIFEST).length,
       modelsLoaded: modelsLoadedCount,
@@ -2375,6 +2537,9 @@ const Battle3DEngine = (function () {
         figureParts: token.troopsContainer.children.find(child => child.userData.originalFigures)?.children.map(mesh => mesh.userData.part) || [],
         animationAt: token.troopsContainer.children.find(child => child.userData.originalFigures)?.userData.animationAt || 0,
         casualties: token.troopsContainer.children.find(child => child.userData.originalFigures)?.userData.casualtyAt.filter(value => value !== null).length || 0,
+        commanderName: token.name,
+        nameLabelVisible: token.hud.sprite.visible,
+        labelRect: token.hud.sprite.userData.screenRect,
         formationSignature: token.troopsContainer.children.find(child => child.userData.isBattalionRanks)?.children[0]?.userData.standingMatrices.map(matrix => [matrix.elements[12], matrix.elements[14]]),
         x: token.mesh.position.x, z: token.mesh.position.z, frontX: token.frontX, frontZ: token.frontZ,
         ranksFallen: token.fallen && token.troopsContainer.children.some(child =>
@@ -2413,6 +2578,10 @@ const Battle3DEngine = (function () {
     beginFinalCharge,
     syncBattleResult,
     pauseAnimationLoop,
+    setAudioPaused: paused => {
+      audioPaused = Boolean(paused);
+      if (audioPaused) window.SoundEngine?.stopSpatial?.();
+    },
     toggleMode,
     clearAllTokens,
     resetCamera,

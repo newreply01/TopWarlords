@@ -10,6 +10,10 @@ field-scale interpretations, not individually reconstructed historical equipment
 or photorealistic scanned assets. The older GLBs remain for existing tools;
 the live renderer loads only arrows, banners and environment props.
 
+From 7.9.0, simplified reserve silhouettes and pennants in the background are
+also original procedural geometry. These decorative reserves are not additional
+combatants in the simulation. No third-party game character assets are used.
+
 | File | Original Title | Author | License | Source |
 | :--- | :--- | :--- | :--- | :--- |
 | `horse.glb` | Horse (Rigged & Animated) | Quaternius | CC0 1.0 | https://poly.pizza/m/F8HAAcLeBL |

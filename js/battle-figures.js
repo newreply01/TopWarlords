@@ -212,6 +212,32 @@ const BattleFigures = (() => {
     return ranks;
   }
 
+  function createReserveRanks(count, side) {
+    const pieces = [
+      new THREE.BoxGeometry(0.18, 0.36, 0.11).translate(0, 0.46, 0),
+      new THREE.SphereGeometry(0.065, 5, 3).translate(0, 0.72, 0),
+      new THREE.BoxGeometry(0.055, 0.30, 0.07).translate(-0.055, 0.15, 0),
+      new THREE.BoxGeometry(0.055, 0.30, 0.07).translate(0.055, 0.15, 0),
+      new THREE.BoxGeometry(0.012, 1.15, 0.012).translate(0.15, 0.57, 0)
+    ].map(geometry => {
+      if (!geometry.index) return geometry;
+      const source = geometry.toNonIndexed();
+      geometry.dispose();
+      return source;
+    });
+    const geometry = new THREE.BufferGeometry();
+    for (const name of ['position', 'normal']) {
+      geometry.setAttribute(name, new THREE.Float32BufferAttribute(
+        pieces.flatMap(piece => Array.from(piece.attributes[name].array)), 3));
+    }
+    pieces.forEach(piece => piece.dispose());
+    const mesh = new THREE.InstancedMesh(geometry, new THREE.MeshLambertMaterial({
+      color: side === 'A' ? 0x555f60 : 0x6a584b
+    }), count);
+    mesh.userData.reserveSide = side;
+    return mesh;
+  }
+
   const position = new THREE.Vector3(), rotation = new THREE.Quaternion(), scale = new THREE.Vector3();
   const animationRotation = new THREE.Quaternion(), matrix = new THREE.Matrix4(), axis = new THREE.Vector3(1, 0, 0);
   function fallenMatrix(base, progress, index, groundOffset, result, advance) {
@@ -289,13 +315,14 @@ const BattleFigures = (() => {
         else if (part.startsWith('horseLeg')) angle = Math.sin(phase + (part.endsWith('FL') || part.endsWith('BR') ? 0 : Math.PI)) * (moving ? 0.48 : 0.012);
         else if (part.endsWith('Arm')) {
           angle = gait * (part === 'leftArm' ? -0.30 : 0.30);
-          if (attack || (fighting && i - losses < 6)) angle -= 0.45 + Math.sin(now * 0.009 + i * 1.1) * 0.35;
+          if (attack || (fighting && i - losses < 18)) angle -= 0.45 + Math.sin(now * 0.009 + i * 1.1) * 0.35;
           if (token.cat === 'air_defense' && attack) angle = -1.05 + Math.sin(now * 0.004 + i) * 0.08;
         }
         base.decompose(position, rotation, scale);
         position.y += heights[i];
         position.z += ranks.userData.advance;
         if (mounted && moving) position.y += Math.sin(phase * 2) * 0.018;
+        if (part === 'body' && fighting) angle = Math.sin(now * 0.003 + i * 1.7) * 0.045;
         animationRotation.setFromAxisAngle(axis, angle);
         rotation.multiply(animationRotation);
         matrix.compose(position, rotation, scale);
@@ -305,5 +332,5 @@ const BattleFigures = (() => {
     });
   }
 
-  return { createRanks, animate, fall };
+  return { createRanks, createReserveRanks, animate, fall };
 })();

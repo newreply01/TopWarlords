@@ -73,4 +73,14 @@ for (const cat of cats) {
   ranks.userData.material.dispose();
 }
 assert.equal(new Set(silhouettes).size, 5, 'All five roles must use distinct equipment geometry');
+for (const side of ['A', 'B']) {
+  const reserves = figures.createReserveRanks(384, side);
+  assert.equal(reserves.count, 384);
+  assert(reserves.geometry.attributes.position.count / 3 <= 100, 'Distant reserves must use simplified geometry');
+  assert([...reserves.geometry.attributes.normal.array].every(Number.isFinite));
+  assert.equal(reserves.userData.reserveSide, side);
+  reserves.geometry.dispose();
+  reserves.material.dispose();
+  reserves.dispose();
+}
 console.log('PASS: five original troop silhouettes, complete mounts, articulated gait/attacks, finite geometry, terrain grounding.');

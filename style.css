@@ -20167,10 +20167,47 @@ select:focus-visible,
 .badge-3d-title { color: #ded3ba; border-color: #756c59; background: rgba(25, 28, 27, 0.88); }
 @media (min-width: 1101px) {
   #viewBattle .battle-3d-wrapper {
-    height: clamp(400px, 58dvh, 620px) !important;
-    min-height: 400px !important;
+    height: auto !important;
+    flex: 1 1 0 !important;
+    min-height: 220px !important;
     max-height: 620px !important;
   }
+  #viewBattle .battle-grid { flex: 0 0 260px !important; min-height: 260px !important; }
+  #viewBattle .units-card-list {
+    flex: 1 1 0 !important; height: auto !important;
+    grid-template-rows: repeat(3, minmax(64px, 1fr)) !important;
+    overflow-y: auto !important;
+  }
+  #viewBattle .units-card-list .bu { height: auto !important; min-height: 64px !important; }
+  #viewBattle .units-card-list .bu-thumb {
+    width: 42px !important; height: 48px !important; min-height: 48px !important; flex-basis: 42px !important;
+  }
+  #viewBattle .units-card-list .bu-row-wpn,
+  #viewBattle .units-card-list .bu-row-role,
+  #viewBattle .units-card-list .bu-metrics { display: none !important; }
+  #viewBattle .units-card-list .bu-name-txt { font-size: 13px !important; }
+  #viewBattle .units-card-list .bu-hp-num { font-size: 11px !important; }
+  #viewBattle .team-units-box > h3 { position: static !important; flex: 0 0 30px !important; margin: 0 0 4px !important; }
+}
+@media (min-width: 769px) and (max-height: 660px) {
+  #viewBattle { overflow-y: auto !important; }
+  #viewBattle .battle-3d-wrapper { flex: 0 0 230px !important; min-height: 230px !important; }
+  #viewBattle .battle-panel-tabs { display: grid !important; }
+  #viewBattle .battle-grid { display: block !important; flex: 0 0 220px !important; min-height: 220px !important; }
+  #viewBattle .battle-grid > #teamA,
+  #viewBattle .battle-grid > #teamB,
+  #viewBattle .battle-grid > .log-col { display: none !important; }
+  #viewBattle[data-battle-panel="team-a"] #teamA,
+  #viewBattle[data-battle-panel="team-b"] #teamB,
+  #viewBattle[data-battle-panel="log"] .log-col { display: flex !important; }
+}
+@media (max-width: 1100px) {
+  #viewBattle .units-card-list {
+    display: flex !important; flex-direction: column !important; height: auto !important;
+    overflow-y: auto !important;
+  }
+  #viewBattle .units-card-list .bu { flex: 0 0 auto !important; min-height: 76px !important; height: auto !important; }
+  #viewBattle .team-units-box > h3 { position: static !important; flex: 0 0 auto !important; }
 }
 @media (max-width: 520px) {
   .badge-3d-title { display: none; }

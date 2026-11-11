@@ -5,7 +5,7 @@
    支援左右陣營立體聲定位、多取樣輪替防機械感、戶外山谷空間殘響與平滑 BGM 交叉淡入淡出
    ===================================================== */
 (function () {
-  const AUDIO_VER = '7.8.2';
+  const AUDIO_VER = '7.9.0';
   const BASE_PATH = 'assets/audio/';
 
   const CLIP_MANIFEST = {
@@ -84,6 +84,7 @@
     currentBgmNode: null,
     currentBgmGain: null,
     unlocked: false,
+    spatialSources: new Set(),
     enabled: readSoundPref(),
 
     // 預先抓取二進位音訊檔（不需等待使用者點擊即可透過網路快取下載）
@@ -221,6 +222,7 @@
           this._startBgmSource(this.currentBgmMode);
         }
       } else {
+        this.stopSpatial();
         if (this.masterGain && this.ctx) {
           this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
           this.masterGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.03);
@@ -398,7 +400,7 @@
       }
     },
 
-    _triggerBuffer(clipKey, { side = 'A', gain = 0.85, rateJitter = 0.05, delay = 0, panScale = 1.0 }) {
+    _triggerBuffer(clipKey, { side = 'A', gain = 0.85, rateJitter = 0.05, delay = 0, panScale = 1.0, pan = null, distance = 0, spatial = false }) {
       const buf = this.buffers[clipKey];
       if (!buf || !this.ctx) return false;
 
@@ -410,23 +412,62 @@
       src.playbackRate.setValueAtTime(Math.max(0.82, Math.min(1.18, rate)), now);
 
       const g = this.ctx.createGain();
-      const gJit = gain * (0.94 + Math.random() * 0.12);
+      const gJit = gain * (0.94 + Math.random() * 0.12) / (1 + Math.max(0, distance - 8) * 0.07);
       g.gain.setValueAtTime(gJit, now);
 
-      if (this.ctx.createStereoPanner && panScale > 0) {
-        const panner = this.ctx.createStereoPanner();
-        const basePan = side === 'A' ? -0.32 : (side === 'B' ? 0.32 : 0);
-        panner.pan.setValueAtTime(basePan * panScale + (Math.random() * 0.08 - 0.04), now);
+      let filter = null;
+      if (distance > 0) {
+        filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(Math.max(1600, 15000 / (1 + distance * 0.12)), now);
+        src.connect(filter);
+        filter.connect(g);
+      } else {
         src.connect(g);
+      }
+      let panner = null;
+      if (this.ctx.createStereoPanner && panScale > 0) {
+        panner = this.ctx.createStereoPanner();
+        const basePan = side === 'A' ? -0.32 : (side === 'B' ? 0.32 : 0);
+        panner.pan.setValueAtTime(pan === null ? basePan * panScale + (Math.random() * 0.08 - 0.04) : pan, now);
         g.connect(panner);
         panner.connect(this.sfxBus);
       } else {
-        src.connect(g);
         g.connect(this.sfxBus);
       }
 
+      src.onended = () => {
+        this.spatialSources.delete(src);
+        src.disconnect();
+        if (filter) filter.disconnect();
+        g.disconnect();
+        if (panner) panner.disconnect();
+      };
       src.start(now);
+      if (spatial) this.spatialSources.add(src);
       return true;
+    },
+
+    stopSpatial() {
+      this.spatialSources.forEach(source => source.stop());
+      this.spatialSources.clear();
+    },
+
+    playSpatial(type, side, { distance, pan, gain = 1 }) {
+      if (![distance, pan, gain].every(Number.isFinite) || distance < 0 || gain < 0) {
+        throw new TypeError('Spatial sound requires finite non-negative distance/gain and finite pan');
+      }
+      if (!this.enabled) return;
+      this.init();
+      if (!this.ctx) return;
+      const spec = this._resolveEvent(type);
+      const now = performance.now();
+      if (now - (this.lastPlayAt[spec.key] || 0) < (spec.minGapMs || 40)) return;
+      this.lastPlayAt[spec.key] = now;
+      return this._triggerBuffer(spec.key, {
+        side, distance, pan: Math.max(-1, Math.min(1, pan)), gain: Math.min(1, gain) * spec.gain,
+        rateJitter: spec.rateJitter, spatial: true
+      });
     },
 
     play(type, side = 'A') {

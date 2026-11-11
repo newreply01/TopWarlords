@@ -104,6 +104,10 @@ try:
         assert all(len(unit["figureParts"]) == (10 if unit["cat"] == "air" else 5) for unit in terrain_state["battalions"]), \
             "Troops or mounts have missing articulated parts"
         assert terrain_state["cameraView"] == "cinematic" and not terrain_state["unitLabels"]
+        assert all(unit["nameLabelVisible"] and unit["commanderName"] for unit in terrain_state["battalions"]), \
+            "Commander names must remain visible without enabling detailed crests"
+        assert terrain_state["reserveSoldiers"] == (384 if terrain_state["lowPowerDevice"] else 768)
+        assert terrain_state["reserveFlags"] == (16 if terrain_state["lowPowerDevice"] else 32)
         page.evaluate("""() => {
             document.querySelector('#btnPause').click();
             Battle3DEngine.pauseAnimationLoop(true);
@@ -111,6 +115,7 @@ try:
         page.locator('[data-camera-view="overview"]').click()
         assert page.evaluate("() => Battle3DEngine.getDebugState().cameraView") == "overview"
         page.locator('#btnBattleLabels').click()
+        assert all(unit["nameLabelVisible"] for unit in page.evaluate("() => Battle3DEngine.getDebugState().battalions"))
         assert page.evaluate("() => Battle3DEngine.getDebugState().unitLabels")
         page.locator('#btnBattleLabels').click()
         page.locator('[data-camera-view="cinematic"]').click()
@@ -121,6 +126,8 @@ try:
         assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
         assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
         page.wait_for_function("() => Battle3DEngine.getDebugState().engagedBattalions > 0", polling=100, timeout=15000)
+        page.locator('#btnPause').click()
+        assert page.evaluate("() => Battle3DEngine.getDebugState().audioPaused")
         assert not page.locator('#battlePanelTabs').is_visible(), 'Desktop should use the three-panel command layout'
         assert page.locator('#teamA').is_visible() and page.locator('#teamB').is_visible(), 'Desktop should show both team rosters'
         assert page.locator('.log-col').is_visible(), 'Desktop battle log is missing'
@@ -132,10 +139,48 @@ try:
             card: document.querySelector('#unitsCardListA .bu')?.getBoundingClientRect().height || 0,
             log: document.querySelector('.log-col').clientWidth
         })""")
-        assert 340 <= desktop_layout['stage'] <= 460, f"3D stage height is outside the viewport budget: {desktop_layout}"
-        assert desktop_layout['grid'] >= 180 and desktop_layout['card'] >= 48, f"Battle roster was compressed: {desktop_layout}"
+        assert 220 <= desktop_layout['stage'] <= 460, f"3D stage height is outside the viewport budget: {desktop_layout}"
+        assert desktop_layout['grid'] >= 260 and desktop_layout['card'] >= 64, f"Battle roster was compressed: {desktop_layout}"
         assert desktop_layout['log'] >= 280, f"Battle log column is too narrow: {desktop_layout}"
         assert desktop_layout['rosterContent'] <= desktop_layout['roster'] + 4, f"Desktop roster still needs scrolling: {desktop_layout}"
+        assert page.evaluate("""() => [...document.querySelectorAll('.units-card-list')].every(list =>
+            !list.querySelector('h3') && list.previousElementSibling.tagName === 'H3')"""), \
+            "Team headings must not consume unit grid cells"
+        page.evaluate("() => Battle3DEngine.pauseAnimationLoop(true)")
+        for width, height in [(1680, 900), (1273, 588), (1019, 470), (1100, 800), (390, 844), (320, 740)]:
+            page.set_viewport_size({"width": width, "height": height})
+            page.wait_for_timeout(150)
+            layout = page.evaluate("""() => {
+                const cards = [...document.querySelectorAll('.units-card-list .bu')].filter(card => card.getClientRects().length);
+                const labels = Battle3DEngine.getDebugState().battalions.map(unit => unit.labelRect);
+                const canvas = document.querySelector('#battle3DCanvas');
+                return {
+                    labels: labels.every((rect, i) => rect && rect.x >= rect.width / 2
+                        && rect.x + rect.width / 2 <= canvas.clientWidth
+                        && rect.y >= rect.height / 2 + 40 && rect.y + rect.height / 2 <= canvas.clientHeight
+                        && labels.slice(i + 1).every(other =>
+                            Math.abs(rect.x - other.x) >= (rect.width + other.width) / 2
+                            || Math.abs(rect.y - other.y) >= (rect.height + other.height) / 2)),
+                    readable: cards.every(card => {
+                        const name = card.querySelector('.bu-name-txt').getBoundingClientRect();
+                        const hp = card.querySelector('.bu-hp-num').getBoundingClientRect();
+                        const box = card.getBoundingClientRect();
+                        return box.height >= 64 && hp.bottom <= box.bottom + 1
+                            && name.top >= box.top && name.bottom <= box.bottom;
+                    }),
+                    tabs: Boolean(document.querySelector('#battlePanelTabs').getClientRects().length),
+                    overflow: document.documentElement.scrollWidth > innerWidth + 1
+                };
+            }""")
+            assert layout["readable"] and not layout["overflow"], f"Compressed battle information at {width}x{height}: {layout}"
+            assert layout["labels"], f"Commander names overlap or leave the battlefield at {width}x{height}: {layout}"
+            if height <= 660 or width <= 1100:
+                assert layout["tabs"], f"Low-space battle must expose information tabs: {layout}"
+                for panel, selector in [("team-a", "#teamA"), ("team-b", "#teamB"), ("log", ".log-col")]:
+                    page.locator(f'[data-battle-panel="{panel}"]').click()
+                    assert page.locator(selector).is_visible()
+        page.set_viewport_size({"width": 1680, "height": 749})
+        page.evaluate("() => Battle3DEngine.pauseAnimationLoop(false)")
         charge_finished = page.evaluate("async () => await Battle3DEngine.beginFinalCharge(280)")
         assert charge_finished and not page.evaluate("() => Battle3DEngine.getDebugState().finalChargeActive"), 'Final charge animation did not settle cleanly'
 
@@ -200,6 +245,12 @@ try:
             };
             window.visualKills = [];
             const playOriginal = Battle3DEngine.playEvent;
+            window.spatialCues = [];
+            const spatialOriginal = SoundEngine.playSpatial.bind(SoundEngine);
+            SoundEngine.playSpatial = (type, side, perspective) => {
+                spatialCues.push({ type, side, ...perspective });
+                return spatialOriginal(type, side, perspective);
+            };
             Battle3DEngine.playEvent = async line => {
                 const startedAt = performance.now();
                 window.visualLastEvent = { kind: line.kind, attacker: line.auid, target: line.tuid, startedAt, finished: false };
@@ -243,12 +294,17 @@ try:
             expectedDead: [...visualBattle.final.A, ...visualBattle.final.B].filter(unit => !unit.alive).length,
             state: Battle3DEngine.getDebugState(),
             kills: visualKills,
-            charge: visualCharge
+            charge: visualCharge,
+            spatialCues
         })""")
         assert visual['rounds'] == 4 and not visual['finale'], f"Four-round regression fixture changed: {visual}"
         assert visual['state']['fallenBattalions'] == visual['expectedDead'], f"3D deaths diverged from battle result: {visual}"
         assert visual['state']['cameraView'] == 'cinematic'
         assert visual['state']['activeEffects'] == 0, "Expired battle effects remained frozen at the result"
+        assert all(unit["nameLabelVisible"] for unit in visual['state']['battalions']), "Result hid commander identity"
+        assert visual['spatialCues'] and all(cue['distance'] > 0 and -1 <= cue['pan'] <= 1 for cue in visual['spatialCues']), \
+            "Battle ambience did not receive camera-relative spatial positions"
+        assert natural.evaluate("() => SoundEngine.spatialSources.size") == 0, "Spatial voices continued after settlement"
         assert visual['state']['drawCalls'] < 500 and visual['state']['triangles'] < 1500000, \
             f"Battlefield exceeded its draw/geometry budget: {visual['state']['drawCalls']}, {visual['state']['triangles']}"
         assert len(visual['kills']) == visual['expectedDead'], f"Deaths were only repaired at result instead of animated: {visual}"

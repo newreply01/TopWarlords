@@ -1176,12 +1176,12 @@ function renderMatrix() {
             </button>
           </div>
         </div>
-        <div class="m-stats" aria-label="基本數值">
-          <span>生命 <b>${u.hp}</b></span>
-          <span>攻擊 <b>${u.atk}</b></span>
-          <span>${u.ew > u.st ? '謀略' : '隱匿'} <b>${Math.max(u.ew, u.st)}</b></span>
-        </div>
         <div class="m-bot">
+          <div class="m-stats" aria-label="基本數值">
+            <span title="生命" aria-label="生命 ${u.hp}">生 <b>${u.hp}</b></span>
+            <span title="攻擊" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
+            <span title="${u.ew > u.st ? '謀略' : '隱匿'}" aria-label="${u.ew > u.st ? '謀略' : '隱匿'} ${Math.max(u.ew, u.st)}">${u.ew > u.st ? '謀' : '隱'} <b>${Math.max(u.ew, u.st)}</b></span>
+          </div>
           ${showWhy
             ? `<span class="m-why ${isBanned ? 'why-banned' : 'why-budget'}">${why}</span>`
             : (envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}">${envMod.short}</span>` : '')}

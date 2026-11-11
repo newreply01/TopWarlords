@@ -55,7 +55,7 @@ try:
         print(f"[TEST 1] 5x5 看板渲染名將卡片數量: {card_count} 張")
         assert card_count == 25, f"預期 25 張卡片，實際得到 {card_count}"
 
-        for width, height in [(1680, 900), (1440, 900), (1100, 800), (390, 844), (320, 740)]:
+        for width, height in [(1680, 900), (1440, 900), (1366, 768), (1280, 720), (1273, 588), (1019, 470), (1100, 800), (390, 844), (320, 740)]:
             page.set_viewport_size({"width": width, "height": height})
             page.wait_for_timeout(200)
             readability = page.evaluate("""() => {
@@ -70,6 +70,8 @@ try:
                             && [...card.querySelectorAll('.m-stats b')].map(value => value.textContent).join(',')
                                 === [unit.hp, unit.atk, Math.max(unit.ew, unit.st)].join(',')
                             && card.querySelector('.m-stats span:last-child').textContent.trim()
+                                === `${unit.ew > unit.st ? '謀' : '隱'} ${Math.max(unit.ew, unit.st)}`
+                            && card.querySelector('.m-stats span:last-child').getAttribute('aria-label')
                                 === `${unit.ew > unit.st ? '謀略' : '隱匿'} ${Math.max(unit.ew, unit.st)}`;
                     }),
                     readable: visible.every(card => {
@@ -79,21 +81,31 @@ try:
                         const stats = card.querySelector('.m-stats').getBoundingClientRect();
                         const statCells = [...card.querySelectorAll('.m-stats span')].map(cell => cell.getBoundingClientRect());
                         const bounds = card.getBoundingClientRect();
-                        return avatar.width >= 76 && avatar.height >= 76
-                            && parseFloat(getComputedStyle(card.querySelector('.m-name')).fontSize) >= 16
-                            && parseFloat(getComputedStyle(card.querySelector('.m-skill')).fontSize) >= 13
+                        const compact = innerWidth > 768 && innerHeight <= 540;
+                        return avatar.width >= (compact ? 32 : 44) && avatar.height >= (compact ? 32 : 44)
+                            && parseFloat(getComputedStyle(card.querySelector('.m-name')).fontSize) >= (compact ? 13 : 14)
+                            && parseFloat(getComputedStyle(card.querySelector('.m-skill')).fontSize) >= (compact ? 11 : 12)
                             && skill.width < bounds.width * 0.7
                             && skill.left >= info.left && skill.right <= info.right + 1
                             && skill.bottom <= stats.top
-                            && stats.height > 0 && stats.bottom <= bounds.bottom
+                            && stats.height > 0 && stats.height <= 18 && stats.bottom <= bounds.bottom
                             && statCells.every(cell => Math.abs(cell.top - statCells[0].top) < 1)
-                            && parseFloat(getComputedStyle(card.querySelector('.m-stats b')).fontSize) >= 15;
+                            && statCells.every(cell => cell.right <= bounds.right && cell.left >= bounds.left)
+                            && parseFloat(getComputedStyle(card.querySelector('.m-stats b')).fontSize) >= (compact ? 11 : 12);
+                    }),
+                    onePage: innerWidth <= 768 || cards.every(card => {
+                        const rect = card.getBoundingClientRect();
+                        const board = document.querySelector('#matrixBoard');
+                        const footer = document.querySelector('#commandDeck').getBoundingClientRect();
+                        return rect.top >= board.getBoundingClientRect().top && rect.bottom <= footer.top
+                            && board.scrollHeight <= board.clientHeight + 1;
                     }),
                     horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1
                 };
             }""")
             assert readability["skills"] and readability["readable"], f"Unreadable selection cards at {width}px: {readability}"
             assert not readability["horizontalOverflow"], f"Selection overflow at {width}px"
+            assert readability["onePage"], f"All 25 cards must fit without scrolling at {width}x{height}: {readability}"
             last_card = page.locator(".col-category.mobile-active .m-card" if width <= 768 else ".col-category:first-child .m-card").last
             last_card.scroll_into_view_if_needed()
             assert last_card.is_visible(), f"Last card is inaccessible at {width}px"

@@ -1171,11 +1171,16 @@ function renderMatrix() {
                 <button class="m-info-btn" data-info-id="${u.id}" title="查看名將傳記與實戰數值">ℹ</button>
               </div>
             </div>
+            <button type="button" class="m-skill" data-info-id="${u.id}" aria-label="${esc(u.name)}：${esc(u.skill?.name || '未配置戰法')}，查看詳情">
+              <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
+            </button>
           </div>
         </div>
-        <button type="button" class="m-skill" data-info-id="${u.id}" aria-label="${esc(u.name)}：${esc(u.skill?.name || '未配置戰法')}，查看詳情">
-          <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
-        </button>
+        <div class="m-stats" aria-label="基本數值">
+          <span>生命 <b>${u.hp}</b></span>
+          <span>攻擊 <b>${u.atk}</b></span>
+          <span>${u.ew > u.st ? '謀略' : '隱匿'} <b>${Math.max(u.ew, u.st)}</b></span>
+        </div>
         <div class="m-bot">
           ${showWhy
             ? `<span class="m-why ${isBanned ? 'why-banned' : 'why-budget'}">${why}</span>`

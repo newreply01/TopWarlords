@@ -55,7 +55,7 @@ try:
         print(f"[TEST 1] 5x5 看板渲染名將卡片數量: {card_count} 張")
         assert card_count == 25, f"預期 25 張卡片，實際得到 {card_count}"
 
-        for width, height in [(1680, 900), (1100, 800), (390, 844)]:
+        for width, height in [(1680, 900), (1440, 900), (1100, 800), (390, 844), (320, 740)]:
             page.set_viewport_size({"width": width, "height": height})
             page.wait_for_timeout(200)
             readability = page.evaluate("""() => {
@@ -65,18 +65,29 @@ try:
                     skills: cards.every(card => {
                         const unit = UNIT_MAP[card.dataset.id];
                         return card.querySelector('.m-skill strong').textContent === unit.skill.name
-                            && !card.querySelector('.m-skill-effect, .m-role-hint, .m-stats')
-                            && card.querySelector('.m-skill').dataset.infoId === unit.id;
+                            && !card.querySelector('.m-skill-effect, .m-role-hint')
+                            && card.querySelector('.m-card-info-col .m-skill').dataset.infoId === unit.id
+                            && [...card.querySelectorAll('.m-stats b')].map(value => value.textContent).join(',')
+                                === [unit.hp, unit.atk, Math.max(unit.ew, unit.st)].join(',')
+                            && card.querySelector('.m-stats span:last-child').textContent.trim()
+                                === `${unit.ew > unit.st ? '謀略' : '隱匿'} ${Math.max(unit.ew, unit.st)}`;
                     }),
                     readable: visible.every(card => {
                         const avatar = card.querySelector('.m-avatar-wrap').getBoundingClientRect();
                         const skill = card.querySelector('.m-skill').getBoundingClientRect();
+                        const info = card.querySelector('.m-card-info-col').getBoundingClientRect();
+                        const stats = card.querySelector('.m-stats').getBoundingClientRect();
+                        const statCells = [...card.querySelectorAll('.m-stats span')].map(cell => cell.getBoundingClientRect());
                         const bounds = card.getBoundingClientRect();
                         return avatar.width >= 76 && avatar.height >= 76
                             && parseFloat(getComputedStyle(card.querySelector('.m-name')).fontSize) >= 16
-                            && parseFloat(getComputedStyle(card.querySelector('.m-skill')).fontSize) >= 15
-                            && skill.width >= bounds.width - 25
-                            && skill.bottom <= bounds.bottom;
+                            && parseFloat(getComputedStyle(card.querySelector('.m-skill')).fontSize) >= 13
+                            && skill.width < bounds.width * 0.7
+                            && skill.left >= info.left && skill.right <= info.right + 1
+                            && skill.bottom <= stats.top
+                            && stats.height > 0 && stats.bottom <= bounds.bottom
+                            && statCells.every(cell => Math.abs(cell.top - statCells[0].top) < 1)
+                            && parseFloat(getComputedStyle(card.querySelector('.m-stats b')).fontSize) >= 15;
                     }),
                     horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1
                 };
@@ -88,12 +99,23 @@ try:
             assert last_card.is_visible(), f"Last card is inaccessible at {width}px"
             assert last_card.evaluate("(card) => {const r=card.getBoundingClientRect();return r.top>=0 && r.bottom<=innerHeight;}"), \
                 f"Last card cannot scroll into viewport at {width}px"
+            if width <= 768:
+                deck_before_details = page.evaluate("() => localStorage.getItem('wl15_deck')")
+                last_card.locator(".m-skill").click()
+                assert page.locator("#unitDetailModal").is_visible(), f"Skill details are inaccessible at {width}px"
+                assert page.evaluate("() => localStorage.getItem('wl15_deck')") == deck_before_details
+                page.locator("#btnUnitSheetClose").click()
         page.set_viewport_size({"width": 1280, "height": 720})
         page.locator(".m-card").first.scroll_into_view_if_needed()
         deck_before_details = page.evaluate("() => localStorage.getItem('wl15_deck')")
         page.locator(".m-card .m-skill").first.click()
         assert page.locator("#unitDetailModal").is_visible(), "Skill badge must open details without selecting the unit"
         assert page.evaluate("() => localStorage.getItem('wl15_deck')") == deck_before_details, "Opening skill details selected a unit"
+        page.locator("#btnUnitSheetClose").click()
+        page.locator(".m-card .m-skill").first.focus()
+        page.keyboard.press("Enter")
+        assert page.locator("#unitDetailModal").is_visible(), "Keyboard activation must open skill details"
+        assert page.evaluate("() => localStorage.getItem('wl15_deck')") == deck_before_details
         page.locator("#btnUnitSheetClose").click()
         page.locator(".m-card").first.hover()
         assert page.locator("#unitTooltip .u-tt-skill").is_visible(), "Desktop hover must show skill details"

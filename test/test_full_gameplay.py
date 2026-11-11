@@ -55,6 +55,43 @@ try:
         print(f"[TEST 1] 5x5 看板渲染名將卡片數量: {card_count} 張")
         assert card_count == 25, f"預期 25 張卡片，實際得到 {card_count}"
 
+        for width, height in [(1680, 900), (1100, 800), (390, 844)]:
+            page.set_viewport_size({"width": width, "height": height})
+            page.wait_for_timeout(200)
+            readability = page.evaluate("""() => {
+                const cards = [...document.querySelectorAll('.m-card')];
+                const visible = cards.filter(card => card.getBoundingClientRect().width > 0);
+                return {
+                    skills: cards.every(card => {
+                        const unit = UNIT_MAP[card.dataset.id];
+                        return card.querySelector('.m-skill-heading strong').textContent === unit.skill.name
+                            && card.querySelector('.m-skill-effect').textContent === unit.skill.desc
+                            && card.querySelector('.m-skill-heading span').textContent.includes(unit.skill.phase);
+                    }),
+                    readable: visible.every(card => {
+                        const avatar = card.querySelector('.m-avatar-wrap').getBoundingClientRect();
+                        const skill = card.querySelector('.m-skill').getBoundingClientRect();
+                        const bounds = card.getBoundingClientRect();
+                        return avatar.width >= 76 && avatar.height >= 76
+                            && parseFloat(getComputedStyle(card.querySelector('.m-name')).fontSize) >= 16
+                            && parseFloat(getComputedStyle(card.querySelector('.m-skill-effect')).fontSize) >= 13
+                            && skill.width >= bounds.width - 25
+                            && skill.bottom <= bounds.bottom;
+                    }),
+                    horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1
+                };
+            }""")
+            assert readability["skills"] and readability["readable"], f"Unreadable selection cards at {width}px: {readability}"
+            assert not readability["horizontalOverflow"], f"Selection overflow at {width}px"
+            last_card = page.locator(".col-category.mobile-active .m-card" if width <= 768 else ".col-category:first-child .m-card").last
+            last_card.scroll_into_view_if_needed()
+            assert last_card.is_visible(), f"Last card is inaccessible at {width}px"
+            assert last_card.evaluate("(card) => {const r=card.getBoundingClientRect();return r.top>=0 && r.bottom<=innerHeight;}"), \
+                f"Last card cannot scroll into viewport at {width}px"
+        page.set_viewport_size({"width": 1280, "height": 720})
+        page.locator(".m-card").first.scroll_into_view_if_needed()
+        print("[TEST 1b] 桌機／平板／手機頭像、字級、專屬技能與捲動可達性通過")
+
         same_role_result = page.evaluate("""() => {
             const ids = [...document.querySelectorAll('.m-card[data-cat="air"]')].map(card => card.dataset.id);
             if (ids.length !== 5) return { count: ids.length, deck: [] };

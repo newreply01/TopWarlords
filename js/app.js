@@ -1167,8 +1167,8 @@ function renderMatrix() {
         <div class="m-card-main-row">
           <div class="m-avatar-wrap">
             <img class="m-avatar-img" src="${u.img || ''}" width="48" height="48" loading="lazy" decoding="async" alt="${esc(u.name)}" onerror="this.style.display='none'" />
-            <span class="m-avatar-cost">$${u.cost}</span>
           </div>
+          <span class="m-avatar-cost">$${u.cost}</span>
           <div class="m-card-info-col">
             <div class="m-top">
               <div class="m-name-group">
@@ -1182,12 +1182,17 @@ function renderMatrix() {
             <div class="m-weapon-strip">⚔️ ${esc((u.weapon || '').split(' ')[0])}</div>
           </div>
         </div>
+        <div class="m-skill" title="${esc(u.skill?.desc || '')}">
+          <div class="m-skill-heading"><strong>${esc(u.skill?.name || '未配置戰法')}</strong><span>${esc(u.skill?.phase || '')} · 每戰一次</span></div>
+          <div class="m-skill-effect">${esc(u.skill?.desc || '此武將尚未配置專屬戰法。')}</div>
+        </div>
+        <div class="m-role-hint">${esc(getCombatRoleSummary(u))}</div>
         <div class="m-mobile-intel">${u.weapon ? `<span class="m-mob-wpn">🎯 ${esc(u.weapon)}</span>` : ''}${(u.traits && u.traits.length) ? `<div class="m-mob-traits">${u.traits.map(t => `<span class="m-mob-trait-pill">${M_TRAIT_SHORT[t] || t}</span>`).join('')}</div>` : ''}</div>
         <div class="m-bot">
           <div class="m-stats">
-            <span>HP <b>${u.hp}</b></span>
-            <span>ATK <b>${u.atk}</b></span>
-            <span>${u.ew > u.st ? 'EW' : 'STH'} <b>${Math.max(u.ew, u.st)}</b></span>
+            <span>生命 <b>${u.hp}</b></span>
+            <span>攻擊 <b>${u.atk}</b></span>
+            <span>${u.ew > u.st ? '謀略' : '隱匿'} <b>${Math.max(u.ew, u.st)}</b></span>
           </div>
           ${showWhy
             ? `<span class="m-why ${isBanned ? 'why-banned' : 'why-budget'}">${why}</span>`
@@ -4364,7 +4369,7 @@ async function showBattle(res, opts = {}) {
       }
       if ((enteringMelee || f.finale === 'charge') && typeof Battle3DEngine !== 'undefined') {
         $('#phaseTitle').textContent = '兩 軍 衝 陣 · 白 刃 交 鋒';
-        await Battle3DEngine.beginFinalCharge(skip ? 0 : 1600);
+        await Battle3DEngine.beginFinalCharge(skip ? 0 : 1600, f.finale === 'charge');
         if (token !== playToken || res._finished) return;
       }
       sec++;
@@ -4382,7 +4387,7 @@ async function showBattle(res, opts = {}) {
         const d = document.createElement('div');
         d.className = `s${ln.side} ${ln.kind}`;
         const brevityBadge = ln.brevity ? `<span class="brevity-tag ${ln.kind}">${esc(ln.brevity)}</span>` : '';
-        d.innerHTML = `${brevityBadge}<span class="log-text">${esc(ln.text)}</span>`;
+        d.innerHTML = `${brevityBadge}<span class="log-text">${esc(ln.text)}</span>${ln.matchup ? `<span class="matchup-tag">${esc(ln.matchup)}</span>` : ''}`;
         // 反敘倒序插入：最新戰況出現在最上方
         log.prepend(d);
         log.scrollTop = 0;

@@ -6,7 +6,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.7.14';
+  const ASSET_VER = '7.7.15';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -683,8 +683,25 @@ const Battle3DEngine = (function () {
     if (terrainDecorationGroup) {
       terrainDecorationGroup.children.forEach((group, index) => {
         group.visible = currentBattleTerrain === (index === 0 ? 'forest' : 'mountain');
+        group.scale.set(index === 0 ? 0.72 : 0.62, 1, index === 0 ? 0.68 : 0.58);
+        group.children.forEach(mesh => {
+          if (!mesh.userData.terrainMatrices) {
+            mesh.userData.terrainMatrices = Array.from({ length: mesh.count }, (_, i) => {
+              const matrix = new THREE.Matrix4();
+              mesh.getMatrixAt(i, matrix);
+              return matrix;
+            });
+          }
+          mesh.userData.terrainMatrices.forEach((base, i) => {
+            const matrix = base.clone();
+            matrix.elements[13] += getBattleTerrainHeight(matrix.elements[12] * group.scale.x, matrix.elements[14] * group.scale.z);
+            mesh.setMatrixAt(i, matrix);
+          });
+          mesh.instanceMatrix.needsUpdate = true;
+        });
       });
     }
+    updateEnvironmentLayout();
     if (!groundGeometryRef) return;
 
     const positions = groundGeometryRef.attributes.position;
@@ -925,6 +942,7 @@ const Battle3DEngine = (function () {
         if (tower) {
           tower.group.position.set(sx * 13.0, 0, zPos);
           tower.group.rotation.y = faceY;
+          tower.group.userData.terrainRole = 'tower';
           envPropsGroup.add(tower.group);
         }
       });
@@ -952,6 +970,7 @@ const Battle3DEngine = (function () {
         const abatis = buildWoodenAbatis(1.32, 0.68);
         abatis.position.set(sx * 2.55, 0, zPos);
         abatis.rotation.y = faceY;
+        abatis.userData.terrainRole = 'abatis';
         envPropsGroup.add(abatis);
       });
     });
@@ -966,8 +985,33 @@ const Battle3DEngine = (function () {
       if (rk) {
         rk.group.position.set(rx, 0.15, rz);
         rk.group.rotation.y = i * 1.1;
+        rk.group.userData.terrainRole = 'rock';
         envPropsGroup.add(rk.group);
       }
+    });
+    updateEnvironmentLayout();
+  }
+
+  function updateEnvironmentLayout() {
+    if (!envPropsGroup) return;
+    envPropsGroup.children.forEach(prop => {
+      if (!prop.userData.basePosition) {
+        prop.userData.basePosition = prop.position.clone();
+        prop.userData.baseScale = prop.scale.clone();
+      }
+      const role = prop.userData.terrainRole;
+      const mountain = currentBattleTerrain === 'mountain';
+      prop.visible = role === 'rock' ? mountain
+        : role === 'abatis' ? currentBattleTerrain === 'plain'
+        : role === 'tower' ? !mountain : true;
+      prop.position.copy(prop.userData.basePosition);
+      prop.scale.copy(prop.userData.baseScale);
+      if (mountain) {
+        prop.position.x *= 0.85;
+        prop.position.z *= 0.58;
+        if (role === 'rock') prop.scale.multiply(new THREE.Vector3(1.5, 1.4, 1));
+      }
+      prop.position.y += getBattleTerrainHeight(prop.position.x, prop.position.z);
     });
   }
 
@@ -1003,6 +1047,7 @@ const Battle3DEngine = (function () {
     } else if (currentWeatherKey === 'em') {
       scene.fog = new THREE.FogExp2(0x64748b, 0.025);
       if (sunLightRef) sunLightRef.intensity = 1.15;
+      if (hemiLightRef) hemiLightRef.intensity = 0.8;
     } else {
       scene.fog = new THREE.FogExp2(0x4a3d31, 0.0125);
       if (sunLightRef) sunLightRef.intensity = 1.55;
@@ -1042,6 +1087,7 @@ const Battle3DEngine = (function () {
       return { x: (wingIndex % 2 ? 1 : -1) * (0.82 + rank * 0.22), z: 0.08 - rank * 0.56 };
     }
     if (layout === 'column') {
+      if (count > 8) return { x: (index % 3 - 1) * 0.38, z: 0.68 - Math.floor(index / 3) * 0.48 };
       return { x: index % 2 ? 0.12 : -0.12, z: 0.68 - index * 0.48 };
     }
     return null;
@@ -1093,8 +1139,9 @@ const Battle3DEngine = (function () {
     for (let i = 0; i < count; i++) {
       const row = Math.floor(i / columns);
       const rowCount = Math.min(columns, count - row * columns);
-      const x = (i % columns - (rowCount - 1) / 2) * 0.48;
-      const z = -0.95 - row * 0.52;
+      const offset = getFormationOffset(token.formationLayout, i, count);
+      const x = offset ? offset.x * 0.55 : (i % columns - (rowCount - 1) / 2) * 0.48;
+      const z = offset ? offset.z * 0.55 - 1.25 : -0.95 - row * 0.52;
       transform.position.set(x, 0.30, z);
       transform.rotation.set(0, (i % 3 - 1) * 0.07, 0);
       transform.scale.set(1, 0.88 + (i % 4) * 0.06, 1);
@@ -1283,6 +1330,7 @@ const Battle3DEngine = (function () {
       side,
       cat,
       formationName: unit.formationName || '魚鱗',
+      formationRanged: Boolean(unit.formationRanged),
       formationLayout,
       formationMobility: unit.formationMobility || 1,
       formationOccupation: Boolean(unit.formationOccupation),
@@ -1761,7 +1809,7 @@ const Battle3DEngine = (function () {
     battleSettled = false;
 
     applyBattleTerrain(res && res.terrain);
-    const wKey = (res && res.weather) || (window.state && window.state.weather) || 'plain';
+    const wKey = res?.ev?.id || res?.weather || 'clear';
     applyWeatherAtmosphere(wKey);
 
     const teamA = (res && res.final && res.final.A) || [];
@@ -1782,7 +1830,7 @@ const Battle3DEngine = (function () {
     const now = performance.now();
     [...unitsMap.values()].forEach((token, index) => {
       const direction = token.side === 'A' ? -1 : 1;
-      const frontDistance = {
+      const frontDistance = token.formationRanged ? (token.cat === 'support' ? 7.6 : 5.2) : {
         armor: 0.82,
         air: 0.82,
         naval: 0.9,
@@ -1797,7 +1845,8 @@ const Battle3DEngine = (function () {
         support: 0
       }[token.cat] || 0;
       token.frontX = direction * frontDistance;
-      token.frontZ = frontLane;
+      const laneScale = currentBattleTerrain === 'forest' ? 0.72 : currentBattleTerrain === 'mountain' ? 0.58 : 1;
+      token.frontZ = frontLane * laneScale;
       token.frontY = getBattleTerrainHeight(token.frontX, token.frontZ);
       token.march = {
         fromX: token.origX,
@@ -1814,7 +1863,7 @@ const Battle3DEngine = (function () {
     updateOccupationZones();
   }
 
-  function beginFinalCharge(duration = 1150) {
+  function beginFinalCharge(duration = 1150, allOut = false) {
     const participants = [...unitsMap.values()].filter(token => token.alive);
     if (!isInitialized || battleSettled || !participants.length) return Promise.resolve(false);
 
@@ -1824,16 +1873,21 @@ const Battle3DEngine = (function () {
     const moves = participants.map(token => {
       const start = token.mesh.position.clone();
       const lane = { air: -5.4, armor: -1.8, air_defense: 1.8, naval: 5.4, support: 0 }[token.cat];
+      const ranged = !allOut && (['air_defense', 'support'].includes(token.cat) || token.formationRanged);
+      const side = token.side === 'A' ? 1 : -1;
+      const distance = ranged ? (token.cat === 'support' ? -6.5 : -4.5) : 0.85;
+      const laneScale = currentBattleTerrain === 'forest' ? 0.72 : currentBattleTerrain === 'mountain' ? 0.58 : 1;
+      const flank = token.formationLayout === 'wings' || token.cat === 'naval' ? 0.65 : 0;
       const target = new THREE.Vector3(
-        token.side === 'A' ? 0.85 : -0.85,
+        side * distance,
         0,
-        lane + (token.side === 'A' ? -0.32 : 0.32)
+        lane * laneScale + side * (0.32 + flank)
       );
       target.y = getBattleTerrainHeight(target.x, target.z);
       token.march = null;
       token.engagement = null;
       triggerSquadAnim(token, 'move', token.cat === 'air' ? 1.55 : 1.25);
-      return { token, start, target };
+      return { token, start, target, ranged };
     });
 
     camFocusTarget.set(0, 0, 0);
@@ -1849,7 +1903,7 @@ const Battle3DEngine = (function () {
         }
         const progress = chargeDuration === 0 ? 1 : Math.min(1, (now - startedAt) / chargeDuration);
         const eased = progress * progress * (3 - 2 * progress);
-        moves.forEach(({ token, start, target }) => {
+        moves.forEach(({ token, start, target, ranged }) => {
           if (!token.alive) return;
           token.mesh.position.lerpVectors(start, target, eased);
           if (progress === 1) {
@@ -1857,7 +1911,7 @@ const Battle3DEngine = (function () {
             token.frontY = target.y;
             token.frontZ = target.z;
             token.chargeCommitted = true;
-            triggerSquadAnim(token, 'attack', 1.2);
+            triggerSquadAnim(token, ranged ? 'idle' : 'attack', 1.2);
           }
         });
         if (progress < 1) requestAnimationFrame(step);
@@ -1878,7 +1932,7 @@ const Battle3DEngine = (function () {
   }
 
   function advanceBattalionToContact(token) {
-    if (!token || !token.alive || token.engagement || token.cat === 'support' || token.cat === 'air_defense') return;
+    if (!token || !token.alive || token.engagement || token.formationRanged || token.cat === 'support' || token.cat === 'air_defense') return;
     const contactX = token.side === 'A' ? -0.82 : 0.82;
     const targetX = token.side === 'A'
       ? Math.max(token.mesh.position.x, contactX)
@@ -1901,7 +1955,7 @@ const Battle3DEngine = (function () {
     triggerSquadAnim(token, 'move', token.cat === 'air' ? 1.45 : 1.1);
   }
 
-  function playEvent(ln) {
+  async function playEvent(ln) {
     if (!isInitialized || battleSettled || !ln) return;
 
     const aToken = ln.auid ? unitsMap.get(ln.auid) : null;
@@ -1935,7 +1989,11 @@ const Battle3DEngine = (function () {
     let deferTargetEffects = false;
 
     // 3. 依五大兵種執行全 3D 模型骨骼動畫與彈道特效
-    if ((ln.finale || meleeActive) && aToken && tToken && aToken.alive) {
+    const ranged = aToken && (['air_defense', 'support'].includes(aToken.cat) || aToken.formationRanged);
+    const forcedMelee = ranged && tToken && aToken.mesh.position.distanceTo(tToken.mesh.position) < 2;
+    if ((ln.finale || (meleeActive && (!ranged || forcedMelee))) && aToken && tToken && aToken.alive) {
+      await approachMeleeTarget(aToken, tToken);
+      if (aToken.epoch !== battleEpoch || battleSettled) { finishEffects(); return effectsFinished; }
       aToken.formationRig.rotation.y = Math.atan2(
         tToken.mesh.position.x - aToken.mesh.position.x,
         tToken.mesh.position.z - aToken.mesh.position.z
@@ -1945,6 +2003,9 @@ const Battle3DEngine = (function () {
       const midpoint = aToken.mesh.position.clone().lerp(tToken.mesh.position, 0.5);
       spawnSparkBurst(midpoint.add(new THREE.Vector3(0, 0.9, 0)), 26, 0xfbbf24);
       applyImpactReaction(tToken, 0.3);
+    } else if (aToken?.formationRanged && aToken.cat !== 'support' && tToken && aToken.alive) {
+      triggerSquadAnim(aToken, 'attack', 1.15);
+      spawn3DArrowVolley(aToken.mesh.position, tToken.mesh.position, aToken.side);
     } else if (ln.duel && aToken && tToken && aToken.alive && tToken.alive) {
       performDuelClash(aToken, tToken);
     } else if (aToken && tToken && aToken.alive) {
@@ -1993,6 +2054,37 @@ const Battle3DEngine = (function () {
         tokenFallDown(tToken, ln.kind === 'capture').then(finishEffects, failEffects);
       } else finishEffects();
     }
+  }
+
+  function approachMeleeTarget(attacker, target) {
+    const start = attacker.mesh.position.clone();
+    const delta = start.clone().sub(target.mesh.position);
+    if (delta.length() < 1.15) return Promise.resolve();
+    const end = target.mesh.position.clone().add(delta.normalize().multiplyScalar(0.95));
+    end.y = getBattleTerrainHeight(end.x, end.z);
+    attacker.march = null;
+    attacker.engagement = null;
+    triggerSquadAnim(attacker, 'move', attacker.cat === 'air' ? 1.5 : 1.2);
+    const startedAt = performance.now();
+    const duration = isEnabled ? 450 / Math.max(0.75, attacker.formationMobility) : 0;
+    return new Promise(resolve => {
+      function step(now) {
+        if (attacker.epoch !== battleEpoch || battleSettled || !attacker.alive) { resolve(); return; }
+        const progress = duration ? Math.min(1, (now - startedAt) / duration) : 1;
+        attacker.mesh.position.lerpVectors(start, end, progress);
+        if (attacker.formationLayout === 'wings' || attacker.cat === 'naval') {
+          attacker.mesh.position.z += Math.sin(progress * Math.PI) * (attacker.side === 'A' ? 0.8 : -0.8);
+        }
+        if (progress < 1) requestAnimationFrame(step);
+        else {
+          attacker.frontX = end.x;
+          attacker.frontY = end.y;
+          attacker.frontZ = end.z;
+          resolve();
+        }
+      }
+      step(startedAt);
+    });
   }
 
   function performDuelClash(aToken, tToken) {
@@ -2525,7 +2617,7 @@ const Battle3DEngine = (function () {
         const ranks = token.troopsContainer.children.find(child => child.userData.isBattalionRanks);
         if (ranks) {
           const moving = finalChargeActive || Boolean((march && !march.finished) || (engagement && !engagement.finished));
-          const fighting = meleeActive && !moving;
+          const fighting = meleeActive && !moving && !['air_defense', 'support'].includes(token.cat) && !token.formationRanged;
           const phase = ranks.userData.marchPhase || 0;
           const gait = elapsed * (moving ? 13 : 3.8) + phase;
           ranks.position.y = Math.sin(gait) * (moving ? 0.035 : 0.012);
@@ -2723,7 +2815,9 @@ const Battle3DEngine = (function () {
       meleeActive,
       battalions: [...unitsMap.values()].map(token => ({
         uid: token.uid, side: token.side, cat: token.cat, alive: token.alive, fallen: token.fallen,
-        x: token.mesh.position.x, z: token.mesh.position.z,
+        layout: token.formationLayout, ranged: token.formationRanged || ['air_defense', 'support'].includes(token.cat),
+        formationSignature: token.troopsContainer.children.find(child => child.userData.isBattalionRanks)?.children[0]?.userData.standingMatrices.map(matrix => [matrix.elements[12], matrix.elements[14]]),
+        x: token.mesh.position.x, z: token.mesh.position.z, frontX: token.frontX, frontZ: token.frontZ,
         ranksFallen: token.fallen && token.troopsContainer.children.some(child =>
           child.userData.isBattalionRanks && child.children.every(mesh =>
             Array.from({ length: mesh.count }, (_, index) => mesh.instanceMatrix.array[index * 16 + 13]).every(height => height < 0.09)
@@ -2733,7 +2827,12 @@ const Battle3DEngine = (function () {
       finalChargeActive,
       pixelRatio: renderer ? renderer.getPixelRatio() : 0,
       weather: currentWeatherKey,
+      sunlight: sunLightRef ? sunLightRef.intensity : 0,
+      ambientLight: hemiLightRef ? hemiLightRef.intensity : 0,
       terrain: currentBattleTerrain,
+      environmentLayout: envPropsGroup ? envPropsGroup.children.filter(prop => prop.visible).map(prop => ({
+        role: prop.userData.terrainRole || 'camp', x: prop.position.x, z: prop.position.z
+      })) : [],
       waterwayVisible: waterwayGroup ? waterwayGroup.visible : false,
       terrainDecorVisible: terrainDecorationGroup ? terrainDecorationGroup.visible : false,
       battalionRanks: [...unitsMap.values()].filter(token => token.troopsContainer.children.some(child => child.userData.isBattalionRanks)).length

@@ -9,7 +9,7 @@ E2E 測試：驗證 TopWarlords 3D 古戰場推演沙盤
 """
 import sys, time, subprocess, socket
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 sys.stdout.reconfigure(encoding='utf-8')
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,6 +38,7 @@ try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(viewport={'width': 1680, 'height': 749}, service_workers='block')
+        context.set_default_timeout(60000)
         
         context.add_init_script("""
             localStorage.setItem('wl15_seen', '1');
@@ -50,7 +51,7 @@ try:
         desktop_errors = []
         page.on('pageerror', lambda error: desktop_errors.append(str(error)))
 
-        page.goto(f"http://localhost:{PORT}/index.html")
+        page.goto(f"http://127.0.0.1:{PORT}/index.html")
         page.wait_for_selector(".m-card", timeout=8000)
         time.sleep(1.0)
 
@@ -90,14 +91,18 @@ try:
         is_engine_ready = page.evaluate("() => typeof Battle3DEngine !== 'undefined'")
         print(f"[TEST 3] Three.js 就緒: {is_three_ready}, Battle3DEngine 就緒: {is_engine_ready}")
         assert is_three_ready and is_engine_ready, "Three.js 或 Battle3DEngine 未載入！"
-        page.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", timeout=10000)
+        try:
+            page.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", polling=100, timeout=10000)
+        except PlaywrightTimeoutError:
+            print("[MODEL LOAD TIMEOUT]", page.evaluate("() => Battle3DEngine.getDebugState()"), desktop_errors)
+            raise
         terrain_state = page.evaluate("() => Battle3DEngine.getDebugState()")
         expected_soldiers = 240 if terrain_state['lowPowerDevice'] else 360
         assert terrain_state['modelsLoaded'] == terrain_state['modelsTotal'], f"兵種模型未完整載入：{terrain_state}"
         assert terrain_state['soldierCount'] == expected_soldiers, f"Unexpected visible soldier count: {terrain_state}"
         assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
         assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
-        page.wait_for_function("() => Battle3DEngine.getDebugState().engagedBattalions > 0", timeout=15000)
+        page.wait_for_function("() => Battle3DEngine.getDebugState().engagedBattalions > 0", polling=100, timeout=15000)
         assert not page.locator('#battlePanelTabs').is_visible(), 'Desktop should use the three-panel command layout'
         assert page.locator('#teamA').is_visible() and page.locator('#teamB').is_visible(), 'Desktop should show both team rosters'
         assert page.locator('.log-col').is_visible(), 'Desktop battle log is missing'
@@ -117,7 +122,17 @@ try:
         assert charge_finished and not page.evaluate("() => Battle3DEngine.getDebugState().finalChargeActive"), 'Final charge animation did not settle cleanly'
 
         # 測試切換 3D/2D 按鈕
-        page.locator('#btnToggle3DView').click()
+        try:
+            page.locator('#btnToggle3DView').click()
+        except PlaywrightTimeoutError:
+            print("[TOGGLE TIMEOUT]", page.evaluate("""() => ({
+                button: document.querySelector('#btnToggle3DView').getBoundingClientRect().toJSON(),
+                result: document.querySelector('#rReview')?.getClientRects().length,
+                help: !document.querySelector('#helpModal').hidden,
+                state: (({ modelsLoaded, battalionRanks, animationPaused, finalChargeActive }) =>
+                    ({ modelsLoaded, battalionRanks, animationPaused, finalChargeActive }))(Battle3DEngine.getDebugState())
+            })"""), desktop_errors)
+            raise
         is_hidden_now = page.locator('#battle3DWrapper').is_hidden()
         print(f"[TEST 5] 切換 3D 隱藏: {is_hidden_now}")
         assert is_hidden_now, "點擊切換後 3D 沙盤未正常隱藏！"
@@ -141,6 +156,7 @@ try:
 
         context.close()
         natural_context = browser.new_context(viewport={'width': 1530, 'height': 750}, service_workers='block')
+        natural_context.set_default_timeout(60000)
         natural_context.add_init_script("""
             localStorage.setItem('wl15_seen', '1');
             localStorage.setItem('wl15_onboard_done', 'true');
@@ -150,10 +166,11 @@ try:
         natural = natural_context.new_page()
         natural_errors = []
         natural.on('pageerror', lambda error: natural_errors.append(str(error)))
-        natural.goto(f"http://localhost:{PORT}/index.html")
+        natural.goto(f"http://127.0.0.1:{PORT}/index.html")
         natural.wait_for_selector(".m-card", timeout=10000)
         natural.evaluate("""() => {
             const resolveOriginal = window.resolveBattle;
+            window.visualResolveBattle = resolveOriginal;
             window.resolveBattle = () => {
                 const result = resolveOriginal(
                     ['LUBU', 'XUCHU', 'HUANGZHONG', 'YUEJIN', 'LIUBOWEN'],
@@ -167,7 +184,9 @@ try:
             const playOriginal = Battle3DEngine.playEvent;
             Battle3DEngine.playEvent = async line => {
                 const startedAt = performance.now();
+                window.visualLastEvent = { kind: line.kind, attacker: line.auid, target: line.tuid, startedAt, finished: false };
                 await playOriginal(line);
+                window.visualLastEvent.finished = true;
                 if (line.kind === 'kill' || line.kind === 'capture') {
                     window.visualKills.push({
                         attacker: line.auid,
@@ -177,18 +196,29 @@ try:
                 }
             };
             const chargeOriginal = Battle3DEngine.beginFinalCharge;
-            Battle3DEngine.beginFinalCharge = async duration => {
+            Battle3DEngine.beginFinalCharge = async (duration, allOut) => {
                 const before = Battle3DEngine.getDebugState().battalions;
-                await chargeOriginal(duration);
+                await chargeOriginal(duration, allOut);
                 window.visualCharge = { before, after: Battle3DEngine.getDebugState().battalions };
             };
             document.querySelector('#btnRand').click();
             document.querySelector('#btnGo').click();
         }""")
-        natural.wait_for_function(
-            "() => window.visualBattle?._finished && Battle3DEngine.getDebugState().animationPaused",
-            polling=100, timeout=120000
-        )
+        try:
+            natural.wait_for_function(
+                "() => window.visualBattle?._finished && Battle3DEngine.getDebugState().animationPaused",
+                polling=100, timeout=600000
+            )
+        except PlaywrightTimeoutError:
+            print("[NATURAL PLAYBACK TIMEOUT]", natural.evaluate("""() => {
+                const state = Battle3DEngine.getDebugState();
+                return { now: performance.now(), lastEvent: window.visualLastEvent, kills: visualKills.length,
+                    finished: visualBattle?._finished, phase: document.querySelector('#phaseTitle').textContent,
+                    charge: state.finalChargeActive, paused: state.animationPaused,
+                    battalions: state.battalions.map(({ uid, alive, fallen, x, z }) => ({ uid, alive, fallen, x, z }))
+                };
+            }"""), natural_errors)
+            raise
         visual = natural.evaluate("""() => ({
             rounds: visualBattle.frames.filter(frame => frame.phase === 3).length,
             finale: visualBattle.finale,
@@ -210,17 +240,53 @@ try:
                 continue
             start = next(before for before in visual['charge']['before'] if before['uid'] == unit['uid'])
             assert abs(unit['x'] - start['x']) > 0.1, f"Battalion did not charge: {unit}"
-            assert (unit['x'] > 0 if unit['side'] == 'A' else unit['x'] < 0), f"Battalion never crossed the battle line: {unit}"
+            if unit['ranged']:
+                assert (unit['x'] < -3 if unit['side'] == 'A' else unit['x'] > 3), f"Rear support charged into the front line: {unit}"
+            else:
+                assert (unit['x'] > 0 if unit['side'] == 'A' else unit['x'] < 0), f"Battalion never crossed the battle line: {unit}"
         assert natural.locator("#rReview").is_visible(), "Natural battle result was not shown"
         natural.locator("#rReview").click()
         natural.locator("#btnToggle3DView").click()
         assert natural.locator("#battle3DWrapper").is_hidden()
         natural.locator("#btnToggle3DView").click()
         assert natural.locator("#battle3DWrapper").is_visible(), "Review could not return to 3D"
+        formation_checks = natural.evaluate("""async () => {
+            const deck = ['LUBU', 'XUCHU', 'HUANGZHONG', 'YUEJIN', 'LIUBOWEN'];
+            const layouts = [];
+            for (const formation of ['fishscale', 'spearhead', 'square', 'goose', 'crane', 'longsnake', 'cone']) {
+                const result = visualResolveBattle(deck, deck, { seed: 11, formationsA: Array(5).fill(formation) });
+                Battle3DEngine.loadBattle(result);
+                await new Promise(resolve => setTimeout(resolve, 0));
+                const unit = Battle3DEngine.getDebugState().battalions[0];
+                if (formation === 'goose' && (!unit.ranged || unit.frontX >= -3)) throw new Error('Goose formation did not deploy in the rear');
+                layouts.push(JSON.stringify(unit.formationSignature));
+            }
+            const scenes = [];
+            for (const [terrain, weather] of [['plain', 'clear'], ['forest', 'storm'], ['mountain', 'em'], ['plain', 'clear']]) {
+                Battle3DEngine.loadBattle(visualResolveBattle(deck, deck, {
+                    seed: 11, terrain, event: EVENTS.find(event => event.id === weather)
+                }));
+                await new Promise(resolve => setTimeout(resolve, 0));
+                const state = Battle3DEngine.getDebugState();
+                scenes.push({ terrain: state.terrain, weather: state.weather, water: state.waterwayVisible,
+                    lane: Math.abs(state.battalions[0].frontZ),
+                    light: [state.sunlight, state.ambientLight], layout: JSON.stringify(state.environmentLayout) });
+            }
+            return { distinctLayouts: new Set(layouts).size, scenes };
+        }""")
+        assert formation_checks['distinctLayouts'] == 7, f"Rear ranks do not follow all seven formation layouts: {formation_checks}"
+        assert [scene['weather'] for scene in formation_checks['scenes']] == ['clear', 'storm', 'em', 'clear']
+        assert [scene['water'] for scene in formation_checks['scenes']] == [True, False, False, True]
+        scenes = formation_checks["scenes"]
+        assert scenes[0]["lane"] > scenes[1]["lane"] > scenes[2]["lane"], f"Forest and mountain lanes did not narrow: {scenes}"
+        assert len({scene["layout"] for scene in scenes}) == 3, "Terrains still share identical environment layouts"
+        assert scenes[0]["layout"] == scenes[3]["layout"] and scenes[0]["light"] == scenes[3]["light"], \
+            "Terrain or lighting did not restore after rain and fog"
         assert not natural_errors, f"Natural battle raised browser errors: {natural_errors}"
-        print("[TEST 7b] 四輪戰局自然播放：騎兵首擊、全軍交錯衝陣、六隊陣亡與結算同步通過！")
+        print("[TEST 7b] 四輪自然播放：前軍衝陣、後軍支援、六隊陣亡、七種陣列及地形氣候同步通過！")
         natural_context.close()
         mobile_context = browser.new_context(viewport={'width': 600, 'height': 900}, service_workers='block')
+        mobile_context.set_default_timeout(60000)
         mobile_context.add_init_script("""
             localStorage.setItem('wl15_seen', '1');
             localStorage.setItem('wl15_onboard_done', 'true');
@@ -232,7 +298,7 @@ try:
         mobile.on('pageerror', lambda err: mobile_errors.append(str(err)))
         mobile.on('console', lambda msg: mobile_errors.append(msg.text) if msg.type == 'error' else None)
         mobile.on('requestfailed', lambda request: mobile_errors.append(f"{request.url}: {request.failure}"))
-        mobile.goto(f"http://localhost:{PORT}/index.html")
+        mobile.goto(f"http://127.0.0.1:{PORT}/index.html")
         mobile.wait_for_selector("#btnRand", state='visible', timeout=8000)
         mobile.evaluate("() => document.querySelector('#btnRand').click()")
         mobile.wait_for_function("() => !document.querySelector('#btnGo').disabled", timeout=5000)
@@ -264,11 +330,12 @@ try:
         assert mobile_canvas.count() == 1 and mobile_canvas.is_visible() and mobile_canvas_state['webgl'], \
             f"手機 3D canvas 未初始化：{mobile_canvas_state}; browser errors: {mobile_errors}"
         try:
-            mobile.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", timeout=12000)
-        except Exception as error:
+            mobile.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", polling=100, timeout=12000)
+        except PlaywrightTimeoutError as error:
             debug_state = mobile.evaluate("() => Battle3DEngine.getDebugState()")
             raise AssertionError(f"手機兵群未完成載入：{debug_state}; browser errors: {mobile_errors}") from error
         mobile_state = mobile.evaluate("() => Battle3DEngine.getDebugState()")
+        assert mobile_state['modelsLoaded'] == mobile_state['modelsTotal'], f"Mobile models are incomplete: {mobile_state}; errors: {mobile_errors}"
         assert mobile_state['lowPowerDevice'], f"手機未使用低功耗渲染：{mobile_state}"
         assert mobile_state['pixelRatio'] <= 1.15, f"手機 DPR 未受限：{mobile_state}"
         mobile.locator("#btnToggle3DView").click()

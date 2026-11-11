@@ -70,6 +70,26 @@ function getAmmoProfile(u) {
   return { tier: 3, dmgMult: 0.52, hitMod: -0.06, canSat: false, canSwarm: false, canTrueAt: hasRoleFlag(u, 'HEAVY_AP') };
 }
 
+function getCombatRoleSummary(unit) {
+  return ({
+    air: '突騎：衝擊側翼，提防神射攔截',
+    armor: '重甲：正面護陣，提防破甲攻擊',
+    air_defense: '神射：優先攔截突騎，失去掩護才近戰',
+    naval: '先登：側翼突襲，依特性破陣',
+    support: '軍師：後方號令，依專屬戰法支援'
+  })[unit.cat] || '依武將特性與專屬戰法交戰';
+}
+
+function getCombatMatchup(attacker, target, phase, trueDamage = false, skillProc = false, armorPierce = 0) {
+  if (trueDamage || armorPierce >= 1) return '破甲：本次忽略護甲';
+  if (armorPierce > 0 && target.def > 0) return `破甲：護甲效果降低 ${Math.round(armorPierce * 100)}%`;
+  if (attacker.cat === 'air_defense' && target.cat === 'air') return '神射攔截突騎';
+  if (skillProc && attacker.skill?.phase === `P${phase}` && attacker.skill.effects?.bonusVs?.[target.cat]) return '專屬戰法兵種加成';
+  if (attacker.cat === 'air' && target.cat === 'armor') return '突騎衝擊重甲';
+  if (target.cat === 'armor' && target.def > 0) return '重甲承受護甲減傷';
+  return '';
+}
+
 function getSkillAttackModifiers(attacker, target, phase, terrain = 'plain') {
   const active = !attacker.skillUsed && attacker.skill?.phase === `P${phase}`;
   const effects = active ? attacker.skill.effects : null;
@@ -349,6 +369,7 @@ function resolveBattle(deckA, deckB, opts) {
       const tier = a.ammoTier || 1;
       const meta = resolveBrevityAndSfx(at, t, tier, r.skillProc);
       const brv = r.skillProc ? meta.brv : (r.ambushProc ? '奇襲突擊' : meta.brv);
+      const matchup = getCombatMatchup(at, t, vOpts.phase, a.trueDmg, r.skillProc, r.skillModifiers.armorPierce);
 
       if (!r.ok) {
         const missCode = tier === 3 ? '力竭偏差' : '身法規避';
@@ -422,6 +443,9 @@ function resolveBattle(deckA, deckB, opts) {
         lines.push({
           side: at.side,
           kind: captured ? 'capture' : 'kill',
+          matchup,
+          formation: at.formation,
+          formationTactic: r.tacticProc,
           duel: r.duelProc,
           captured,
           auid: at.uid,
@@ -449,6 +473,7 @@ function resolveBattle(deckA, deckB, opts) {
         lines.push({
           side: at.side,
           kind: 'hit',
+          matchup,
           duel: r.duelProc,
           auid: at.uid,
           tuid: t.uid,

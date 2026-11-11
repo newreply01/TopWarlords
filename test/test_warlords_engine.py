@@ -132,6 +132,50 @@ try:
                 if (!unit.skill.desc.includes('每戰一次')) errs.push('技能說明缺少觸發限制：' + unit.id);
             }
             const skillAttacker = id => makeTeam([id], 'A', [], 'plain')[0];
+            const fixtureIds = ['__MATCHUP_ATTACKER', '__MATCHUP_TARGET'];
+            try {
+                const fixture = (id, cat, extra = {}) => ({
+                    id, name: id, cat, cost: 1, hp: 10000000, atk: 1000, def: 0,
+                    st: 0, ew: 0, traits: [], roleFlags: [], ...extra
+                });
+                const firstDamage = (attackerCat, targetCat, attackerExtra = {}, targetExtra = {}, phase = 3) => {
+                    UNIT_MAP[fixtureIds[0]] = fixture(fixtureIds[0], attackerCat, attackerExtra);
+                    UNIT_MAP[fixtureIds[1]] = fixture(fixtureIds[1], targetCat, { atk: 0, ...targetExtra });
+                    for (let seed = 1; seed <= 30; seed++) {
+                        const battle = resolveBattle([fixtureIds[0]], [fixtureIds[1]], {
+                            seed, event: EVENTS.find(e => e.id === 'clear'),
+                            formationsA: ['square'], formationsB: ['square']
+                        });
+                        const line = battle.frames.filter(frame => frame.phase === phase).flatMap(frame => frame.lines)
+                            .find(line => line.auid === `${fixtureIds[0]}-A0` && line.kind === 'hit');
+                        if (line) return line.dmg;
+                    }
+                    throw new Error('No successful matchup fixture attack');
+                };
+                const normal = firstDamage('armor', 'armor');
+                const armored = firstDamage('armor', 'armor', {}, { def: 0.5 });
+                if (Math.abs(armored - normal * 0.5) > 1) errs.push('實際護甲減傷未達 50%');
+                const pierce = firstDamage('armor', 'armor', { traits: ['TRUE_AT'] });
+                const pierceArmored = firstDamage('armor', 'armor', { traits: ['TRUE_AT'] }, { def: 0.5 });
+                if (pierce !== pierceArmored) errs.push('真傷未忽略護甲');
+                const skill = bonus => ({ phase: 'P3', name: 'fixture', desc: 'fixture', effects: { damage: 1, bonusVs: { armor: bonus } } });
+                const baseSkill = firstDamage('armor', 'armor', { skill: skill(0) });
+                const bonusSkill = firstDamage('armor', 'armor', { skill: skill(0.3) });
+                if (Math.abs(bonusSkill - baseSkill * 1.3) > 1) errs.push('專屬兵種增傷未實際達 30%');
+                const partialPierce = firstDamage('armor', 'armor', {
+                    skill: { ...skill(0), effects: { damage: 1, armorPierce: 0.4 } }
+                }, { def: 0.5 });
+                if (Math.abs(partialPierce - baseSkill * 0.7) > 1) errs.push('40% 技能破甲未正確降低護甲效果');
+                if (!getCombatMatchup({ cat: 'armor' }, { cat: 'armor', def: 0.5 }, 3, false, false, 0.4).includes('40%')) errs.push('部分破甲提示與實際效果不符');
+                const intercept = firstDamage('air_defense', 'air', {}, {}, 2);
+                const formationScale = 0.9 * 0.78 * 0.88;
+                if (intercept < Math.round(2125 * formationScale) || intercept > Math.round(2875 * formationScale)) errs.push('神射階段二攔截未實際使用 2.5 倍攻擊');
+                const plainShot = firstDamage('air_defense', 'armor');
+                if (plainShot < Math.round(595 * formationScale) || plainShot > Math.round(805 * formationScale)) errs.push('神射無突騎時平射未實際使用 0.7 倍攻擊');
+                if (intercept <= plainShot * 2.5) errs.push('神射攔截與平射缺少實際傷害差異');
+            } finally {
+                for (const id of fixtureIds) delete UNIT_MAP[id];
+            }
             const skillTarget = skillAttacker('BAIQI');
             const burst = skillAttacker('LUBU');
             if (getSkillAttackModifiers(burst, skillTarget, 3).damage !== 1.3 || getSkillAttackModifiers(burst, skillTarget, 2).damage !== 1) errs.push('爆發／階段限制錯誤');

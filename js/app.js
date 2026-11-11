@@ -2550,8 +2550,11 @@ $('#btnToggle3DView')?.addEventListener('click', () => {
   is3DVisible = !is3DVisible;
   const wrap = $('#battle3DWrapper');
   const btn = $('#btnToggle3DView');
-  if (wrap) wrap.style.display = is3DVisible ? 'block' : 'none';
-  if (btn) btn.textContent = is3DVisible ? '切換 3D/2D' : '展開 3D 沙盤';
+  if (wrap) wrap.hidden = !is3DVisible;
+  if (btn) {
+    btn.textContent = is3DVisible ? '切換至 2D' : '切換至 3D';
+    btn.setAttribute('aria-expanded', String(is3DVisible));
+  }
   if (typeof Battle3DEngine !== 'undefined') {
     Battle3DEngine.toggleMode(is3DVisible);
   }
@@ -4351,6 +4354,7 @@ async function showBattle(res, opts = {}) {
   try {
     for (const f of res.frames) {
       if (token !== playToken || res._finished) return;
+      const enteringMelee = f.phase === 3 && curPhase !== 3;
       if (f.phase !== curPhase) {
         document.querySelectorAll('.ph').forEach(p => { const n = +p.dataset.p; p.className = 'ph' + (n < f.phase ? ' done' : n === f.phase ? ' on' : ''); });
         curPhase = f.phase;
@@ -4358,8 +4362,10 @@ async function showBattle(res, opts = {}) {
         else if (radarEl) radarEl.classList.remove('emp-active');
         updateHoloPhase(curPhase);
       }
-      if (f.finale === 'charge' && typeof Battle3DEngine !== 'undefined') {
-        await Battle3DEngine.beginFinalCharge(skip ? 0 : 1150);
+      if ((enteringMelee || f.finale === 'charge') && typeof Battle3DEngine !== 'undefined') {
+        $('#phaseTitle').textContent = '兩 軍 衝 陣 · 白 刃 交 鋒';
+        await Battle3DEngine.beginFinalCharge(skip ? 0 : 1600);
+        if (token !== playToken || res._finished) return;
       }
       sec++;
       const timerEl = $('#camTimer');
@@ -4385,7 +4391,7 @@ async function showBattle(res, opts = {}) {
         }
         playFx(ln);
         if (typeof Battle3DEngine !== 'undefined') {
-          try { Battle3DEngine.playEvent(ln); } catch (_) {}
+          await Battle3DEngine.playEvent(ln);
         }
         if (!skip) {
           const waitTime = ln.kind === 'miss' ? 140 : ln.kind === 'kill' ? 320 : 220;
@@ -4401,6 +4407,7 @@ async function showBattle(res, opts = {}) {
     return;
   }
   if (token !== playToken || res._finished) return;
+  if (typeof Battle3DEngine !== 'undefined') Battle3DEngine.syncBattleResult(res);
   res._finished = true;
   if (radarEl) radarEl.classList.remove('emp-active');
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph done');
@@ -5005,6 +5012,7 @@ function fastForwardBattle(res, opts = {}) {
   }
 
   // 3. 推進三階段全數完成
+  if (typeof Battle3DEngine !== 'undefined') Battle3DEngine.syncBattleResult(res);
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph done');
   const pTitle = $('#phaseTitle');
   if (pTitle) pTitle.textContent = '交 戰 結 束';

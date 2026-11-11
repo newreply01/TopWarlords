@@ -6,7 +6,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.7.13';
+  const ASSET_VER = '7.7.14';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -87,6 +87,8 @@ const Battle3DEngine = (function () {
   const camFocusTarget = new THREE.Vector3(0, 0, 0);
   let lastFocusAt = 0;
   let finalChargeActive = false;
+  let meleeActive = false;
+  let battleSettled = false;
 
   // 五大兵種方陣托盤陣位 (A軍在西岸 X<0 朝東，B軍在東岸 X>0 朝西)
   const SLOT_COORDS = {
@@ -1128,6 +1130,13 @@ const Battle3DEngine = (function () {
     weapons.castShadow = false;
     crowd.add(body, head, weapons);
     if (shields) crowd.add(shields);
+    crowd.children.forEach(mesh => {
+      mesh.userData.standingMatrices = Array.from({ length: count }, (_, index) => {
+        const matrix = new THREE.Matrix4();
+        mesh.getMatrixAt(index, matrix);
+        return matrix;
+      });
+    });
     crowd.userData.isBattalionRanks = true;
     crowd.userData.soldierCount = count;
     crowd.userData.marchPhase = (token.uid || '').length * 0.63 + (token.side === 'A' ? 0 : 1.2);
@@ -1298,6 +1307,7 @@ const Battle3DEngine = (function () {
       currentHp: startHp,
       maxHp: startHp,
       alive: true,
+      fallen: false,
       epoch: battleEpoch
     };
 
@@ -1558,7 +1568,8 @@ const Battle3DEngine = (function () {
     }
     arrangeFormationUnits(token);
     addBattalionRanks(token);
-    triggerSquadAnim(token, token.march && !token.march.finished ? 'move' : 'idle', 1.0);
+    triggerSquadAnim(token, !token.alive ? 'death' : token.march && !token.march.finished ? 'move' : 'idle', 1.0);
+    if (!token.alive) applyFallenPose(token, 1);
   }
 
   /* ----------------------------------------------------
@@ -1747,6 +1758,7 @@ const Battle3DEngine = (function () {
     if (!isInitialized) return;
     battleEpoch++;
     clearAllTokens();
+    battleSettled = false;
 
     applyBattleTerrain(res && res.terrain);
     const wKey = (res && res.weather) || (window.state && window.state.weather) || 'plain';
@@ -1798,24 +1810,24 @@ const Battle3DEngine = (function () {
       };
     });
     finalChargeActive = false;
+    meleeActive = false;
     updateOccupationZones();
   }
 
   function beginFinalCharge(duration = 1150) {
     const participants = [...unitsMap.values()].filter(token => token.alive);
-    if (!isInitialized || !participants.length) return Promise.resolve(false);
+    if (!isInitialized || battleSettled || !participants.length) return Promise.resolve(false);
 
     const epoch = battleEpoch;
     const startedAt = performance.now();
-    const chargeDuration = Math.max(0, Number(duration) || 0);
-    const ranks = { A: 0, B: 0 };
+    const chargeDuration = isEnabled ? Math.max(0, Number(duration) || 0) : 0;
     const moves = participants.map(token => {
       const start = token.mesh.position.clone();
-      const rank = ranks[token.side]++;
+      const lane = { air: -5.4, armor: -1.8, air_defense: 1.8, naval: 5.4, support: 0 }[token.cat];
       const target = new THREE.Vector3(
-        token.side === 'A' ? -0.58 : 0.58,
+        token.side === 'A' ? 0.85 : -0.85,
         0,
-        (rank - 2) * 2.0 + (token.side === 'A' ? -0.4 : 0.4)
+        lane + (token.side === 'A' ? -0.32 : 0.32)
       );
       target.y = getBattleTerrainHeight(target.x, target.z);
       token.march = null;
@@ -1830,7 +1842,7 @@ const Battle3DEngine = (function () {
 
     return new Promise(resolve => {
       function step(now) {
-        if (epoch !== battleEpoch) {
+        if (epoch !== battleEpoch || isAnimationPaused) {
           finalChargeActive = false;
           resolve(false);
           return;
@@ -1844,12 +1856,14 @@ const Battle3DEngine = (function () {
             token.frontX = target.x;
             token.frontY = target.y;
             token.frontZ = target.z;
+            token.chargeCommitted = true;
             triggerSquadAnim(token, 'attack', 1.2);
           }
         });
         if (progress < 1) requestAnimationFrame(step);
         else {
           finalChargeActive = false;
+          meleeActive = true;
           resolve(true);
         }
       }
@@ -1888,7 +1902,7 @@ const Battle3DEngine = (function () {
   }
 
   function playEvent(ln) {
-    if (!isInitialized || !isEnabled || !ln) return;
+    if (!isInitialized || battleSettled || !ln) return;
 
     const aToken = ln.auid ? unitsMap.get(ln.auid) : null;
     const tToken = ln.tuid ? unitsMap.get(ln.tuid) : null;
@@ -1913,10 +1927,19 @@ const Battle3DEngine = (function () {
       }
     }
 
+    let finishEffects, failEffects;
+    const effectsFinished = new Promise((resolve, reject) => {
+      finishEffects = resolve;
+      failEffects = reject;
+    });
     let deferTargetEffects = false;
 
     // 3. 依五大兵種執行全 3D 模型骨骼動畫與彈道特效
-    if (ln.finale && aToken && tToken && aToken.alive) {
+    if ((ln.finale || meleeActive) && aToken && tToken && aToken.alive) {
+      aToken.formationRig.rotation.y = Math.atan2(
+        tToken.mesh.position.x - aToken.mesh.position.x,
+        tToken.mesh.position.z - aToken.mesh.position.z
+      );
       triggerSquadAnim(aToken, 'attack', 1.35);
       if (tToken.alive) triggerSquadAnim(tToken, 'hit', 1.25);
       const midpoint = aToken.mesh.position.clone().lerp(tToken.mesh.position, 0.5);
@@ -1941,9 +1964,13 @@ const Battle3DEngine = (function () {
 
     // 4. 受擊反應、盾牆格擋與 3D 浮動兵損數字
     if (!deferTargetEffects) playTargetEffects();
+    return effectsFinished;
 
     function playTargetEffects() {
-      if (!tToken) return;
+      if (!tToken || battleSettled || tToken.epoch !== battleEpoch) {
+        finishEffects();
+        return;
+      }
       if (ln.kind === 'block') {
         performShieldBlockDome(tToken);
         spawnFloatingDamagePopup(tToken.mesh.position, '🛡️ 鐵壁格擋', '#fbbf24', false);
@@ -1963,8 +1990,8 @@ const Battle3DEngine = (function () {
         updateTokenHp(tToken, ln.hpAfter);
       }
       if (ln.kind === 'kill' || ln.kind === 'capture') {
-        tokenFallDown(tToken, ln.kind === 'capture');
-      }
+        tokenFallDown(tToken, ln.kind === 'capture').then(finishEffects, failEffects);
+      } else finishEffects();
     }
   }
 
@@ -2005,6 +2032,9 @@ const Battle3DEngine = (function () {
     }
 
     aToken.chargeInProgress = true;
+    aToken.chargeImpactCallbacks.push(onImpact);
+    aToken.march = null;
+    aToken.engagement = null;
     triggerSquadAnim(aToken, 'move', 1.45);
     const startedAt = performance.now();
     const duration = 420;
@@ -2012,7 +2042,7 @@ const Battle3DEngine = (function () {
     function step(now) {
       if (aToken.epoch !== battleEpoch) {
         aToken.chargeInProgress = false;
-        aToken.chargeImpactCallbacks = [];
+        aToken.chargeImpactCallbacks.splice(0).forEach(callback => callback());
         return;
       }
       if (!aToken.alive) {
@@ -2042,9 +2072,9 @@ const Battle3DEngine = (function () {
         return;
       }
       requestAnimationFrame(step);
-      return true;
     }
     requestAnimationFrame(step);
+    return true;
   }
 
   /* 神射強弩：發射 16 支真實 3D 箭矢模型 + 火羽軌跡拋物線齊射 */
@@ -2103,8 +2133,11 @@ const Battle3DEngine = (function () {
     }
 
     triggerSquadAnim(aToken, 'move', 1.5);
+    aToken.march = null;
+    aToken.engagement = null;
     let frame = 0;
     function step() {
+      if (aToken.epoch !== battleEpoch || !aToken.alive) return;
       frame++;
       const progress = Math.min(1, frame / 12);
       aToken.mesh.position.lerpVectors(orig, strikePos, progress);
@@ -2217,24 +2250,78 @@ const Battle3DEngine = (function () {
     }
   }
 
-  function tokenFallDown(token, captured = false) {
-    if (!token.alive) return;
+  function tokenFallDown(token, captured = false, immediate = false) {
+    if (!token.alive) {
+      if (immediate) applyFallenPose(token, 1);
+      return token.deathAnimation || Promise.resolve();
+    }
     token.alive = false;
+    token.march = null;
+    token.engagement = null;
+    token.impact = null;
     updateOccupationZones();
     updateTokenHp(token, 0);
     triggerSquadAnim(token, 'death', 1.0);
     spawnSparkBurst(token.mesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)), captured ? 14 : 28, captured ? 0xfbbf24 : 0xef4444);
-    // 托盤微沉並半透明黯淡，保留屍骸戰場滄桑感
-    let f = 0;
-    function sink() {
-      f++;
-      token.formationRig.position.y = -0.10 * (f / 20);
-      if (token.hud && token.hud.sprite && token.hud.sprite.material) {
-        token.hud.sprite.material.opacity = Math.max(0.28, 1 - (f / 20) * 0.72);
+    const startedAt = performance.now();
+    token.deathAnimation = new Promise(resolve => {
+      function fall(now) {
+        if (token.epoch !== battleEpoch) { resolve(); return; }
+        const progress = immediate || token.fallen ? 1 : Math.min(1, (now - startedAt) / 700);
+        applyFallenPose(token, progress);
+        if (progress < 1) requestAnimationFrame(fall);
+        else {
+          token.fallen = true;
+          if (renderer && !isAnimationPaused && !immediate) renderer.render(scene, camera);
+          resolve();
+        }
       }
-      if (f < 20) requestAnimationFrame(sink);
+      fall(startedAt);
+    });
+    return token.deathAnimation;
+  }
+
+  function applyFallenPose(token, progress) {
+    token.formationRig.position.y = -0.10 * progress;
+    const ranks = token.troopsContainer.children.find(child => child.userData.isBattalionRanks);
+    if (ranks) {
+      ranks.rotation.x = 0;
+      ranks.position.y = 0;
+      const position = new THREE.Vector3();
+      const rotation = new THREE.Quaternion();
+      const scale = new THREE.Vector3();
+      const matrix = new THREE.Matrix4();
+      const angle = progress * Math.PI / 2;
+      const fallRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), angle);
+      ranks.children.forEach(mesh => {
+        mesh.userData.standingMatrices.forEach((standing, index) => {
+          standing.decompose(position, rotation, scale);
+          const height = position.y;
+          position.y = height * Math.cos(angle) + 0.06 * progress;
+          position.z += height * Math.sin(angle);
+          rotation.premultiply(fallRotation);
+          matrix.compose(position, rotation, scale);
+          mesh.setMatrixAt(index, matrix);
+        });
+        mesh.instanceMatrix.needsUpdate = true;
+      });
     }
-    sink();
+    token.troopsContainer.children.forEach(troop => {
+      if (troop.userData.isFormationTroop) troop.rotation.z = progress * Math.PI / 2;
+    });
+    if (token.hud?.sprite?.material) token.hud.sprite.material.opacity = 1 - progress * 0.8;
+    token.fallen = progress === 1;
+  }
+
+  function syncBattleResult(res) {
+    battleSettled = true;
+    for (const unit of [...res.final.A, ...res.final.B]) {
+      const token = unitsMap.get(unit.uid);
+      if (!token) continue;
+      updateTokenHp(token, unit.hp);
+      if (!unit.alive) tokenFallDown(token, unit.captured, true);
+    }
+    if (renderer) renderer.render(scene, camera);
   }
 
   /* ----------------------------------------------------
@@ -2398,6 +2485,7 @@ const Battle3DEngine = (function () {
       }
 
       unitsMap.forEach((token) => {
+        if (!token.alive) return;
         const march = token.march;
         if (march && !march.finished && now >= march.startedAt) {
           if (!march.started) {
@@ -2436,11 +2524,13 @@ const Battle3DEngine = (function () {
 
         const ranks = token.troopsContainer.children.find(child => child.userData.isBattalionRanks);
         if (ranks) {
-          const moving = Boolean((march && !march.finished) || (engagement && !engagement.finished));
+          const moving = finalChargeActive || Boolean((march && !march.finished) || (engagement && !engagement.finished));
+          const fighting = meleeActive && !moving;
           const phase = ranks.userData.marchPhase || 0;
           const gait = elapsed * (moving ? 13 : 3.8) + phase;
           ranks.position.y = Math.sin(gait) * (moving ? 0.035 : 0.012);
-          ranks.rotation.x = Math.sin(gait * 0.72) * (moving ? 0.018 : 0.006);
+          ranks.rotation.x = Math.sin(gait * 0.72) * (fighting ? 0.08 : moving ? 0.018 : 0.006);
+          ranks.position.z = -0.18 + (fighting ? Math.sin(elapsed * 9 + phase) * 0.12 : 0);
         }
       });
       if (now - lastOccupationZoneUpdate > 180) {
@@ -2603,6 +2693,7 @@ const Battle3DEngine = (function () {
     camera.fov = getBattleCameraFov(camera.aspect);
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
+    if (isAnimationPaused && isEnabled) renderer.render(scene, camera);
   }
 
   function toggleMode(enabled) {
@@ -2628,6 +2719,17 @@ const Battle3DEngine = (function () {
       envPropsChildren: envPropsGroup ? envPropsGroup.children.length : 0,
       lowPowerDevice: isLowPowerDevice,
       aliveBattalions: [...unitsMap.values()].filter(token => token.alive).length,
+      fallenBattalions: [...unitsMap.values()].filter(token => token.fallen).length,
+      meleeActive,
+      battalions: [...unitsMap.values()].map(token => ({
+        uid: token.uid, side: token.side, cat: token.cat, alive: token.alive, fallen: token.fallen,
+        x: token.mesh.position.x, z: token.mesh.position.z,
+        ranksFallen: token.fallen && token.troopsContainer.children.some(child =>
+          child.userData.isBattalionRanks && child.children.every(mesh =>
+            Array.from({ length: mesh.count }, (_, index) => mesh.instanceMatrix.array[index * 16 + 13]).every(height => height < 0.09)
+          )
+        )
+      })),
       finalChargeActive,
       pixelRatio: renderer ? renderer.getPixelRatio() : 0,
       weather: currentWeatherKey,
@@ -2649,6 +2751,7 @@ const Battle3DEngine = (function () {
     loadBattle,
     playEvent,
     beginFinalCharge,
+    syncBattleResult,
     pauseAnimationLoop,
     toggleMode,
     clearAllTokens,

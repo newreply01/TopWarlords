@@ -47,6 +47,8 @@ try:
         """)
 
         page = context.new_page()
+        desktop_errors = []
+        page.on('pageerror', lambda error: desktop_errors.append(str(error)))
 
         page.goto(f"http://localhost:{PORT}/index.html")
         page.wait_for_selector(".m-card", timeout=8000)
@@ -115,24 +117,109 @@ try:
         assert charge_finished and not page.evaluate("() => Battle3DEngine.getDebugState().finalChargeActive"), 'Final charge animation did not settle cleanly'
 
         # 測試切換 3D/2D 按鈕
-        page.evaluate("() => document.querySelector('#btnToggle3DView').click()")
-        is_hidden_now = page.evaluate("() => document.getElementById('battle3DWrapper').style.display === 'none'")
+        page.locator('#btnToggle3DView').click()
+        is_hidden_now = page.locator('#battle3DWrapper').is_hidden()
         print(f"[TEST 5] 切換 3D 隱藏: {is_hidden_now}")
         assert is_hidden_now, "點擊切換後 3D 沙盤未正常隱藏！"
 
-        page.evaluate("() => document.querySelector('#btnToggle3DView').click()")
-        is_visible_again = page.evaluate("() => document.getElementById('battle3DWrapper').style.display === 'block'")
+        assert page.locator('#btnToggle3DView').is_visible(), '2D mode hid the only way back to 3D'
+        assert page.locator('#btnToggle3DView').get_attribute('aria-expanded') == 'false'
+        page.locator('#btnToggle3DView').click()
+        is_visible_again = page.locator('#battle3DWrapper').is_visible()
         print(f"[TEST 6] 切換 3D 重新顯現: {is_visible_again}")
         assert is_visible_again, "再次點擊後 3D 沙盤未重新顯現！"
+        assert page.locator('#btnToggle3DView').get_attribute('aria-expanded') == 'true'
 
         # 點擊跳過秒速完成結算
         page.evaluate("() => document.querySelector('#btnSkip').click()")
-        page.wait_for_function("() => Battle3DEngine.getDebugState().animationPaused", timeout=5000)
+        skip_state = page.evaluate("() => Battle3DEngine.getDebugState()")
+        assert skip_state['animationPaused'], f"Skip did not finish: {skip_state}; errors: {desktop_errors}"
+        assert not desktop_errors, f"Desktop battle raised browser errors: {desktop_errors}"
         assert page.locator("#rReview").is_visible(), "Battle result report did not render after skip"
         time.sleep(0.5)
         print("[TEST 7] 戰鬥秒速結算完成！")
 
         context.close()
+        natural_context = browser.new_context(viewport={'width': 1530, 'height': 750}, service_workers='block')
+        natural_context.add_init_script("""
+            localStorage.setItem('wl15_seen', '1');
+            localStorage.setItem('wl15_onboard_done', 'true');
+            localStorage.setItem('wl15_speed', '4');
+            localStorage.setItem('topwarlords_cached_global_visits', '100');
+        """)
+        natural = natural_context.new_page()
+        natural_errors = []
+        natural.on('pageerror', lambda error: natural_errors.append(str(error)))
+        natural.goto(f"http://localhost:{PORT}/index.html")
+        natural.wait_for_selector(".m-card", timeout=10000)
+        natural.evaluate("""() => {
+            const resolveOriginal = window.resolveBattle;
+            window.resolveBattle = () => {
+                const result = resolveOriginal(
+                    ['LUBU', 'XUCHU', 'HUANGZHONG', 'YUEJIN', 'LIUBOWEN'],
+                    ['GAISUWEN', 'HONDA', 'ZHANGHE', 'DINGFENG', 'HANBEI'],
+                    { seed: 11, event: EVENTS.find(event => event.id === 'clear'), docA: 'blitz', docB: 'defense' }
+                );
+                window.visualBattle = result;
+                return result;
+            };
+            window.visualKills = [];
+            const playOriginal = Battle3DEngine.playEvent;
+            Battle3DEngine.playEvent = async line => {
+                const startedAt = performance.now();
+                await playOriginal(line);
+                if (line.kind === 'kill' || line.kind === 'capture') {
+                    window.visualKills.push({
+                        attacker: line.auid,
+                        elapsed: performance.now() - startedAt,
+                        target: Battle3DEngine.getDebugState().battalions.find(unit => unit.uid === line.tuid)
+                    });
+                }
+            };
+            const chargeOriginal = Battle3DEngine.beginFinalCharge;
+            Battle3DEngine.beginFinalCharge = async duration => {
+                const before = Battle3DEngine.getDebugState().battalions;
+                await chargeOriginal(duration);
+                window.visualCharge = { before, after: Battle3DEngine.getDebugState().battalions };
+            };
+            document.querySelector('#btnRand').click();
+            document.querySelector('#btnGo').click();
+        }""")
+        natural.wait_for_function(
+            "() => window.visualBattle?._finished && Battle3DEngine.getDebugState().animationPaused",
+            polling=100, timeout=120000
+        )
+        visual = natural.evaluate("""() => ({
+            rounds: visualBattle.frames.filter(frame => frame.phase === 3).length,
+            finale: visualBattle.finale,
+            expectedDead: [...visualBattle.final.A, ...visualBattle.final.B].filter(unit => !unit.alive).length,
+            state: Battle3DEngine.getDebugState(),
+            kills: visualKills,
+            charge: visualCharge
+        })""")
+        assert visual['rounds'] == 4 and not visual['finale'], f"Four-round regression fixture changed: {visual}"
+        assert visual['state']['fallenBattalions'] == visual['expectedDead'], f"3D deaths diverged from battle result: {visual}"
+        assert len(visual['kills']) == visual['expectedDead'], f"Deaths were only repaired at result instead of animated: {visual}"
+        assert all(kill['target']['fallen'] and kill['target']['ranksFallen'] for kill in visual['kills']), \
+            f"Soldiers stayed standing after a lethal event: {visual}"
+        assert any(kill['attacker'] == 'LUBU-A0' for kill in visual['kills']), "First cavalry-charge kill was not animated"
+        assert next(kill for kill in visual['kills'] if kill['attacker'] == 'LUBU-A0')['elapsed'] >= 1000, \
+            "Cavalry target fell before both charge impact and death animation finished"
+        for unit in visual['charge']['after']:
+            if not unit['alive']:
+                continue
+            start = next(before for before in visual['charge']['before'] if before['uid'] == unit['uid'])
+            assert abs(unit['x'] - start['x']) > 0.1, f"Battalion did not charge: {unit}"
+            assert (unit['x'] > 0 if unit['side'] == 'A' else unit['x'] < 0), f"Battalion never crossed the battle line: {unit}"
+        assert natural.locator("#rReview").is_visible(), "Natural battle result was not shown"
+        natural.locator("#rReview").click()
+        natural.locator("#btnToggle3DView").click()
+        assert natural.locator("#battle3DWrapper").is_hidden()
+        natural.locator("#btnToggle3DView").click()
+        assert natural.locator("#battle3DWrapper").is_visible(), "Review could not return to 3D"
+        assert not natural_errors, f"Natural battle raised browser errors: {natural_errors}"
+        print("[TEST 7b] 四輪戰局自然播放：騎兵首擊、全軍交錯衝陣、六隊陣亡與結算同步通過！")
+        natural_context.close()
         mobile_context = browser.new_context(viewport={'width': 600, 'height': 900}, service_workers='block')
         mobile_context.add_init_script("""
             localStorage.setItem('wl15_seen', '1');
@@ -184,6 +271,11 @@ try:
         mobile_state = mobile.evaluate("() => Battle3DEngine.getDebugState()")
         assert mobile_state['lowPowerDevice'], f"手機未使用低功耗渲染：{mobile_state}"
         assert mobile_state['pixelRatio'] <= 1.15, f"手機 DPR 未受限：{mobile_state}"
+        mobile.locator("#btnToggle3DView").click()
+        assert mobile.locator("#battle3DWrapper").is_hidden()
+        assert mobile.locator("#btnToggle3DView").is_visible(), "Mobile 2D mode hid the view toggle"
+        mobile.locator("#btnToggle3DView").click()
+        assert mobile.locator("#battle3DWrapper").is_visible(), "Mobile could not return to 3D"
         assert len(mobile_errors) == 0, f"手機戰場瀏覽器錯誤：{mobile_errors}"
         print("[TEST 8] 手機低功耗渲染、DPR 與實例化兵群通過！")
         mobile_context.close()

@@ -97,9 +97,27 @@ try:
             print("[MODEL LOAD TIMEOUT]", page.evaluate("() => Battle3DEngine.getDebugState()"), desktop_errors)
             raise
         terrain_state = page.evaluate("() => Battle3DEngine.getDebugState()")
-        expected_soldiers = 240 if terrain_state['lowPowerDevice'] else 360
+        expected_soldiers = 216 if terrain_state['lowPowerDevice'] else 432
         assert terrain_state['modelsLoaded'] == terrain_state['modelsTotal'], f"兵種模型未完整載入：{terrain_state}"
         assert terrain_state['soldierCount'] == expected_soldiers, f"Unexpected visible soldier count: {terrain_state}"
+        assert all(unit["originalFigures"] for unit in terrain_state["battalions"]), "A battalion still uses legacy primitive or cartoon figures"
+        assert all(len(unit["figureParts"]) == (10 if unit["cat"] == "air" else 5) for unit in terrain_state["battalions"]), \
+            "Troops or mounts have missing articulated parts"
+        assert terrain_state["cameraView"] == "cinematic" and not terrain_state["unitLabels"]
+        page.evaluate("""() => {
+            document.querySelector('#btnPause').click();
+            Battle3DEngine.pauseAnimationLoop(true);
+        }""")
+        page.locator('[data-camera-view="overview"]').click()
+        assert page.evaluate("() => Battle3DEngine.getDebugState().cameraView") == "overview"
+        page.locator('#btnBattleLabels').click()
+        assert page.evaluate("() => Battle3DEngine.getDebugState().unitLabels")
+        page.locator('#btnBattleLabels').click()
+        page.locator('[data-camera-view="cinematic"]').click()
+        page.evaluate("""() => {
+            document.querySelector('#btnPause').click();
+            Battle3DEngine.pauseAnimationLoop(false);
+        }""")
         assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
         assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
         page.wait_for_function("() => Battle3DEngine.getDebugState().engagedBattalions > 0", polling=100, timeout=15000)
@@ -115,7 +133,7 @@ try:
             log: document.querySelector('.log-col').clientWidth
         })""")
         assert 340 <= desktop_layout['stage'] <= 460, f"3D stage height is outside the viewport budget: {desktop_layout}"
-        assert desktop_layout['grid'] >= 220 and desktop_layout['card'] >= 48, f"Battle roster was compressed: {desktop_layout}"
+        assert desktop_layout['grid'] >= 180 and desktop_layout['card'] >= 48, f"Battle roster was compressed: {desktop_layout}"
         assert desktop_layout['log'] >= 280, f"Battle log column is too narrow: {desktop_layout}"
         assert desktop_layout['rosterContent'] <= desktop_layout['roster'] + 4, f"Desktop roster still needs scrolling: {desktop_layout}"
         charge_finished = page.evaluate("async () => await Battle3DEngine.beginFinalCharge(280)")
@@ -229,6 +247,10 @@ try:
         })""")
         assert visual['rounds'] == 4 and not visual['finale'], f"Four-round regression fixture changed: {visual}"
         assert visual['state']['fallenBattalions'] == visual['expectedDead'], f"3D deaths diverged from battle result: {visual}"
+        assert visual['state']['cameraView'] == 'cinematic'
+        assert visual['state']['activeEffects'] == 0, "Expired battle effects remained frozen at the result"
+        assert visual['state']['drawCalls'] < 500 and visual['state']['triangles'] < 1500000, \
+            f"Battlefield exceeded its draw/geometry budget: {visual['state']['drawCalls']}, {visual['state']['triangles']}"
         assert len(visual['kills']) == visual['expectedDead'], f"Deaths were only repaired at result instead of animated: {visual}"
         assert all(kill['target']['fallen'] and kill['target']['ranksFallen'] for kill in visual['kills']), \
             f"Soldiers stayed standing after a lethal event: {visual}"
@@ -260,6 +282,11 @@ try:
                 const unit = Battle3DEngine.getDebugState().battalions[0];
                 if (formation === 'goose' && (!unit.ranged || unit.frontX >= -3)) throw new Error('Goose formation did not deploy in the rear');
                 layouts.push(JSON.stringify(unit.formationSignature));
+                const xs = unit.formationSignature.map(position => position[0]);
+                const zs = unit.formationSignature.map(position => position[1]);
+                if (Math.max(...xs) - Math.min(...xs) > 2.5 || Math.max(...zs) - Math.min(...zs) > 9) {
+                    throw new Error('Formation overflowed its battlefield lane: ' + formation);
+                }
             }
             const scenes = [];
             for (const [terrain, weather] of [['plain', 'clear'], ['forest', 'storm'], ['mountain', 'em'], ['plain', 'clear']]) {

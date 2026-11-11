@@ -1,30 +1,17 @@
 /* =====================================================
-   TopWarlords 3D 古戰場全模型合戰引擎 v7.0 (Three.js r128 + GLTFLoader + SkeletonUtils)
-   光榮特庫摩《三國志14》／《信長之野望・新生》風格
-   全 3D 骨骼動畫兵種方陣托盤 (Unit Formation Plinth) · 寫實名將軍徽 · 山河渡口古戰場地形
+   TopWarlords field-scale battle renderer (Three.js r128).
+   Original articulated troops, restrained materials, stable camera presets.
    ===================================================== */
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.7.15';
+  const ASSET_VER = '7.8.0';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
   const MODEL_MANIFEST = {
-    horse_armored: 'horse_armored.glb',
-    horse: 'horse.glb',
-    infantry: 'infantry.glb',
-    strategist: 'strategist.glb',
-    spear: 'spear.glb',
-    pike: 'pike.glb',
-    katana: 'katana.glb',
-    sword: 'sword.glb',
-    bow: 'bow.glb',
     arrow: 'arrow.glb',
-    shield_tower: 'shield_tower.glb',
-    shield_round: 'shield_round.glb',
     banner: 'banner.glb',
-    flag: 'flag.glb',
     tent: 'tent.glb',
     watchtower: 'watchtower.glb',
     rock_a: 'rock_a.glb',
@@ -62,15 +49,10 @@ const Battle3DEngine = (function () {
   let terrainDecorationGroup = null;
   let occupationZones = [];
   let lastOccupationZoneUpdate = 0;
+  let groundCover = null;
 
-  const unitsMap = new Map();      // uid -> UnitPlinthToken
+  const unitsMap = new Map();      // uid -> battalion token
   let activeMixers = [];           // { mixer, actions, currentState }
-  let crowdBodyGeometry = null;
-  let crowdHeadGeometry = null;
-  let crowdSpearGeometry = null;
-  const crowdWeaponGeometries = new Map();
-  let crowdShieldGeometry = null;
-  const crowdMaterials = new Map();
   let projectiles = [];            // 3D 箭雨與火彈
   let particleSystems = [];        // 塵土、刀光火花、衝擊波
   let floatingPopups = [];         // 3D 浮動兵力傷害數字 (-3,200 / 格擋)
@@ -82,6 +64,8 @@ const Battle3DEngine = (function () {
   let isDragging = false;
   let prevMouseX = 0, prevMouseY = 0;
   let camTheta = 0.0, camPhi = 0.64, camRadius = 25.5;
+  let cameraView = 'cinematic';
+  let showUnitLabels = false;
   const CAM_BASE_TARGET = new THREE.Vector3(0, 0.55, 0.35);
   const camFocusOffset = new THREE.Vector3(0, 0, 0);
   const camFocusTarget = new THREE.Vector3(0, 0, 0);
@@ -398,14 +382,21 @@ const Battle3DEngine = (function () {
     updateCameraPosition();
 
     renderer = new THREE.WebGLRenderer({ antialias: !isLowPowerDevice, alpha: false, powerPreference: 'high-performance' });
+    const gl = renderer.getContext();
+    const rendererInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    if (rendererInfo && /swiftshader|llvmpipe|software/i.test(gl.getParameter(rendererInfo.UNMASKED_RENDERER_WEBGL))) {
+      isLowPowerDevice = true;
+      console.info('[Battle3D] Software WebGL: reduced troop detail and unshadowed lighting.');
+    }
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isLowPowerDevice ? 1.15 : 1.75));
-    renderer.shadowMap.enabled = true;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isLowPowerDevice ? 1 : 1.25));
+    renderer.shadowMap.enabled = !isLowPowerDevice;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     if (THREE.ACESFilmicToneMapping !== undefined) {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.12;
+      renderer.toneMappingExposure = 0.94;
     }
+    renderer.outputEncoding = THREE.sRGBEncoding;
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -413,6 +404,16 @@ const Battle3DEngine = (function () {
     setupLighting();
     buildAncientBattlefieldTerrain();
     setupCameraControls();
+    container.closest('#battle3DWrapper').querySelectorAll('[data-camera-view]').forEach(button => {
+      button.onclick = () => setCameraView(button.dataset.cameraView);
+    });
+    const labelsButton = container.closest('#battle3DWrapper').querySelector('#btnBattleLabels');
+    labelsButton.onclick = () => {
+      showUnitLabels = !showUnitLabels;
+      labelsButton.setAttribute('aria-pressed', String(showUnitLabels));
+      unitsMap.forEach(token => { token.hud.sprite.visible = showUnitLabels; });
+      if (isAnimationPaused) renderer.render(scene, camera);
+    };
     injectCutinLayer();
 
     window.removeEventListener('resize', onWindowResize);
@@ -425,7 +426,7 @@ const Battle3DEngine = (function () {
   }
 
   function setupLighting() {
-    hemiLightRef = new THREE.HemisphereLight(0xfff4d6, 0x4b3f2f, 0.95);
+    hemiLightRef = new THREE.HemisphereLight(0xc9d2d6, 0x34362b, 0.78);
     hemiLightRef.position.set(0, 28, 0);
     scene.add(hemiLightRef);
 
@@ -446,7 +447,7 @@ const Battle3DEngine = (function () {
     scene.add(sunLightRef);
 
     // 東側冷色補光勾勒鎧甲與兵刃邊緣反光
-    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.52);
+    const rimLight = new THREE.DirectionalLight(0xb7c4c6, 0.3);
     rimLight.position.set(18, 14, -12);
     scene.add(rimLight);
   }
@@ -488,17 +489,19 @@ const Battle3DEngine = (function () {
       ctx.fillRect(40, cy - 28, 944, 56);
     });
 
-    // 淡雅戰術九宮格刻度線 (光榮沙盤韻味)
-    ctx.strokeStyle = 'rgba(245, 222, 179, 0.11)';
-    ctx.lineWidth = 1;
-    for (let x = 64; x < 1024; x += 64) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 512); ctx.stroke();
-    }
-    for (let y = 64; y < 512; y += 64) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1024, y); ctx.stroke();
-    }
+    ctx.strokeStyle = 'rgba(48, 39, 27, 0.28)';
+    ctx.lineWidth = 2;
+    [136, 256, 376].forEach(y => {
+      [-5, 5].forEach(track => {
+        ctx.beginPath();
+        ctx.moveTo(0, y + track);
+        ctx.bezierCurveTo(320, y - 10 + track, 720, y + 12 + track, 1024, y + track);
+        ctx.stroke();
+      });
+    });
 
     const tex = new THREE.CanvasTexture(canvas);
+    tex.encoding = THREE.sRGBEncoding;
     tex.anisotropy = 4;
     return tex;
   }
@@ -549,11 +552,11 @@ const Battle3DEngine = (function () {
     scene.add(waterwayGroup);
     const riverGeo = new THREE.PlaneGeometry(3.2, 34, 8, 24);
     const riverMat = new THREE.MeshStandardMaterial({
-      color: 0x2b6cb0,
-      emissive: 0x0c2d48,
-      emissiveIntensity: 0.35,
-      roughness: 0.18,
-      metalness: 0.65,
+      color: 0x46594f,
+      emissive: 0x000000,
+      emissiveIntensity: 0,
+      roughness: 0.62,
+      metalness: 0.12,
       transparent: true,
       opacity: 0.82
     });
@@ -596,7 +599,7 @@ const Battle3DEngine = (function () {
       forestPositions.length
     );
     const treeCrowns = new THREE.InstancedMesh(
-      new THREE.ConeGeometry(0.85, 2.4, 6),
+      new THREE.DodecahedronGeometry(1.05, 1),
       new THREE.MeshStandardMaterial({ color: 0x31543a, roughness: 0.94 }),
       forestPositions.length
     );
@@ -609,6 +612,8 @@ const Battle3DEngine = (function () {
       treeTrunks.setMatrixAt(index, instanceTransform.matrix);
       instanceTransform.position.y = height * 2.15;
       instanceTransform.scale.setScalar(height);
+      instanceTransform.updateMatrix();
+      instanceTransform.scale.set(height * 1.1, height * 1.35, height);
       instanceTransform.updateMatrix();
       treeCrowns.setMatrixAt(index, instanceTransform.matrix);
     });
@@ -639,6 +644,22 @@ const Battle3DEngine = (function () {
     terrainDecorationGroup = new THREE.Group();
     terrainDecorationGroup.add(forestGroup, mountainGroup);
     scene.add(terrainDecorationGroup);
+    const grassGeometry = new THREE.BufferGeometry();
+    grassGeometry.setAttribute('position', new THREE.Float32BufferAttribute([
+      -0.035, 0, 0, 0, 0.13, 0.01, 0.035, 0, 0,
+      0, 0, -0.03, -0.02, 0.10, 0, 0, 0, 0.03
+    ], 3));
+    grassGeometry.computeVertexNormals();
+    groundCover = new THREE.InstancedMesh(grassGeometry, new THREE.MeshStandardMaterial({
+      color: 0x4b5339, roughness: 1, side: THREE.DoubleSide
+    }), isLowPowerDevice ? 180 : 700);
+    groundCover.userData.positions = Array.from({ length: groundCover.count }, (_, i) => ({
+      x: Math.sin(i * 127.1) * 21,
+      z: Math.cos(i * 311.7) * 12,
+      size: 0.7 + (i % 7) * 0.16
+    }));
+    groundCover.receiveShadow = true;
+    scene.add(groundCover);
 
     // 4. 東西大營篝火火盆
     const campBraziers = [
@@ -702,6 +723,19 @@ const Battle3DEngine = (function () {
       });
     }
     updateEnvironmentLayout();
+    if (groundCover) {
+      const tuft = new THREE.Object3D();
+      groundCover.userData.positions.forEach(({ x, z, size }, i) => {
+        tuft.position.set(x, getBattleTerrainHeight(x, z), z);
+        tuft.rotation.y = i * 0.7;
+        const road = Math.abs(z) < 1.3 || Math.abs(Math.abs(z) - 3.8) < 0.8;
+        const water = currentBattleTerrain === 'plain' && Math.abs(x) < 2;
+        tuft.scale.setScalar(road || water ? 0 : size);
+        tuft.updateMatrix();
+        groundCover.setMatrixAt(i, tuft.matrix);
+      });
+      groundCover.instanceMatrix.needsUpdate = true;
+    }
     if (!groundGeometryRef) return;
 
     const positions = groundGeometryRef.attributes.position;
@@ -787,6 +821,8 @@ const Battle3DEngine = (function () {
       zone.fill.material.opacity = strengthA || strengthB ? 0.16 : 0.045;
       zone.ring.material.color.setHex(color);
       zone.ring.material.opacity = strengthA || strengthB ? 0.72 : 0.38;
+      zone.fill.visible = cameraView === 'overview';
+      zone.ring.visible = cameraView === 'overview';
     });
   }
 
@@ -898,33 +934,6 @@ const Battle3DEngine = (function () {
     });
 
     return grp;
-  }
-
-  /**
-   * 為士兵模型頂部裝配古代兵種專屬兜鍪冠飾 (紅纓、鍬形前立、玄鐵兜)，拉開五兵種近景辨識度
-   */
-  function addHelmetCrest(parentGroup, headY, crestType, crestColor) {
-    const mat = new THREE.MeshStandardMaterial({
-      color: crestColor,
-      roughness: 0.32,
-      metalness: crestType === 'horns' ? 0.85 : 0.18
-    });
-    if (crestType === 'plume') {
-      // 突騎紅纓／蒼纓馬尾冠
-      const plume = new THREE.Mesh(new THREE.ConeGeometry(0.065, 0.22, 6), mat);
-      plume.rotation.x = -0.55;
-      plume.position.set(0, headY + 0.06, -0.05);
-      parentGroup.add(plume);
-    } else if (crestType === 'horns') {
-      // 重甲／先登大將鎏金鍬形前立雙角
-      [-1, 1].forEach((dir) => {
-        const horn = new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.20, 4), mat);
-        horn.position.set(dir * 0.08, headY + 0.07, 0.06);
-        horn.rotation.z = -dir * 0.48;
-        horn.rotation.x = 0.18;
-        parentGroup.add(horn);
-      });
-    }
   }
 
   function populateBattlefieldProps() {
@@ -1058,174 +1067,63 @@ const Battle3DEngine = (function () {
   /* ----------------------------------------------------
      3. 打造《三國志》立體部隊方陣托盤 + 全 3D 骨骼動畫兵種
      ---------------------------------------------------- */
-  function getFormationOffset(layout, index, count) {
+  function getFormationOffset(layout, index, count, mounted) {
+    const stepX = mounted ? 0.50 : 0.40;
+    const stepZ = mounted ? 0.85 : 0.45;
     if (layout === 'wedge' || layout === 'cone') {
-      const row = Math.floor((Math.sqrt(8 * index + 1) - 1) / 2);
-      const firstInRow = row * (row + 1) / 2;
-      const column = index - firstInRow;
-      const spacing = layout === 'cone' ? 0.58 : 0.82;
-      return { x: (column - row / 2) * spacing, z: 0.68 - row * 0.62 };
+      const maxColumns = mounted ? 4 : 6;
+      let row = 0, column = index;
+      while (column >= Math.min(row + 1, maxColumns)) {
+        column -= Math.min(row + 1, maxColumns);
+        row++;
+      }
+      const columns = Math.min(row + 1, maxColumns);
+      return { x: (column - (columns - 1) / 2) * stepX * (layout === 'cone' ? 0.85 : 1),
+        z: 0.5 - row * stepZ };
     }
     if (layout === 'square') {
       const columns = Math.ceil(Math.sqrt(count));
       const rows = Math.ceil(count / columns);
       const row = Math.floor(index / columns);
       const inRow = Math.min(columns, count - row * columns);
-      return { x: (index % columns - (inRow - 1) / 2) * 0.72, z: (rows - 1) * 0.3 - row * 0.62 };
+      return { x: (index % columns - (inRow - 1) / 2) * stepX * 0.85,
+        z: (rows - 1) * stepZ * 0.3 - row * stepZ };
     }
     if (layout === 'staggered') {
-      const row = Math.floor(index / 2);
-      const column = index % 2;
-      return { x: (column ? 0.4 : -0.4) + (row % 2 ? 0.2 : 0), z: 0.42 - row * 0.62 };
+      const columns = mounted ? 3 : 4;
+      const row = Math.floor(index / columns);
+      return { x: (index % columns - (columns - 1) / 2) * stepX + (row % 2 ? stepX * 0.4 : 0),
+        z: 0.42 - row * stepZ };
     }
     if (layout === 'wings') {
       if (count <= 2) return { x: (index - (count - 1) / 2) * 1.0, z: 0.1 };
       if (index === 0) return { x: 0, z: 0.55 };
       if (index === count - 1 && count % 2 === 0) return { x: 0, z: -0.55 };
       const wingIndex = index - 1;
-      const rank = Math.floor(wingIndex / 2);
-      return { x: (wingIndex % 2 ? 1 : -1) * (0.82 + rank * 0.22), z: 0.08 - rank * 0.56 };
+      const columns = mounted ? 2 : 3;
+      const rank = Math.floor(wingIndex / (columns * 2));
+      const column = Math.floor((wingIndex % (columns * 2)) / 2);
+      return { x: (wingIndex % 2 ? 1 : -1) * (0.24 + column * (mounted ? 0.44 : 0.30) + rank * 0.01),
+        z: 0.08 - rank * stepZ - column * 0.14 };
     }
     if (layout === 'column') {
-      if (count > 8) return { x: (index % 3 - 1) * 0.38, z: 0.68 - Math.floor(index / 3) * 0.48 };
+      if (count > 8) return { x: (index % 3 - 1) * stepX, z: 0.68 - Math.floor(index / 3) * stepZ };
       return { x: index % 2 ? 0.12 : -0.12, z: 0.68 - index * 0.48 };
     }
     return null;
   }
 
-  function arrangeFormationUnits(token) {
-    const groups = token.troopsContainer.children.filter(child => child.userData.isFormationTroop);
-    groups.forEach((group, index) => {
-      const offset = getFormationOffset(token.formationLayout, index, groups.length);
-      if (offset) group.position.set(offset.x, 0, offset.z);
-    });
-  }
-
   function addBattalionRanks(token) {
-    if (!crowdBodyGeometry) {
-      crowdBodyGeometry = new THREE.CylinderGeometry(0.11, 0.16, 0.5, 5);
-      crowdHeadGeometry = new THREE.SphereGeometry(0.105, 5, 4);
-      crowdSpearGeometry = new THREE.CylinderGeometry(0.018, 0.028, 0.88, 4);
-    }
-    if (!crowdShieldGeometry) {
-      crowdShieldGeometry = new THREE.BoxGeometry(0.34, 0.46, 0.11);
-    }
-
-    const count = isLowPowerDevice ? 24 : 36;
-    const columns = 6;
-    const materialKey = `${token.side}:${token.cat}`;
-    if (!crowdMaterials.has(materialKey)) {
-      const sideTint = new THREE.Color(token.side === 'A' ? 0x1e3a8a : 0x7f1d1d);
-      const roleTint = new THREE.Color((CAT_META[token.cat] || CAT_META.armor).color);
-      const bodyColor = roleTint.lerp(sideTint, 0.34);
-      crowdMaterials.set(materialKey, {
-        body: new THREE.MeshStandardMaterial({ color: bodyColor, roughness: 0.78, metalness: 0.18 }),
-        head: new THREE.MeshStandardMaterial({ color: 0xc2a276, roughness: 0.9 }),
-        weapon: new THREE.MeshStandardMaterial({ color: token.cat === 'air_defense' ? 0xc9a96e : 0xb7b2a7, roughness: 0.58, metalness: 0.46 }),
-        shield: new THREE.MeshStandardMaterial({ color: token.side === 'A' ? 0x2563eb : 0xdc2626, roughness: 0.62, metalness: 0.25 })
-      });
-    }
-    const materials = crowdMaterials.get(materialKey);
-    const crowd = new THREE.Group();
-    const body = new THREE.InstancedMesh(crowdBodyGeometry, materials.body, count);
-    const head = new THREE.InstancedMesh(crowdHeadGeometry, materials.head, count);
-    const weaponGeometry = getCrowdWeaponGeometry(token.cat);
-    const weapons = new THREE.InstancedMesh(weaponGeometry, materials.weapon, count);
-    const shields = ['armor', 'naval'].includes(token.cat)
-      ? new THREE.InstancedMesh(crowdShieldGeometry, materials.shield, count)
-      : null;
-    const transform = new THREE.Object3D();
-
-    for (let i = 0; i < count; i++) {
-      const row = Math.floor(i / columns);
-      const rowCount = Math.min(columns, count - row * columns);
-      const offset = getFormationOffset(token.formationLayout, i, count);
-      const x = offset ? offset.x * 0.55 : (i % columns - (rowCount - 1) / 2) * 0.48;
-      const z = offset ? offset.z * 0.55 - 1.25 : -0.95 - row * 0.52;
-      transform.position.set(x, 0.30, z);
-      transform.rotation.set(0, (i % 3 - 1) * 0.07, 0);
-      transform.scale.set(1, 0.88 + (i % 4) * 0.06, 1);
-      transform.updateMatrix();
-      body.setMatrixAt(i, transform.matrix);
-
-      transform.position.set(x, 0.66, z);
-      transform.rotation.set(0, 0, 0);
-      transform.scale.setScalar(1);
-      transform.updateMatrix();
-      head.setMatrixAt(i, transform.matrix);
-
-      transform.position.set(x + (token.cat === 'air_defense' ? 0.12 : 0.15), token.cat === 'air_defense' ? 0.58 : 0.72, z + 0.04);
-      transform.rotation.set(token.cat === 'air' || token.cat === 'armor' ? Math.PI / 2 : 0.10, 0, -0.04);
-      transform.updateMatrix();
-      weapons.setMatrixAt(i, transform.matrix);
-
-      if (shields) {
-        transform.position.set(x - 0.19, 0.39, z + 0.12);
-        transform.rotation.set(0, 0, token.cat === 'naval' ? 0.08 : 0);
-        transform.scale.set(token.cat === 'armor' ? 1.15 : 0.82, 1, 0.55);
-        transform.updateMatrix();
-        shields.setMatrixAt(i, transform.matrix);
-      }
-    }
-
-    body.instanceMatrix.needsUpdate = true;
-    head.instanceMatrix.needsUpdate = true;
-    weapons.instanceMatrix.needsUpdate = true;
-    if (shields) shields.instanceMatrix.needsUpdate = true;
-    body.castShadow = false;
-    head.castShadow = false;
-    weapons.castShadow = false;
-    crowd.add(body, head, weapons);
-    if (shields) crowd.add(shields);
-    crowd.children.forEach(mesh => {
-      mesh.userData.standingMatrices = Array.from({ length: count }, (_, index) => {
-        const matrix = new THREE.Matrix4();
-        mesh.getMatrixAt(index, matrix);
-        return matrix;
-      });
+    const mounted = token.cat === 'air';
+    const count = mounted ? (isLowPowerDevice ? 12 : 24) : (isLowPowerDevice ? 24 : 48);
+    token.lowPower = isLowPowerDevice;
+    const ranks = BattleFigures.createRanks(token, count, (i, total) => {
+      const offset = getFormationOffset(token.formationLayout, i, total, mounted);
+      const columns = mounted ? 4 : 6;
+      return offset || { x: (i % columns - (columns - 1) / 2) * (mounted ? 0.50 : 0.40),
+        z: -Math.floor(i / columns) * (mounted ? 0.85 : 0.45) };
     });
-    crowd.userData.isBattalionRanks = true;
-    crowd.userData.soldierCount = count;
-    crowd.userData.marchPhase = (token.uid || '').length * 0.63 + (token.side === 'A' ? 0 : 1.2);
-    crowd.position.z = -0.18;
-    token.troopsContainer.add(crowd);
-  }
-
-  function getCrowdWeaponGeometry(cat) {
-    if (crowdWeaponGeometries.has(cat)) return crowdWeaponGeometries.get(cat);
-    let geometry;
-    if (cat === 'air_defense') {
-      geometry = new THREE.TorusGeometry(0.19, 0.025, 4, 10, Math.PI);
-    } else if (cat === 'naval') {
-      geometry = new THREE.BoxGeometry(0.075, 0.58, 0.045);
-    } else if (cat === 'support') {
-      geometry = new THREE.CylinderGeometry(0.025, 0.035, 0.92, 5);
-    } else {
-      geometry = crowdSpearGeometry || new THREE.CylinderGeometry(0.018, 0.028, 0.88, 4);
-      crowdSpearGeometry = geometry;
-    }
-    crowdWeaponGeometries.set(cat, geometry);
-    return geometry;
-  }
-
-  function addFormationMark(parent, layout, color, width, depth, height) {
-    const paths = {
-      line: [[-0.36, 0], [0.36, 0]],
-      wedge: [[0, 0.38], [-0.34, -0.3], [0, -0.08], [0.34, -0.3], [0, 0.38]],
-      cone: [[0, 0.38], [-0.2, -0.3], [0, -0.12], [0.2, -0.3], [0, 0.38]],
-      square: [[-0.3, 0.28], [0.3, 0.28], [0.3, -0.28], [-0.3, -0.28], [-0.3, 0.28]],
-      staggered: [[-0.3, 0.25], [0.3, 0.05], [-0.3, -0.15], [0.3, -0.35]],
-      wings: [[0, 0.28], [-0.42, 0.02], [-0.2, -0.12], [0, -0.24], [0.2, -0.12], [0.42, 0.02], [0, 0.28]],
-      column: [[-0.12, 0.38], [0.12, 0.38], [0.12, -0.38], [-0.12, -0.38], [-0.12, 0.38]]
-    };
-    const path = paths[layout];
-    if (!path) return;
-    const points = path.map(([x, z]) => new THREE.Vector3(x * width, height + 0.055, z * depth));
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.58, depthWrite: false });
-    const mark = new THREE.Line(geometry, material);
-    mark.renderOrder = 2;
-    parent.add(mark);
+    token.troopsContainer.add(ranks);
   }
 
   function createUnitToken(unit, side, index) {
@@ -1234,8 +1132,6 @@ const Battle3DEngine = (function () {
     const meta = CAT_META[cat] || CAT_META.armor;
     const formationLayout = unit.formationLayout || 'line';
     const coords = (SLOT_COORDS[side] && SLOT_COORDS[side][cat]) || { x: isSideA ? -6 : 6, z: (index - 2) * 3.0 };
-    const factionColor = isSideA ? 0x2563eb : 0xdc2626;
-    const factionTrim = isSideA ? 0x38bdf8 : 0xf59e0b;
 
     const rootGroup = new THREE.Group();
     rootGroup.position.set(coords.x, getBattleTerrainHeight(coords.x, coords.z), coords.z);
@@ -1246,67 +1142,6 @@ const Battle3DEngine = (function () {
     formationRig.rotation.y = isSideA ? Math.PI / 2 : -Math.PI / 2;
     rootGroup.add(formationRig);
 
-    // A. 光榮風格雕花漆木戰術方陣托盤 (Unit Formation Plinth)
-    const PLINTH_W = 2.45; // 左右寬 (local X)
-    const PLINTH_D = 2.65; // 前後深 (local Z)
-    const PLINTH_H = 0.22;
-
-    const plinthGroup = new THREE.Group();
-    const baseMat = new THREE.MeshStandardMaterial({
-      color: isSideA ? 0x172554 : 0x450a0a,
-      roughness: 0.42,
-      metalness: 0.25
-    });
-    const baseMesh = new THREE.Mesh(new THREE.BoxGeometry(PLINTH_W, PLINTH_H, PLINTH_D), baseMat);
-    baseMesh.position.y = PLINTH_H / 2;
-    baseMesh.castShadow = true;
-    baseMesh.receiveShadow = true;
-    plinthGroup.add(baseMesh);
-
-    // 托盤頂面戰陣泥石台面
-    const topDeckMat = new THREE.MeshStandardMaterial({
-      color: isSideA ? 0x334155 : 0x44332a,
-      roughness: 0.78,
-      metalness: 0.08
-    });
-    const topDeck = new THREE.Mesh(new THREE.BoxGeometry(PLINTH_W - 0.16, 0.04, PLINTH_D - 0.16), topDeckMat);
-    topDeck.position.y = PLINTH_H + 0.015;
-    topDeck.receiveShadow = true;
-    plinthGroup.add(topDeck);
-    addFormationMark(formationRig, formationLayout, factionTrim, 2.7, 2.5, 0.015);
-
-    // 四邊鎏金／陣營鑲邊與前鋒箭頭指向標
-    const rimMat = new THREE.MeshStandardMaterial({
-      color: factionTrim,
-      emissive: factionColor,
-      emissiveIntensity: 0.22,
-      roughness: 0.3,
-      metalness: 0.75
-    });
-    const fBar = new THREE.Mesh(new THREE.BoxGeometry(PLINTH_W + 0.06, 0.07, 0.08), rimMat);
-    fBar.position.set(0, PLINTH_H + 0.01, PLINTH_D / 2);
-    plinthGroup.add(fBar);
-    const bBar = fBar.clone();
-    bBar.position.z = -PLINTH_D / 2;
-    plinthGroup.add(bBar);
-
-    const sBarGeo = new THREE.BoxGeometry(0.08, 0.07, PLINTH_D + 0.06);
-    const lBar = new THREE.Mesh(sBarGeo, rimMat);
-    lBar.position.set(-PLINTH_W / 2, PLINTH_H + 0.01, 0);
-    plinthGroup.add(lBar);
-    const rBar = lBar.clone();
-    rBar.position.x = PLINTH_W / 2;
-    plinthGroup.add(rBar);
-
-    // 托盤正前方陣向金三角箭標 (+Z 為前鋒)
-    const arrowChevron = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.32, 3), rimMat);
-    arrowChevron.rotation.x = Math.PI / 2;
-    arrowChevron.position.set(0, PLINTH_H * 0.6, PLINTH_D / 2 + 0.18);
-    plinthGroup.add(arrowChevron);
-
-    formationRig.add(plinthGroup);
-    plinthGroup.visible = false;
-
     // B. 3D 兵種模型方陣容器
     const troopsContainer = new THREE.Group();
     troopsContainer.position.y = 0.03;
@@ -1315,7 +1150,8 @@ const Battle3DEngine = (function () {
     // C. 光榮式懸浮名將頭像軍徽與即時兵力銘牌 (Sprite 永遠正對鏡頭、不遮擋 3D 士兵！)
     const startHp = Math.max(1, Number(unit.maxHp || unit.hpMax || unit.hp || 200));
     const hud = buildWarlordCrestHud(unit, isSideA, meta, startHp, startHp);
-    hud.sprite.position.set(0, 2.18, 0);
+    hud.sprite.position.set(0, cat === 'air' ? 1.95 : 1.35, 0);
+    hud.sprite.visible = showUnitLabels;
     rootGroup.add(hud.sprite);
 
     scene.add(rootGroup);
@@ -1336,11 +1172,9 @@ const Battle3DEngine = (function () {
       formationOccupation: Boolean(unit.formationOccupation),
       mesh: rootGroup,
       formationRig,
-      plinthGroup,
       troopsContainer,
       hud,
       unitAnims: [],
-      baguaMesh: null,
       origX: coords.x,
       origZ: coords.z,
       frontX: coords.x,
@@ -1382,239 +1216,14 @@ const Battle3DEngine = (function () {
     if (!g || g.children.length > 0) return;
 
     const isSideA = token.side === 'A';
-    const factionTint = isSideA ? 0x1d4ed8 : 0xb91c1c;
-    const plumeColor = isSideA ? 0x38bdf8 : 0xef4444;
-    const goldColor = 0xfbbf24;
-    const cat = token.cat;
-    const markTroop = group => {
-      group.userData.isFormationTroop = true;
-      return group;
-    };
-
-    // 後排主將背旗／帥旗 (所有兵種托盤皆立戰旗，強化三國合戰軍陣感)
-    attachProp(g, 'banner', { targetHeight: 1.55, tintHex: factionTint, tintStrength: 0.45 }, [-0.92, 0, -0.92], [0, 0, 0]);
-
-    if (cat === 'air') {
-      // 【⚡ 奔雷突騎】：3 騎全骨骼動畫具裝戰馬 + 挺立披甲騎將 + 水平前指長槊楔形陣
-      const cavSpots = [
-        { x: 0.00, z: 0.42, lead: true },
-        { x: -0.68, z: -0.32, lead: false },
-        { x: 0.68, z: -0.32, lead: false }
-      ];
-      cavSpots.forEach((sp) => {
-        const mountUnit = new THREE.Group();
-        mountUnit.position.set(sp.x, 0, sp.z);
-
-        const horseKey = sp.lead ? 'horse_armored' : 'horse';
-        const horse = spawnModelInstance(horseKey, {
-          targetHeight: sp.lead ? 1.08 : 0.98,
-          tintHex: sp.lead ? (isSideA ? 0xf8fafc : 0x7f1d1d) : null,
-          tintStrength: sp.lead ? 0.22 : 0,
-          registerAnim: true
-        });
-        if (horse) {
-          mountUnit.add(horse.group);
-          if (horse.animCtrl) token.unitAnims.push(horse.animCtrl);
-        }
-
-        const rider = spawnModelInstance('infantry', {
-          targetHeight: 0.78,
-          tintHex: factionTint,
-          tintStrength: 0.34,
-          registerAnim: true
-        });
-        if (rider) {
-          rider.group.position.set(0, 0.50, -0.04);
-          addHelmetCrest(rider.group, 0.74, sp.lead ? 'horns' : 'plume', sp.lead ? goldColor : plumeColor);
-          mountUnit.add(rider.group);
-          if (rider.animCtrl) token.unitAnims.push(rider.animCtrl);
-        }
-
-        // spear.glb 原生軸向已沿 +Z，設為微仰 [-0.10, 0, 0] 讓騎槊筆直朝前直指敵軍！
-        attachProp(mountUnit, 'spear', { targetMaxDim: 1.52 }, [0.22, 0.78, 0.32], [-0.10, 0, 0]);
-        g.add(markTroop(mountUnit));
-      });
-
-    } else if (cat === 'armor') {
-      // 【🛡️ 重甲陷陣】：前排 3 名大盾重鎧甲士 + 後排 3 名長槍兵密集魚鱗方陣
-      const heavyArmorTint = isSideA ? 0x1e40af : 0x991b1b;
-      [-0.68, 0.0, 0.68].forEach((xPos, idx) => {
-        const front = new THREE.Group();
-        front.position.set(xPos, 0, 0.50);
-        front.userData.isShieldLine = true;
-        const w = spawnModelInstance('infantry', {
-          targetHeight: idx === 1 ? 1.04 : 0.96,
-          tintHex: idx === 1 ? goldColor : heavyArmorTint,
-          tintStrength: idx === 1 ? 0.32 : 0.36,
-          registerAnim: true
-        });
-        if (w) {
-          if (idx === 1) addHelmetCrest(w.group, 1.00, 'horns', goldColor);
-          front.add(w.group);
-          if (w.animCtrl) token.unitAnims.push(w.animCtrl);
-        }
-        attachProp(front, 'shield_tower', { targetHeight: 0.78, tintHex: factionTint, tintStrength: 0.25 }, [-0.08, 0.08, 0.28], [0, 0, 0]);
-        // sword.glb 原生直立 (+Y)，旋轉 +Math.PI * 0.36 呈斜前備戰握持
-        attachProp(front, 'sword', { targetMaxDim: 0.72 }, [0.24, 0.44, 0.14], [Math.PI * 0.36, 0, 0]);
-        g.add(markTroop(front));
-      });
-
-      [-0.68, 0.0, 0.68].forEach((xPos) => {
-        const rear = new THREE.Group();
-        rear.position.set(xPos, 0, -0.40);
-        const inf = spawnModelInstance('infantry', {
-          targetHeight: 0.96,
-          tintHex: heavyArmorTint,
-          tintStrength: 0.30,
-          registerAnim: true
-        });
-        if (inf) {
-          rear.add(inf.group);
-          if (inf.animCtrl) token.unitAnims.push(inf.animCtrl);
-        }
-        // pike.glb 原生直立 (+Y)，握把置於後排兵腰側並旋轉 +Math.PI * 0.42 越過前排盾牆平指前方！
-        attachProp(rear, 'pike', { targetMaxDim: 1.68 }, [0.22, 0.48, -0.05], [Math.PI * 0.42, 0, 0]);
-        g.add(markTroop(rear));
-      });
-
-    } else if (cat === 'air_defense') {
-      // 【🏹 神射強弩】：前排雙座「鹿角拒馬」木柵掩體 + 4 名骨骼動畫強弩弓手交錯齊射陣
-      [-0.56, 0.56].forEach((bx) => {
-        const abatis = buildWoodenAbatis(0.92, 0.54);
-        abatis.position.set(bx, 0, 0.80);
-        g.add(abatis);
-      });
-
-      const archerTint = isSideA ? 0x3b82f6 : 0xd97706;
-      const archSpots = [
-        [-0.62, 0.16], [0.62, 0.16],
-        [-0.36, -0.52], [0.36, -0.52]
-      ];
-      archSpots.forEach(([ax, az], idx) => {
-        const archer = new THREE.Group();
-        archer.position.set(ax, 0, az);
-        const sol = spawnModelInstance('infantry', {
-          targetHeight: 0.95,
-          tintHex: archerTint,
-          tintStrength: 0.28,
-          registerAnim: true
-        });
-        if (sol) {
-          if (idx < 2) addHelmetCrest(sol.group, 0.91, 'plume', plumeColor);
-          archer.add(sol.group);
-          if (sol.animCtrl) token.unitAnims.push(sol.animCtrl);
-        }
-        attachProp(archer, 'bow', { targetMaxDim: 0.74 }, [0.16, 0.22, 0.28], [0, Math.PI / 2, 0]);
-        // arrow.glb 原生直立 (+Y)，旋轉 Math.PI * 0.46 微仰搭弦朝向敵軍 (+Z)
-        attachProp(archer, 'arrow', { targetMaxDim: 0.64 }, [0.16, 0.56, 0.18], [Math.PI * 0.46, 0, 0]);
-        g.add(markTroop(archer));
-      });
-
-    } else if (cat === 'naval') {
-      // 【⚔️ 先登奇兵】：4 名玄甲死士鋒矢突擊陣 (持太刀＋圓盾，頭頂鍬形前立與突擊纓冠)
-      const vanguardTint = isSideA ? 0x0f766e : 0x7f1d1d;
-      const vanSpots = [
-        { x: 0.00, z: 0.60, h: 1.04, lead: true },
-        { x: -0.66, z: 0.02, h: 0.95, lead: false },
-        { x: 0.66, z: 0.02, h: 0.95, lead: false },
-        { x: 0.00, z: -0.52, h: 0.95, lead: false }
-      ];
-      vanSpots.forEach((sp) => {
-        const van = new THREE.Group();
-        van.position.set(sp.x, 0, sp.z);
-        const fig = spawnModelInstance('infantry', {
-          targetHeight: sp.h,
-          tintHex: vanguardTint,
-          tintStrength: 0.42,
-          registerAnim: true
-        });
-        if (fig) {
-          addHelmetCrest(fig.group, sp.h - 0.04, sp.lead ? 'horns' : 'plume', sp.lead ? goldColor : plumeColor);
-          van.add(fig.group);
-          if (fig.animCtrl) token.unitAnims.push(fig.animCtrl);
-        }
-        attachProp(van, 'katana', { targetMaxDim: 0.84 }, [0.22, 0.46, 0.18], [Math.PI * 0.32, 0, -0.22]);
-        attachProp(van, 'shield_round', { targetMaxDim: 0.52, tintHex: factionTint, tintStrength: 0.30 }, [-0.22, 0.44, 0.18], [0, 0.35, 0]);
-        g.add(markTroop(van));
-      });
-
-    } else {
-      // 【📜 軍師奇謀】：太極八卦祈禳法壇 + 軍師本尊 + 朱漆雷音大戰鼓 + 左右金吾衛護法
-      const baguaCanvas = document.createElement('canvas');
-      baguaCanvas.width = 256;
-      baguaCanvas.height = 256;
-      const bctx = baguaCanvas.getContext('2d');
-      bctx.translate(128, 128);
-      bctx.strokeStyle = isSideA ? '#38bdf8' : '#fbbf24';
-      bctx.lineWidth = 5;
-      bctx.beginPath(); bctx.arc(0, 0, 114, 0, Math.PI * 2); bctx.stroke();
-      bctx.beginPath(); bctx.arc(0, 0, 88, 0, Math.PI * 2); bctx.stroke();
-      for (let i = 0; i < 8; i++) {
-        const a = (i * Math.PI) / 4;
-        bctx.save();
-        bctx.rotate(a);
-        bctx.fillStyle = isSideA ? 'rgba(56,189,248,0.85)' : 'rgba(251,191,36,0.85)';
-        bctx.fillRect(-16, -106, 32, 6);
-        bctx.fillRect(-16, -96, 13, 6);
-        bctx.fillRect(3, -96, 13, 6);
-        bctx.restore();
-      }
-      const baguaTex = new THREE.CanvasTexture(baguaCanvas);
-      const baguaMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(2.05, 2.05),
-        new THREE.MeshBasicMaterial({ map: baguaTex, transparent: true, opacity: 0.78, depthWrite: false })
-      );
-      baguaMesh.rotation.x = -Math.PI / 2;
-      baguaMesh.position.y = 0.02;
-      g.add(baguaMesh);
-      token.baguaMesh = baguaMesh;
-
-      // 中央軍師高台與軍師模型
-      const dais = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.46, 0.56, 0.18, 8),
-        new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.5, metalness: 0.3 })
-      );
-      dais.position.set(0, 0.09, 0.05);
-      g.add(dais);
-
-      const strat = spawnModelInstance('strategist', {
-        targetHeight: 1.08,
-        tintHex: factionTint,
-        tintStrength: 0.22
-      });
-      if (strat) {
-        strat.group.position.set(0, 0.18, 0.05);
-        g.add(strat.group);
-      }
-
-      // 朱漆鎏金雷音戰鼓與帥旗
-      const warDrum = buildTaikoWarDrum();
-      warDrum.position.set(0.68, 0, -0.42);
-      warDrum.rotation.y = -0.35;
-      g.add(warDrum);
-
-      attachProp(g, 'flag', { targetHeight: 1.50, tintHex: factionTint, tintStrength: 0.45 }, [0.90, 0, -0.90], [0, 0, 0]);
-
-      [-0.68, 0.68].forEach((gx) => {
-        const guard = new THREE.Group();
-        guard.position.set(gx, 0, 0.48);
-        const gw = spawnModelInstance('infantry', {
-          targetHeight: 0.94,
-          tintHex: goldColor,
-          tintStrength: 0.30,
-          registerAnim: true
-        });
-        if (gw) {
-          addHelmetCrest(gw.group, 0.90, 'plume', plumeColor);
-          guard.add(gw.group);
-          if (gw.animCtrl) token.unitAnims.push(gw.animCtrl);
-        }
-        // 護衛執戟斜立 (-Math.PI * 0.38 使長戟由地面斜指前上方)
-        attachProp(guard, 'spear', { targetMaxDim: 1.38 }, [0.20, 0.55, 0.16], [-Math.PI * 0.36, 0, 0]);
-        g.add(markTroop(guard));
-      });
+    const factionTint = isSideA ? 0x485c68 : 0x783c32;
+    attachProp(g, 'banner', { targetHeight: 1.65, tintHex: factionTint, tintStrength: 0.3 }, [-1.2, 0, -0.65], [0, 0, 0]);
+    if (token.cat === 'support') {
+      const drum = buildTaikoWarDrum();
+      drum.scale.setScalar(0.65);
+      drum.position.set(-1.3, 0, -1.3);
+      g.add(drum);
     }
-    arrangeFormationUnits(token);
     addBattalionRanks(token);
     triggerSquadAnim(token, !token.alive ? 'death' : token.march && !token.march.finished ? 'move' : 'idle', 1.0);
     if (!token.alive) applyFallenPose(token, 1);
@@ -1752,7 +1361,7 @@ const Battle3DEngine = (function () {
     tex.minFilter = THREE.LinearFilter;
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
     const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(2.85, 0.98, 1);
+    sprite.scale.set(1.75, 0.60, 1);
     sprite.renderOrder = 20;
 
     if (unit.id) {
@@ -1796,7 +1405,7 @@ const Battle3DEngine = (function () {
     sp.renderOrder = 30;
     scene.add(sp);
 
-    floatingPopups.push({ sprite: sp, tex, mat, life: 38, maxLife: 38 });
+    floatingPopups.push({ sprite: sp, tex, mat, startedAt: performance.now(), duration: 635 });
   }
 
   /* ----------------------------------------------------
@@ -1928,6 +1537,8 @@ const Battle3DEngine = (function () {
 
   function triggerSquadAnim(token, state, timeScale = 1.0) {
     if (!token || !token.unitAnims) return;
+    token.figureState = state;
+    if (state === 'attack') token.attackUntil = performance.now() + 1000 / Math.max(0.5, timeScale);
     token.unitAnims.forEach((ctrl) => ctrl.playState(state, timeScale));
   }
 
@@ -1964,7 +1575,7 @@ const Battle3DEngine = (function () {
 
     // 1. 高費名將 ($4~$5) 戰法發動或斬將時觸發光榮風格橫幅 Cut-in (節流防刷屏)
     const nowMs = performance.now();
-    if (!ln.finale && aToken && aToken.cost >= 4 && (ln.kind === 'kill' || ln.kind === 'capture' || (ln.kind === 'hit' && nowMs - lastCutinAt > 3600))) {
+    if (!ln.finale && aToken && ln.skillActivation && nowMs - lastCutinAt > 6000) {
       lastCutinAt = nowMs;
       triggerWarlordCutin(aToken, ln.kind === 'kill');
     }
@@ -2169,7 +1780,7 @@ const Battle3DEngine = (function () {
     return true;
   }
 
-  /* 神射強弩：發射 16 支真實 3D 箭矢模型 + 火羽軌跡拋物線齊射 */
+  /* 神射強弩：16 支箭矢分批拋射 */
   function spawn3DArrowVolley(fromPos, toPos, side) {
     const count = 16;
     for (let i = 0; i < count; i++) {
@@ -2182,17 +1793,10 @@ const Battle3DEngine = (function () {
       const arrowInst = spawnModelInstance('arrow', { targetMaxDim: 0.78, castShadow: false });
       if (arrowInst) {
         projMesh = arrowInst.group;
-        // 附著火箭尾焰亮點
-        const tipGlow = new THREE.Mesh(
-          new THREE.SphereGeometry(0.06, 6, 6),
-          new THREE.MeshBasicMaterial({ color: side === 'A' ? 0x38bdf8 : 0xf97316 })
-        );
-        tipGlow.position.set(0, 0, 0.25);
-        projMesh.add(tipGlow);
       } else {
         projMesh = new THREE.Mesh(
           new THREE.CylinderGeometry(0.02, 0.04, 0.65, 6),
-          new THREE.MeshBasicMaterial({ color: side === 'A' ? 0x38bdf8 : 0xf97316 })
+          new THREE.MeshBasicMaterial({ color: 0x62523b })
         );
       }
 
@@ -2203,9 +1807,9 @@ const Battle3DEngine = (function () {
         mesh: projMesh,
         start,
         end,
-        progress: -(i * 0.032),
-        speed: 0.046,
-        arcHeight: 4.8 + Math.random() * 1.3,
+        startedAt: performance.now() + i * 12,
+        duration: 450,
+        arcHeight: Math.min(3.2, fromPos.distanceTo(toPos) * 0.15) + Math.random() * 0.3,
         isGLB: Boolean(arrowInst)
       });
     }
@@ -2227,14 +1831,13 @@ const Battle3DEngine = (function () {
     triggerSquadAnim(aToken, 'move', 1.5);
     aToken.march = null;
     aToken.engagement = null;
-    let frame = 0;
-    function step() {
+    const startedAt = performance.now();
+    function step(now) {
       if (aToken.epoch !== battleEpoch || !aToken.alive) return;
-      frame++;
-      const progress = Math.min(1, frame / 12);
+      const progress = Math.min(1, (now - startedAt) / 650);
       aToken.mesh.position.lerpVectors(orig, strikePos, progress);
-      aToken.mesh.position.y = orig.y + (strikePos.y - orig.y) * progress + Math.sin(progress * Math.PI) * 0.8;
-      if (frame === 12) {
+      aToken.mesh.position.y = getBattleTerrainHeight(aToken.mesh.position.x, aToken.mesh.position.z);
+      if (progress === 1) {
         aToken.chargeCommitted = true;
         aToken.frontX = strikePos.x;
         aToken.frontZ = strikePos.z;
@@ -2243,10 +1846,10 @@ const Battle3DEngine = (function () {
         spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.8, 0)), 18, 0x2dd4bf);
         applyImpactReaction(tToken, 0.16);
       }
-      if (frame < 12) requestAnimationFrame(step);
+      if (progress < 1) requestAnimationFrame(step);
       else aToken.mesh.position.set(strikePos.x, strikePos.y, strikePos.z);
     }
-    step();
+    step(startedAt);
   }
 
   /* 重甲陷陣：步兵方陣推進短兵相接 */
@@ -2256,82 +1859,18 @@ const Battle3DEngine = (function () {
     applyImpactReaction(tToken, 0.10);
   }
 
-  /* 軍師奇謀：八卦天雷／火計光柱與陣紋擴散 */
+  /* Orders raise dust; only explicit fire attacks produce embers. */
   function performStrategistFormation(aToken, tToken, logText) {
     triggerSquadAnim(aToken, 'attack', 1.15);
     const isFire = logText.includes('火') || logText.includes('砲') || logText.includes('焚');
-    const fxColor = isFire ? 0xf97316 : 0x4ade80;
-
-    const pillarGeo = new THREE.CylinderGeometry(0.65, 0.95, 7.5, 16, 1, true);
-    const pillarMat = new THREE.MeshBasicMaterial({
-      color: fxColor,
-      transparent: true,
-      opacity: 0.68,
-      side: THREE.DoubleSide,
-      depthWrite: false
-    });
-    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-    pillar.position.copy(tToken.mesh.position);
-    pillar.position.y = 3.75;
-    scene.add(pillar);
-
-    const ringGeo = new THREE.RingGeometry(0.4, 1.35, 32);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: fxColor,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.92,
-      depthWrite: false
-    });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.copy(tToken.mesh.position);
-    ring.position.y = 0.28;
-    scene.add(ring);
-
-    spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.9, 0)), isFire ? 26 : 16, fxColor);
-
-    let f = 0;
-    function animPillar() {
-      f++;
-      const s = 1 + f * 0.08;
-      ring.scale.set(s, s, 1);
-      ring.material.opacity = Math.max(0, 0.92 - f * 0.05);
-      pillar.scale.set(1 - f * 0.03, 1, 1 - f * 0.03);
-      pillar.material.opacity = Math.max(0, 0.68 - f * 0.04);
-      if (f < 18) {
-        requestAnimationFrame(animPillar);
-      } else {
-        scene.remove(pillar);
-        scene.remove(ring);
-        pillarGeo.dispose(); pillarMat.dispose();
-        ringGeo.dispose(); ringMat.dispose();
-      }
-    }
-    animPillar();
+    spawnDustPuff(tToken.mesh.position);
+    if (isFire) spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)), 8, 0xbe7945);
   }
 
   function performShieldBlockDome(tToken) {
-    const geo = new THREE.SphereGeometry(1.75, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2);
-    const mat = new THREE.MeshBasicMaterial({ color: 0xfbbf24, wireframe: true, transparent: true, opacity: 0.85 });
-    const dome = new THREE.Mesh(geo, mat);
-    dome.position.copy(tToken.mesh.position);
-    dome.position.y = 0.2;
-    scene.add(dome);
-
-    let f = 0;
-    function fade() {
-      f++;
-      dome.material.opacity = Math.max(0, 0.85 - f * 0.07);
-      dome.scale.addScalar(0.02);
-      if (f < 13) requestAnimationFrame(fade);
-      else {
-        scene.remove(dome);
-        geo.dispose();
-        mat.dispose();
-      }
-    }
-    fade();
+    triggerSquadAnim(tToken, 'hit', 1.1);
+    spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.55, 0)), 5, 0xaba58d);
+    applyImpactReaction(tToken, 0.08);
   }
 
   function updateTokenHp(token, newHp) {
@@ -2354,7 +1893,7 @@ const Battle3DEngine = (function () {
     updateOccupationZones();
     updateTokenHp(token, 0);
     triggerSquadAnim(token, 'death', 1.0);
-    spawnSparkBurst(token.mesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)), captured ? 14 : 28, captured ? 0xfbbf24 : 0xef4444);
+    spawnDustPuff(token.mesh.position);
     const startedAt = performance.now();
     token.deathAnimation = new Promise(resolve => {
       function fall(now) {
@@ -2374,29 +1913,12 @@ const Battle3DEngine = (function () {
   }
 
   function applyFallenPose(token, progress) {
-    token.formationRig.position.y = -0.10 * progress;
+    token.formationRig.position.y = 0;
     const ranks = token.troopsContainer.children.find(child => child.userData.isBattalionRanks);
     if (ranks) {
       ranks.rotation.x = 0;
       ranks.position.y = 0;
-      const position = new THREE.Vector3();
-      const rotation = new THREE.Quaternion();
-      const scale = new THREE.Vector3();
-      const matrix = new THREE.Matrix4();
-      const angle = progress * Math.PI / 2;
-      const fallRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), angle);
-      ranks.children.forEach(mesh => {
-        mesh.userData.standingMatrices.forEach((standing, index) => {
-          standing.decompose(position, rotation, scale);
-          const height = position.y;
-          position.y = height * Math.cos(angle) + 0.06 * progress;
-          position.z += height * Math.sin(angle);
-          rotation.premultiply(fallRotation);
-          matrix.compose(position, rotation, scale);
-          mesh.setMatrixAt(index, matrix);
-        });
-        mesh.instanceMatrix.needsUpdate = true;
-      });
+      BattleFigures.fall(ranks, token, progress, getBattleTerrainHeight);
     }
     token.troopsContainer.children.forEach(troop => {
       if (troop.userData.isFormationTroop) troop.rotation.z = progress * Math.PI / 2;
@@ -2413,6 +1935,7 @@ const Battle3DEngine = (function () {
       updateTokenHp(token, unit.hp);
       if (!unit.alive) tokenFallDown(token, unit.captured, true);
     }
+    clearBattleEffects();
     if (renderer) renderer.render(scene, camera);
   }
 
@@ -2427,8 +1950,8 @@ const Battle3DEngine = (function () {
       'position:absolute;top:12px;left:50%;transform:translateX(-50%) scale(0.92);',
       'z-index:30;display:flex;align-items:center;gap:14px;padding:8px 22px 8px 10px;',
       'background:linear-gradient(95deg,rgba(15,23,42,0.96),rgba(69,10,10,0.92),rgba(15,23,42,0.95));',
-      'border:2px solid #fbbf24;border-radius:999px;',
-      'box-shadow:0 10px 28px rgba(0,0,0,0.65),0 0 22px rgba(251,191,36,0.35);',
+      'border:1px solid #938269;border-radius:3px;',
+      'box-shadow:0 4px 16px rgba(0,0,0,0.4);',
       'color:#fff;pointer-events:none;opacity:0;transition:all 0.22s cubic-bezier(0.16,1,0.3,1);'
     ].join('');
     container.appendChild(div);
@@ -2439,7 +1962,7 @@ const Battle3DEngine = (function () {
     if (!el) return;
     const meta = CAT_META[token.cat] || CAT_META.armor;
     const actionLabel = isKill ? '一騎討・陣斬敵將！' : `${token.wep || meta.label}・戰法發動！`;
-    const borderCol = token.side === 'A' ? '#38bdf8' : '#f59e0b';
+    const borderCol = token.side === 'A' ? '#889ca5' : '#b68a74';
 
     el.style.borderColor = borderCol;
     el.innerHTML = `
@@ -2462,15 +1985,17 @@ const Battle3DEngine = (function () {
     cutinTimeout = setTimeout(() => {
       el.style.opacity = '0';
       el.style.transform = 'translateX(-50%) scale(0.92)';
-    }, 1550);
+    }, 1100);
   }
 
   /* ----------------------------------------------------
      7. 粒子火花、塵土、震屏與相機控制
      ---------------------------------------------------- */
   function spawnSparkBurst(pos, count = 14, colorHex = 0xfbbf24) {
+    count = Math.min(count, isLowPowerDevice ? 4 : 7);
+    colorHex = new THREE.Color(colorHex).lerp(new THREE.Color(0xb7a58a), 0.85);
     for (let i = 0; i < count; i++) {
-      const geo = new THREE.SphereGeometry(0.065, 4, 4);
+      const geo = new THREE.SphereGeometry(0.022, 4, 3);
       const mat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? colorHex : 0xffffff, transparent: true, opacity: 1 });
       const m = new THREE.Mesh(geo, mat);
       m.position.copy(pos);
@@ -2480,8 +2005,9 @@ const Battle3DEngine = (function () {
         vx: (Math.random() - 0.5) * 0.26,
         vy: Math.random() * 0.22 + 0.06,
         vz: (Math.random() - 0.5) * 0.26,
-        life: 18 + Math.floor(Math.random() * 8),
-        maxLife: 24,
+        startedAt: performance.now(),
+        duration: 300 + Math.random() * 130,
+        opacity: 1,
         gravity: 0.013
       });
     }
@@ -2498,16 +2024,17 @@ const Battle3DEngine = (function () {
       vx: (Math.random() - 0.5) * 0.04,
       vy: 0.035,
       vz: (Math.random() - 0.5) * 0.04,
-      life: 20,
-      maxLife: 20,
+      startedAt: performance.now(),
+      duration: 335,
+      opacity: 0.48,
       gravity: 0,
       scaleGrowth: 0.045
     });
   }
 
   function getBattleCameraFov(aspect) {
-    if (aspect <= 2.4) return 35;
-    const horizontalFov = 100 * Math.PI / 180;
+    if (aspect <= 2.4) return cameraView === 'cinematic' ? 42 : 48;
+    const horizontalFov = (cameraView === 'cinematic' ? 78 : 100) * Math.PI / 180;
     return 2 * Math.atan(Math.tan(horizontalFov / 2) / aspect) * 180 / Math.PI;
   }
 
@@ -2549,12 +2076,26 @@ const Battle3DEngine = (function () {
   }
 
   function resetCamera() {
-    camTheta = 0.0;
-    camPhi = (container && container.clientWidth >= 720) ? 0.9 : 0.86;
-    camRadius = (container && container.clientWidth < 720) ? 18.5 : 14.8;
+    camTheta = cameraView === 'cinematic' ? -0.12 : 0;
+    camPhi = cameraView === 'cinematic' ? 1.08 : 0.78;
+    camRadius = (container && container.clientWidth < 720) ? 22 : cameraView === 'cinematic' ? 14.5 : 25;
     camFocusOffset.set(0, 0, 0);
-    camFocusOffset.set(0, 0, 0);
+    if (camera) {
+      camera.fov = getBattleCameraFov(camera.aspect);
+      camera.updateProjectionMatrix();
+    }
     updateCameraPosition();
+    if (renderer && isAnimationPaused) renderer.render(scene, camera);
+  }
+
+  function setCameraView(view) {
+    if (!['cinematic', 'overview'].includes(view)) throw new Error(`Unknown battle camera: ${view}`);
+    cameraView = view;
+    if (container) container.closest('#battle3DWrapper').querySelectorAll('[data-camera-view]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.cameraView === view));
+    });
+    updateOccupationZones();
+    resetCamera();
   }
 
   /* ----------------------------------------------------
@@ -2618,11 +2159,7 @@ const Battle3DEngine = (function () {
         if (ranks) {
           const moving = finalChargeActive || Boolean((march && !march.finished) || (engagement && !engagement.finished));
           const fighting = meleeActive && !moving && !['air_defense', 'support'].includes(token.cat) && !token.formationRanged;
-          const phase = ranks.userData.marchPhase || 0;
-          const gait = elapsed * (moving ? 13 : 3.8) + phase;
-          ranks.position.y = Math.sin(gait) * (moving ? 0.035 : 0.012);
-          ranks.rotation.x = Math.sin(gait * 0.72) * (fighting ? 0.08 : moving ? 0.018 : 0.006);
-          ranks.position.z = -0.18 + (fighting ? Math.sin(elapsed * 9 + phase) * 0.12 : 0);
+          BattleFigures.animate(ranks, token, now, moving || token.figureState === 'move', fighting, getBattleTerrainHeight);
         }
       });
       if (now - lastOccupationZoneUpdate > 180) {
@@ -2635,7 +2172,7 @@ const Battle3DEngine = (function () {
         camFocusTarget.set(0, 0, 0);
         lastFocusAt = 0;
       }
-      camFocusOffset.lerp(camFocusTarget, 1 - Math.exp(-dt * 2.4));
+      camFocusOffset.set(0, 0, 0);
       unitsMap.forEach((token) => {
         if (!token.impact) return;
         const progress = Math.min(1, (now - token.impact.startedAt) / token.impact.duration);
@@ -2681,16 +2218,17 @@ const Battle3DEngine = (function () {
       // 5. 3D 拋物線箭矢飛行
       for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
-        p.progress += p.speed;
-        if (p.progress < 0) continue;
-        if (p.progress >= 1.0) {
+        const progress = (now - p.startedAt) / p.duration;
+        if (progress < 0) continue;
+        if (progress >= 1.0) {
           spawnSparkBurst(p.end, 3, 0xf97316);
           scene.remove(p.mesh);
+          if (!p.isGLB) { p.mesh.geometry.dispose(); p.mesh.material.dispose(); }
           projectiles.splice(i, 1);
         } else {
-          p.mesh.position.lerpVectors(p.start, p.end, p.progress);
-          p.mesh.position.y += Math.sin(p.progress * Math.PI) * p.arcHeight;
-          const nextP = Math.min(1.0, p.progress + 0.04);
+          p.mesh.position.lerpVectors(p.start, p.end, progress);
+          p.mesh.position.y += Math.sin(progress * Math.PI) * p.arcHeight;
+          const nextP = Math.min(1.0, progress + 0.04);
           const nextPos = p.start.clone().lerp(p.end, nextP);
           nextPos.y += Math.sin(nextP * Math.PI) * p.arcHeight;
           p.mesh.lookAt(nextPos);
@@ -2700,14 +2238,15 @@ const Battle3DEngine = (function () {
       // 6. 粒子與塵土更新
       for (let i = particleSystems.length - 1; i >= 0; i--) {
         const pt = particleSystems[i];
-        pt.mesh.position.x += pt.vx;
-        pt.mesh.position.y += pt.vy;
-        pt.mesh.position.z += pt.vz;
-        pt.vy -= pt.gravity || 0;
-        if (pt.scaleGrowth) pt.mesh.scale.addScalar(pt.scaleGrowth);
-        pt.life--;
-        if (pt.mesh.material) pt.mesh.material.opacity = Math.max(0, pt.life / pt.maxLife);
-        if (pt.life <= 0) {
+        const steps = dt * 60;
+        pt.mesh.position.x += pt.vx * steps;
+        pt.mesh.position.y += pt.vy * steps;
+        pt.mesh.position.z += pt.vz * steps;
+        pt.vy -= (pt.gravity || 0) * steps;
+        if (pt.scaleGrowth) pt.mesh.scale.addScalar(pt.scaleGrowth * steps);
+        const remaining = Math.max(0, 1 - (now - pt.startedAt) / pt.duration);
+        if (pt.mesh.material) pt.mesh.material.opacity = remaining * pt.opacity;
+        if (remaining === 0) {
           scene.remove(pt.mesh);
           pt.mesh.geometry.dispose();
           pt.mesh.material.dispose();
@@ -2719,22 +2258,15 @@ const Battle3DEngine = (function () {
       for (let i = floatingPopups.length - 1; i >= 0; i--) {
         const fp = floatingPopups[i];
         fp.sprite.position.y += 1.35 * dt;
-        fp.life--;
-        fp.mat.opacity = Math.min(1, (fp.life / fp.maxLife) * 1.4);
-        if (fp.life <= 0) {
+        const remaining = Math.max(0, 1 - (now - fp.startedAt) / fp.duration);
+        fp.mat.opacity = Math.min(1, remaining * 1.4);
+        if (remaining === 0) {
           scene.remove(fp.sprite);
           fp.tex.dispose();
           fp.mat.dispose();
           floatingPopups.splice(i, 1);
         }
       }
-
-      // 8. 軍師八卦陣緩緩旋轉
-      unitsMap.forEach((tok) => {
-        if (tok.baguaMesh && tok.alive) {
-          tok.baguaMesh.rotation.z += 0.75 * dt;
-        }
-      });
 
       if (renderer && scene && camera) {
         renderer.render(scene, camera);
@@ -2758,14 +2290,31 @@ const Battle3DEngine = (function () {
     unitsMap.forEach((t) => {
       if (scene && t.mesh) scene.remove(t.mesh);
       if (t.hud && t.hud.tex) t.hud.tex.dispose();
+      if (t.hud) t.hud.sprite.material.dispose();
+      const ranks = t.troopsContainer.children.find(child => child.userData.isBattalionRanks);
+      if (ranks) {
+        ranks.children.forEach(mesh => mesh.dispose());
+        ranks.userData.material.dispose();
+      }
     });
     unitsMap.clear();
     activeMixers = [];
 
-    projectiles.forEach((p) => { if (scene && p.mesh) scene.remove(p.mesh); });
+    clearBattleEffects();
+  }
+
+  function clearBattleEffects() {
+    projectiles.forEach(p => {
+      if (scene && p.mesh) scene.remove(p.mesh);
+      if (!p.isGLB) { p.mesh.geometry.dispose(); p.mesh.material.dispose(); }
+    });
     projectiles = [];
 
-    particleSystems.forEach((pt) => { if (scene && pt.mesh) scene.remove(pt.mesh); });
+    particleSystems.forEach(pt => {
+      if (scene && pt.mesh) scene.remove(pt.mesh);
+      pt.mesh.geometry.dispose();
+      pt.mesh.material.dispose();
+    });
     particleSystems = [];
 
     floatingPopups.forEach((fp) => {
@@ -2798,6 +2347,12 @@ const Battle3DEngine = (function () {
     return {
       isInitialized,
       isEnabled,
+      cameraView,
+      unitLabels: showUnitLabels,
+      cameraPosition: camera ? camera.position.toArray() : [],
+      drawCalls: renderer ? renderer.info.render.calls : 0,
+      triangles: renderer ? renderer.info.render.triangles : 0,
+      activeEffects: projectiles.length + particleSystems.length + floatingPopups.length,
       animationPaused: isAnimationPaused,
       modelsTotal: Object.keys(MODEL_MANIFEST).length,
       modelsLoaded: modelsLoadedCount,
@@ -2816,11 +2371,17 @@ const Battle3DEngine = (function () {
       battalions: [...unitsMap.values()].map(token => ({
         uid: token.uid, side: token.side, cat: token.cat, alive: token.alive, fallen: token.fallen,
         layout: token.formationLayout, ranged: token.formationRanged || ['air_defense', 'support'].includes(token.cat),
+        originalFigures: token.troopsContainer.children.some(child => child.userData.originalFigures),
+        figureParts: token.troopsContainer.children.find(child => child.userData.originalFigures)?.children.map(mesh => mesh.userData.part) || [],
+        animationAt: token.troopsContainer.children.find(child => child.userData.originalFigures)?.userData.animationAt || 0,
+        casualties: token.troopsContainer.children.find(child => child.userData.originalFigures)?.userData.casualtyAt.filter(value => value !== null).length || 0,
         formationSignature: token.troopsContainer.children.find(child => child.userData.isBattalionRanks)?.children[0]?.userData.standingMatrices.map(matrix => [matrix.elements[12], matrix.elements[14]]),
         x: token.mesh.position.x, z: token.mesh.position.z, frontX: token.frontX, frontZ: token.frontZ,
         ranksFallen: token.fallen && token.troopsContainer.children.some(child =>
           child.userData.isBattalionRanks && child.children.every(mesh =>
-            Array.from({ length: mesh.count }, (_, index) => mesh.instanceMatrix.array[index * 16 + 13]).every(height => height < 0.09)
+            Array.from({ length: mesh.count }, (_, index) =>
+              mesh.instanceMatrix.array[index * 16 + 13] - (child.userData.groundOffsets?.[index] || 0)
+            ).every(height => Math.abs(height - 0.035) < 0.01)
           )
         )
       })),

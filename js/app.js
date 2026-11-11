@@ -1147,13 +1147,6 @@ function renderMatrix() {
       });
     }
 
-    const M_TRAIT_SHORT = {
-      CAS: '🐎蹂躪步陣', LR: '🏹百步穿楊', HEAVY: '🛡️玄甲鐵壁', APS: '⚔️格擋反震',
-      AA_LONG: '🎯專克突騎', CIWS: '🔥密集弩陣', AEGIS: '🏯鐵桶拒馬', SUB: '🌊潛行渡江',
-      ASW: '🔱水陸搜剿', AMBUSH: '🌑奇兵伏擊', SWARM: '🔥萬箭連發', EW: '📜奇門遁甲',
-      SEAD: '⚡破除弓陣', DEEP: '🗡️斬將奪旗', ARTY: '☄️霹靂火砲', SAT: '🔥烈火燎原',
-      TRUE_AT: '🪓破甲重擊', SPOT: '🚩登高瞭望'
-    };
     const cardsHtml = displayUnits.map(u => {
       const isEquipped = state.deck.includes(u.id);
       const isBanned = currentBanned().includes(u.id);
@@ -1173,27 +1166,17 @@ function renderMatrix() {
             <div class="m-top">
               <div class="m-name-group">
                 <div class="m-name" title="${esc(u.name)}"><span class="m-flag" style="margin-right:2px">${u.flag || ''}</span> ${esc(u.name)}</div>
-                <div class="m-tag">${esc(u.tag)}</div>
               </div>
               <div class="m-actions">
                 <button class="m-info-btn" data-info-id="${u.id}" title="查看名將傳記與實戰數值">ℹ</button>
               </div>
             </div>
-            <div class="m-weapon-strip">⚔️ ${esc((u.weapon || '').split(' ')[0])}</div>
           </div>
         </div>
-        <div class="m-skill" title="${esc(u.skill?.desc || '')}">
-          <div class="m-skill-heading"><strong>${esc(u.skill?.name || '未配置戰法')}</strong><span>${esc(u.skill?.phase || '')} · 每戰一次</span></div>
-          <div class="m-skill-effect">${esc(u.skill?.desc || '此武將尚未配置專屬戰法。')}</div>
-        </div>
-        <div class="m-role-hint">${esc(getCombatRoleSummary(u))}</div>
-        <div class="m-mobile-intel">${u.weapon ? `<span class="m-mob-wpn">🎯 ${esc(u.weapon)}</span>` : ''}${(u.traits && u.traits.length) ? `<div class="m-mob-traits">${u.traits.map(t => `<span class="m-mob-trait-pill">${M_TRAIT_SHORT[t] || t}</span>`).join('')}</div>` : ''}</div>
+        <button type="button" class="m-skill" data-info-id="${u.id}" aria-label="${esc(u.name)}：${esc(u.skill?.name || '未配置戰法')}，查看詳情">
+          <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
+        </button>
         <div class="m-bot">
-          <div class="m-stats">
-            <span>生命 <b>${u.hp}</b></span>
-            <span>攻擊 <b>${u.atk}</b></span>
-            <span>${u.ew > u.st ? '謀略' : '隱匿'} <b>${Math.max(u.ew, u.st)}</b></span>
-          </div>
           ${showWhy
             ? `<span class="m-why ${isBanned ? 'why-banned' : 'why-budget'}">${why}</span>`
             : (envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}">${envMod.short}</span>` : '')}
@@ -1230,12 +1213,14 @@ function showTooltip(u, x, y) {
       </div>
     </div>
     <div class="u-tt-body">
+      ${u.skill ? `<div class="u-tt-skill"><strong>${esc(u.skill.name)}</strong><div>${esc(u.skill.phase)} · 每戰一次</div><p>${esc(u.skill.desc)}</p></div>` : ''}
+      <p class="u-tt-role">${esc(getCombatRoleSummary(u))}</p>
       ${envMod ? `<div class="u-tt-env-box env-${envMod.type}">${esc(envMod.tip)}</div>` : ''}
       ${u.weapon ? `<div class="u-tt-weapon-box"><span>🎯 主武裝:</span> <b>${esc(u.weapon)}</b></div>` : ''}
       ${(() => {
         const r = typeof getUnitRealismBadges === 'function' ? getUnitRealismBadges(u) : null;
         if (!r) return '';
-        const spHtml = r.specials.map(s => `<div style="margin-top:3px;color:var(--amber);font-size:11.5px"><b>${s.icon} ${esc(s.title)}：</b>${esc(s.desc)}</div>`).join('');
+        const spHtml = r.specials.filter(s => !s.title.startsWith('專屬戰法')).map(s => `<div style="margin-top:3px;color:var(--amber);font-size:11.5px"><b>${s.icon} ${esc(s.title)}：</b>${esc(s.desc)}</div>`).join('');
         return `<div style="margin-bottom:6px;padding:5px 8px;border-radius:6px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);font-size:11.5px"><div style="color:var(--cyan);font-weight:700">${esc(r.magLabel)}</div>${spHtml}</div>`;
       })()}
       ${(() => {
@@ -2064,11 +2049,11 @@ if (boardEl) {
 
 // 矩陣卡片點擊、型號切換與懸停
 $('#matrixBoard').addEventListener('click', e => {
-  const infoBtn = e.target.closest('.m-info-btn');
+  const infoBtn = e.target.closest('[data-info-id]');
   if (infoBtn) {
     e.stopPropagation();
     const u = UNIT_MAP[infoBtn.dataset.infoId];
-    if (u) openUnitDetailModal(u);
+    if (u) { hideTooltip(); openUnitDetailModal(u); }
     return;
   }
   const vBtn = e.target.closest('.m-var-toggle');

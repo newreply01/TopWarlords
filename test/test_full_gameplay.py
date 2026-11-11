@@ -64,9 +64,9 @@ try:
                 return {
                     skills: cards.every(card => {
                         const unit = UNIT_MAP[card.dataset.id];
-                        return card.querySelector('.m-skill-heading strong').textContent === unit.skill.name
-                            && card.querySelector('.m-skill-effect').textContent === unit.skill.desc
-                            && card.querySelector('.m-skill-heading span').textContent.includes(unit.skill.phase);
+                        return card.querySelector('.m-skill strong').textContent === unit.skill.name
+                            && !card.querySelector('.m-skill-effect, .m-role-hint, .m-stats')
+                            && card.querySelector('.m-skill').dataset.infoId === unit.id;
                     }),
                     readable: visible.every(card => {
                         const avatar = card.querySelector('.m-avatar-wrap').getBoundingClientRect();
@@ -74,7 +74,7 @@ try:
                         const bounds = card.getBoundingClientRect();
                         return avatar.width >= 76 && avatar.height >= 76
                             && parseFloat(getComputedStyle(card.querySelector('.m-name')).fontSize) >= 16
-                            && parseFloat(getComputedStyle(card.querySelector('.m-skill-effect')).fontSize) >= 13
+                            && parseFloat(getComputedStyle(card.querySelector('.m-skill')).fontSize) >= 15
                             && skill.width >= bounds.width - 25
                             && skill.bottom <= bounds.bottom;
                     }),
@@ -90,6 +90,13 @@ try:
                 f"Last card cannot scroll into viewport at {width}px"
         page.set_viewport_size({"width": 1280, "height": 720})
         page.locator(".m-card").first.scroll_into_view_if_needed()
+        deck_before_details = page.evaluate("() => localStorage.getItem('wl15_deck')")
+        page.locator(".m-card .m-skill").first.click()
+        assert page.locator("#unitDetailModal").is_visible(), "Skill badge must open details without selecting the unit"
+        assert page.evaluate("() => localStorage.getItem('wl15_deck')") == deck_before_details, "Opening skill details selected a unit"
+        page.locator("#btnUnitSheetClose").click()
+        page.locator(".m-card").first.hover()
+        assert page.locator("#unitTooltip .u-tt-skill").is_visible(), "Desktop hover must show skill details"
         print("[TEST 1b] 桌機／平板／手機頭像、字級、專屬技能與捲動可達性通過")
 
         same_role_result = page.evaluate("""() => {
@@ -159,6 +166,29 @@ try:
         view_battle = page.locator("#viewBattle")
         assert not click_res['viewBattleHidden'], "戰場推演畫面未展開"
         print("[TEST 4] 古戰場戰況推演畫面成功展開！三階段推演進行中...")
+
+        page.locator("#btnToggle3DView").click()
+        assert page.locator("#battle3DWrapper").is_hidden()
+        for width, height in [(1680, 900), (1100, 800), (390, 844)]:
+            page.set_viewport_size({"width": width, "height": height})
+            page.wait_for_timeout(150)
+            for panel, team in [("team-a", "#teamA"), ("team-b", "#teamB")]:
+                if width <= 1100:
+                    page.locator(f'[data-battle-panel="{panel}"]').click()
+                vertical = page.locator(f"{team} .bu").evaluate_all("""cards => {
+                    const rects = cards.map(card => ({
+                        top: card.offsetTop, bottom: card.offsetTop + card.offsetHeight,
+                        left: card.offsetLeft, x: card.offsetLeft, y: card.offsetTop,
+                        width: card.offsetWidth, height: card.offsetHeight
+                    }));
+                    return { valid: rects.length === 5 && rects.every((rect, i) => i === 0 ||
+                        (rect.top >= rects[i - 1].bottom - 1 && Math.abs(rect.left - rects[0].left) < 1)),
+                        rects: rects.map(rect => ({ x: rect.x, y: rect.y, width: rect.width, height: rect.height })) };
+                }""")
+                assert vertical["valid"], f"{team} 2D cards are not stacked vertically at {width}px: {vertical}"
+        page.set_viewport_size({"width": 1280, "height": 720})
+        page.locator("#btnToggle3DView").click()
+        assert page.locator("#battle3DWrapper").is_visible()
 
         # 5. 測試跳過動畫秒速結算 (#btnSkip)
         btn_skip = page.locator("#btnSkip")

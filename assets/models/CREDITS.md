@@ -1,6 +1,14 @@
 # 3D Models Attribution (assets/models/)
 
-All 18 3D `.glb` models used in **TopWarlords** are licensed under **CC0 1.0 (Public Domain)**.
+The 18 bundled `.glb` models below retain their original **CC0 1.0 (Public Domain)** attribution.
+
+From 7.8.0, battlefield soldiers and mounts are original procedural geometry in
+[`battle-figures.js`](../../js/battle-figures.js), not the bundled cartoon infantry,
+strategist or horse models. They use articulated instancing, vertex-colored iron,
+leather and cloth, and no external character textures. These are stylized,
+field-scale interpretations, not individually reconstructed historical equipment
+or photorealistic scanned assets. The older GLBs remain for existing tools;
+the live renderer loads only arrows, banners and environment props.
 
 | File | Original Title | Author | License | Source |
 | :--- | :--- | :--- | :--- | :--- |

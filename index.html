@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.7.15">
+<link rel="stylesheet" href="style.css?v=7.8.0">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
@@ -225,7 +225,12 @@
   <div class="battle-3d-wrapper" id="battle3DWrapper">
     <div class="battle-3d-canvas-container" id="battle3DCanvas"></div>
     <div class="battle-3d-overlay-hud">
-      <span class="badge-3d-title">🏛️ 3D 古戰場沙盤推演台</span>
+      <span class="badge-3d-title">古戰場 · 實兵交鋒</span>
+      <div class="battle-camera-controls" role="group" aria-label="戰場鏡頭">
+        <button type="button" data-camera-view="cinematic" aria-pressed="true">臨陣</button>
+        <button type="button" data-camera-view="overview" aria-pressed="false">全軍</button>
+        <button type="button" id="btnBattleLabels" aria-pressed="false">軍旗資訊</button>
+      </div>
     </div>
   </div>
 
@@ -1075,27 +1080,28 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script defer src="js/data.js?v=7.7.15"></script>
-<script defer src="js/ladder-data.js?v=7.7.15"></script>
-<script defer src="js/ladder.js?v=7.7.15"></script>
-<script defer src="js/engine.js?v=7.7.15"></script>
+<script defer src="js/data.js?v=7.8.0"></script>
+<script defer src="js/ladder-data.js?v=7.8.0"></script>
+<script defer src="js/ladder.js?v=7.8.0"></script>
+<script defer src="js/engine.js?v=7.8.0"></script>
 <!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script defer src="js/firebase-config.js?v=7.7.15"></script>
-<script defer src="js/firebase-tourney.js?v=7.7.15"></script>
-<script defer src="js/tournament.js?v=7.7.15"></script>
-<script defer src="js/online-pvp.js?v=7.7.15"></script>
-<script defer src="js/telemetry.js?v=7.7.15"></script>
-<script defer src="js/cloud-sync.js?v=7.7.15"></script>
-<script defer src="js/sound.js?v=7.7.15"></script>
-<script defer src="js/poster-help.js?v=7.7.15"></script>
-<script defer src="js/libs/three.min.js?v=7.7.15"></script>
-<script defer src="js/libs/GLTFLoader.js?v=7.7.15"></script>
-<script defer src="js/libs/SkeletonUtils.js?v=7.7.15"></script>
-<script defer src="js/battle-3d.js?v=7.7.15"></script>
-<script defer src="js/app.js?v=7.7.15"></script>
+<script defer src="js/firebase-config.js?v=7.8.0"></script>
+<script defer src="js/firebase-tourney.js?v=7.8.0"></script>
+<script defer src="js/tournament.js?v=7.8.0"></script>
+<script defer src="js/online-pvp.js?v=7.8.0"></script>
+<script defer src="js/telemetry.js?v=7.8.0"></script>
+<script defer src="js/cloud-sync.js?v=7.8.0"></script>
+<script defer src="js/sound.js?v=7.8.0"></script>
+<script defer src="js/poster-help.js?v=7.8.0"></script>
+<script defer src="js/libs/three.min.js?v=7.8.0"></script>
+<script defer src="js/libs/GLTFLoader.js?v=7.8.0"></script>
+<script defer src="js/libs/SkeletonUtils.js?v=7.8.0"></script>
+<script defer src="js/battle-figures.js?v=7.8.0"></script>
+<script defer src="js/battle-3d.js?v=7.8.0"></script>
+<script defer src="js/app.js?v=7.8.0"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let refreshing = false;
@@ -1106,7 +1112,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.7.15').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.8.0').then(r => r.update()).catch(() => {});
   });
 }
 </script>

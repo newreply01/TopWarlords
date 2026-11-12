@@ -278,7 +278,7 @@ const BattleFigures = (() => {
     });
   }
 
-  function animate(ranks, token, now, moving, fighting, terrainHeight) {
+  function animate(ranks, token, now, moving, fighting, terrainHeight, attackPhaseOffset = 0) {
     if (now - ranks.userData.animationAt < (token.lowPower ? 66 : 40)) return;
     const dt = Math.min(0.1, (now - ranks.userData.animationAt) / 1000);
     ranks.userData.animationAt = now;
@@ -310,21 +310,23 @@ const BattleFigures = (() => {
           mesh.setMatrixAt(i, matrix);
           return;
         }
-        const phase = now * (moving ? (mounted ? 0.015 : 0.009) : 0.004) + i * 1.71;
+        const phase = now * (moving ? (mounted ? 0.015 : 0.009) : 0.004) + i * 1.71 + attackPhaseOffset;
         const gait = moving ? Math.sin(phase) : 0;
         let angle = 0;
         if (part.endsWith('Leg')) angle = gait * (part === 'leftLeg' ? 0.46 : -0.46);
         else if (part.startsWith('horseLeg')) angle = Math.sin(phase + (part.endsWith('FL') || part.endsWith('BR') ? 0 : Math.PI)) * (moving ? 0.48 : 0.012);
         else if (part.endsWith('Arm')) {
           angle = gait * (part === 'leftArm' ? -0.30 : 0.30);
-          if (attack || (fighting && i - losses < 18)) angle -= 0.45 + Math.sin(now * 0.009 + i * 1.1) * 0.35;
-          if (token.cat === 'air_defense' && attack) angle = -1.05 + Math.sin(now * 0.004 + i) * 0.08;
+          const striking = fighting && Math.sin(now * 0.006 + attackPhaseOffset + Math.floor(i / 6) * 0.72) > 0.15;
+          if (attack || (striking && token.cat !== 'support')) angle -= 0.45 + Math.sin(now * 0.009 + i * 1.1 + attackPhaseOffset) * 0.35;
+          if (token.cat === 'air_defense' && (attack || striking)) angle = -1.05 + Math.sin(now * 0.004 + i) * 0.08;
+          if (token.cat === 'support' && fighting) angle = -0.25 + Math.sin(now * 0.004 + i * 0.8 + attackPhaseOffset) * 0.16;
         }
         base.decompose(position, rotation, scale);
         position.y += heights[i];
         position.z += ranks.userData.advance;
         if (mounted && moving) position.y += Math.sin(phase * 2) * 0.018;
-        if (part === 'body' && fighting) angle = Math.sin(now * 0.003 + i * 1.7) * 0.045;
+        if (part === 'body' && fighting) angle = Math.sin(now * 0.003 + i * 1.7 + attackPhaseOffset) * 0.045;
         animationRotation.setFromAxisAngle(axis, angle);
         rotation.multiply(animationRotation);
         matrix.compose(position, rotation, scale);

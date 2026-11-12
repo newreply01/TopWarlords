@@ -4383,7 +4383,7 @@ async function showBattle(res, opts = {}) {
   }
   $('#battleMeta').innerHTML = metaHtml;
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph');
-  await sleep(1100);
+  await sleep(280);
   let curPhase = 0, sec = 0;
   const log = $('#battleLog');
   try {
@@ -4450,7 +4450,7 @@ async function showBattle(res, opts = {}) {
         fieldHp[uid] = f.hp[uid];
       });
       updateFieldStrength();
-      if (!skip) await sleep(650);
+      if (!skip) await sleep(120);
     }
   } catch (loopErr) {
     console.error('showBattle animation loop caught unexpected error:', loopErr);

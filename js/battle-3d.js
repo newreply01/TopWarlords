@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.10.0';
+  const ASSET_VER = '7.10.1';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -100,6 +100,7 @@ const Battle3DEngine = (function () {
   let lastFocusAt = 0;
   let finalChargeActive = false;
   let meleeActive = false;
+  let battleMotionActive = false;
   let battleSettled = false;
 
   // 五大兵種方陣托盤陣位 (A軍在西岸 X<0 朝東，B軍在東岸 X>0 朝西)
@@ -1628,6 +1629,7 @@ const Battle3DEngine = (function () {
     lastFocusAt = 0;
     const now = combatNow();
     [...unitsMap.values()].forEach((token, index) => {
+      token.attackPhaseOffset = (index % 5) * 0.82 + (token.side === 'B' ? 1.1 : 0);
       const direction = token.side === 'A' ? -1 : 1;
       const slot = getArmySlot(token);
       token.origX = direction * (8.5 + slot.depth * 0.6);
@@ -1655,6 +1657,7 @@ const Battle3DEngine = (function () {
     });
     finalChargeActive = false;
     meleeActive = false;
+    battleMotionActive = true;
     lastMarchSoundAt = now;
     lastMeleeSoundAt = now;
     updateOccupationZones();
@@ -1826,7 +1829,7 @@ const Battle3DEngine = (function () {
               if (accepted) onImpact(line);
             }
           });
-          await waitForCombatBeat(350 / Math.max(0.6, tempo), epoch);
+          await waitForCombatBeat(160 / Math.max(0.6, tempo), epoch);
         } finally {
           if (epoch === battleEpoch) activeAttackers.delete(uid);
         }
@@ -1956,7 +1959,7 @@ const Battle3DEngine = (function () {
         if (ln.dmg > 0 && ln.kind !== 'miss' && ln.kind !== 'block') {
           const epoch = battleEpoch;
           for (let beat = 0; beat < 3; beat++) {
-            await waitForCombatBeat(500 / Math.max(0.6, options.tempo || 1), epoch);
+            await waitForCombatBeat(180 / Math.max(0.6, options.tempo || 1), epoch);
             if (epoch !== battleEpoch || battleSettled) { finishEffects(); return; }
             if (aToken?.alive) {
               triggerSquadAnim(aToken, 'attack', 1.15);
@@ -2258,6 +2261,7 @@ const Battle3DEngine = (function () {
 
   function syncBattleResult(res) {
     battleSettled = true;
+    battleMotionActive = false;
     activeAttackers.clear();
     window.SoundEngine?.stopSpatial?.();
     for (const unit of [...res.final.A, ...res.final.B]) {
@@ -2520,7 +2524,7 @@ const Battle3DEngine = (function () {
       if (cavalry) playFieldSound('cavalry_hooves', cavalry, 0.45);
       lastMarchSoundAt = now;
     }
-    if (meleeActive && now - lastMeleeSoundAt > 1700) {
+    if (battleMotionActive && now - lastMeleeSoundAt > 1700) {
       const front = living.filter(token => !['air_defense', 'support'].includes(token.cat) && !token.formationRanged);
       const nearest = front.sort((a, b) => camera.position.distanceTo(a.mesh.position) - camera.position.distanceTo(b.mesh.position))[0];
       if (nearest) playFieldSound(Math.floor(now / 1700) % 2 ? 'shield_block' : 'blade_clash', nearest, 0.28);
@@ -2596,8 +2600,9 @@ const Battle3DEngine = (function () {
         const ranks = token.troopsContainer.children.find(child => child.userData.isBattalionRanks);
         if (ranks) {
           const moving = finalChargeActive || Boolean((march && !march.finished) || (engagement && !engagement.finished));
-          const fighting = meleeActive && !moving && !['air_defense', 'support'].includes(token.cat) && !token.formationRanged;
-          BattleFigures.animate(ranks, token, now, moving || token.figureState === 'move', fighting, getBattleTerrainHeight);
+          const fighting = battleMotionActive || meleeActive;
+          BattleFigures.animate(ranks, token, now, moving || token.figureState === 'move',
+            fighting, getBattleTerrainHeight, token.attackPhaseOffset || 0);
         }
       });
       if (now - lastOccupationZoneUpdate > 180) {
@@ -2731,6 +2736,7 @@ const Battle3DEngine = (function () {
 
   function clearAllTokens() {
     battleEpoch++;
+    battleMotionActive = false;
     activeAttackers.clear();
     window.SoundEngine?.stopSpatial?.();
     unitsMap.forEach((t) => {
@@ -2828,6 +2834,8 @@ const Battle3DEngine = (function () {
       aliveBattalions: [...unitsMap.values()].filter(token => token.alive).length,
       fallenBattalions: [...unitsMap.values()].filter(token => token.fallen).length,
       meleeActive,
+      battleMotionActive,
+      marchingBattalions: [...unitsMap.values()].filter(token => token.march && !token.march.finished).length,
       battalions: [...unitsMap.values()].map(token => ({
         uid: token.uid, side: token.side, cat: token.cat, alive: token.alive, fallen: token.fallen,
         currentHp: token.currentHp, visualHp: token.visualHp ?? token.currentHp,

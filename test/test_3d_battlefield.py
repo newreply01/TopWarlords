@@ -118,6 +118,7 @@ try:
         print("[TEST 3a] Models, troops and name labels ready")
         assert terrain_state["reserveSoldiers"] == (384 if terrain_state["lowPowerDevice"] else 768)
         assert terrain_state["reserveFlags"] == (16 if terrain_state["lowPowerDevice"] else 32)
+        assert terrain_state['battleMotionActive'], 'All battalions must keep fighting between resolved volleys'
         page.evaluate("""() => {
             document.querySelector('#btnPause').click();
             Battle3DEngine.pauseAnimationLoop(true);
@@ -160,7 +161,10 @@ try:
         }""")
         assert terrain_state['terrain'] == 'mountain' and not terrain_state['waterwayVisible'], f"山岳地形未切換：{terrain_state}"
         assert terrain_state['battalionRanks'] == 10, f"預期雙方 10 支部隊皆已加入後列兵群：{terrain_state}"
-        page.wait_for_function("() => Battle3DEngine.getDebugState().engagedBattalions > 0", polling=100, timeout=15000)
+        page.wait_for_timeout(350)
+        resumed_state = page.evaluate("() => Battle3DEngine.getDebugState()")
+        assert resumed_state['battleMotionActive'] and not resumed_state['animationPaused'] \
+            and not resumed_state['audioPaused'], f"Battle did not resume continuous motion: {resumed_state}"
         page.locator('#btnPause').click()
         assert page.evaluate("() => Battle3DEngine.getDebugState().audioPaused")
         assert not page.locator('#battleIntelDialog').is_visible(), 'Full report must be collapsed by default'
@@ -219,8 +223,10 @@ try:
         page.keyboard.press('Escape')
         assert not page.locator('#battleIntelDialog').is_visible()
         assert page.locator('#btnBattleIntel').evaluate('(button) => button === document.activeElement')
-        page.evaluate("() => Battle3DEngine.pauseAnimationLoop(false)")
-        page.locator('#btnPause').click()
+        page.evaluate("""() => {
+            if (Battle3DEngine.getDebugState().audioPaused) document.querySelector('#btnPause').click();
+            Battle3DEngine.pauseAnimationLoop(false);
+        }""")
         charge_finished = page.evaluate("async () => await Battle3DEngine.beginFinalCharge(280)")
         assert charge_finished and not page.evaluate("() => Battle3DEngine.getDebugState().finalChargeActive"), 'Final charge animation did not settle cleanly'
         page.locator('#btnPause').click()
@@ -323,6 +329,21 @@ try:
                 await chargeOriginal(duration, allOut);
                 window.visualCharge = { before, after: Battle3DEngine.getDebugState().battalions };
             };
+            const loadOriginal = Battle3DEngine.loadBattle;
+            Battle3DEngine.loadBattle = result => {
+                  loadOriginal(result);
+                  const initial = Battle3DEngine.getDebugState().battalions;
+                  window.visualOpeningAdvance = new Promise(resolve => setTimeout(() => {
+                      const after = Battle3DEngine.getDebugState().battalions;
+                      resolve({
+                          moving: Battle3DEngine.getDebugState().marchingBattalions,
+                          moved: initial.filter(unit => {
+                              const next = after.find(other => other.uid === unit.uid);
+                              return Math.hypot(next.x - unit.x, next.z - unit.z) > 0.1;
+                          }).length
+                      });
+                  }, 650));
+            };
             document.querySelector('#btnRand').click();
             document.querySelector('#btnGo').click();
         }""")
@@ -351,6 +372,9 @@ try:
             spatialCues,
             misses: visualMisses
         })""")
+        opening_advance = natural.evaluate("() => visualOpeningAdvance")
+        assert opening_advance['moved'] == 10, f"Both armies did not advance together at battle start: {opening_advance}"
+        print("[TEST 7a] 雙方十支部隊同時向前推進，所有兵種保持連續戰鬥動作")
         assert visual['rounds'] == 4 and not visual['finale'], f"Four-round regression fixture changed: {visual}"
         assert visual['state']['fallenBattalions'] == visual['expectedDead'], f"3D deaths diverged from battle result: {visual}"
         assert visual['state']['cameraView'] == 'cinematic'

@@ -66,6 +66,10 @@ for (const cat of cats) {
   token.currentHp = 100;
   figures.animate(ranks, token, 2600, false, false, () => 0);
   assert.equal(ranks.userData.losses, 24, 'Recovering HP must not resurrect casualties or move ranks backwards');
+  const readyArm = Array.from(arm.instanceMatrix.array);
+  figures.animate(ranks, token, 2800, true, true, () => 0, 0.82);
+  assert.notDeepEqual(Array.from(arm.instanceMatrix.array), readyArm,
+    'Every battalion role must fight continuously while the army advances');
   figures.fall(ranks, token, 0.1, () => 0.3);
   assert(Math.abs(body.instanceMatrix.array[13] - 0.335) < 0.001,
     'Previously fallen soldiers must not stand up during defeat');

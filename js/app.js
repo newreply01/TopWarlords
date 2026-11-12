@@ -4399,7 +4399,7 @@ async function showBattle(res, opts = {}) {
       }
       if ((enteringMelee || f.finale === 'charge') && typeof Battle3DEngine !== 'undefined') {
         $('#phaseTitle').textContent = '兩 軍 衝 陣 · 白 刃 交 鋒';
-        const chargeMs = skip ? 0 : Math.max(180, Math.round(560 / Math.max(1, speed * 0.85)));
+        const chargeMs = skip ? 0 : Math.max(500, Math.round(950 / Math.max(1, speed * 0.75)));
         await Battle3DEngine.beginFinalCharge(chargeMs, f.finale === 'charge');
         if (token !== playToken || res._finished) return;
       }

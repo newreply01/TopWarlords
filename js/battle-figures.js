@@ -348,17 +348,10 @@ const BattleFigures = (() => {
         base.decompose(position, rotation, scale);
         position.y += heights[i];
         position.z += ranks.userData.advance;
-        if (fighting && !isBackline) {
-          // 近戰混戰：士兵前後突刺與左右閃避，打破死板方陣邊界
-          const rankRow = Math.floor(i / (mounted ? 4 : 6));
-          const rowWeight = rankRow === 0 ? 1.0 : rankRow === 1 ? 0.65 : 0.35;
-          position.z += Math.sin(skirmishPhase) * (mounted ? 0.13 : 0.095) * rowWeight;
-          position.x += Math.cos(skirmishPhase * 0.75 + i) * 0.042 * rowWeight;
-        }
-        if (mounted && (moving || fighting)) position.y += Math.sin(phase * 2) * 0.02;
+        if (mounted && (moving || fighting)) position.y += Math.sin(phase * 2) * 0.015;
         if (part === 'body' && fighting) {
-          const sway = token.cat === 'support' ? 0.08 : isBackline ? 0.05 : 0.095;
-          angle = Math.sin(now * 0.0055 + i * 1.7 + attackPhaseOffset) * sway;
+          const sway = token.cat === 'support' ? 0.06 : isBackline ? 0.04 : 0.07;
+          angle = Math.sin(now * 0.004 + i * 1.7 + attackPhaseOffset) * sway;
         }
         animationRotation.setFromAxisAngle(axis, angle);
         rotation.multiply(animationRotation);

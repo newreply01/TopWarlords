@@ -20,10 +20,10 @@
       "sources": []
     },
     "st": 90,
-    "ew": 20,
-    "hp": 230,
-    "atk": 134,
-    "def": 0,
+    "ew": 22,
+    "hp": 238,
+    "atk": 140,
+    "def": 0.02,
     "skill": {
       "name": "封狼居胥",
       "phase": "P3",
@@ -37,7 +37,7 @@
     "origin": "中國 · 西漢",
     "weapon": "漢軍玄甲鐵騎 + 環首刀",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HUO.jpg?v=7.10.1"
+    "img": "assets/warlords/HUO.jpg?v=7.10.2"
   },
   {
     "id": "WEI",
@@ -59,10 +59,10 @@
       "note": "",
       "sources": []
     },
-    "st": 72,
-    "ew": 26,
-    "hp": 204,
-    "atk": 112,
+    "st": 74,
+    "ew": 28,
+    "hp": 212,
+    "atk": 118,
     "def": 0.04,
     "skill": {
       "name": "武剛龍城",
@@ -78,7 +78,7 @@
     "origin": "中國 · 西漢",
     "weapon": "武剛突騎大陣 + 漢劍",
     "sfx": "war_drum",
-    "img": "assets/warlords/WEI.jpg?v=7.10.1"
+    "img": "assets/warlords/WEI.jpg?v=7.10.2"
   },
   {
     "id": "LUBU",
@@ -102,9 +102,9 @@
       "sources": []
     },
     "st": 76,
-    "ew": 12,
-    "hp": 244,
-    "atk": 140,
+    "ew": 14,
+    "hp": 248,
+    "atk": 146,
     "def": 0.05,
     "skill": {
       "name": "轅門無雙",
@@ -118,7 +118,7 @@
     "origin": "中國 · 三國",
     "weapon": "方天畫戟 + 赤兔馬",
     "sfx": "blade_clash",
-    "img": "assets/warlords/LUBU.jpg?v=7.10.1"
+    "img": "assets/warlords/LUBU.jpg?v=7.10.2"
   },
   {
     "id": "YOSHITSUNE",
@@ -142,10 +142,10 @@
       "sources": []
     },
     "st": 88,
-    "ew": 24,
-    "hp": 226,
-    "atk": 132,
-    "def": 0,
+    "ew": 26,
+    "hp": 232,
+    "atk": 136,
+    "def": 0.02,
     "skill": {
       "name": "鵯越逆落",
       "phase": "P3",
@@ -160,7 +160,7 @@
     "origin": "日本 · 源平",
     "weapon": "薄綠太刀 + 黑葦威鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YOSHITSUNE.jpg?v=7.10.1"
+    "img": "assets/warlords/YOSHITSUNE.jpg?v=7.10.2"
   },
   {
     "id": "SHINGEN",
@@ -183,9 +183,9 @@
       "sources": []
     },
     "st": 80,
-    "ew": 28,
-    "hp": 234,
-    "atk": 128,
+    "ew": 30,
+    "hp": 240,
+    "atk": 134,
     "def": 0.04,
     "skill": {
       "name": "風林火山",
@@ -201,7 +201,7 @@
     "origin": "日本 · 戰國",
     "weapon": "軍配團扇 + 諏訪法性兜",
     "sfx": "war_drum",
-    "img": "assets/warlords/SHINGEN.jpg?v=7.10.1"
+    "img": "assets/warlords/SHINGEN.jpg?v=7.10.2"
   },
   {
     "id": "GAISUWEN",
@@ -224,10 +224,10 @@
       "note": "",
       "sources": []
     },
-    "st": 48,
-    "ew": 14,
-    "hp": 128,
-    "atk": 76,
+    "st": 52,
+    "ew": 16,
+    "hp": 142,
+    "atk": 86,
     "def": 0.02,
     "skill": {
       "name": "五刀威震",
@@ -242,7 +242,7 @@
     "origin": "韓國 · 高句麗",
     "weapon": "五口寶刀 + 鐵騎長矛",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GAISUWEN.jpg?v=7.10.1"
+    "img": "assets/warlords/GAISUWEN.jpg?v=7.10.2"
   },
   {
     "id": "ZHAOYUN",
@@ -264,10 +264,10 @@
       "note": "",
       "sources": []
     },
-    "st": 74,
-    "ew": 18,
-    "hp": 204,
-    "atk": 114,
+    "st": 76,
+    "ew": 20,
+    "hp": 212,
+    "atk": 120,
     "def": 0.03,
     "skill": {
       "name": "七進七出",
@@ -283,7 +283,7 @@
     "origin": "中國 · 三國",
     "weapon": "青釭劍 + 亮銀龍膽槍",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHAOYUN.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHAOYUN.jpg?v=7.10.2"
   },
   {
     "id": "MACHO",
@@ -305,10 +305,10 @@
       "note": "",
       "sources": []
     },
-    "st": 58,
-    "ew": 12,
-    "hp": 164,
-    "atk": 96,
+    "st": 60,
+    "ew": 14,
+    "hp": 174,
+    "atk": 104,
     "def": 0.02,
     "skill": {
       "name": "西涼鐵騎",
@@ -326,7 +326,7 @@
     "origin": "中國 · 三國",
     "weapon": "虎頭湛金槍 + 白袍銀鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/MACHO.jpg?v=7.10.1"
+    "img": "assets/warlords/MACHO.jpg?v=7.10.2"
   },
   {
     "id": "ZHANGLIAO",
@@ -351,10 +351,10 @@
         "https://en.wikipedia.org/wiki/Battle_of_Xiaoyao_Ford"
       ]
     },
-    "st": 62,
-    "ew": 18,
-    "hp": 166,
-    "atk": 94,
+    "st": 66,
+    "ew": 20,
+    "hp": 176,
+    "atk": 102,
     "def": 0.02,
     "skill": {
       "name": "威震逍遙",
@@ -369,7 +369,7 @@
     "origin": "中國 · 三國",
     "weapon": "問天青龍雙戟 + 塞外駿馬",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHANGLIAO.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHANGLIAO.jpg?v=7.10.2"
   },
   {
     "id": "CHENQINGZHI",
@@ -392,10 +392,10 @@
       "note": "",
       "sources": []
     },
-    "st": 76,
-    "ew": 28,
-    "hp": 198,
-    "atk": 112,
+    "st": 78,
+    "ew": 30,
+    "hp": 206,
+    "atk": 118,
     "def": 0.02,
     "skill": {
       "name": "白袍千軍",
@@ -410,7 +410,7 @@
     "origin": "中國 · 南北朝",
     "weapon": "白袍麾旗 + 輕騎快槍",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/CHENQINGZHI.jpg?v=7.10.1"
+    "img": "assets/warlords/CHENQINGZHI.jpg?v=7.10.2"
   },
   {
     "id": "KENSHIN",
@@ -434,9 +434,9 @@
       "sources": []
     },
     "st": 82,
-    "ew": 24,
-    "hp": 232,
-    "atk": 134,
+    "ew": 26,
+    "hp": 236,
+    "atk": 138,
     "def": 0.03,
     "skill": {
       "name": "車懸之陣",
@@ -452,7 +452,7 @@
     "origin": "日本 · 戰國",
     "weapon": "順慶手太刀 + 毘字旗",
     "sfx": "war_drum",
-    "img": "assets/warlords/KENSHIN.jpg?v=7.10.1"
+    "img": "assets/warlords/KENSHIN.jpg?v=7.10.2"
   },
   {
     "id": "YUKIMURA",
@@ -476,10 +476,10 @@
       "note": "",
       "sources": []
     },
-    "st": 72,
-    "ew": 18,
-    "hp": 200,
-    "atk": 116,
+    "st": 74,
+    "ew": 20,
+    "hp": 208,
+    "atk": 122,
     "def": 0.02,
     "skill": {
       "name": "六文錢決死",
@@ -494,7 +494,7 @@
     "origin": "日本 · 戰國",
     "weapon": "十文字槍 + 六文錢赤備",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YUKIMURA.jpg?v=7.10.1"
+    "img": "assets/warlords/YUKIMURA.jpg?v=7.10.2"
   },
   {
     "id": "KIMYUSHIN",
@@ -516,10 +516,10 @@
       "note": "",
       "sources": []
     },
-    "st": 44,
-    "ew": 18,
-    "hp": 128,
-    "atk": 72,
+    "st": 48,
+    "ew": 20,
+    "hp": 142,
+    "atk": 82,
     "def": 0.02,
     "skill": {
       "name": "花郎誓天",
@@ -535,7 +535,7 @@
     "origin": "韓國 · 新羅",
     "weapon": "龍鳳環首刀 + 金花官服戰鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/KIMYUSHIN.jpg?v=7.10.1"
+    "img": "assets/warlords/KIMYUSHIN.jpg?v=7.10.2"
   },
   {
     "id": "SUNCE",
@@ -557,10 +557,10 @@
       "note": "",
       "sources": []
     },
-    "st": 58,
-    "ew": 16,
-    "hp": 162,
-    "atk": 94,
+    "st": 60,
+    "ew": 18,
+    "hp": 172,
+    "atk": 102,
     "def": 0.03,
     "skill": {
       "name": "霸王怒濤",
@@ -575,7 +575,7 @@
     "origin": "中國 · 東漢末",
     "weapon": "霸王槍 + 江東戰旗",
     "sfx": "cavalry_charge",
-    "img": "assets/warlords/SUNCE.jpg?v=7.10.1"
+    "img": "assets/warlords/SUNCE.jpg?v=7.10.2"
   },
   {
     "id": "DENGAI",
@@ -598,10 +598,10 @@
       "note": "",
       "sources": []
     },
-    "st": 64,
-    "ew": 24,
-    "hp": 160,
-    "atk": 90,
+    "st": 68,
+    "ew": 26,
+    "hp": 170,
+    "atk": 98,
     "def": 0.02,
     "skill": {
       "name": "陰平天降",
@@ -616,7 +616,7 @@
     "origin": "中國 · 三國",
     "weapon": "登山步稍 + 奇襲輕甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/DENGAI.jpg?v=7.10.1"
+    "img": "assets/warlords/DENGAI.jpg?v=7.10.2"
   },
   {
     "id": "XIAHOUYUAN",
@@ -636,10 +636,10 @@
       "note": "",
       "sources": []
     },
-    "st": 48,
-    "ew": 12,
-    "hp": 128,
-    "atk": 74,
+    "st": 52,
+    "ew": 14,
+    "hp": 140,
+    "atk": 84,
     "def": 0,
     "skill": {
       "name": "虎步關右",
@@ -654,7 +654,7 @@
     "origin": "中國 · 三國",
     "weapon": "精鋼長矛 + 快馬大黃弓",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/XIAHOUYUAN.jpg?v=7.10.1"
+    "img": "assets/warlords/XIAHOUYUAN.jpg?v=7.10.2"
   },
   {
     "id": "GONGSUNDU",
@@ -677,10 +677,10 @@
         "https://en.wikipedia.org/wiki/Gongsun_Du"
       ]
     },
-    "st": 34,
-    "ew": 10,
-    "hp": 98,
-    "atk": 54,
+    "st": 40,
+    "ew": 14,
+    "hp": 112,
+    "atk": 66,
     "def": 0,
     "skill": {
       "name": "白馬義從",
@@ -696,7 +696,7 @@
     "origin": "中國 · 三國",
     "weapon": "白馬長槊 + 雕花角弓",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/GONGSUNDU.jpg?v=7.10.1"
+    "img": "assets/warlords/GONGSUNDU.jpg?v=7.10.2"
   },
   {
     "id": "DATE",
@@ -719,10 +719,10 @@
       "note": "",
       "sources": []
     },
-    "st": 58,
-    "ew": 20,
-    "hp": 160,
-    "atk": 92,
+    "st": 62,
+    "ew": 22,
+    "hp": 170,
+    "atk": 100,
     "def": 0.02,
     "skill": {
       "name": "獨眼龍騎銃",
@@ -737,7 +737,7 @@
     "origin": "日本 · 戰國",
     "weapon": "黑漆弦月盔 + 騎鐵火繩槍",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/DATE.jpg?v=7.10.1"
+    "img": "assets/warlords/DATE.jpg?v=7.10.2"
   },
   {
     "id": "EULJI",
@@ -760,10 +760,10 @@
         "https://en.wikipedia.org/wiki/Battle_of_Salsu"
       ]
     },
-    "st": 36,
-    "ew": 20,
-    "hp": 98,
-    "atk": 54,
+    "st": 42,
+    "ew": 24,
+    "hp": 112,
+    "atk": 66,
     "def": 0,
     "skill": {
       "name": "薩水誘敵",
@@ -779,7 +779,7 @@
     "origin": "韓國 · 高句麗",
     "weapon": "高句麗環刀 + 輕步快騎",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/EULJI.jpg?v=7.10.1"
+    "img": "assets/warlords/EULJI.jpg?v=7.10.2"
   },
   {
     "id": "LINGTONG",
@@ -799,10 +799,10 @@
       "note": "",
       "sources": []
     },
-    "st": 32,
-    "ew": 10,
-    "hp": 96,
-    "atk": 54,
+    "st": 38,
+    "ew": 14,
+    "hp": 110,
+    "atk": 66,
     "def": 0,
     "skill": {
       "name": "國士死戰",
@@ -818,7 +818,7 @@
     "origin": "中國 · 三國",
     "weapon": "烈火大刀 + 隨身精短劍",
     "sfx": "blade_clash",
-    "img": "assets/warlords/LINGTONG.jpg?v=7.10.1"
+    "img": "assets/warlords/LINGTONG.jpg?v=7.10.2"
   },
   {
     "id": "YAMAGATA",
@@ -838,10 +838,10 @@
       "note": "",
       "sources": []
     },
-    "st": 46,
-    "ew": 12,
-    "hp": 128,
-    "atk": 74,
+    "st": 48,
+    "ew": 14,
+    "hp": 140,
+    "atk": 84,
     "def": 0.02,
     "skill": {
       "name": "赤備先驅",
@@ -856,7 +856,7 @@
     "origin": "日本 · 戰國",
     "weapon": "長柄槍 + 赤漆塗胴具足",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YAMAGATA.jpg?v=7.10.1"
+    "img": "assets/warlords/YAMAGATA.jpg?v=7.10.2"
   },
   {
     "id": "TACHIBANA",
@@ -879,10 +879,10 @@
       "note": "",
       "sources": []
     },
-    "st": 70,
-    "ew": 18,
-    "hp": 202,
-    "atk": 114,
+    "st": 72,
+    "ew": 20,
+    "hp": 210,
+    "atk": 120,
     "def": 0.03,
     "skill": {
       "name": "西國疾風",
@@ -898,7 +898,7 @@
     "origin": "日本 · 戰國",
     "weapon": "雷切脇差 + 栗色鎧甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/TACHIBANA.jpg?v=7.10.1"
+    "img": "assets/warlords/TACHIBANA.jpg?v=7.10.2"
   },
   {
     "id": "ZHAOSHE",
@@ -918,10 +918,10 @@
       "note": "",
       "sources": []
     },
-    "st": 46,
-    "ew": 20,
-    "hp": 126,
-    "atk": 72,
+    "st": 48,
+    "ew": 22,
+    "hp": 138,
+    "atk": 82,
     "def": 0,
     "skill": {
       "name": "狹路勇勝",
@@ -937,7 +937,7 @@
     "origin": "中國 · 戰國",
     "weapon": "趙國鐵騎長矛 + 馬服良駒",
     "sfx": "cavalry_charge",
-    "img": "assets/warlords/ZHAOSHE.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHAOSHE.jpg?v=7.10.2"
   },
   {
     "id": "PANGDE",
@@ -957,10 +957,10 @@
       "note": "",
       "sources": []
     },
-    "st": 28,
-    "ew": 8,
-    "hp": 100,
-    "atk": 56,
+    "st": 34,
+    "ew": 12,
+    "hp": 116,
+    "atk": 70,
     "def": 0.02,
     "skill": {
       "name": "抬櫬決死",
@@ -975,7 +975,7 @@
     "origin": "中國 · 三國",
     "weapon": "截頭大刀 + 白馬重鐵鞍",
     "sfx": "blade_clash",
-    "img": "assets/warlords/PANGDE.jpg?v=7.10.1"
+    "img": "assets/warlords/PANGDE.jpg?v=7.10.2"
   },
   {
     "id": "MAEDATOSHI",
@@ -995,10 +995,10 @@
       "note": "",
       "sources": []
     },
-    "st": 34,
-    "ew": 12,
-    "hp": 98,
-    "atk": 56,
+    "st": 38,
+    "ew": 14,
+    "hp": 112,
+    "atk": 68,
     "def": 0,
     "skill": {
       "name": "槍之又左",
@@ -1013,7 +1013,7 @@
     "origin": "日本 · 戰國",
     "weapon": "朱柄長槍 + 赤母衣良駒",
     "sfx": "blade_clash",
-    "img": "assets/warlords/MAEDATOSHI.jpg?v=7.10.1"
+    "img": "assets/warlords/MAEDATOSHI.jpg?v=7.10.2"
   },
   {
     "id": "BAIQI",
@@ -1036,9 +1036,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 18,
-    "hp": 365,
-    "atk": 124,
+    "ew": 20,
+    "hp": 376,
+    "atk": 132,
     "def": 0.28,
     "skill": {
       "name": "長平殲滅",
@@ -1053,7 +1053,7 @@
     "origin": "中國 · 戰國",
     "weapon": "武安君銅劍 + 戰國玄甲",
     "sfx": "war_drum",
-    "img": "assets/warlords/BAIQI.jpg?v=7.10.1"
+    "img": "assets/warlords/BAIQI.jpg?v=7.10.2"
   },
   {
     "id": "XIANGYU",
@@ -1076,9 +1076,9 @@
       "sources": []
     },
     "st": 12,
-    "ew": 10,
-    "hp": 364,
-    "atk": 136,
+    "ew": 12,
+    "hp": 370,
+    "atk": 142,
     "def": 0.26,
     "skill": {
       "name": "霸王破釜",
@@ -1093,7 +1093,7 @@
     "origin": "中國 · 楚漢",
     "weapon": "霸王楚戟 + 烏騅馬鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/XIANGYU.jpg?v=7.10.1"
+    "img": "assets/warlords/XIANGYU.jpg?v=7.10.2"
   },
   {
     "id": "YUEFEI",
@@ -1117,9 +1117,9 @@
       "sources": []
     },
     "st": 12,
-    "ew": 24,
-    "hp": 364,
-    "atk": 124,
+    "ew": 26,
+    "hp": 374,
+    "atk": 130,
     "def": 0.28,
     "skill": {
       "name": "背嵬撼山",
@@ -1137,7 +1137,7 @@
     "origin": "中國 · 南宋",
     "weapon": "瀝泉神槍 + 岳字白旄大旗",
     "sfx": "war_drum",
-    "img": "assets/warlords/YUEFEI.jpg?v=7.10.1"
+    "img": "assets/warlords/YUEFEI.jpg?v=7.10.2"
   },
   {
     "id": "WANGJIAN",
@@ -1160,9 +1160,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 22,
-    "hp": 306,
-    "atk": 98,
+    "ew": 24,
+    "hp": 318,
+    "atk": 106,
     "def": 0.28,
     "skill": {
       "name": "秦滅六國",
@@ -1177,7 +1177,7 @@
     "origin": "中國 · 秦朝",
     "weapon": "大秦青銅長戈 + 重甲鐵盾",
     "sfx": "war_drum",
-    "img": "assets/warlords/WANGJIAN.jpg?v=7.10.1"
+    "img": "assets/warlords/WANGJIAN.jpg?v=7.10.2"
   },
   {
     "id": "HONDA",
@@ -1202,9 +1202,9 @@
       "sources": []
     },
     "st": 12,
-    "ew": 14,
-    "hp": 360,
-    "atk": 130,
+    "ew": 16,
+    "hp": 368,
+    "atk": 134,
     "def": 0.28,
     "skill": {
       "name": "蜻蛉切無傷",
@@ -1220,7 +1220,7 @@
     "origin": "日本 · 戰國",
     "weapon": "蜻蛉切神槍 + 鹿角脇立兜",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HONDA.jpg?v=7.10.1"
+    "img": "assets/warlords/HONDA.jpg?v=7.10.2"
   },
   {
     "id": "SHIBATA",
@@ -1244,9 +1244,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 10,
-    "hp": 252,
-    "atk": 90,
+    "ew": 12,
+    "hp": 260,
+    "atk": 98,
     "def": 0.24,
     "skill": {
       "name": "破瓶柴田",
@@ -1261,7 +1261,7 @@
     "origin": "日本 · 戰國",
     "weapon": "瓶割刀 + 漆黑重甲具足",
     "sfx": "blade_clash",
-    "img": "assets/warlords/SHIBATA.jpg?v=7.10.1"
+    "img": "assets/warlords/SHIBATA.jpg?v=7.10.2"
   },
   {
     "id": "LIANPO",
@@ -1284,9 +1284,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 16,
-    "hp": 304,
-    "atk": 98,
+    "ew": 18,
+    "hp": 316,
+    "atk": 104,
     "def": 0.28,
     "skill": {
       "name": "長平堅壁",
@@ -1301,7 +1301,7 @@
     "origin": "中國 · 戰國",
     "weapon": "青銅重戟 + 戰國大盾",
     "sfx": "war_drum",
-    "img": "assets/warlords/LIANPO.jpg?v=7.10.1"
+    "img": "assets/warlords/LIANPO.jpg?v=7.10.2"
   },
   {
     "id": "MENGTIAN",
@@ -1324,9 +1324,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 16,
-    "hp": 254,
-    "atk": 86,
+    "ew": 18,
+    "hp": 264,
+    "atk": 94,
     "def": 0.26,
     "skill": {
       "name": "萬里長城",
@@ -1341,7 +1341,7 @@
     "origin": "中國 · 秦朝",
     "weapon": "秦軍重弩 + 狼毫筆",
     "sfx": "war_drum",
-    "img": "assets/warlords/MENGTIAN.jpg?v=7.10.1"
+    "img": "assets/warlords/MENGTIAN.jpg?v=7.10.2"
   },
   {
     "id": "GUANYU",
@@ -1365,9 +1365,9 @@
       "sources": []
     },
     "st": 14,
-    "ew": 18,
-    "hp": 358,
-    "atk": 132,
+    "ew": 20,
+    "hp": 366,
+    "atk": 136,
     "def": 0.26,
     "skill": {
       "name": "威震華夏",
@@ -1382,7 +1382,7 @@
     "origin": "中國 · 三國",
     "weapon": "青龍偃月刀 + 美髯綠袍鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GUANYU.jpg?v=7.10.1"
+    "img": "assets/warlords/GUANYU.jpg?v=7.10.2"
   },
   {
     "id": "ZHANGFEI",
@@ -1405,9 +1405,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 10,
-    "hp": 298,
-    "atk": 108,
+    "ew": 12,
+    "hp": 306,
+    "atk": 116,
     "def": 0.24,
     "skill": {
       "name": "當陽斷橋",
@@ -1422,7 +1422,7 @@
     "origin": "中國 · 三國",
     "weapon": "丈八蛇矛 + 烏金鐵環甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHANGFEI.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHANGFEI.jpg?v=7.10.2"
   },
   {
     "id": "HOJO_UJIYASU",
@@ -1445,9 +1445,9 @@
       "sources": []
     },
     "st": 12,
-    "ew": 18,
-    "hp": 254,
-    "atk": 84,
+    "ew": 20,
+    "hp": 262,
+    "atk": 90,
     "def": 0.26,
     "skill": {
       "name": "相模獅籠城",
@@ -1463,7 +1463,7 @@
     "origin": "日本 · 戰國",
     "weapon": "采配 + 太刀",
     "sfx": "war_drum",
-    "img": "assets/warlords/HOJO_UJIYASU.jpg?v=7.10.1"
+    "img": "assets/warlords/HOJO_UJIYASU.jpg?v=7.10.2"
   },
   {
     "id": "XIAHOU_DUN",
@@ -1486,9 +1486,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 12,
-    "hp": 250,
-    "atk": 88,
+    "ew": 14,
+    "hp": 228,
+    "atk": 84,
     "def": 0.24,
     "skill": {
       "name": "拔矢啖睛",
@@ -1503,7 +1503,7 @@
     "origin": "中國 · 三國",
     "weapon": "環首刀 + 曹魏軍旗",
     "sfx": "blade_clash",
-    "img": "assets/warlords/XIAHOU_DUN.jpg?v=7.10.1"
+    "img": "assets/warlords/XIAHOU_DUN.jpg?v=7.10.2"
   },
   {
     "id": "TACHIBANAD",
@@ -1526,9 +1526,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 18,
-    "hp": 250,
-    "atk": 86,
+    "ew": 20,
+    "hp": 258,
+    "atk": 92,
     "def": 0.25,
     "skill": {
       "name": "雷神斬雷",
@@ -1543,7 +1543,7 @@
     "origin": "日本 · 戰國",
     "weapon": "名刀雷切 + 轎載鐵盾",
     "sfx": "blade_clash",
-    "img": "assets/warlords/TACHIBANAD.jpg?v=7.10.1"
+    "img": "assets/warlords/TACHIBANAD.jpg?v=7.10.2"
   },
   {
     "id": "CHOIYOUNG",
@@ -1565,9 +1565,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 14,
-    "hp": 210,
-    "atk": 68,
+    "ew": 16,
+    "hp": 224,
+    "atk": 80,
     "def": 0.24,
     "skill": {
       "name": "高麗柱石",
@@ -1582,7 +1582,7 @@
     "origin": "韓國 · 高麗",
     "weapon": "高麗大刀 + 頭頂鐵胄",
     "sfx": "blade_clash",
-    "img": "assets/warlords/CHOIYOUNG.jpg?v=7.10.1"
+    "img": "assets/warlords/CHOIYOUNG.jpg?v=7.10.2"
   },
   {
     "id": "DIANWEI",
@@ -1605,9 +1605,9 @@
       "sources": []
     },
     "st": 8,
-    "ew": 6,
-    "hp": 210,
-    "atk": 72,
+    "ew": 10,
+    "hp": 224,
+    "atk": 86,
     "def": 0.23,
     "skill": {
       "name": "古之惡來",
@@ -1623,7 +1623,7 @@
     "origin": "中國 · 三國",
     "weapon": "雙鐵戟 + 重裝近衛鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/DIANWEI.jpg?v=7.10.1"
+    "img": "assets/warlords/DIANWEI.jpg?v=7.10.2"
   },
   {
     "id": "XUCHU",
@@ -1644,9 +1644,9 @@
       "sources": []
     },
     "st": 8,
-    "ew": 4,
-    "hp": 172,
-    "atk": 54,
+    "ew": 10,
+    "hp": 188,
+    "atk": 72,
     "def": 0.23,
     "skill": {
       "name": "裸衣虎癡",
@@ -1661,7 +1661,7 @@
     "origin": "中國 · 三國",
     "weapon": "虎頭大金刀 + 粗鐵皮甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/XUCHU.jpg?v=7.10.1"
+    "img": "assets/warlords/XUCHU.jpg?v=7.10.2"
   },
   {
     "id": "SHIMAZUY",
@@ -1685,9 +1685,9 @@
       "sources": []
     },
     "st": 14,
-    "ew": 14,
-    "hp": 296,
-    "atk": 106,
+    "ew": 16,
+    "hp": 306,
+    "atk": 112,
     "def": 0.25,
     "skill": {
       "name": "鬼石曼子背進",
@@ -1702,7 +1702,7 @@
     "origin": "日本 · 戰國",
     "weapon": "野太刀 + 黑漆塗二枚胴",
     "sfx": "blade_clash",
-    "img": "assets/warlords/SHIMAZUY.jpg?v=7.10.1"
+    "img": "assets/warlords/SHIMAZUY.jpg?v=7.10.2"
   },
   {
     "id": "SUNJIAN",
@@ -1725,9 +1725,9 @@
       "sources": []
     },
     "st": 12,
-    "ew": 12,
-    "hp": 296,
-    "atk": 106,
+    "ew": 14,
+    "hp": 304,
+    "atk": 112,
     "def": 0.24,
     "skill": {
       "name": "江東猛虎",
@@ -1742,7 +1742,7 @@
     "origin": "中國 · 東漢末",
     "weapon": "古錠刀 + 虎頭戰盔",
     "sfx": "blade_clash",
-    "img": "assets/warlords/SUNJIAN.jpg?v=7.10.1"
+    "img": "assets/warlords/SUNJIAN.jpg?v=7.10.2"
   },
   {
     "id": "GYEBAEK",
@@ -1762,9 +1762,9 @@
       "sources": []
     },
     "st": 8,
-    "ew": 6,
-    "hp": 168,
-    "atk": 50,
+    "ew": 12,
+    "hp": 184,
+    "atk": 68,
     "def": 0.23,
     "skill": {
       "name": "黃山伐決死",
@@ -1780,7 +1780,7 @@
     "origin": "韓國 · 百濟",
     "weapon": "百濟環首大刀 + 鐵鱗背心",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GYEBAEK.jpg?v=7.10.1"
+    "img": "assets/warlords/GYEBAEK.jpg?v=7.10.2"
   },
   {
     "id": "YANGYE",
@@ -1802,9 +1802,9 @@
       "sources": []
     },
     "st": 10,
-    "ew": 14,
-    "hp": 208,
-    "atk": 68,
+    "ew": 16,
+    "hp": 222,
+    "atk": 82,
     "def": 0.24,
     "skill": {
       "name": "金刀楊無敵",
@@ -1821,7 +1821,7 @@
     "origin": "中國 · 北宋",
     "weapon": "九環金刀 + 雁門重甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YANGYE.jpg?v=7.10.1"
+    "img": "assets/warlords/YANGYE.jpg?v=7.10.2"
   },
   {
     "id": "CAOREN",
@@ -1844,9 +1844,9 @@
       "sources": []
     },
     "st": 8,
-    "ew": 16,
-    "hp": 212,
-    "atk": 64,
+    "ew": 18,
+    "hp": 228,
+    "atk": 76,
     "def": 0.26,
     "skill": {
       "name": "樊城天人",
@@ -1861,7 +1861,7 @@
     "origin": "中國 · 三國",
     "weapon": "重鋼大盾 + 短刃佩刀",
     "sfx": "war_drum",
-    "img": "assets/warlords/CAOREN.jpg?v=7.10.1"
+    "img": "assets/warlords/CAOREN.jpg?v=7.10.2"
   },
   {
     "id": "ZHOUTAI",
@@ -1882,9 +1882,9 @@
       "sources": []
     },
     "st": 8,
-    "ew": 4,
-    "hp": 170,
-    "atk": 52,
+    "ew": 10,
+    "hp": 188,
+    "atk": 70,
     "def": 0.22,
     "skill": {
       "name": "膚如刻畫",
@@ -1900,7 +1900,7 @@
     "origin": "中國 · 三國",
     "weapon": "截頭厚刃刀 + 肉盾鐵軀",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHOUTAI.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHOUTAI.jpg?v=7.10.2"
   },
   {
     "id": "IINAOMASA",
@@ -1922,10 +1922,10 @@
       "sources": []
     },
     "st": 12,
-    "ew": 10,
-    "hp": 206,
-    "atk": 68,
-    "def": 0.23,
+    "ew": 14,
+    "hp": 254,
+    "atk": 94,
+    "def": 0.24,
     "skill": {
       "name": "井伊赤鬼",
       "phase": "P3",
@@ -1939,7 +1939,7 @@
     "origin": "日本 · 戰國",
     "weapon": "朱漆大槍 + 金箔天衝脇立",
     "sfx": "blade_clash",
-    "img": "assets/warlords/IINAOMASA.jpg?v=7.10.1"
+    "img": "assets/warlords/IINAOMASA.jpg?v=7.10.2"
   },
   {
     "id": "KATOKIYOMASA",
@@ -1960,9 +1960,9 @@
       "sources": []
     },
     "st": 8,
-    "ew": 8,
-    "hp": 170,
-    "atk": 52,
+    "ew": 12,
+    "hp": 186,
+    "atk": 68,
     "def": 0.23,
     "skill": {
       "name": "肥後虎之壘",
@@ -1978,7 +1978,7 @@
     "origin": "日本 · 戰國",
     "weapon": "片鎌槍 + 長烏帽子形兜",
     "sfx": "blade_clash",
-    "img": "assets/warlords/KATOKIYOMASA.jpg?v=7.10.1"
+    "img": "assets/warlords/KATOKIYOMASA.jpg?v=7.10.2"
   },
   {
     "id": "YUJIN",
@@ -1999,9 +1999,9 @@
       "sources": []
     },
     "st": 8,
-    "ew": 14,
-    "hp": 170,
-    "atk": 50,
+    "ew": 16,
+    "hp": 186,
+    "atk": 66,
     "def": 0.24,
     "skill": {
       "name": "毅重假節",
@@ -2017,7 +2017,7 @@
     "origin": "中國 · 三國",
     "weapon": "鐵環長刀 + 堅木大盾",
     "sfx": "war_drum",
-    "img": "assets/warlords/YUJIN.jpg?v=7.10.1"
+    "img": "assets/warlords/YUJIN.jpg?v=7.10.2"
   },
   {
     "id": "LIGUANG",
@@ -2041,8 +2041,8 @@
     },
     "st": 18,
     "ew": 22,
-    "hp": 256,
-    "atk": 132,
+    "hp": 260,
+    "atk": 138,
     "def": 0.06,
     "skill": {
       "name": "射石沒羽",
@@ -2058,7 +2058,7 @@
     "origin": "中國 · 西漢",
     "weapon": "漢家雕弓 + 白羽穿甲箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/LIGUANG.jpg?v=7.10.1"
+    "img": "assets/warlords/LIGUANG.jpg?v=7.10.2"
   },
   {
     "id": "YANGYOUJI",
@@ -2082,8 +2082,8 @@
     },
     "st": 18,
     "ew": 20,
-    "hp": 252,
-    "atk": 136,
+    "hp": 256,
+    "atk": 142,
     "def": 0.08,
     "skill": {
       "name": "百步穿楊",
@@ -2099,7 +2099,7 @@
     "origin": "中國 · 春秋",
     "weapon": "穿楊神弓 + 七札破甲箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/YANGYOUJI.jpg?v=7.10.1"
+    "img": "assets/warlords/YANGYOUJI.jpg?v=7.10.2"
   },
   {
     "id": "NOBUNAGA",
@@ -2124,8 +2124,8 @@
     },
     "st": 16,
     "ew": 28,
-    "hp": 250,
-    "atk": 132,
+    "hp": 256,
+    "atk": 136,
     "def": 0.06,
     "skill": {
       "name": "長篠三段擊",
@@ -2143,7 +2143,7 @@
     "origin": "日本 · 戰國",
     "weapon": "南蠻鐵砲火銃 + 織田木瓜旗",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/NOBUNAGA.jpg?v=7.10.1"
+    "img": "assets/warlords/NOBUNAGA.jpg?v=7.10.2"
   },
   {
     "id": "YOICHI",
@@ -2166,9 +2166,9 @@
       "sources": []
     },
     "st": 18,
-    "ew": 16,
-    "hp": 198,
-    "atk": 106,
+    "ew": 18,
+    "hp": 206,
+    "atk": 114,
     "def": 0.04,
     "skill": {
       "name": "屋島扇之的",
@@ -2184,7 +2184,7 @@
     "origin": "日本 · 源平",
     "weapon": "滋野籐弓 + 白羽神箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/YOICHI.jpg?v=7.10.1"
+    "img": "assets/warlords/YOICHI.jpg?v=7.10.2"
   },
   {
     "id": "JUMONG",
@@ -2209,8 +2209,8 @@
     },
     "st": 18,
     "ew": 22,
-    "hp": 252,
-    "atk": 130,
+    "hp": 258,
+    "atk": 136,
     "def": 0.06,
     "skill": {
       "name": "東明神矢",
@@ -2225,7 +2225,7 @@
     "origin": "韓國 · 高句麗",
     "weapon": "高句麗神弓 + 鹿角箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/JUMONG.jpg?v=7.10.1"
+    "img": "assets/warlords/JUMONG.jpg?v=7.10.2"
   },
   {
     "id": "HUANGZHONG",
@@ -2248,9 +2248,9 @@
       "sources": []
     },
     "st": 14,
-    "ew": 14,
-    "hp": 204,
-    "atk": 108,
+    "ew": 16,
+    "hp": 212,
+    "atk": 114,
     "def": 0.05,
     "skill": {
       "name": "定軍神弦",
@@ -2265,7 +2265,7 @@
     "origin": "中國 · 三國",
     "weapon": "鐵胎寶弓 + 鳳嘴刀",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/HUANGZHONG.jpg?v=7.10.1"
+    "img": "assets/warlords/HUANGZHONG.jpg?v=7.10.2"
   },
   {
     "id": "TAISHICI",
@@ -2287,9 +2287,9 @@
       "sources": []
     },
     "st": 14,
-    "ew": 12,
-    "hp": 166,
-    "atk": 88,
+    "ew": 14,
+    "hp": 174,
+    "atk": 96,
     "def": 0.06,
     "skill": {
       "name": "猿臂貫手",
@@ -2304,7 +2304,7 @@
     "origin": "中國 · 三國",
     "weapon": "狂歌戟 + 穿甲大黃弓",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/TAISHICI.jpg?v=7.10.1"
+    "img": "assets/warlords/TAISHICI.jpg?v=7.10.2"
   },
   {
     "id": "HANSHIZHONG",
@@ -2325,9 +2325,9 @@
       "sources": []
     },
     "st": 14,
-    "ew": 20,
-    "hp": 204,
-    "atk": 104,
+    "ew": 22,
+    "hp": 212,
+    "atk": 112,
     "def": 0.06,
     "skill": {
       "name": "克敵神弓",
@@ -2342,7 +2342,7 @@
     "origin": "中國 · 南宋",
     "weapon": "克敵勁弩 + 倒馬長槍",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/HANSHIZHONG.jpg?v=7.10.1"
+    "img": "assets/warlords/HANSHIZHONG.jpg?v=7.10.2"
   },
   {
     "id": "LIMU",
@@ -2367,8 +2367,8 @@
     },
     "st": 20,
     "ew": 34,
-    "hp": 258,
-    "atk": 132,
+    "hp": 264,
+    "atk": 136,
     "def": 0.08,
     "skill": {
       "name": "代郡萬弩",
@@ -2386,7 +2386,7 @@
     "origin": "中國 · 戰國",
     "weapon": "趙國鐵角硬弓 + 破甲箭陣",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/LIMU.jpg?v=7.10.1"
+    "img": "assets/warlords/LIMU.jpg?v=7.10.2"
   },
   {
     "id": "AKECHI",
@@ -2407,9 +2407,9 @@
       "sources": []
     },
     "st": 18,
-    "ew": 22,
-    "hp": 162,
-    "atk": 86,
+    "ew": 24,
+    "hp": 170,
+    "atk": 92,
     "def": 0.04,
     "skill": {
       "name": "本能寺雷火",
@@ -2424,7 +2424,7 @@
     "origin": "日本 · 戰國",
     "weapon": "名銃備前鐵砲 + 桔梗紋旗",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/AKECHI.jpg?v=7.10.1"
+    "img": "assets/warlords/AKECHI.jpg?v=7.10.2"
   },
   {
     "id": "SAIKA",
@@ -2448,9 +2448,9 @@
       "sources": []
     },
     "st": 20,
-    "ew": 16,
-    "hp": 162,
-    "atk": 88,
+    "ew": 18,
+    "hp": 170,
+    "atk": 94,
     "def": 0.04,
     "skill": {
       "name": "八咫烏銃擊",
@@ -2468,7 +2468,7 @@
     "origin": "日本 · 戰國",
     "weapon": "三連發火繩銃 + 八咫烏標記",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/SAIKA.jpg?v=7.10.1"
+    "img": "assets/warlords/SAIKA.jpg?v=7.10.2"
   },
   {
     "id": "YANGMANCHUN",
@@ -2489,9 +2489,9 @@
       "sources": []
     },
     "st": 14,
-    "ew": 14,
-    "hp": 132,
-    "atk": 68,
+    "ew": 16,
+    "hp": 142,
+    "atk": 78,
     "def": 0.06,
     "skill": {
       "name": "安市挽弓",
@@ -2506,7 +2506,7 @@
     "origin": "韓國 · 高句麗",
     "weapon": "高句麗城防硬角弓 + 火弩",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/YANGMANCHUN.jpg?v=7.10.1"
+    "img": "assets/warlords/YANGMANCHUN.jpg?v=7.10.2"
   },
   {
     "id": "HULUGUANG",
@@ -2529,8 +2529,8 @@
     },
     "st": 16,
     "ew": 24,
-    "hp": 202,
-    "atk": 106,
+    "hp": 210,
+    "atk": 112,
     "def": 0.06,
     "skill": {
       "name": "落雕都督",
@@ -2548,7 +2548,7 @@
     "origin": "中國 · 南北朝",
     "weapon": "黑角落雕強弓 + 鐵羽鑿子箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/HULUGUANG.jpg?v=7.10.1"
+    "img": "assets/warlords/HULUGUANG.jpg?v=7.10.2"
   },
   {
     "id": "ZHANGHE",
@@ -2573,9 +2573,9 @@
       ]
     },
     "st": 22,
-    "ew": 20,
-    "hp": 166,
-    "atk": 86,
+    "ew": 22,
+    "hp": 174,
+    "atk": 94,
     "def": 0.06,
     "skill": {
       "name": "街亭斷汲",
@@ -2592,7 +2592,7 @@
     "origin": "中國 · 三國",
     "weapon": "巧變長弓 + 綠沉槍",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/ZHANGHE.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHANGHE.jpg?v=7.10.2"
   },
   {
     "id": "ZHOUYAFU",
@@ -2617,8 +2617,8 @@
     },
     "st": 16,
     "ew": 30,
-    "hp": 206,
-    "atk": 102,
+    "hp": 214,
+    "atk": 110,
     "def": 0.08,
     "skill": {
       "name": "細柳堅陣",
@@ -2634,7 +2634,7 @@
     "origin": "中國 · 西漢",
     "weapon": "漢軍武剛弩 + 精鋼大箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/ZHOUYAFU.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHOUYAFU.jpg?v=7.10.2"
   },
   {
     "id": "ZONGZE",
@@ -2655,9 +2655,9 @@
       "sources": []
     },
     "st": 14,
-    "ew": 20,
-    "hp": 134,
-    "atk": 66,
+    "ew": 22,
+    "hp": 144,
+    "atk": 76,
     "def": 0.06,
     "skill": {
       "name": "汴京連弩",
@@ -2675,7 +2675,7 @@
     "origin": "中國 · 南宋",
     "weapon": "連弩機樓 + 宣慰刀",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/ZONGZE.jpg?v=7.10.1"
+    "img": "assets/warlords/ZONGZE.jpg?v=7.10.2"
   },
   {
     "id": "TORII",
@@ -2696,9 +2696,9 @@
       "sources": []
     },
     "st": 12,
-    "ew": 14,
-    "hp": 104,
-    "atk": 50,
+    "ew": 16,
+    "hp": 116,
+    "atk": 60,
     "def": 0.06,
     "skill": {
       "name": "伏見絕唱",
@@ -2714,7 +2714,7 @@
     "origin": "日本 · 戰國",
     "weapon": "三河火繩槍 + 伏見箭矢",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/TORII.jpg?v=7.10.1"
+    "img": "assets/warlords/TORII.jpg?v=7.10.2"
   },
   {
     "id": "CHOIMUSEON",
@@ -2736,9 +2736,9 @@
       "sources": []
     },
     "st": 16,
-    "ew": 18,
-    "hp": 102,
-    "atk": 52,
+    "ew": 20,
+    "hp": 114,
+    "atk": 62,
     "def": 0.04,
     "skill": {
       "name": "火桶神機箭",
@@ -2753,7 +2753,7 @@
     "origin": "韓國 · 高麗",
     "weapon": "走火火箭 + 鎮浦銅砲",
     "sfx": "fire_attack",
-    "img": "assets/warlords/CHOIMUSEON.jpg?v=7.10.1"
+    "img": "assets/warlords/CHOIMUSEON.jpg?v=7.10.2"
   },
   {
     "id": "GENGYAN",
@@ -2774,9 +2774,9 @@
       "sources": []
     },
     "st": 16,
-    "ew": 20,
-    "hp": 132,
-    "atk": 68,
+    "ew": 22,
+    "hp": 142,
+    "atk": 78,
     "def": 0.05,
     "skill": {
       "name": "雲台破齊",
@@ -2792,19 +2792,19 @@
     "origin": "中國 · 東漢",
     "weapon": "雲台強弩 + 破甲箭匣",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/GENGYAN.jpg?v=7.10.1"
+    "img": "assets/warlords/GENGYAN.jpg?v=7.10.2"
   },
   {
-    "id": "PANGJUAN",
-    "name": "龐涓",
+    "id": "YAMAMOTO",
+    "name": "山本勘助",
     "cat": "support",
     "cost": 1,
-    "v": "B",
-    "tag": "魏武上將·馬陵伏誅",
-    "desc": "戰國魏國大將軍，統帥魏武卒征戰諸侯，與孫臏交鋒於桂陵、馬陵，最終中伏敗亡。",
+    "v": "E",
+    "tag": "啄木鳥智謀·晴幸軍師",
+    "desc": "武田信玄首席獨眼軍師，精通城郭築城、奇門陣法與兵略，於川中島合戰獻「啄木鳥戰法」名震戰國。",
     "traits": [
       "EW",
-      "DEEP"
+      "SPOT"
     ],
     "roleFlags": [
       "STRATEGIST"
@@ -2814,25 +2814,31 @@
       "note": "",
       "sources": []
     },
-    "st": 16,
-    "ew": 38,
-    "hp": 106,
-    "atk": 56,
+    "st": 38,
+    "ew": 58,
+    "hp": 116,
+    "atk": 70,
     "def": 0.04,
     "skill": {
-      "name": "桂陵急攻",
-      "phase": "P1",
-      "desc": "P1 開局號令，每戰一次：全軍後續傷害 ×1.04；全軍後續命中 +2 個百分點（同類取最高）。持續效果至戰鬥結束。",
+      "flag": "🇯🇵",
+      "origin": "日本 · 戰國",
+      "weapon": "軍配團扇 + 築城陣圖",
+      "sfx": "strategy_gong",
+      "img": "assets/warlords/YAMAMOTO.jpg?v=7.10.2",
       "effects": {
-        "commandAttack": 0.04,
-        "teamHit": 0.02
-      }
+        "flag": "🇯🇵",
+        "origin": "日本 · 戰國",
+        "weapon": "軍配團扇 + 築城陣圖",
+        "sfx": "strategy_gong",
+        "img": "assets/warlords/YAMAMOTO.jpg?v=7.10.2"
+      },
+      "desc": "undefined 首次命中時，每戰一次：。持續效果至戰鬥結束。"
     },
-    "flag": "🇨🇳",
-    "origin": "中國 · 戰國",
-    "weapon": "魏武卒十二石大弩",
-    "sfx": "arrow_volley",
-    "img": "assets/warlords/PANGJUAN.jpg?v=7.10.1"
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "軍配團扇 + 築城陣圖",
+    "sfx": "strategy_gong",
+    "img": "assets/warlords/YAMAMOTO.jpg?v=7.10.2"
   },
   {
     "id": "FENGYI",
@@ -2855,9 +2861,9 @@
       "sources": []
     },
     "st": 18,
-    "ew": 22,
-    "hp": 132,
-    "atk": 66,
+    "ew": 24,
+    "hp": 142,
+    "atk": 76,
     "def": 0.06,
     "skill": {
       "name": "大樹伏弩",
@@ -2873,7 +2879,7 @@
     "origin": "中國 · 東漢",
     "weapon": "大樹長弓 + 伏射箭列",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/FENGYI.jpg?v=7.10.1"
+    "img": "assets/warlords/FENGYI.jpg?v=7.10.2"
   },
   {
     "id": "ASAKURA_SOT",
@@ -2895,8 +2901,8 @@
     },
     "st": 14,
     "ew": 22,
-    "hp": 130,
-    "atk": 68,
+    "hp": 140,
+    "atk": 76,
     "def": 0.04,
     "skill": {
       "name": "九頭龍銃陣",
@@ -2912,7 +2918,7 @@
     "origin": "日本 · 戰國",
     "weapon": "越前早期火繩銃",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/ASAKURA_SOT.jpg?v=7.10.1"
+    "img": "assets/warlords/ASAKURA_SOT.jpg?v=7.10.2"
   },
   {
     "id": "MATSUNAGA",
@@ -2933,10 +2939,10 @@
       "sources": []
     },
     "st": 16,
-    "ew": 18,
-    "hp": 98,
-    "atk": 52,
-    "def": 0,
+    "ew": 20,
+    "hp": 110,
+    "atk": 62,
+    "def": 0.02,
     "skill": {
       "name": "平蜘蛛爆烈",
       "phase": "P2",
@@ -2950,7 +2956,7 @@
     "origin": "日本 · 戰國",
     "weapon": "南蠻炸藥引線 + 短鐵砲",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/MATSUNAGA.jpg?v=7.10.1"
+    "img": "assets/warlords/MATSUNAGA.jpg?v=7.10.2"
   },
   {
     "id": "TANDAOJI",
@@ -2973,8 +2979,8 @@
     },
     "st": 18,
     "ew": 26,
-    "hp": 168,
-    "atk": 84,
+    "hp": 176,
+    "atk": 92,
     "def": 0.06,
     "skill": {
       "name": "唱籌量沙",
@@ -2990,7 +2996,7 @@
     "origin": "中國 · 南北朝",
     "weapon": "宋軍神臂大弓 + 鐵羽矢",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/TANDAOJI.jpg?v=7.10.1"
+    "img": "assets/warlords/TANDAOJI.jpg?v=7.10.2"
   },
   {
     "id": "KUANGZHANG",
@@ -3011,9 +3017,9 @@
       "sources": []
     },
     "st": 14,
-    "ew": 18,
-    "hp": 102,
-    "atk": 52,
+    "ew": 20,
+    "hp": 114,
+    "atk": 62,
     "def": 0.04,
     "skill": {
       "name": "垂沙破楚",
@@ -3029,7 +3035,7 @@
     "origin": "中國 · 戰國",
     "weapon": "齊國臨淄強弩 + 箭陣纛旗",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/KUANGZHANG.jpg?v=7.10.1"
+    "img": "assets/warlords/KUANGZHANG.jpg?v=7.10.2"
   },
   {
     "id": "HONDA_TADATSUGU",
@@ -3050,10 +3056,10 @@
       "sources": []
     },
     "st": 14,
-    "ew": 14,
-    "hp": 100,
-    "atk": 48,
-    "def": 0.02,
+    "ew": 16,
+    "hp": 114,
+    "atk": 60,
+    "def": 0.04,
     "skill": {
       "name": "三河銃衛",
       "phase": "P2",
@@ -3070,7 +3076,7 @@
     "origin": "日本 · 戰國",
     "weapon": "三河軍制鐵砲 + 火藥袋",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/HONDA_TADATSUGU.jpg?v=7.10.1"
+    "img": "assets/warlords/HONDA_TADATSUGU.jpg?v=7.10.2"
   },
   {
     "id": "ZHOUYU",
@@ -3094,9 +3100,9 @@
       "sources": []
     },
     "st": 24,
-    "ew": 64,
-    "hp": 158,
-    "atk": 88,
+    "ew": 70,
+    "hp": 172,
+    "atk": 92,
     "def": 0.04,
     "skill": {
       "name": "赤壁東風",
@@ -3112,7 +3118,7 @@
     "origin": "中國 · 三國",
     "weapon": "赤壁督軍劍 + 樓船令旗",
     "sfx": "fire_attack",
-    "img": "assets/warlords/ZHOUYU.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHOUYU.jpg?v=7.10.2"
   },
   {
     "id": "YISUNSIN",
@@ -3138,9 +3144,9 @@
       ]
     },
     "st": 84,
-    "ew": 24,
-    "hp": 350,
-    "atk": 132,
+    "ew": 26,
+    "hp": 356,
+    "atk": 136,
     "def": 0.14,
     "skill": {
       "name": "鳴梁扼流",
@@ -3158,7 +3164,7 @@
     "origin": "韓國 · 朝鮮",
     "weapon": "忠武公三尺寶劍 + 龜甲船",
     "sfx": "fire_attack",
-    "img": "assets/warlords/YISUNSIN.jpg?v=7.10.1"
+    "img": "assets/warlords/YISUNSIN.jpg?v=7.10.2"
   },
   {
     "id": "KUKI",
@@ -3181,10 +3187,10 @@
       "note": "",
       "sources": []
     },
-    "st": 32,
-    "ew": 20,
-    "hp": 284,
-    "atk": 108,
+    "st": 34,
+    "ew": 22,
+    "hp": 292,
+    "atk": 114,
     "def": 0.14,
     "skill": {
       "name": "鐵甲船大筒",
@@ -3200,13 +3206,13 @@
     "origin": "日本 · 戰國",
     "weapon": "海賊大太刀 + 安宅鐵甲船",
     "sfx": "war_drum",
-    "img": "assets/warlords/KUKI.jpg?v=7.10.1"
+    "img": "assets/warlords/KUKI.jpg?v=7.10.2"
   },
   {
     "id": "CHOSOKABE",
     "name": "長宗我部元親",
     "cat": "naval",
-    "cost": 3,
+    "cost": 4,
     "v": "F",
     "tag": "土佐之蝠·一領具足",
     "desc": "四國霸主，創立水陸兩棲「一領具足」強襲軍團，橫掃四國，海陸突襲所向披靡。",
@@ -3222,11 +3228,11 @@
       "note": "",
       "sources": []
     },
-    "st": 40,
-    "ew": 22,
-    "hp": 222,
-    "atk": 88,
-    "def": 0.1,
+    "st": 44,
+    "ew": 24,
+    "hp": 286,
+    "atk": 112,
+    "def": 0.11,
     "skill": {
       "name": "一領具足",
       "phase": "P2",
@@ -3240,7 +3246,7 @@
     "origin": "日本 · 戰國",
     "weapon": "長槍 + 一領具足兩棲甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/CHOSOKABE.jpg?v=7.10.1"
+    "img": "assets/warlords/CHOSOKABE.jpg?v=7.10.2"
   },
   {
     "id": "JANGPOGO",
@@ -3262,10 +3268,10 @@
       "note": "",
       "sources": []
     },
-    "st": 32,
+    "st": 34,
     "ew": 24,
-    "hp": 224,
-    "atk": 86,
+    "hp": 234,
+    "atk": 94,
     "def": 0.12,
     "skill": {
       "name": "清海鎮海王",
@@ -3283,7 +3289,7 @@
     "origin": "韓國 · 新羅",
     "weapon": "清海鎮寶刀 + 大海船樓舵",
     "sfx": "war_drum",
-    "img": "assets/warlords/JANGPOGO.jpg?v=7.10.1"
+    "img": "assets/warlords/JANGPOGO.jpg?v=7.10.2"
   },
   {
     "id": "LUMENG",
@@ -3307,9 +3313,9 @@
       "sources": []
     },
     "st": 86,
-    "ew": 32,
-    "hp": 346,
-    "atk": 126,
+    "ew": 34,
+    "hp": 350,
+    "atk": 130,
     "def": 0.12,
     "skill": {
       "name": "白衣渡江",
@@ -3325,13 +3331,13 @@
     "origin": "中國 · 三國",
     "weapon": "白衣偽裝袍 + 吳地雙手劍",
     "sfx": "blade_clash",
-    "img": "assets/warlords/LUMENG.jpg?v=7.10.1"
+    "img": "assets/warlords/LUMENG.jpg?v=7.10.2"
   },
   {
     "id": "GANNING",
     "name": "甘寧",
     "cat": "naval",
-    "cost": 5,
+    "cost": 3,
     "v": "B",
     "tag": "百騎夜襲·錦帆鈴聲",
     "desc": "東吳猛將，頭插鳥羽腰繫銅鈴，濡須之戰親率百名死士夜襲曹操四十萬大營全身而退。",
@@ -3351,8 +3357,8 @@
     },
     "st": 64,
     "ew": 18,
-    "hp": 348,
-    "atk": 134,
+    "hp": 238,
+    "atk": 102,
     "def": 0.12,
     "skill": {
       "name": "百騎劫營",
@@ -3367,7 +3373,7 @@
     "origin": "中國 · 三國",
     "weapon": "短戟飛刀 + 銅鈴錦帆",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GANNING.jpg?v=7.10.1"
+    "img": "assets/warlords/GANNING.jpg?v=7.10.2"
   },
   {
     "id": "HUANGGAI",
@@ -3387,10 +3393,10 @@
       "note": "",
       "sources": []
     },
-    "st": 46,
+    "st": 48,
     "ew": 20,
-    "hp": 220,
-    "atk": 86,
+    "hp": 230,
+    "atk": 94,
     "def": 0.1,
     "skill": {
       "name": "苦肉火船",
@@ -3407,13 +3413,13 @@
     "origin": "中國 · 三國",
     "weapon": "火攻燃引火箭 + 艨艟衝角",
     "sfx": "fire_attack",
-    "img": "assets/warlords/HUANGGAI.jpg?v=7.10.1"
+    "img": "assets/warlords/HUANGGAI.jpg?v=7.10.2"
   },
   {
     "id": "JIANGWEI",
     "name": "姜維",
     "cat": "naval",
-    "cost": 4,
+    "cost": 5,
     "v": "D",
     "tag": "天水麒麟·九伐奇謀",
     "desc": "蜀漢大將軍，諸葛亮親傳弟子，智勇雙全，善出奇兵險道穿插隴右九伐中原，劍閣據險挫敵十萬。",
@@ -3430,11 +3436,11 @@
       "note": "",
       "sources": []
     },
-    "st": 42,
-    "ew": 34,
-    "hp": 278,
-    "atk": 108,
-    "def": 0.12,
+    "st": 46,
+    "ew": 36,
+    "hp": 352,
+    "atk": 132,
+    "def": 0.13,
     "skill": {
       "name": "九伐天水",
       "phase": "P2",
@@ -3449,7 +3455,7 @@
     "origin": "中國 · 三國",
     "weapon": "天水綠沉長槍 + 蜀錦奇兵袍",
     "sfx": "war_drum",
-    "img": "assets/warlords/JIANGWEI.jpg?v=7.10.1"
+    "img": "assets/warlords/JIANGWEI.jpg?v=7.10.2"
   },
   {
     "id": "MURAKAMI",
@@ -3470,10 +3476,10 @@
       "note": "",
       "sources": []
     },
-    "st": 42,
+    "st": 44,
     "ew": 16,
-    "hp": 172,
-    "atk": 72,
+    "hp": 182,
+    "atk": 80,
     "def": 0.08,
     "skill": {
       "name": "能島焙烙玉",
@@ -3488,7 +3494,7 @@
     "origin": "日本 · 戰國",
     "weapon": "焙烙火玉 + 鯨船快櫓",
     "sfx": "fire_attack",
-    "img": "assets/warlords/MURAKAMI.jpg?v=7.10.1"
+    "img": "assets/warlords/MURAKAMI.jpg?v=7.10.2"
   },
   {
     "id": "XIEXUAN",
@@ -3511,10 +3517,10 @@
       "note": "",
       "sources": []
     },
-    "st": 48,
-    "ew": 34,
-    "hp": 354,
-    "atk": 130,
+    "st": 50,
+    "ew": 36,
+    "hp": 360,
+    "atk": 134,
     "def": 0.14,
     "skill": {
       "name": "北府風鶴",
@@ -3529,7 +3535,7 @@
     "origin": "中國 · 兩晉",
     "weapon": "北府精鋼斬馬刀 + 艨艟",
     "sfx": "blade_clash",
-    "img": "assets/warlords/XIEXUAN.jpg?v=7.10.1"
+    "img": "assets/warlords/XIEXUAN.jpg?v=7.10.2"
   },
   {
     "id": "YUYUNWEN",
@@ -3549,10 +3555,10 @@
       "note": "",
       "sources": []
     },
-    "st": 24,
-    "ew": 22,
-    "hp": 116,
-    "atk": 48,
+    "st": 26,
+    "ew": 24,
+    "hp": 128,
+    "atk": 58,
     "def": 0.06,
     "skill": {
       "name": "采石霹靂",
@@ -3569,7 +3575,7 @@
     "origin": "中國 · 南宋",
     "weapon": "采石督師劍 + 海鰍踏浪船",
     "sfx": "fire_attack",
-    "img": "assets/warlords/YUYUNWEN.jpg?v=7.10.1"
+    "img": "assets/warlords/YUYUNWEN.jpg?v=7.10.2"
   },
   {
     "id": "WEIYAN",
@@ -3591,10 +3597,10 @@
       "note": "",
       "sources": []
     },
-    "st": 50,
-    "ew": 18,
-    "hp": 280,
-    "atk": 112,
+    "st": 52,
+    "ew": 20,
+    "hp": 290,
+    "atk": 118,
     "def": 0.12,
     "skill": {
       "name": "子午奇略",
@@ -3609,13 +3615,13 @@
     "origin": "中國 · 三國",
     "weapon": "狂骨環刀 + 伏兵令旗",
     "sfx": "blade_clash",
-    "img": "assets/warlords/WEIYAN.jpg?v=7.10.1"
+    "img": "assets/warlords/WEIYAN.jpg?v=7.10.2"
   },
   {
     "id": "MOURI_MOTO",
     "name": "毛利元就",
     "cat": "naval",
-    "cost": 4,
+    "cost": 5,
     "v": "E",
     "tag": "西國謀神·嚴島水陸奇襲",
     "desc": "日本戰國第一智將，嚴島之戰暴風雨夜水陸奇襲陶晴賢兩萬大軍，三矢之訓一統中國地方。",
@@ -3632,11 +3638,11 @@
       "note": "",
       "sources": []
     },
-    "st": 48,
-    "ew": 36,
-    "hp": 272,
-    "atk": 104,
-    "def": 0.1,
+    "st": 52,
+    "ew": 38,
+    "hp": 346,
+    "atk": 128,
+    "def": 0.12,
     "skill": {
       "name": "三矢嚴島",
       "phase": "P2",
@@ -3651,7 +3657,7 @@
     "origin": "日本 · 戰國",
     "weapon": "一文字太刀 + 村上嚴島樓船",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/MOURI_MOTO.jpg?v=7.10.1"
+    "img": "assets/warlords/MOURI_MOTO.jpg?v=7.10.2"
   },
   {
     "id": "HATTORI",
@@ -3674,10 +3680,10 @@
       "note": "",
       "sources": []
     },
-    "st": 86,
-    "ew": 20,
-    "hp": 264,
-    "atk": 114,
+    "st": 88,
+    "ew": 22,
+    "hp": 274,
+    "atk": 118,
     "def": 0.08,
     "skill": {
       "name": "伊賀影縫",
@@ -3693,7 +3699,7 @@
     "origin": "日本 · 戰國",
     "weapon": "伊賀鎖鎌 + 漆黑忍衣",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HATTORI.jpg?v=7.10.1"
+    "img": "assets/warlords/HATTORI.jpg?v=7.10.2"
   },
   {
     "id": "JEONGJI",
@@ -3713,10 +3719,10 @@
       "note": "",
       "sources": []
     },
-    "st": 28,
-    "ew": 16,
-    "hp": 174,
-    "atk": 68,
+    "st": 30,
+    "ew": 18,
+    "hp": 184,
+    "atk": 76,
     "def": 0.1,
     "skill": {
       "name": "觀音浦斬寇",
@@ -3733,7 +3739,7 @@
     "origin": "韓國 · 高麗",
     "weapon": "高麗火銃銅管 + 海上長矛",
     "sfx": "fire_attack",
-    "img": "assets/warlords/JEONGJI.jpg?v=7.10.1"
+    "img": "assets/warlords/JEONGJI.jpg?v=7.10.2"
   },
   {
     "id": "YUEJIN",
@@ -3755,10 +3761,10 @@
       "note": "",
       "sources": []
     },
-    "st": 32,
+    "st": 34,
     "ew": 18,
-    "hp": 224,
-    "atk": 90,
+    "hp": 234,
+    "atk": 98,
     "def": 0.12,
     "skill": {
       "name": "無堅不陷",
@@ -3773,7 +3779,7 @@
     "origin": "中國 · 三國",
     "weapon": "短柄破城大斧 + 先登飛爪",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YUEJIN.jpg?v=7.10.1"
+    "img": "assets/warlords/YUEJIN.jpg?v=7.10.2"
   },
   {
     "id": "MENGHUO",
@@ -3795,10 +3801,10 @@
       "note": "",
       "sources": []
     },
-    "st": 45,
-    "ew": 10,
-    "hp": 124,
-    "atk": 56,
+    "st": 46,
+    "ew": 12,
+    "hp": 138,
+    "atk": 66,
     "def": 0.08,
     "skill": {
       "name": "南中藤甲象",
@@ -3814,7 +3820,7 @@
     "origin": "中國 · 三國",
     "weapon": "南中神木三叉戟 + 獸皮生藤甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/MENGHUO.jpg?v=7.10.1"
+    "img": "assets/warlords/MENGHUO.jpg?v=7.10.2"
   },
   {
     "id": "DINGFENG",
@@ -3834,10 +3840,10 @@
       "note": "",
       "sources": []
     },
-    "st": 48,
+    "st": 50,
     "ew": 18,
-    "hp": 220,
-    "atk": 88,
+    "hp": 230,
+    "atk": 96,
     "def": 0.1,
     "skill": {
       "name": "雪中奮短兵",
@@ -3852,13 +3858,13 @@
     "origin": "中國 · 三國",
     "weapon": "雪夜白刃 + 短皮小盾",
     "sfx": "blade_clash",
-    "img": "assets/warlords/DINGFENG.jpg?v=7.10.1"
+    "img": "assets/warlords/DINGFENG.jpg?v=7.10.2"
   },
   {
     "id": "XUHUANG",
     "name": "徐晃",
     "cat": "naval",
-    "cost": 5,
+    "cost": 4,
     "v": "D",
     "tag": "長驅直入·聲東破陣",
     "desc": "曹魏五子良將，樊城之戰聲東擊西長驅直入大破關羽四塚連營，曹操讚其「有周亞夫之風，長驅直入古今未有」。",
@@ -3877,8 +3883,8 @@
     },
     "st": 36,
     "ew": 24,
-    "hp": 356,
-    "atk": 132,
+    "hp": 296,
+    "atk": 116,
     "def": 0.14,
     "skill": {
       "name": "長驅破十屯",
@@ -3893,7 +3899,7 @@
     "origin": "中國 · 三國",
     "weapon": "宣花開山大斧 + 破陣鎧",
     "sfx": "heavy_strike",
-    "img": "assets/warlords/XUHUANG.jpg?v=7.10.1"
+    "img": "assets/warlords/XUHUANG.jpg?v=7.10.2"
   },
   {
     "id": "WAKIZAKA",
@@ -3912,10 +3918,10 @@
       "note": "",
       "sources": []
     },
-    "st": 28,
-    "ew": 14,
-    "hp": 116,
-    "atk": 52,
+    "st": 30,
+    "ew": 16,
+    "hp": 128,
+    "atk": 62,
     "def": 0.06,
     "skill": {
       "name": "淡路快船",
@@ -3930,7 +3936,7 @@
     "origin": "日本 · 戰國",
     "weapon": "賤岳長槍 + 淡路戰船",
     "sfx": "blade_clash",
-    "img": "assets/warlords/WAKIZAKA.jpg?v=7.10.1"
+    "img": "assets/warlords/WAKIZAKA.jpg?v=7.10.2"
   },
   {
     "id": "TOUDO",
@@ -3950,10 +3956,10 @@
       "note": "",
       "sources": []
     },
-    "st": 24,
-    "ew": 18,
-    "hp": 118,
-    "atk": 50,
+    "st": 26,
+    "ew": 20,
+    "hp": 130,
+    "atk": 60,
     "def": 0.08,
     "skill": {
       "name": "水城改築",
@@ -3969,7 +3975,7 @@
     "origin": "日本 · 戰國",
     "weapon": "築城大銃 + 水軍旗艦",
     "sfx": "war_drum",
-    "img": "assets/warlords/TOUDO.jpg?v=7.10.1"
+    "img": "assets/warlords/TOUDO.jpg?v=7.10.2"
   },
   {
     "id": "SHAMOKE",
@@ -3989,10 +3995,10 @@
       "note": "",
       "sources": []
     },
-    "st": 48,
-    "ew": 10,
-    "hp": 120,
-    "atk": 56,
+    "st": 50,
+    "ew": 12,
+    "hp": 134,
+    "atk": 66,
     "def": 0.06,
     "skill": {
       "name": "鐵蒺藜骨朵",
@@ -4008,7 +4014,7 @@
     "origin": "中國 · 三國",
     "weapon": "鐵蒺藜骨朵 + 蠻夷硬角弓",
     "sfx": "blade_clash",
-    "img": "assets/warlords/SHAMOKE.jpg?v=7.10.1"
+    "img": "assets/warlords/SHAMOKE.jpg?v=7.10.2"
   },
   {
     "id": "HEQI",
@@ -4028,10 +4034,10 @@
       "note": "",
       "sources": []
     },
-    "st": 32,
+    "st": 34,
     "ew": 18,
-    "hp": 176,
-    "atk": 70,
+    "hp": 186,
+    "atk": 78,
     "def": 0.1,
     "skill": {
       "name": "艨艟丹陽甲",
@@ -4049,7 +4055,7 @@
     "origin": "中國 · 三國",
     "weapon": "精鋼短戟 + 先登皮鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HEQI.jpg?v=7.10.1"
+    "img": "assets/warlords/HEQI.jpg?v=7.10.2"
   },
   {
     "id": "CAOBIN",
@@ -4069,10 +4075,10 @@
       "note": "",
       "sources": []
     },
-    "st": 28,
-    "ew": 24,
-    "hp": 176,
-    "atk": 64,
+    "st": 30,
+    "ew": 26,
+    "hp": 186,
+    "atk": 72,
     "def": 0.1,
     "skill": {
       "name": "浮橋平江南",
@@ -4088,7 +4094,7 @@
     "origin": "中國 · 北宋",
     "weapon": "北宋大纛軍刀 + 浮橋長索",
     "sfx": "war_drum",
-    "img": "assets/warlords/CAOBIN.jpg?v=7.10.1"
+    "img": "assets/warlords/CAOBIN.jpg?v=7.10.2"
   },
   {
     "id": "ZHUGELIANG",
@@ -4111,11 +4117,11 @@
       "note": "",
       "sources": []
     },
-    "st": 12,
-    "ew": 80,
-    "hp": 224,
-    "atk": 94,
-    "def": 0,
+    "st": 16,
+    "ew": 84,
+    "hp": 230,
+    "atk": 96,
+    "def": 0.04,
     "skill": {
       "name": "八陣通神",
       "phase": "P1",
@@ -4130,7 +4136,7 @@
     "origin": "中國 · 三國",
     "weapon": "羽扇綸巾 + 諸葛八陣圖",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/ZHUGELIANG.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHUGELIANG.jpg?v=7.10.2"
   },
   {
     "id": "HANXIN",
@@ -4157,9 +4163,9 @@
       ]
     },
     "st": 86,
-    "ew": 80,
-    "hp": 222,
-    "atk": 116,
+    "ew": 82,
+    "hp": 228,
+    "atk": 118,
     "def": 0.04,
     "skill": {
       "name": "十面埋伏",
@@ -4175,7 +4181,7 @@
     "origin": "中國 · 楚漢",
     "weapon": "兵仙令劍 + 十面埋伏陣",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HANXIN.jpg?v=7.10.1"
+    "img": "assets/warlords/HANXIN.jpg?v=7.10.2"
   },
   {
     "id": "ZHANGLIANG",
@@ -4197,10 +4203,10 @@
       "note": "",
       "sources": []
     },
-    "st": 20,
-    "ew": 79,
-    "hp": 220,
-    "atk": 90,
+    "st": 22,
+    "ew": 83,
+    "hp": 226,
+    "atk": 92,
     "def": 0.04,
     "skill": {
       "name": "運籌千里",
@@ -4215,13 +4221,13 @@
     "origin": "中國 · 漢朝",
     "weapon": "太公兵法卷軸 + 漢印佩玉",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/ZHANGLIANG.jpg?v=7.10.1"
+    "img": "assets/warlords/ZHANGLIANG.jpg?v=7.10.2"
   },
   {
     "id": "SIMAYI",
     "name": "司馬懿",
     "cat": "support",
-    "cost": 4,
+    "cost": 3,
     "v": "D",
     "tag": "鷹視狼顧·深謀待時",
     "desc": "曹魏太傅，深沉有度深謀遠慮，熬死諸葛亮、平定遼東，為晉朝開國奠定基業。",
@@ -4239,8 +4245,8 @@
       "sources": []
     },
     "st": 24,
-    "ew": 69,
-    "hp": 180,
+    "ew": 70,
+    "hp": 176,
     "atk": 90,
     "def": 0.06,
     "skill": {
@@ -4257,13 +4263,13 @@
     "origin": "中國 · 三國",
     "weapon": "宣帝佩劍 + 陣列令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SIMAYI.jpg?v=7.10.1"
+    "img": "assets/warlords/SIMAYI.jpg?v=7.10.2"
   },
   {
     "id": "TOYOTOMI",
     "name": "豐臣秀吉",
     "cat": "support",
-    "cost": 3,
+    "cost": 4,
     "v": "E",
     "tag": "太閤天下·統一大將",
     "desc": "戰國三傑之一，從織田信長麾下崛起，經多場戰事完成日本大部分地區統一；其軍事才能以統帥與調度見長。",
@@ -4279,11 +4285,11 @@
       "note": "",
       "sources": []
     },
-    "st": 22,
-    "ew": 58,
-    "hp": 156,
-    "atk": 82,
-    "def": 0.04,
+    "st": 24,
+    "ew": 73,
+    "hp": 198,
+    "atk": 96,
+    "def": 0.05,
     "skill": {
       "name": "中國大返還",
       "phase": "P1",
@@ -4297,7 +4303,7 @@
     "origin": "日本 · 戰國",
     "weapon": "采配 + 陣太刀",
     "sfx": "war_drum",
-    "img": "assets/warlords/TOYOTOMI.jpg?v=7.10.1"
+    "img": "assets/warlords/TOYOTOMI.jpg?v=7.10.2"
   },
   {
     "id": "CAOCAO",
@@ -4321,9 +4327,9 @@
       "sources": []
     },
     "st": 36,
-    "ew": 70,
-    "hp": 184,
-    "atk": 96,
+    "ew": 75,
+    "hp": 204,
+    "atk": 102,
     "def": 0.06,
     "skill": {
       "name": "孟德新書",
@@ -4339,13 +4345,13 @@
     "origin": "中國 · 東漢末／三國",
     "weapon": "環首刀 + 丞相令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/CAOCAO.jpg?v=7.10.1"
+    "img": "assets/warlords/CAOCAO.jpg?v=7.10.2"
   },
   {
     "id": "HANBEI",
     "name": "竹中半兵衛",
     "cat": "support",
-    "cost": 3,
+    "cost": 2,
     "v": "F",
     "tag": "今孔明·十人奪城",
     "desc": "戰國天才軍師，僅帶十六名隨從便智奪固若金湯之稻葉山城，輔佐豐臣秀吉天下布武。",
@@ -4362,9 +4368,9 @@
       "sources": []
     },
     "st": 26,
-    "ew": 61,
-    "hp": 152,
-    "atk": 80,
+    "ew": 63,
+    "hp": 140,
+    "atk": 76,
     "def": 0.04,
     "skill": {
       "name": "十人奪城",
@@ -4379,13 +4385,13 @@
     "origin": "日本 · 戰國",
     "weapon": "竹中軍配 + 一之谷形兜",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/HANBEI.jpg?v=7.10.1"
+    "img": "assets/warlords/HANBEI.jpg?v=7.10.2"
   },
   {
     "id": "KANBEI",
     "name": "黑田官兵衛",
     "cat": "support",
-    "cost": 4,
+    "cost": 3,
     "v": "G",
     "tag": "如水大謀·天下二兵衛",
     "desc": "戰國頂級軍略家，高松城水攻、中國大返還之總策劃者，智謀令豐臣秀吉亦為之忌憚。",
@@ -4403,9 +4409,9 @@
       "sources": []
     },
     "st": 28,
-    "ew": 70,
-    "hp": 176,
-    "atk": 92,
+    "ew": 69,
+    "hp": 168,
+    "atk": 88,
     "def": 0.04,
     "skill": {
       "name": "如水奇策",
@@ -4421,13 +4427,13 @@
     "origin": "日本 · 戰國",
     "weapon": "合子形兜 + 水攻策圖卷",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/KANBEI.jpg?v=7.10.1"
+    "img": "assets/warlords/KANBEI.jpg?v=7.10.2"
   },
   {
     "id": "SUNBIN",
     "name": "孫臏",
     "cat": "support",
-    "cost": 4,
+    "cost": 3,
     "v": "A",
     "tag": "圍魏救趙·馬陵道伏兵",
     "desc": "戰國兵家宗師，著《孫臏兵法》，桂陵之戰圍魏救趙、馬陵之戰減灶誘敵射殺龐涓。",
@@ -4446,8 +4452,8 @@
     },
     "st": 28,
     "ew": 72,
-    "hp": 178,
-    "atk": 94,
+    "hp": 174,
+    "atk": 92,
     "def": 0.04,
     "skill": {
       "name": "圍魏救趙",
@@ -4462,7 +4468,7 @@
     "origin": "中國 · 戰國",
     "weapon": "孫臏兵法木牘 + 獨輪戰車",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SUNBIN.jpg?v=7.10.1"
+    "img": "assets/warlords/SUNBIN.jpg?v=7.10.2"
   },
   {
     "id": "WUQI",
@@ -4487,9 +4493,9 @@
       "sources": []
     },
     "st": 26,
-    "ew": 78,
-    "hp": 224,
-    "atk": 102,
+    "ew": 80,
+    "hp": 228,
+    "atk": 106,
     "def": 0.06,
     "skill": {
       "name": "吳子魏武卒",
@@ -4505,7 +4511,7 @@
     "origin": "中國 · 戰國",
     "weapon": "吳子兵書 + 魏武卒精矛",
     "sfx": "war_drum",
-    "img": "assets/warlords/WUQI.jpg?v=7.10.1"
+    "img": "assets/warlords/WUQI.jpg?v=7.10.2"
   },
   {
     "id": "GUOJIA",
@@ -4528,10 +4534,10 @@
       "sources": []
     },
     "st": 36,
-    "ew": 50,
-    "hp": 128,
-    "atk": 70,
-    "def": 0,
+    "ew": 66,
+    "hp": 140,
+    "atk": 78,
+    "def": 0.02,
     "skill": {
       "name": "十勝遺計",
       "phase": "P1",
@@ -4545,7 +4551,7 @@
     "origin": "中國 · 三國",
     "weapon": "十勝十敗論卷 + 謀士羽扇",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/GUOJIA.jpg?v=7.10.1"
+    "img": "assets/warlords/GUOJIA.jpg?v=7.10.2"
   },
   {
     "id": "XUNYU",
@@ -4568,9 +4574,9 @@
       "sources": []
     },
     "st": 30,
-    "ew": 50,
-    "hp": 130,
-    "atk": 68,
+    "ew": 66,
+    "hp": 144,
+    "atk": 76,
     "def": 0.04,
     "skill": {
       "name": "王佐居中",
@@ -4586,7 +4592,7 @@
     "origin": "中國 · 三國",
     "weapon": "王佐印信 + 荀氏家傳竹簡",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/XUNYU.jpg?v=7.10.1"
+    "img": "assets/warlords/XUNYU.jpg?v=7.10.2"
   },
   {
     "id": "JIAXU",
@@ -4609,10 +4615,10 @@
       "sources": []
     },
     "st": 42,
-    "ew": 42,
-    "hp": 104,
-    "atk": 54,
-    "def": 0,
+    "ew": 60,
+    "hp": 118,
+    "atk": 72,
+    "def": 0.02,
     "skill": {
       "name": "毒士亂武",
       "phase": "P1",
@@ -4626,13 +4632,13 @@
     "origin": "中國 · 三國",
     "weapon": "離間策書 + 毒士算籌",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/JIAXU.jpg?v=7.10.1"
+    "img": "assets/warlords/JIAXU.jpg?v=7.10.2"
   },
   {
     "id": "LUXUN",
     "name": "陸遜",
     "cat": "support",
-    "cost": 2,
+    "cost": 3,
     "v": "F",
     "tag": "火燒連營·夷陵破蜀",
     "desc": "東吳大都督，白面書生深藏不露，夷陵之戰後發制人，一把火燒連營七百里擊潰劉備。",
@@ -4650,9 +4656,9 @@
       "sources": []
     },
     "st": 32,
-    "ew": 48,
-    "hp": 128,
-    "atk": 72,
+    "ew": 71,
+    "hp": 174,
+    "atk": 94,
     "def": 0.04,
     "skill": {
       "name": "火燒連營",
@@ -4667,7 +4673,7 @@
     "origin": "中國 · 三國",
     "weapon": "夷陵火計箭符 + 吳都督佩劍",
     "sfx": "fire_attack",
-    "img": "assets/warlords/LUXUN.jpg?v=7.10.1"
+    "img": "assets/warlords/LUXUN.jpg?v=7.10.2"
   },
   {
     "id": "SHIMAZU_YOSHIHISA",
@@ -4690,9 +4696,9 @@
       "sources": []
     },
     "st": 24,
-    "ew": 38,
-    "hp": 104,
-    "atk": 52,
+    "ew": 56,
+    "hp": 118,
+    "atk": 68,
     "def": 0.04,
     "skill": {
       "name": "薩摩釣野伏",
@@ -4708,13 +4714,13 @@
     "origin": "日本 · 戰國",
     "weapon": "采配 + 島津家旗印",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SHIMAZU_YOSHIHISA.jpg?v=7.10.1"
+    "img": "assets/warlords/SHIMAZU_YOSHIHISA.jpg?v=7.10.2"
   },
   {
     "id": "PANGTONG",
     "name": "龐統",
     "cat": "support",
-    "cost": 3,
+    "cost": 2,
     "v": "A",
     "tag": "鳳雛奇策·連環上策",
     "desc": "劉備軍師，與諸葛亮並稱「伏龍鳳雛」，入蜀大戰獻上中下三策，親臨戰陣指揮破敵。",
@@ -4732,9 +4738,9 @@
       "sources": []
     },
     "st": 24,
-    "ew": 60,
-    "hp": 156,
-    "atk": 84,
+    "ew": 64,
+    "hp": 142,
+    "atk": 82,
     "def": 0.06,
     "skill": {
       "name": "鳳雛連環",
@@ -4750,7 +4756,7 @@
     "origin": "中國 · 三國",
     "weapon": "鳳雛連環策 + 青銅短劍",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/PANGTONG.jpg?v=7.10.1"
+    "img": "assets/warlords/PANGTONG.jpg?v=7.10.2"
   },
   {
     "id": "FAZHENG",
@@ -4773,10 +4779,10 @@
       "note": "",
       "sources": []
     },
-    "st": 20,
-    "ew": 40,
-    "hp": 104,
-    "atk": 54,
+    "st": 22,
+    "ew": 59,
+    "hp": 118,
+    "atk": 74,
     "def": 0.04,
     "skill": {
       "name": "定軍奇畫",
@@ -4791,13 +4797,13 @@
     "origin": "中國 · 三國",
     "weapon": "定軍指旗 + 蜀川圖誌",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/FAZHENG.jpg?v=7.10.1"
+    "img": "assets/warlords/FAZHENG.jpg?v=7.10.2"
   },
   {
     "id": "SANADAMASA",
     "name": "真田昌幸",
     "cat": "support",
-    "cost": 3,
+    "cost": 1,
     "v": "F",
     "tag": "表裏比興·上田鬼謀",
     "desc": "真田幸村之父，以極小之上田城兩度挫敗德川數萬大軍，連豐臣秀吉亦嘆其為「表裏比興之者」。",
@@ -4815,8 +4821,8 @@
     },
     "st": 30,
     "ew": 59,
-    "hp": 154,
-    "atk": 82,
+    "hp": 118,
+    "atk": 72,
     "def": 0.06,
     "skill": {
       "name": "表裏比興",
@@ -4832,7 +4838,7 @@
     "origin": "日本 · 戰國",
     "weapon": "上田城地圖 + 誘敵令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SANADAMASA.jpg?v=7.10.1"
+    "img": "assets/warlords/SANADAMASA.jpg?v=7.10.2"
   },
   {
     "id": "LUSU",
@@ -4855,9 +4861,9 @@
       "sources": []
     },
     "st": 24,
-    "ew": 52,
-    "hp": 132,
-    "atk": 68,
+    "ew": 65,
+    "hp": 146,
+    "atk": 76,
     "def": 0.04,
     "skill": {
       "name": "榻上宏圖",
@@ -4873,7 +4879,7 @@
     "origin": "中國 · 三國",
     "weapon": "榻上策竹簡 + 結盟令劍",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/LUSU.jpg?v=7.10.1"
+    "img": "assets/warlords/LUSU.jpg?v=7.10.2"
   },
   {
     "id": "TIANDAN",
@@ -4895,10 +4901,10 @@
         "https://en.wikipedia.org/wiki/Tian_Dan"
       ]
     },
-    "st": 44,
+    "st": 46,
     "ew": 24,
-    "hp": 170,
-    "atk": 68,
+    "hp": 180,
+    "atk": 74,
     "def": 0.08,
     "skill": {
       "name": "即墨火牛陣",
@@ -4913,13 +4919,13 @@
     "origin": "中國 · 戰國",
     "weapon": "火牛蘆葦火把 + 衝角雙刃",
     "sfx": "fire_attack",
-    "img": "assets/warlords/TIANDAN.jpg?v=7.10.1"
+    "img": "assets/warlords/TIANDAN.jpg?v=7.10.2"
   },
   {
     "id": "LIUBOWEN",
     "name": "劉伯溫",
     "cat": "support",
-    "cost": 1,
+    "cost": 4,
     "v": "J",
     "tag": "神機妙算·佐明開國",
     "desc": "明初政治家與軍事謀臣，輔佐朱元璋制定統一戰略，參與平定群雄與建立明朝。",
@@ -4935,10 +4941,10 @@
       "note": "",
       "sources": []
     },
-    "st": 20,
-    "ew": 42,
-    "hp": 106,
-    "atk": 54,
+    "st": 24,
+    "ew": 78,
+    "hp": 196,
+    "atk": 94,
     "def": 0.04,
     "skill": {
       "name": "神機誠意",
@@ -4953,7 +4959,7 @@
     "origin": "中國 · 明初",
     "weapon": "軍師羽扇 + 明軍令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/LIUBOWEN.jpg?v=7.10.1"
+    "img": "assets/warlords/LIUBOWEN.jpg?v=7.10.2"
   },
   {
     "id": "SUNWU",
@@ -4979,9 +4985,9 @@
       ]
     },
     "st": 30,
-    "ew": 82,
-    "hp": 228,
-    "atk": 98,
+    "ew": 85,
+    "hp": 236,
+    "atk": 100,
     "def": 0.06,
     "skill": {
       "name": "兵聖十三篇",
@@ -4997,13 +5003,13 @@
     "origin": "中國 · 春秋",
     "weapon": "孫子兵法十三篇 + 吳王授鉞",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SUNWU.jpg?v=7.10.1"
+    "img": "assets/warlords/SUNWU.jpg?v=7.10.2"
   },
   {
     "id": "LEYI",
     "name": "樂毅",
     "cat": "support",
-    "cost": 2,
+    "cost": 4,
     "v": "B",
     "tag": "昌國拔城·連克七十",
     "desc": "戰國名將，拜為燕昭王上將軍，率五國聯軍濟西破齊，半年連克齊國七十餘城，算無遺策。",
@@ -5020,10 +5026,10 @@
       "sources": []
     },
     "st": 28,
-    "ew": 51,
-    "hp": 132,
-    "atk": 72,
-    "def": 0.04,
+    "ew": 76,
+    "hp": 204,
+    "atk": 104,
+    "def": 0.06,
     "skill": {
       "name": "昌國合縱",
       "phase": "P1",
@@ -5038,7 +5044,7 @@
     "origin": "中國 · 戰國",
     "weapon": "昌國君佩劍 + 五國聯軍令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/LEYI.jpg?v=7.10.1"
+    "img": "assets/warlords/LEYI.jpg?v=7.10.2"
   },
   {
     "id": "TOKUGAWA",
@@ -5063,9 +5069,9 @@
       "sources": []
     },
     "st": 26,
-    "ew": 68,
-    "hp": 184,
-    "atk": 92,
+    "ew": 72,
+    "hp": 202,
+    "atk": 94,
     "def": 0.08,
     "skill": {
       "name": "東照大權現",
@@ -5081,6 +5087,6 @@
     "origin": "日本 · 戰國",
     "weapon": "葵紋軍配 + 三河統帥刀",
     "sfx": "war_drum",
-    "img": "assets/warlords/TOKUGAWA.jpg?v=7.10.1"
+    "img": "assets/warlords/TOKUGAWA.jpg?v=7.10.2"
   }
 ]

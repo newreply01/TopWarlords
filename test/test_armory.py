@@ -90,7 +90,7 @@ async def main():
             ("XIAHOU_DUN", "夏侯惇"),
             ("SUNCE", "孫策"),
             ("SUNJIAN", "孫堅"),
-            ("PANGJUAN", "龐涓"),
+            ("YAMAMOTO", "山本勘助"),
             ("JIAXU", "賈詡"),
             ("LIUBOWEN", "劉伯溫"),
         ]:
@@ -101,7 +101,7 @@ async def main():
         for unit_id, name in (
             ("SUNCE", "孫策"),
             ("SUNJIAN", "孫堅"),
-            ("PANGJUAN", "龐涓"),
+            ("YAMAMOTO", "山本勘助"),
             ("HOJO_UJIYASU", "北條氏康"),
             ("SHIMAZU_YOSHIHISA", "島津義久"),
             ("XIAHOU_DUN", "夏侯惇"),
@@ -120,7 +120,7 @@ async def main():
             SUNJIAN: UNIT_MAP.SUNJIAN?.cat,
             LIUBOWEN: UNIT_MAP.LIUBOWEN?.cat,
             ZHOUYU: UNIT_MAP.ZHOUYU?.cat,
-            PANGJUAN: UNIT_MAP.PANGJUAN?.cat,
+            YAMAMOTO: UNIT_MAP.YAMAMOTO?.cat,
             TIANDAN: UNIT_MAP.TIANDAN?.cat
         })""")
         assert roster_categories == {
@@ -128,7 +128,7 @@ async def main():
             "SUNJIAN": "armor",
             "LIUBOWEN": "support",
             "ZHOUYU": "support",
-            "PANGJUAN": "support",
+            "YAMAMOTO": "support",
             "TIANDAN": "naval",
         }, f"名將錄分類未與最新名單同步：{roster_categories}"
 

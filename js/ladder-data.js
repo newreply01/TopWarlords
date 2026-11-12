@@ -122,7 +122,7 @@ const LADDER_PRESETS = [
       "DIANWEI",
       "LIGUANG",
       "YUEJIN",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "殺神威嚴破軍攻勢"
   },
@@ -197,7 +197,7 @@ const LADDER_PRESETS = [
       "SHIBATA",
       "TORII",
       "HATTORI",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "三段輪射火力重壁"
   },
@@ -407,7 +407,7 @@ const LADDER_PRESETS = [
       "KATOKIYOMASA",
       "CHOIMUSEON",
       "JEONGJI",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "十面埋伏天羅地網"
   },
@@ -467,7 +467,7 @@ const LADDER_PRESETS = [
       "LIANPO",
       "ZONGZE",
       "MENGHUO",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "多路並進漫天火矢"
   },
@@ -692,7 +692,7 @@ const LADDER_PRESETS = [
       "KATOKIYOMASA",
       "TORII",
       "HATTORI",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "先制斬首千里破陣"
   },
@@ -1052,7 +1052,7 @@ const LADDER_PRESETS = [
       "TACHIBANAD",
       "HONDA_TADATSUGU",
       "MURAKAMI",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "登高觀瞻精確校射"
   },
@@ -1097,7 +1097,7 @@ const LADDER_PRESETS = [
       "YUJIN",
       "JUMONG",
       "MENGHUO",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "奔雷突襲極致先手"
   },
@@ -1202,7 +1202,7 @@ const LADDER_PRESETS = [
       "GYEBAEK",
       "CHOIMUSEON",
       "LUMENG",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "伏波龍骨水陸破暗"
   },
@@ -1277,7 +1277,7 @@ const LADDER_PRESETS = [
       "KATOKIYOMASA",
       "AKECHI",
       "MURAKAMI",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "先登奇兵暗夜刺殺"
   },
@@ -1352,7 +1352,7 @@ const LADDER_PRESETS = [
       "XUCHU",
       "GENGYAN",
       "HUANGGAI",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "八陣帷幄奇謀致勝"
   },
@@ -1367,7 +1367,7 @@ const LADDER_PRESETS = [
       "SHIMAZUY",
       "MATSUNAGA",
       "HATTORI",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "步騎火砲協同合圍"
   },
@@ -1487,7 +1487,7 @@ const LADDER_PRESETS = [
       "XUCHU",
       "GENGYAN",
       "XIEXUAN",
-      "PANGJUAN"
+      "YAMAMOTO"
     ],
     "title": "伏波龍骨水陸破暗"
   },

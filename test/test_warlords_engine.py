@@ -231,15 +231,15 @@ try:
             if (unitMap.IINAOMASA && (unitMap.IINAOMASA.cost !== 3 || unitMap.IINAOMASA.cat !== 'armor')) {
                 errs.push('井伊直政費用／兵種錯誤');
             }
-            if (!(unitMap.PANGTONG.cost > unitMap.LUSU.cost && unitMap.PANGTONG.ew > unitMap.LUSU.ew && unitMap.LUSU.ew > unitMap.LUXUN.ew)) {
-                errs.push('龐統 > 魯肅 > 陸遜 排序未落實');
+            if (!(unitMap.LUXUN.cost > unitMap.LUSU.cost && unitMap.LUXUN.ew > unitMap.LUSU.ew && unitMap.LUSU.ew >= unitMap.PANGTONG.ew)) {
+                errs.push('陸遜 > 魯肅 >= 龐統 全域歷史排序未落實');
             }
-            for (const [navalId, cost] of [['XIEXUAN', 5], ['TIANDAN', 2], ['LUMENG', 5], ['CAOBIN', 2], ['YISUNSIN', 5]]) {
+            for (const [navalId, cost] of [['XIEXUAN', 5], ['TIANDAN', 2], ['LUMENG', 5], ['CAOBIN', 2], ['YISUNSIN', 5], ['GANNING', 3]]) {
                 if (!unitMap[navalId] || unitMap[navalId].cat !== 'naval' || unitMap[navalId].cost !== cost) {
                     errs.push('先登奇兵費用／定位錯誤: ' + navalId);
                 }
             }
-            for (const [id, cat] of [['ZHOUYU', 'support'], ['PANGJUAN', 'support'], ['TIANDAN', 'naval'], ['SUNCE', 'air'], ['SUNJIAN', 'armor'], ['LIUBOWEN', 'support']]) {
+            for (const [id, cat] of [['ZHOUYU', 'support'], ['YAMAMOTO', 'support'], ['TIANDAN', 'naval'], ['SUNCE', 'air'], ['SUNJIAN', 'armor'], ['LIUBOWEN', 'support']]) {
                 if (!unitMap[id] || unitMap[id].cat !== cat) errs.push(id + ' 分類錯誤或缺漏');
             }
             const removedIds = [
@@ -280,7 +280,7 @@ try:
             if (!battle || !battle.winner) errs.push('戰鬥推演無結果');
             if (!battle.vp || !battle.vp.A || !battle.vp.B) errs.push('VP 結算失敗');
 
-            const skillDeckA = ['DENGAI', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'PANGJUAN'];
+            const skillDeckA = ['DENGAI', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'YAMAMOTO'];
             const skillDeckB = ['XIAHOUYUAN', 'XIANGYU', 'JUMONG', 'GANNING', 'HANBEI'];
             const phaseSkillsTriggered = new Set();
             for (let seed = 0; seed < 48 && phaseSkillsTriggered.size < 3; seed++) {
@@ -303,7 +303,7 @@ try:
                 errs.push('專屬戰法未依 P1/P2/P3 在對應階段觸發: ' + JSON.stringify([...phaseSkillsTriggered]));
             }
 
-            const ambushDeckA = ['ZHANGLIAO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'PANGJUAN'];
+            const ambushDeckA = ['ZHANGLIAO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'YAMAMOTO'];
             const ambushDeckB = ['HUO', 'XIANGYU', 'JUMONG', 'TIANDAN', 'HANBEI'];
             let cavalryAmbushObserved = false;
             let navalAmbushObserved = false;

@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.10.3';
+  const ASSET_VER = '7.10.4';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -1653,12 +1653,13 @@ const Battle3DEngine = (function () {
         fromX: token.origX,
         fromY: token.mesh.position.y,
         fromZ: token.origZ,
-        startedAt: now + (index % 5) * 70,
-        duration: Math.round(1550 / Math.max(0.75, token.formationMobility)),
+        startedAt: now + (index % 5) * 45,
+        duration: Math.round(1150 / Math.max(0.75, token.formationMobility)),
         started: false,
         finished: false
       };
-      token.nextAmbientAttackAt = now + 900 + (index % 5) * 180 + (token.side === 'B' ? 320 : 0);
+      token.nextAmbientAttackAt = now + 820 + (index % 5) * 160 + (token.side === 'B' ? 260 : 0);
+      token.nextAmbientMeleeAt = now + 780 + (index % 5) * 130 + (token.side === 'B' ? 190 : 0);
     });
     finalChargeActive = false;
     meleeActive = false;
@@ -1698,8 +1699,14 @@ const Battle3DEngine = (function () {
       const side = token.side === 'A' ? 1 : -1;
       const distance = ranged ? -(4.5 + slot.depth * 0.35) : 0.85 + slot.depth * 0.12;
       const flank = token.formationLayout === 'wings' || token.cat === 'naval' ? 0.65 : 0;
+      let targetX = side * distance;
+      if (Math.abs(targetX - start.x) < 0.25) {
+        targetX = ranged
+          ? (side > 0 ? Math.min(-3.2, start.x - 0.38) : Math.max(3.2, start.x + 0.38))
+          : (side > 0 ? Math.max(0.35, start.x + 0.42) : Math.min(-0.35, start.x - 0.42));
+      }
       const target = new THREE.Vector3(
-        side * distance,
+        targetX,
         0,
         slot.z + side * (0.32 + flank)
       );
@@ -1724,17 +1731,23 @@ const Battle3DEngine = (function () {
         }
         const progress = chargeDuration === 0 ? 1 : Math.min(1, (now - startedAt) / chargeDuration);
         const eased = progress * progress * (3 - 2 * progress);
-        moves.forEach(({ token, start, target, ranged, flank }) => {
+        moves.forEach(({ token, start, target, ranged, flank }, idx) => {
           if (!token.alive) return;
           token.mesh.position.lerpVectors(start, target, eased);
           token.mesh.position.z += Math.sin(progress * Math.PI) * flank * (token.side === 'A' ? 1 : -1);
           token.mesh.position.y = getBattleTerrainHeight(token.mesh.position.x, token.mesh.position.z);
+          if (!ranged && chargeDuration > 0 && progress > 0.3 && progress < 0.85 && Math.random() < 0.08) {
+            spawnDustPuff(token.mesh.position);
+          }
           if (progress === 1) {
             token.frontX = target.x;
             token.frontY = target.y;
             token.frontZ = target.z;
             token.chargeCommitted = true;
-            triggerSquadAnim(token, ranged ? 'idle' : 'attack', 1.2);
+            triggerSquadAnim(token, ranged ? 'idle' : 'attack', 1.3);
+            if (!ranged && chargeDuration > 0 && idx % 2 === 0) {
+              spawnSparkBurst(token.mesh.position.clone().add(new THREE.Vector3(token.side === 'A' ? 0.45 : -0.45, 0.75, 0)), 10, 0xfbbf24);
+            }
           }
         });
         if (progress < 1) requestAnimationFrame(step);
@@ -1758,7 +1771,7 @@ const Battle3DEngine = (function () {
 
   function advanceBattalionToContact(token) {
     if (!token || !token.alive || token.engagement || token.formationRanged || token.cat === 'support' || token.cat === 'air_defense') return;
-    const contactX = token.side === 'A' ? -0.82 : 0.82;
+    const contactX = token.side === 'A' ? -0.68 : 0.68;
     const targetX = token.side === 'A'
       ? Math.max(token.mesh.position.x, contactX)
       : Math.min(token.mesh.position.x, contactX);
@@ -1773,11 +1786,11 @@ const Battle3DEngine = (function () {
       targetY: getBattleTerrainHeight(targetX, token.mesh.position.z),
       targetZ: token.mesh.position.z,
       startedAt: combatNow(),
-      duration: Math.min(1750, Math.max(520, distance * 620 / Math.max(0.75, token.formationMobility))),
+      duration: Math.min(950, Math.max(320, distance * 420 / Math.max(0.75, token.formationMobility))),
       lastDustAt: 0,
       finished: false
     };
-    triggerSquadAnim(token, 'move', token.cat === 'air' ? 1.45 : 1.1);
+    triggerSquadAnim(token, 'move', token.cat === 'air' ? 1.45 : 1.15);
   }
 
   function waitForCombatBeat(duration, epoch) {
@@ -1789,7 +1802,7 @@ const Battle3DEngine = (function () {
         if (!audioPaused) remaining -= now - previous;
         previous = now;
         if ((!audioPaused && remaining <= 0) || epoch !== battleEpoch || battleSettled) resolve();
-        else setTimeout(step, 25);
+        else setTimeout(step, 20);
       }
       step();
     });
@@ -1798,12 +1811,13 @@ const Battle3DEngine = (function () {
   async function playVolley(lines, onImpact, tempo = 1, frameHp = {}) {
     if (!isInitialized || battleSettled) return;
     const epoch = battleEpoch;
+    const isContinuousBattle = Object.keys(frameHp).length > 0;
     const latestHp = new Map();
     const deaths = new Map();
     const lanes = new Map();
     for (const [index, line] of lines.entries()) {
       if (!line.auid || line.kind === 'info') {
-        await playEvent(line);
+        await playEvent(line, { continuous: isContinuousBattle, tempo });
         if (epoch !== battleEpoch || battleSettled) return;
         onImpact(line);
         continue;
@@ -1811,30 +1825,37 @@ const Battle3DEngine = (function () {
       if (!lanes.has(line.auid)) lanes.set(line.auid, []);
       lanes.get(line.auid).push({ line, index });
     }
-    await Promise.all([...lanes.entries()].map(async ([uid, events]) => {
-      for (const { line, index } of events) {
+    const laneEntries = [...lanes.entries()];
+    await Promise.all(laneEntries.map(async ([uid, events], laneIdx) => {
+      for (const [evIdx, { line, index }] of events.entries()) {
         await waitForCombatBeat(0, epoch);
         if (epoch !== battleEpoch || battleSettled) return;
         activeAttackers.add(uid);
         peakConcurrentAttackers = Math.max(peakConcurrentAttackers, activeAttackers.size);
         try {
+          if (isContinuousBattle && evIdx === 0 && laneEntries.length > 2) {
+            await waitForCombatBeat((laneIdx % 4) * (32 / Math.max(1, tempo)), epoch);
+            if (epoch !== battleEpoch || battleSettled) return;
+          }
           await playEvent(line, {
             deferDeath: true,
+            continuous: isContinuousBattle,
             tempo,
             commit: target => {
               const accepted = index > (latestHp.get(target.uid) ?? -1);
               if (accepted && line.hpAfter !== undefined) {
                 latestHp.set(target.uid, index);
-                updateTokenHp(target, Math.max(line.hpAfter, deaths.has(target.uid) ? 1 : 0), 1200 / Math.max(0.6, tempo));
+                updateTokenHp(target, Math.max(line.hpAfter, deaths.has(target.uid) ? 1 : 0), 850 / Math.max(0.6, tempo));
               }
               if (line.kind === 'kill' || line.kind === 'capture') {
                 deaths.set(target.uid, { token: target, captured: line.kind === 'capture' });
-                updateTokenHp(target, 1, 1200 / Math.max(0.6, tempo));
+                updateTokenHp(target, 1, 850 / Math.max(0.6, tempo));
               }
               if (accepted) onImpact(line);
             }
           });
-          await waitForCombatBeat(160 / Math.max(0.6, tempo), epoch);
+          const postBeat = isContinuousBattle ? 55 : 140;
+          await waitForCombatBeat(postBeat / Math.max(0.6, tempo), epoch);
         } finally {
           if (epoch === battleEpoch) activeAttackers.delete(uid);
         }
@@ -1842,7 +1863,8 @@ const Battle3DEngine = (function () {
     }));
     if (epoch !== battleEpoch || battleSettled) return;
     // A formation completes its simultaneous return fire before its fatal wound is resolved.
-    await Promise.all([...deaths.values()].map(({ token, captured }) => tokenFallDown(token, captured)));
+    const fallDuration = isContinuousBattle ? Math.round(380 / Math.max(1, tempo * 0.7)) : 560;
+    await Promise.all([...deaths.values()].map(({ token, captured }) => tokenFallDown(token, captured, false, fallDuration)));
     if (epoch !== battleEpoch || battleSettled) return;
     for (const [uid, hp] of Object.entries(frameHp)) {
       const token = unitsMap.get(uid);
@@ -1893,7 +1915,7 @@ const Battle3DEngine = (function () {
     }
     const forcedMelee = ranged && tToken && aToken.mesh.position.distanceTo(tToken.mesh.position) < 2;
     if ((ln.finale || (meleeActive && (!ranged || forcedMelee))) && aToken && tToken && aToken.alive) {
-      await approachMeleeTarget(aToken, tToken);
+      await approachMeleeTarget(aToken, tToken, options.continuous);
       if (aToken.epoch !== battleEpoch || battleSettled) { finishEffects(); return effectsFinished; }
       aToken.formationRig.rotation.y = Math.atan2(
         tToken.mesh.position.x - aToken.mesh.position.x,
@@ -1909,7 +1931,7 @@ const Battle3DEngine = (function () {
     } else if (aToken?.formationRanged && aToken.cat !== 'support' && tToken && aToken.alive) {
       triggerSquadAnim(aToken, 'attack', 1.15);
       spawn3DArrowVolley(aToken.mesh.position, tToken.mesh.position, aToken.side, ln.kind === 'miss');
-      await waitForCombatBeat(450, aToken.epoch);
+      await waitForCombatBeat(options.continuous ? 340 : 450, aToken.epoch);
     } else if (ln.duel && aToken && tToken && aToken.alive && tToken.alive) {
       performDuelClash(aToken, tToken);
     } else if (aToken && tToken && aToken.alive) {
@@ -1918,7 +1940,7 @@ const Battle3DEngine = (function () {
       } else if (aToken.cat === 'air_defense' || (ln.text && ln.text.includes('箭'))) {
         triggerSquadAnim(aToken, 'attack', 1.25);
         spawn3DArrowVolley(aToken.mesh.position, tToken.mesh.position, aToken.side, ln.kind === 'miss');
-        await waitForCombatBeat(450, aToken.epoch);
+        await waitForCombatBeat(options.continuous ? 340 : 450, aToken.epoch);
       } else if (aToken.cat === 'naval') {
         deferTargetEffects = performVanguardAssault(aToken, tToken, playTargetEffects, ln.kind === 'miss');
       } else if (aToken.cat === 'support') {
@@ -1959,22 +1981,29 @@ const Battle3DEngine = (function () {
         if (options.commit) {
           options.commit(tToken);
         } else if (ln.hpAfter !== undefined) {
-          updateTokenHp(tToken, ln.hpAfter, 1200 / Math.max(0.6, options.tempo || 1));
+          updateTokenHp(tToken, ln.hpAfter, 850 / Math.max(0.6, options.tempo || 1));
         }
         if (ln.dmg > 0 && ln.kind !== 'miss' && ln.kind !== 'block') {
           const epoch = battleEpoch;
-          for (let beat = 0; beat < 3; beat++) {
-            await waitForCombatBeat(180 / Math.max(0.6, options.tempo || 1), epoch);
-            if (epoch !== battleEpoch || battleSettled) { finishEffects(); return; }
-            if (aToken?.alive) {
-              triggerSquadAnim(aToken, 'attack', 1.15);
-              if (ranged) spawn3DArrowVolley(aToken.mesh.position, tToken.mesh.position, aToken.side, false);
-              else {
-                spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.6, 0)), 4, 0xaba58d);
-                applyImpactReaction(tToken, 0.08);
+          const tempoScale = Math.max(0.6, options.tempo || 1);
+          // 非阻塞背景連擊演出：讓後續刀光與箭矢在背景持續綻放，不阻塞主戰場推進
+          (async () => {
+            for (let beat = 0; beat < 2; beat++) {
+              await waitForCombatBeat(145 / tempoScale, epoch);
+              if (epoch !== battleEpoch || battleSettled) return;
+              if (aToken?.alive && tToken?.alive) {
+                triggerSquadAnim(aToken, 'attack', 1.2);
+                if (ranged) spawn3DArrowVolley(aToken.mesh.position, tToken.mesh.position, aToken.side, false, 8);
+                else {
+                  spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.65, 0)), 6, 0xfbbf24);
+                  applyImpactReaction(tToken, 0.08);
+                }
               }
             }
-          }
+          })();
+          const primaryWait = options.continuous ? 85 : 220;
+          await waitForCombatBeat(primaryWait / tempoScale, epoch);
+          if (epoch !== battleEpoch || battleSettled) { finishEffects(); return; }
         }
         if (!options.deferDeath && (ln.kind === 'kill' || ln.kind === 'capture')) {
           tokenFallDown(tToken, ln.kind === 'capture').then(finishEffects, failEffects);
@@ -1985,7 +2014,7 @@ const Battle3DEngine = (function () {
     }
   }
 
-  function approachMeleeTarget(attacker, target) {
+  function approachMeleeTarget(attacker, target, fast = false) {
     const start = attacker.mesh.position.clone();
     const delta = start.clone().sub(target.mesh.position);
     if (delta.length() < 1.15) return Promise.resolve();
@@ -1993,9 +2022,10 @@ const Battle3DEngine = (function () {
     end.y = getBattleTerrainHeight(end.x, end.z);
     attacker.march = null;
     attacker.engagement = null;
-    triggerSquadAnim(attacker, 'move', attacker.cat === 'air' ? 1.5 : 1.2);
+    triggerSquadAnim(attacker, 'move', attacker.cat === 'air' ? 1.55 : 1.25);
     const startedAt = combatNow();
-    const duration = isEnabled ? 450 / Math.max(0.75, attacker.formationMobility) : 0;
+    const baseMs = fast ? 220 : 340;
+    const duration = isEnabled ? baseMs / Math.max(0.75, attacker.formationMobility) : 0;
     return new Promise(resolve => {
       function step(now) {
         now = combatNow();
@@ -2233,7 +2263,7 @@ const Battle3DEngine = (function () {
     }
   }
 
-  function tokenFallDown(token, captured = false, immediate = false) {
+  function tokenFallDown(token, captured = false, immediate = false, durationMs = 560) {
     if (!token.alive) {
       if (immediate) applyFallenPose(token, 1);
       return token.deathAnimation || Promise.resolve();
@@ -2247,11 +2277,12 @@ const Battle3DEngine = (function () {
     triggerSquadAnim(token, 'death', 1.0);
     spawnDustPuff(token.mesh.position);
     const startedAt = combatNow();
+    const collapseDuration = Math.max(220, Number(durationMs) || 560);
     token.deathAnimation = new Promise(resolve => {
       function fall(now) {
         now = combatNow();
         if (token.epoch !== battleEpoch) { resolve(); return; }
-        const progress = immediate || token.fallen ? 1 : Math.min(1, (now - startedAt) / 1200);
+        const progress = immediate || token.fallen ? 1 : Math.min(1, (now - startedAt) / collapseDuration);
         applyFallenPose(token, progress);
         if (progress < 1) requestAnimationFrame(fall);
         else {
@@ -2641,13 +2672,77 @@ const Battle3DEngine = (function () {
                 triggerSquadAnim(token, 'attack', 1.0);
                 if (token.cat === 'support') {
                   spawnStrategistBolt(token, target);
-                  token.nextAmbientAttackAt = now + 2550;
+                  token.nextAmbientAttackAt = now + 1850;
                 } else {
                   spawn3DArrowVolley(token.mesh.position, target.mesh.position, token.side, false, 8);
                   ambientArrowVolleys++;
-                  token.nextAmbientAttackAt = now + 2050;
+                  token.nextAmbientAttackAt = now + 1550;
                 }
               } else token.nextAmbientAttackAt = now + 450;
+            }
+          }
+        } else if (battleMotionActive && !backline) {
+          token.formationRig.rotation.x = 0;
+          let nearestFront = null;
+          let nearestFrontDist = Infinity;
+          let nearestAny = null;
+          let nearestAnyDist = Infinity;
+          unitsMap.forEach(enemy => {
+            if (!enemy.alive || enemy.side === token.side) return;
+            const d = token.mesh.position.distanceTo(enemy.mesh.position);
+            const enemyBack = enemy.cat === 'air_defense' || enemy.cat === 'support' || enemy.formationRanged;
+            if (!enemyBack && d < nearestFrontDist) {
+              nearestFrontDist = d;
+              nearestFront = enemy;
+            }
+            if (d < nearestAnyDist) {
+              nearestAnyDist = d;
+              nearestAny = enemy;
+            }
+          });
+          const meleeTarget = nearestFront || nearestAny;
+          const marchDone = !march || march.finished;
+          const engageDone = !engagement || engagement.finished;
+          if (meleeTarget && marchDone && engageDone && !token.chargeInProgress && !finalChargeActive) {
+            // 自動索敵轉向與側翼包抄靠攏，消除對空氣揮砍
+            const dx = meleeTarget.mesh.position.x - token.mesh.position.x;
+            const dz = meleeTarget.mesh.position.z - token.mesh.position.z;
+            const dist = Math.hypot(dx, dz);
+            if (dist > 0.05) {
+              const targetYaw = Math.atan2(dx, dz);
+              let yawDiff = targetYaw - token.formationRig.rotation.y;
+              while (yawDiff > Math.PI) yawDiff -= Math.PI * 2;
+              while (yawDiff < -Math.PI) yawDiff += Math.PI * 2;
+              token.formationRig.rotation.y += yawDiff * Math.min(1, dt * 7.5);
+            }
+            if (Math.abs(dz) > 1.35) {
+              token.mesh.position.z += Math.sign(dz) * Math.min(Math.abs(dz) - 0.85, dt * 1.65);
+              token.mesh.position.y = getBattleTerrainHeight(token.mesh.position.x, token.mesh.position.z);
+            }
+            if (meleeActive && dist > 1.15) {
+              const stepDist = Math.min(dist - 0.92, dt * 2.1);
+              token.mesh.position.x += (dx / dist) * stepDist;
+              token.mesh.position.z += (dz / dist) * stepDist;
+              token.mesh.position.y = getBattleTerrainHeight(token.mesh.position.x, token.mesh.position.z);
+            }
+          }
+          if (now >= (token.nextAmbientMeleeAt || 0)) {
+            if (!marchDone || !engageDone) {
+              token.nextAmbientMeleeAt = now + 150;
+            } else if (meleeTarget) {
+              token.attackUntil = Math.max(token.attackUntil || 0, now + 520);
+              const clashDist = token.mesh.position.distanceTo(meleeTarget.mesh.position);
+              if (clashDist < 3.6 || meleeActive) {
+                const clashPos = token.mesh.position.clone().lerp(meleeTarget.mesh.position, 0.48);
+                clashPos.x += (Math.random() - 0.5) * 0.55;
+                clashPos.y += 0.72;
+                clashPos.z += (Math.random() - 0.5) * 0.55;
+                spawnSparkBurst(clashPos, 5, token.cat === 'naval' ? 0x2dd4bf : 0xfbbf24);
+                if (Math.random() < 0.38) spawnDustPuff(clashPos);
+              }
+              token.nextAmbientMeleeAt = now + 460 + ((Math.round(token.attackPhaseOffset * 100) % 3) * 110);
+            } else {
+              token.nextAmbientMeleeAt = now + 400;
             }
           }
         } else {

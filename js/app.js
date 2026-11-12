@@ -4383,7 +4383,7 @@ async function showBattle(res, opts = {}) {
   }
   $('#battleMeta').innerHTML = metaHtml;
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph');
-  await sleep(280);
+  await sleep(90);
   let curPhase = 0, sec = 0;
   const log = $('#battleLog');
   try {
@@ -4399,7 +4399,8 @@ async function showBattle(res, opts = {}) {
       }
       if ((enteringMelee || f.finale === 'charge') && typeof Battle3DEngine !== 'undefined') {
         $('#phaseTitle').textContent = '兩 軍 衝 陣 · 白 刃 交 鋒';
-        await Battle3DEngine.beginFinalCharge(skip ? 0 : 1600, f.finale === 'charge');
+        const chargeMs = skip ? 0 : Math.max(180, Math.round(560 / Math.max(1, speed * 0.85)));
+        await Battle3DEngine.beginFinalCharge(chargeMs, f.finale === 'charge');
         if (token !== playToken || res._finished) return;
       }
       sec++;
@@ -4442,7 +4443,8 @@ async function showBattle(res, opts = {}) {
         recent.prepend(event);
         while (recent.children.length > 2) recent.lastElementChild.remove();
       };
-      if (typeof Battle3DEngine !== 'undefined') await Battle3DEngine.playVolley(f.lines, onImpact, speed, f.hp);
+      const effectiveTempo = f.phase < 3 ? speed * 1.45 : speed * 1.2;
+      if (typeof Battle3DEngine !== 'undefined') await Battle3DEngine.playVolley(f.lines, onImpact, effectiveTempo, f.hp);
       else f.lines.forEach(onImpact);
       if (token !== playToken || res._finished) return;
       Object.keys(f.hp).forEach(uid => {
@@ -4450,7 +4452,7 @@ async function showBattle(res, opts = {}) {
         fieldHp[uid] = f.hp[uid];
       });
       updateFieldStrength();
-      if (!skip) await sleep(120);
+      if (!skip && f.lines.some(l => l.auid && l.kind !== 'info')) await sleep(24);
     }
   } catch (loopErr) {
     console.error('showBattle animation loop caught unexpected error:', loopErr);

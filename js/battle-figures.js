@@ -279,10 +279,11 @@ const BattleFigures = (() => {
   }
 
   function animate(ranks, token, now, moving, fighting, terrainHeight, attackPhaseOffset = 0) {
-    if (now - ranks.userData.animationAt < (token.lowPower ? 66 : 40)) return;
+    if (now - ranks.userData.animationAt < (token.lowPower ? 55 : 24)) return;
     const dt = Math.min(0.1, (now - ranks.userData.animationAt) / 1000);
     ranks.userData.animationAt = now;
     const mounted = token.cat === 'air';
+    const isBackline = ['air_defense', 'support'].includes(token.cat);
     const attack = token.attackUntil > now;
     const losses = Math.max(ranks.userData.losses,
       Math.floor(ranks.userData.soldierCount * Math.min(0.9, 1 - (token.visualHp ?? token.currentHp) / token.maxHp)));
@@ -295,7 +296,7 @@ const BattleFigures = (() => {
     }
     const survivorFront = Math.max(...ranks.userData.placements.slice(losses).map(placement => placement.z));
     const targetAdvance = Math.max(0, ranks.userData.frontZ - survivorFront);
-    const nextAdvance = Math.min(targetAdvance, ranks.userData.advance + dt * 1.1);
+    const nextAdvance = Math.min(targetAdvance, ranks.userData.advance + dt * 1.35);
     moving = moving || nextAdvance - ranks.userData.advance > 0.001;
     ranks.userData.advance = nextAdvance;
     const heights = groundOffsets(ranks, token, terrainHeight);
@@ -305,39 +306,59 @@ const BattleFigures = (() => {
       mesh.userData.standingMatrices.forEach((base, i) => {
         const casualtyAt = ranks.userData.casualtyAt[i];
         if (casualtyAt !== null) {
-          fallenMatrix(base, Math.min(1, (now - casualtyAt) / 550), i, heights[i], matrix,
+          fallenMatrix(base, Math.min(1, (now - casualtyAt) / 420), i, heights[i], matrix,
             ranks.userData.casualtyAdvance[i]);
           mesh.setMatrixAt(i, matrix);
           return;
         }
-        const phase = now * (moving ? (mounted ? 0.015 : 0.009) : 0.004) + i * 1.71 + attackPhaseOffset;
-        const gait = moving ? Math.sin(phase) : 0;
+        const phase = now * (moving ? (mounted ? 0.016 : 0.0105) : 0.0055) + i * 1.71 + attackPhaseOffset;
+        const skirmishPhase = now * 0.0085 + i * 1.37 + attackPhaseOffset;
+        const gait = moving ? Math.sin(phase) : (fighting && !isBackline ? Math.sin(skirmishPhase) * 0.55 : 0);
         let angle = 0;
         if (part.endsWith('Leg')) {
-          angle = gait * (part === 'leftLeg' ? 0.46 : -0.46);
-          if (fighting && !moving && ['air_defense', 'support'].includes(token.cat)) {
+          angle = gait * (part === 'leftLeg' ? 0.48 : -0.48);
+          if (fighting && !moving && isBackline) {
             angle += Math.sin(phase + attackPhaseOffset) * (part === 'leftLeg' ? 0.09 : -0.09);
           }
         }
-        else if (part.startsWith('horseLeg')) angle = Math.sin(phase + (part.endsWith('FL') || part.endsWith('BR') ? 0 : Math.PI)) * (moving ? 0.48 : 0.012);
+        else if (part.startsWith('horseLeg')) {
+          const horseActive = moving || (fighting && !isBackline);
+          angle = Math.sin(phase + (part.endsWith('FL') || part.endsWith('BR') ? 0 : Math.PI)) * (horseActive ? 0.52 : 0.04);
+        }
         else if (part.endsWith('Arm')) {
-          angle = gait * (part === 'leftArm' ? -0.30 : 0.30);
-          const striking = fighting && Math.sin(now * 0.006 + attackPhaseOffset + Math.floor(i / 6) * 0.72) > 0.15;
-          if (attack || (striking && token.cat !== 'support')) angle -= 0.45 + Math.sin(now * 0.009 + i * 1.1 + attackPhaseOffset) * 0.35;
-          if (token.cat === 'air_defense' && (attack || striking)) angle = -1.05 + Math.sin(now * 0.004 + i) * 0.18;
+          angle = gait * (part === 'leftArm' ? -0.32 : 0.32);
+          const striking = fighting && Math.sin(now * 0.0075 + attackPhaseOffset + (i % 7) * 0.85) > -0.15;
+          if (part === 'rightArm') {
+            if (attack || (striking && token.cat !== 'support')) {
+              angle -= 0.58 + Math.sin(now * 0.011 + i * 1.25 + attackPhaseOffset) * 0.46;
+            }
+          } else if (part === 'leftArm' && fighting && !isBackline) {
+            // 左手盾牌頂撞／格擋擺動
+            angle -= 0.22 + Math.cos(now * 0.008 + i * 0.95 + attackPhaseOffset) * 0.24;
+          }
+          if (token.cat === 'air_defense' && (attack || striking)) {
+            angle = -1.05 + Math.sin(now * 0.0045 + i) * 0.22;
+          }
           if (token.cat === 'support' && fighting) {
-            const castBeat = Math.max(0, Math.sin(now * 0.004 + i * 0.8 + attackPhaseOffset));
+            const castBeat = Math.max(0, Math.sin(now * 0.0045 + i * 0.8 + attackPhaseOffset));
             const armDirection = part === 'leftArm' ? 1 : -1;
-            angle = armDirection * (0.25 + castBeat * 0.42);
+            angle = armDirection * (0.25 + castBeat * 0.45);
           }
         }
         base.decompose(position, rotation, scale);
         position.y += heights[i];
         position.z += ranks.userData.advance;
-        if (mounted && moving) position.y += Math.sin(phase * 2) * 0.018;
+        if (fighting && !isBackline) {
+          // 近戰混戰：士兵前後突刺與左右閃避，打破死板方陣邊界
+          const rankRow = Math.floor(i / (mounted ? 4 : 6));
+          const rowWeight = rankRow === 0 ? 1.0 : rankRow === 1 ? 0.65 : 0.35;
+          position.z += Math.sin(skirmishPhase) * (mounted ? 0.13 : 0.095) * rowWeight;
+          position.x += Math.cos(skirmishPhase * 0.75 + i) * 0.042 * rowWeight;
+        }
+        if (mounted && (moving || fighting)) position.y += Math.sin(phase * 2) * 0.02;
         if (part === 'body' && fighting) {
-          const sway = token.cat === 'support' ? 0.075 : 0.045;
-          angle = Math.sin(now * 0.003 + i * 1.7 + attackPhaseOffset) * sway;
+          const sway = token.cat === 'support' ? 0.08 : isBackline ? 0.05 : 0.095;
+          angle = Math.sin(now * 0.0055 + i * 1.7 + attackPhaseOffset) * sway;
         }
         animationRotation.setFromAxisAngle(axis, angle);
         rotation.multiply(animationRotation);

@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.10.1';
+  const ASSET_VER = '7.10.3';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -101,6 +101,8 @@ const Battle3DEngine = (function () {
   let finalChargeActive = false;
   let meleeActive = false;
   let battleMotionActive = false;
+  let ambientArrowVolleys = 0;
+  let ambientSpellcasts = 0;
   let battleSettled = false;
 
   // 五大兵種方陣托盤陣位 (A軍在西岸 X<0 朝東，B軍在東岸 X>0 朝西)
@@ -1605,6 +1607,8 @@ const Battle3DEngine = (function () {
     activeAttackers.clear();
     peakConcurrentAttackers = 0;
     completedVolleys = 0;
+    ambientArrowVolleys = 0;
+    ambientSpellcasts = 0;
 
     const wKey = res?.ev?.id || res?.weather || 'clear';
     const environment = getBattleEnvironment(res?.ev || { id: wKey }, res?.terrain);
@@ -1654,6 +1658,7 @@ const Battle3DEngine = (function () {
         started: false,
         finished: false
       };
+      token.nextAmbientAttackAt = now + 900 + (index % 5) * 180 + (token.side === 'B' ? 320 : 0);
     });
     finalChargeActive = false;
     meleeActive = false;
@@ -2100,8 +2105,8 @@ const Battle3DEngine = (function () {
   }
 
   /* 神射強弩：16 支箭矢分批拋射 */
-  function spawn3DArrowVolley(fromPos, toPos, side, miss = false) {
-    const count = 16;
+  function spawn3DArrowVolley(fromPos, toPos, side, miss = false, volleySize = 16) {
+    const count = volleySize;
     for (let i = 0; i < count; i++) {
       const sx = (Math.random() - 0.5) * 1.6;
       const sz = (Math.random() - 0.5) * 1.6;
@@ -2134,6 +2139,22 @@ const Battle3DEngine = (function () {
         isGLB: Boolean(arrowInst)
       });
     }
+  }
+
+  function spawnStrategistBolt(token, target) {
+    const start = token.mesh.position.clone().add(new THREE.Vector3(0, 1.45, 0));
+    const end = target.mesh.position.clone().add(new THREE.Vector3(0, 1.05, 0));
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.18, 10, 8),
+      new THREE.MeshBasicMaterial({ color: 0x8be0c3 })
+    );
+    mesh.position.copy(start);
+    scene.add(mesh);
+    projectiles.push({
+      mesh, start, end, startedAt: combatNow(), duration: 620,
+      arcHeight: 1.4, miss: false, isGLB: false, impactColor: 0x8be0c3, impactCount: 7
+    });
+    ambientSpellcasts++;
   }
 
   /* 先登奇兵：高速疾行騰躍突襲 */
@@ -2262,6 +2283,7 @@ const Battle3DEngine = (function () {
   function syncBattleResult(res) {
     battleSettled = true;
     battleMotionActive = false;
+    unitsMap.forEach(token => { token.formationRig.rotation.x = 0; });
     activeAttackers.clear();
     window.SoundEngine?.stopSpatial?.();
     for (const unit of [...res.final.A, ...res.final.B]) {
@@ -2597,6 +2619,41 @@ const Battle3DEngine = (function () {
           }
         }
 
+        const backline = token.cat === 'air_defense' || token.cat === 'support' || token.formationRanged;
+        if (battleMotionActive && backline) {
+          token.formationRig.rotation.x = Math.sin(now * 0.0035 + token.attackPhaseOffset) *
+            (token.cat === 'support' ? 0.085 : 0.055);
+          if (now >= token.nextAmbientAttackAt) {
+            if ((march && !march.finished) || (engagement && !engagement.finished)) {
+              token.nextAmbientAttackAt = now + 180;
+            } else {
+              let target = null;
+              let nearestDistance = Infinity;
+              unitsMap.forEach(enemy => {
+                if (!enemy.alive || enemy.side === token.side) return;
+                const distance = token.mesh.position.distanceTo(enemy.mesh.position);
+                if (distance < nearestDistance) {
+                  nearestDistance = distance;
+                  target = enemy;
+                }
+              });
+              if (target) {
+                triggerSquadAnim(token, 'attack', 1.0);
+                if (token.cat === 'support') {
+                  spawnStrategistBolt(token, target);
+                  token.nextAmbientAttackAt = now + 2550;
+                } else {
+                  spawn3DArrowVolley(token.mesh.position, target.mesh.position, token.side, false, 8);
+                  ambientArrowVolleys++;
+                  token.nextAmbientAttackAt = now + 2050;
+                }
+              } else token.nextAmbientAttackAt = now + 450;
+            }
+          }
+        } else {
+          token.formationRig.rotation.x = 0;
+        }
+
         const ranks = token.troopsContainer.children.find(child => child.userData.isBattalionRanks);
         if (ranks) {
           const moving = finalChargeActive || Boolean((march && !march.finished) || (engagement && !engagement.finished));
@@ -2668,7 +2725,7 @@ const Battle3DEngine = (function () {
         if (progress < 0) continue;
         if (progress >= 1.0) {
           if (p.miss) spawnDustPuff(p.end);
-          else spawnSparkBurst(p.end, 3, 0xf97316);
+          else spawnSparkBurst(p.end, p.impactCount || 3, p.impactColor || 0xf97316);
           scene.remove(p.mesh);
           if (!p.isGLB) { p.mesh.geometry.dispose(); p.mesh.material.dispose(); }
           projectiles.splice(i, 1);
@@ -2808,6 +2865,8 @@ const Battle3DEngine = (function () {
       drawCalls: renderer ? renderer.info.render.calls : 0,
       triangles: renderer ? renderer.info.render.triangles : 0,
       activeEffects: projectiles.length + particleSystems.length + floatingPopups.length,
+      ambientArrowVolleys,
+      ambientSpellcasts,
       floatingTexts: floatingPopups.map(popup => popup.text),
       floatingPositions: floatingPopups.map(popup => {
         const point = popup.sprite.position.clone().project(camera);
@@ -2845,6 +2904,11 @@ const Battle3DEngine = (function () {
         figureParts: token.troopsContainer.children.find(child => child.userData.originalFigures)?.children.map(mesh => mesh.userData.part) || [],
         animationAt: token.troopsContainer.children.find(child => child.userData.originalFigures)?.userData.animationAt || 0,
         casualties: token.troopsContainer.children.find(child => child.userData.originalFigures)?.userData.casualtyAt.filter(value => value !== null).length || 0,
+        motionPose: (() => {
+          const arm = token.troopsContainer.children.find(child => child.userData.isBattalionRanks)
+            ?.children.find(child => child.userData.part === 'rightArm');
+          return arm ? [5, 6, 9, 10].map(index => arm.instanceMatrix.array[index]) : [];
+        })(),
         commanderName: token.name,
         nameLabelVisible: token.hud.sprite.visible,
         labelRect: token.hud.sprite.userData.screenRect,

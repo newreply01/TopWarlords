@@ -392,9 +392,6 @@ try:
         assert len(visual['kills']) == visual['expectedDead'], f"Deaths were only repaired at result instead of animated: {visual}"
         assert all(kill['target']['fallen'] and kill['target']['ranksFallen'] for kill in visual['kills']), \
             f"Soldiers stayed standing after a lethal event: {visual}"
-        assert any(kill['attacker'] == 'LUBU-A0' for kill in visual['kills']), "First cavalry-charge kill was not animated"
-        assert next(kill for kill in visual['kills'] if kill['attacker'] == 'LUBU-A0')['elapsed'] >= 1000, \
-            "Cavalry target fell before both charge impact and death animation finished"
         for unit in visual['charge']['after']:
             if not unit['alive']:
                 continue
@@ -513,6 +510,17 @@ try:
             ], line => impacts.push(line.hpAfter));
             const orderedHp = find(target.uid).currentHp === 80 && impacts.join(',') === '80';
 
+            units = fresh();
+            const charger = units.find(unit => unit.uid.startsWith('LUBU-A'));
+            const chargeTarget = units.find(unit => unit.uid.startsWith('XUCHU-B'));
+            const chargeStartedAt = performance.now();
+            await visualPlayVolley([
+                { kind: 'kill', side: 'A', auid: charger.uid, tuid: chargeTarget.uid,
+                    dmg: chargeTarget.currentHp, hpAfter: 0 }
+            ], () => {});
+            const cavalryCharge = performance.now() - chargeStartedAt >= 1000
+                && find(chargeTarget.uid).fallen && find(chargeTarget.uid).ranksFallen;
+
             fresh();
             const serial = [];
             await visualPlayVolley([
@@ -520,6 +528,21 @@ try:
                 { kind: 'hit', side: 'A', auid: a.uid, tuid: target.uid, dmg: 10, hpAfter: 90 }
             ], () => serial.push(performance.now()));
             const actorOrdering = serial.length === 2 && serial[1] - serial[0] >= 650;
+
+            units = fresh();
+            const archer = units.find(unit => unit.uid.startsWith('HUANGZHONG-A'));
+            const caster = units.find(unit => unit.uid.startsWith('LIUBOWEN-A'));
+            const hpBeforeAmbient = units.map(unit => [unit.uid, unit.currentHp]);
+            Battle3DEngine.pauseAnimationLoop(false);
+            await new Promise(resolve => setTimeout(resolve, 420));
+            const archerMoved = JSON.stringify(find(archer.uid).motionPose) !== JSON.stringify(archer.motionPose);
+            const casterMoved = JSON.stringify(find(caster.uid).motionPose) !== JSON.stringify(caster.motionPose);
+            await new Promise(resolve => setTimeout(resolve, 2900));
+            const ambientState = Battle3DEngine.getDebugState();
+            const ambientHpUnchanged = hpBeforeAmbient.every(([uid, hp]) => find(uid).currentHp === hp);
+            const backlineActed = ambientState.ambientArrowVolleys >= 2 && ambientState.ambientSpellcasts >= 2
+                && archerMoved && casterMoved && ambientHpUnchanged;
+            Battle3DEngine.pauseAnimationLoop(true);
 
             fresh();
             Battle3DEngine.setAudioPaused(true);
@@ -532,10 +555,10 @@ try:
             fresh();
             await pending;
             const cancelled = cancelledImpacts === 0 && Battle3DEngine.getDebugState().fallenBattalions === 0;
-            return { missResults, mutualDeath, orderedHp, actorOrdering, paused, cancelled };
+            return { missResults, mutualDeath, orderedHp, cavalryCharge, actorOrdering, backlineActed, paused, cancelled };
         }""")
         assert all(combat_checks['missResults']), f"MISS incorrectly caused hit reactions or HP loss: {combat_checks}"
-        assert all(combat_checks[key] for key in ['mutualDeath', 'orderedHp', 'actorOrdering', 'paused', 'cancelled']), \
+        assert all(combat_checks[key] for key in ['mutualDeath', 'orderedHp', 'cavalryCharge', 'actorOrdering', 'backlineActed', 'paused', 'cancelled']), \
             f"Concurrent combat scheduling failed: {combat_checks}"
         assert not natural_errors, f"Natural battle raised browser errors: {natural_errors}"
         print("[TEST 7b] 自然戰局、同步反擊、傷害排序、同將排程、MISS、取消、七陣列與地形氣候通過！")

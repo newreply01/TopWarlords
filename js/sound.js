@@ -5,7 +5,7 @@
    支援左右陣營立體聲定位、多取樣輪替防機械感、戶外山谷空間殘響與平滑 BGM 交叉淡入淡出
    ===================================================== */
 (function () {
-  const AUDIO_VER = '7.10.1';
+  const AUDIO_VER = '7.10.3';
   const BASE_PATH = 'assets/audio/';
 
   const CLIP_MANIFEST = {

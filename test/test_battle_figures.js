@@ -70,6 +70,13 @@ for (const cat of cats) {
   figures.animate(ranks, token, 2800, true, true, () => 0, 0.82);
   assert.notDeepEqual(Array.from(arm.instanceMatrix.array), readyArm,
     'Every battalion role must fight continuously while the army advances');
+  if (['air_defense', 'support'].includes(cat)) {
+    figures.animate(ranks, token, 3000, false, true, () => 0, 0.82);
+    const firstBacklinePose = Array.from(arm.instanceMatrix.array);
+    figures.animate(ranks, token, 3350, false, true, () => 0, 0.82);
+    assert.notDeepEqual(Array.from(arm.instanceMatrix.array), firstBacklinePose,
+      `${cat} must keep a recognizable combat gesture while holding its position`);
+  }
   figures.fall(ranks, token, 0.1, () => 0.3);
   assert(Math.abs(body.instanceMatrix.array[13] - 0.335) < 0.001,
     'Previously fallen soldiers must not stand up during defeat');

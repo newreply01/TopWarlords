@@ -303,6 +303,61 @@ try:
 
         print(f"[TEST 6] 戰鬥結算完成，戰報海報按鈕可見: {is_finished}")
 
+        # 6.5 行動端 (390x844) 備戰指揮列與首次引導排版實測
+        page.set_viewport_size({"width": 390, "height": 844})
+        page.wait_for_function(
+            "() => window.matchMedia('(max-width: 768px)').matches && document.querySelector('#commandDeck') && !document.querySelector('#commandDeck').hidden",
+            timeout=5000,
+        )
+        page.wait_for_timeout(250)
+        mobile_deck = page.evaluate("""() => {
+            const box = sel => {
+                const el = document.querySelector(sel);
+                if (!el) return null;
+                const r = el.getBoundingClientRect();
+                return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
+            };
+            return {
+                deck: box('#commandDeck'),
+                budget: box('#budgetUsed'),
+                rand: box('#btnRand'),
+                more: box('#btnDeckMore'),
+                go: box('#btnGo')
+            };
+        }""")
+        for key in ("budget", "rand", "more", "go"):
+            b = mobile_deck[key]
+            assert b and b["left"] >= 0 and b["right"] <= 390 and b["top"] >= 0 and b["bottom"] <= 844, \
+                f"Mobile {key} out of 390x844 viewport: {mobile_deck}"
+        assert mobile_deck["rand"]["width"] >= 40 and mobile_deck["more"]["width"] >= 40 and mobile_deck["go"]["width"] >= 200, \
+            f"Mobile command deck buttons undersized: {mobile_deck}"
+        assert mobile_deck["budget"]["right"] < mobile_deck["rand"]["left"], \
+            f"Mobile budget collides with #btnRand: {mobile_deck}"
+        assert mobile_deck["rand"]["bottom"] <= mobile_deck["go"]["top"] + 2, \
+            f"Mobile #btnRand/#btnDeckMore row did not stay above #btnGo: {mobile_deck}"
+
+        fresh_mobile = browser.new_context(viewport={"width": 390, "height": 844})
+        fresh_page = fresh_mobile.new_page()
+        fresh_page.on("pageerror", lambda err: errors.append(str(err)))
+        fresh_page.goto(f"http://127.0.0.1:{PORT}/index.html")
+        fresh_page.wait_for_selector(".m-card", timeout=10000)
+        fresh_page.wait_for_timeout(200)
+        assert not fresh_page.locator("#helpModal").evaluate("el => el.hidden"), "First visit should open help modal"
+        assert fresh_page.locator("#onboardCoachBar").evaluate("el => el.hidden"), "Onboarding coach bar should wait until help modal closes"
+        fresh_page.locator("#helpClose").click()
+        fresh_page.wait_for_timeout(200)
+        assert fresh_page.locator("#helpModal").evaluate("el => el.hidden"), "Help modal did not close"
+        onboard_rect = fresh_page.evaluate("""() => {
+            const bar = document.querySelector('#onboardCoachBar');
+            const br = bar.getBoundingClientRect();
+            const steps = [...bar.querySelectorAll('.onboard-step')].map(s => s.getBoundingClientRect().width);
+            return { hidden: bar.hidden, width: br.width, height: br.height, steps };
+        }""")
+        assert not onboard_rect["hidden"] and onboard_rect["height"] <= 160 and all(w >= 150 for w in onboard_rect["steps"]), \
+            f"Mobile onboard coach bar collapsed or overflowed: {onboard_rect}"
+        fresh_mobile.close()
+        print(f"[TEST 7] 行動端 (390x844) 雙層指揮列與新手引導流驗證通過: {onboard_rect}")
+
         # 檢查過程是否有 JS 報錯
         assert len(errors) == 0, f"瀏覽器執行出現 JS 報錯: {errors}"
 

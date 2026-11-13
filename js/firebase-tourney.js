@@ -36,24 +36,24 @@ const FirebaseTourneyEngine = (function() {
   const seenHistoryLengths = {};
   let isFirstSnap = true;
 
-  // 備選 AI 代表隊庫
+  // 備選 AI 歷史名將軍團庫
   const NATION_POOL = [
-    { name: '美國第七艦隊特遣隊', flag: '🇺🇸', doc: 'strike', callsign: 'TASK FORCE 70' },
-    { name: '德國第十裝甲師', flag: '🇩🇪', doc: 'defense', callsign: 'PANZER 10' },
-    { name: '法國外籍空降特戰群', flag: '🇫🇷', doc: 'strike', callsign: 'LEGION AIR' },
-    { name: '日本海上自衛隊護衛群', flag: '🇯🇵', doc: 'defense', callsign: 'ESCORTE FLEET' },
-    { name: '英國皇家海軍陸戰隊', flag: '🇬🇧', doc: 'strike', callsign: 'ROYAL COMMANDO' },
-    { name: '韓國首都防衛司令部', flag: '🇰🇷', doc: 'defense', callsign: 'SHIELD CAPITAL' },
-    { name: '以色列國防軍裝甲打擊旅', flag: '🇮🇱', doc: 'strike', callsign: 'GOLANI STRIKE' },
-    { name: '加拿大第一步兵師', flag: '🇨🇦', doc: 'defense', callsign: 'MAPLE LEAF' },
-    { name: '瑞典哥特蘭防衛軍群', flag: '🇸🇪', doc: 'deception', callsign: 'NORDIC SHIELD' },
-    { name: '荷蘭皇家空軍快速反應群', flag: '🇳🇱', doc: 'strike', callsign: 'ORANGE TALON' },
-    { name: '波蘭第十六機械化師', flag: '🇵🇱', doc: 'defense', callsign: 'WHITE EAGLE' },
-    { name: '義大利重裝特遣旅', flag: '🇮🇹', doc: 'strike', callsign: 'CENTAURO' },
-    { name: '西班牙特種空中突擊隊', flag: '🇪🇸', doc: 'strike', callsign: 'MATADOR AIR' },
-    { name: '澳洲陸軍第一旅', flag: '🇦🇺', doc: 'defense', callsign: 'ANZAC BRIGADE' },
-    { name: '新加坡裝甲突擊群', flag: '🇸🇬', doc: 'deception', callsign: 'LION ARMOR' },
-    { name: '挪威北部邊防特遣隊', flag: '🇳🇴', doc: 'defense', callsign: 'ARCTIC VANGUARD' }
+    { name: '大漢驃騎冠軍營', flag: '🇨🇳', doc: 'strike', callsign: 'HAN HUO' },
+    { name: '曹魏虎豹精騎軍', flag: '🇨🇳', doc: 'strike', callsign: 'WEI TIGER' },
+    { name: '季漢無當飛軍營', flag: '🇨🇳', doc: 'defense', callsign: 'SHU WUDANG' },
+    { name: '江東錦帆水陸軍', flag: '🇨🇳', doc: 'deception', callsign: 'WU SAIL' },
+    { name: '大秦武安鐵衛軍', flag: '🇨🇳', doc: 'defense', callsign: 'QIN BAIQI' },
+    { name: '大唐玄甲陌刀營', flag: '🇨🇳', doc: 'defense', callsign: 'TANG XUANJIA' },
+    { name: '大宋背嵬忠烈軍', flag: '🇨🇳', doc: 'defense', callsign: 'SONG BEIWEI' },
+    { name: '大明戚家鴛鴦陣', flag: '🇨🇳', doc: 'defense', callsign: 'MING QIJUN' },
+    { name: '甲斐風林火山軍', flag: '🇯🇵', doc: 'strike', callsign: 'KAI SHINGEN' },
+    { name: '越後車懸毘沙門', flag: '🇯🇵', doc: 'strike', callsign: 'ECHIGO KENSHIN' },
+    { name: '尾張三段鐵砲隊', flag: '🇯🇵', doc: 'defense', callsign: 'OWARI ODA' },
+    { name: '奧州伊達騎銃軍', flag: '🇯🇵', doc: 'strike', callsign: 'DATE DRAGON' },
+    { name: '安藝三矢水陸營', flag: '🇯🇵', doc: 'deception', callsign: 'AKI MOURI' },
+    { name: '朝鮮忠武鳴梁營', flag: '🇰🇷', doc: 'defense', callsign: 'JOSEON YI' },
+    { name: '高句麗薩水奇兵軍', flag: '🇰🇷', doc: 'deception', callsign: 'SALSU EULJI' },
+    { name: '新羅花郎誓天衛', flag: '🇰🇷', doc: 'defense', callsign: 'SILLA HWARANG' }
   ];
 
     // 陣列反序列化安全轉換 (防 Firebase RTDB 將陣列還原為純 Object 導致 push/length 失效)
@@ -141,7 +141,7 @@ const FirebaseTourneyEngine = (function() {
       const p = LADDER_PRESETS[Math.floor(Math.random() * LADDER_PRESETS.length)];
       return p.deck.slice();
     }
-    return ['F35A', 'M1A2', 'PAC3', 'TJ', 'MORTAR'];
+    return ['ZHANGLIAO', 'DIANWEI', 'HUANGZHONG', 'GANNING', 'SUNBIN'];
   }
 
   /* 監聽公開大廳等待中房間列表 (自動過濾過期殭屍房，優先使用索引查詢節省頻寬) */

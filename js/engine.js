@@ -33,16 +33,16 @@ const EVENTS = [
 
 /* ---------- 兵法戰術教條（賽前 3 選 1，源自《孫子兵法》與風林火山） ---------- */
 const DOCTRINES = [
-  { id: 'strike',    icon: '🌪️', name: '疾如風', desc: '奇襲破敵：階段一、二攻擊 +12%，但承受傷害 +5%。' },
+  { id: 'strike',    icon: '🌪️', name: '疾如風', desc: '奇襲破敵：階段一、二攻擊 +26%、階段三攻擊 +20%，但承受傷害 +2%。' },
   { id: 'defense',   icon: '⛰️', name: '不動如山', desc: '固守待援：承受傷害 −12%，神射攔截命中 +6%。' },
-  { id: 'deception', icon: '🌑', name: '難知如陰', desc: '虛實奇謀：軍師謀略值 ×1.5；敵方全體命中率 −8%。' }
+  { id: 'deception', icon: '🌑', name: '難知如陰', desc: '虛實奇謀：軍師謀略值 ×1.2；敵方全體命中率 −3%。' }
 ];
 const DOC_FX = {
-  strike:     { atkEarly: 1.12, taken: 1.05, adHit: 0,    ewMult: 1,   enemyPen: 0 },
-  defense:    { atkEarly: 1,    taken: 0.88, adHit: 0.06, ewMult: 1,   enemyPen: 0 },
-  deception:  { atkEarly: 1,    taken: 1,    adHit: 0,    ewMult: 1.5, enemyPen: 0.08 },
-  electronic: { atkEarly: 1,    taken: 1,    adHit: 0,    ewMult: 1.5, enemyPen: 0.08 },
-  air_sup:    { atkEarly: 1.12, taken: 1.05, adHit: 0,    ewMult: 1,   enemyPen: 0 }
+  strike:     { atkEarly: 1.26, atkLate: 1.20, taken: 1.02, adHit: 0,    ewMult: 1,   enemyPen: 0 },
+  defense:    { atkEarly: 1,    atkLate: 1,    taken: 0.88, adHit: 0.06, ewMult: 1,   enemyPen: 0 },
+  deception:  { atkEarly: 1,    atkLate: 1,    taken: 1,    adHit: 0,    ewMult: 1.2, enemyPen: 0.03 },
+  electronic: { atkEarly: 1,    atkLate: 1,    taken: 1,    adHit: 0,    ewMult: 1.2, enemyPen: 0.03 },
+  air_sup:    { atkEarly: 1.26, atkLate: 1.20, taken: 1.02, adHit: 0,    ewMult: 1,   enemyPen: 0 }
 };
 
 /* ---------- 武將戰術標記 (Role Flags) 判定輔助函式 ---------- */
@@ -277,8 +277,8 @@ function resolveBattle(deckA, deckB, opts) {
   const normDoc = d => (d === 'electronic' ? 'deception' : d === 'air_sup' ? 'strike' : (DOC_FX[d] ? d : 'defense'));
   const docs = { A: normDoc(opts.docA), B: normDoc(opts.docB) };
   const S = {
-    A: Object.assign({ hitPen: 0, ewBonus: 0, navHit: 0, navMult: 1, droneMult: 1, landMult: 1 }, DOC_FX[docs.A]),
-    B: Object.assign({ hitPen: 0, ewBonus: 0, navHit: 0, navMult: 1, droneMult: 1, landMult: 1 }, DOC_FX[docs.B])
+    A: Object.assign({ hitPen: 0, ewBonus: 0, atkAll: 1, navHit: 0, navMult: 1, droneMult: 1, landMult: 1 }, DOC_FX[docs.A]),
+    B: Object.assign({ hitPen: 0, ewBonus: 0, atkAll: 1, navHit: 0, navMult: 1, droneMult: 1, landMult: 1 }, DOC_FX[docs.B])
   };
   S.A.hitPen = S.B.enemyPen;
   S.B.hitPen = S.A.enemyPen;
@@ -353,7 +353,7 @@ function resolveBattle(deckA, deckB, opts) {
       const ok = rng() < p;
       const skillPhase = Number(String(a.att.skill?.phase || '').replace('P', ''));
       const skillProc = Boolean(ok && !a.att.skillUsed && skillPhase === vOpts.phase);
-      const ambushProc = Boolean(ok && !a.att.ambushUsed && a.att.traits.includes('AMBUSH') && a.tgt.cost >= a.att.cost + 2);
+      const ambushProc = Boolean(ok && !a.att.ambushUsed && a.att.traits.includes('AMBUSH') && (a.tgt.cost >= a.att.cost + 2 || (a.att.cost >= 4 && a.tgt.cost >= 4)));
       if (skillProc) a.att.skillUsed = true;
       if (ambushProc) a.att.ambushUsed = true;
       const tacticProc = ok && a.att.formationTacticChance > 0 && rng() < a.att.formationTacticChance;
@@ -366,7 +366,7 @@ function resolveBattle(deckA, deckB, opts) {
       }
       rolled.push({
         a, p, ok, tacticProc, duelProc, skillProc, ambushProc, skillModifiers,
-        raw: a.dmg * (0.85 + rng() * 0.3) * DMG_SCALE * (S[a.att.side].atkAll || 1) * a.att.formationAttack * (tacticProc ? a.att.formationTacticDamage : 1) * (duelProc ? 1.12 : 1) * skillModifiers.damage * (ambushProc ? 1.25 : 1)
+        raw: a.dmg * (0.85 + rng() * 0.3) * DMG_SCALE * (S[a.att.side].atkAll || 1) * (vOpts.phase === 3 ? (S[a.att.side].atkLate || 1) : 1) * a.att.formationAttack * (tacticProc ? a.att.formationTacticDamage : 1) * (duelProc ? 1.12 : 1) * skillModifiers.damage * (ambushProc ? 1.25 : 1)
       });
     }
     for (const roll of rolled) {
@@ -523,9 +523,9 @@ function resolveBattle(deckA, deckB, opts) {
   if (Math.abs(ewA - ewB) >= 10) {
     advSide = ewA > ewB ? 'A' : 'B';
     const ratio = clamp(Math.abs(ewA - ewB) / 50, 0, 1);
-    const pen = 0.15 * ratio, boost = 0.08 * ratio;
+    const pen = 0.08 * ratio, boost = 0.05 * ratio;
     S[other(advSide)].hitPen += pen;
-    S[advSide].atkAll = 1 + boost;
+    S[advSide].atkAll = (S[advSide].atkAll || 1) * (1 + boost);
     l1.push({ side: advSide, kind: 'info', text: `${advSide === 'A' ? '我方' : '敵方'}運籌決勝取得謀略先機：對手命中率 −${Math.round(pen * 100)}%，己方全軍戰意 +${Math.round(boost * 100)}%。` });
     if (ratio >= 0.5) addKey(4, `${advSide === 'A' ? '我方' : '敵方'}智勝一籌取得戰局先手（謀略 ${ewA.toFixed(0)} vs ${ewB.toFixed(0)}）`, advSide);
   } else {
@@ -584,7 +584,7 @@ function resolveBattle(deckA, deckB, opts) {
         u.shots++;
         const f = u.cat === 'air_defense' ? 1 : 0.55;
         const hit = hitP(u, t, 0.82 + (u.traits.includes('AA_LONG') ? 0.08 : 0) + S[s].adHit, 0.55, m.airHit + ammo.hitMod);
-        at.push({ att: u, tgt: t, ammoTier: ammo.tier, hit, dmg: u.atk * 2.5 * f * ammo.dmgMult });
+        at.push({ att: u, tgt: t, ammoTier: ammo.tier, hit, dmg: u.atk * 2.5 * f * S[s].atkEarly * ammo.dmgMult });
       }
     }
     pushFrame(2, '階段二 · 神射箭雨攔截', volley(at, { phase: 2 }));
@@ -961,32 +961,49 @@ function randomDeck(rng, budget, locked, banned) {
   budget = budget == null ? BUDGET : budget;
   locked = locked || [];
   banned = banned || [];
+  let fixedSpent = 0;
+  const unlockedIdx = [];
+  for (let i = 0; i < SLOTS.length; i++) {
+    if (locked[i]) {
+      const u = UNIT_MAP[locked[i]];
+      if (!u) return null;
+      fixedSpent += u.cost;
+    } else {
+      unlockedIdx.push(i);
+    }
+  }
+  if (fixedSpent > budget) return null;
+  if (!unlockedIdx.length) {
+    const fixedOut = locked.slice(0, SLOTS.length);
+    return validateDeck(fixedOut, budget, banned).length === 0 ? fixedOut : null;
+  }
   for (let attempt = 0; attempt < 300; attempt++) {
     const ids = [];
-    let spent = 0, ok = true;
-    for (let i = 0; i < SLOTS.length && ok; i++) {
-      if (locked[i]) {
-        ids.push(locked[i]); spent += UNIT_MAP[locked[i]].cost;
-      }
-    }
-    if (spent > budget) return null;
-    const unlockedIdx = [];
-    for (let i = 0; i < SLOTS.length; i++) if (!locked[i]) unlockedIdx.push(i);
-    for (let i = unlockedIdx.length - 1; i > 0; i--) {
+    for (let i = 0; i < SLOTS.length; i++) if (locked[i]) ids[i] = locked[i];
+    let spent = fixedSpent, ok = true;
+    const order = unlockedIdx.slice();
+    for (let i = order.length - 1; i > 0; i--) {
       const j = Math.floor(rng() * (i + 1));
-      const tmp = unlockedIdx[i]; unlockedIdx[i] = unlockedIdx[j]; unlockedIdx[j] = tmp;
+      const tmp = order[i]; order[i] = order[j]; order[j] = tmp;
     }
-    for (let k = 0; k < unlockedIdx.length; k++) {
-      const i = unlockedIdx[k];
-      const rest = unlockedIdx.length - 1 - k;
+    const exactFill = attempt < 150;
+    for (let k = 0; k < order.length; k++) {
+      const i = order[k];
+      const rest = order.length - 1 - k;
       const maxCost = Math.min(5, budget - spent - rest);
-      if (maxCost < 1) { ok = false; break; }
+      const minCost = exactFill ? Math.max(1, budget - spent - 5 * rest) : 1;
+      if (maxCost < minCost) { ok = false; break; }
       const cat = SLOTS[i].fixed;
-      const cand = UNITS.filter(u => u.cat === cat && u.cost <= maxCost && !ids.includes(u.id) && !locked.includes(u.id) && !banned.includes(u.id));
+      const cand = UNITS.filter(u =>
+        u.cat === cat && u.cost >= minCost && u.cost <= maxCost
+        && !ids.includes(u.id) && !locked.includes(u.id) && !banned.includes(u.id)
+      );
       if (!cand.length) { ok = false; break; }
-      const total = cand.reduce((x, u) => x + u.cost, 0);
-      let r = rng() * total, pick = cand[0];
-      for (const u of cand) { r -= u.cost; if (r <= 0) { pick = u; break; } }
+      const tiers = [];
+      for (const u of cand) if (!tiers.includes(u.cost)) tiers.push(u.cost);
+      const chosenCost = tiers[Math.floor(rng() * tiers.length)];
+      const tierPool = cand.filter(u => u.cost === chosenCost);
+      const pick = tierPool[Math.floor(rng() * tierPool.length)];
       ids[i] = pick.id; spent += pick.cost;
     }
     if (ok) {

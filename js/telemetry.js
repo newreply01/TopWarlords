@@ -35,18 +35,25 @@ const Telemetry = (() => {
   let myPresenceRef = null;
   let mySessionId = 'sess_' + Math.random().toString(36).substring(2, 10);
 
-  // 取得或生成不變的本機玩家 UID
+  // 取得或生成不變的本機玩家 UID (與 LadderEngine 共用 32 字元無混淆字元集)
   function getMyUid() {
     let uid = localStorage.getItem('topclash_user_uid');
     if (!uid) {
-      uid = 'CMD-' + Math.floor(1000 + Math.random() * 9000);
+      if (typeof LadderEngine !== 'undefined' && typeof LadderEngine.generateCommanderUID === 'function') {
+        uid = LadderEngine.generateCommanderUID();
+      } else {
+        const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        let code = '';
+        for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+        uid = `CMD-${code}`;
+      }
       localStorage.setItem('topclash_user_uid', uid);
     }
     return uid;
   }
 
   function getMyCallsign() {
-    return localStorage.getItem('topclash_auto_callsign') || '特遣隊指揮官';
+    return localStorage.getItem('topclash_auto_callsign') || '無名大將';
   }
 
   function getTodayKey() {

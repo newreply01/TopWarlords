@@ -1694,6 +1694,11 @@ function updateCardSelectionVisuals() {
 function renderOnboardingGuide() {
   const bar = $('#onboardCoachBar');
   if (!bar) return;
+  const helpModal = $('#helpModal');
+  if (helpModal && !helpModal.hidden) {
+    bar.hidden = true;
+    return;
+  }
   const isDismissed = Boolean(LS.get('wl15_onboard_done', false));
   if (isDismissed || (stats.played > 0 && !state.forceShowOnboard)) {
     bar.hidden = true;
@@ -2610,9 +2615,9 @@ function startLadderBuild(pendingTarget = null) {
   state.buildSource = 'ladder';
   state.ladderPendingTarget = pendingTarget;
 
-  // 載入當前天梯防守陣容與教條（若已配置滿 5 槽）
+  // 載入當前天梯防守陣容與教條（若已配置合法滿 5 槽）
   const lState = (typeof LadderEngine !== 'undefined') ? LadderEngine.getState() : null;
-  if (lState?.player?.defenseDeck && Array.isArray(lState.player.defenseDeck) && lState.player.defenseDeck.filter(Boolean).length === 5) {
+  if (lState?.player?.defenseDeck && Array.isArray(lState.player.defenseDeck) && validateDeck(lState.player.defenseDeck).length === 0) {
     state.deck = lState.player.defenseDeck.slice();
   }
   if (lState?.player?.defenseDoc) {
@@ -3313,7 +3318,9 @@ $('#viewLadder')?.addEventListener('click', e => {
   if (defDocBtn) {
     const newDoc = defDocBtn.dataset.defDoc;
     const lState = LadderEngine.getState();
-    const curDeck = lState.player.defenseDeck || (state.deck.every(Boolean) ? state.deck : ['F16V', 'M1A2', 'NASAMS', 'TJ', 'TB2']);
+    const curDeck = (Array.isArray(lState.player.defenseDeck) && validateDeck(lState.player.defenseDeck).length === 0)
+      ? lState.player.defenseDeck
+      : (state.deck.every(Boolean) ? state.deck : ['ZHANGLIAO', 'DIANWEI', 'HUANGZHONG', 'GANNING', 'SUNBIN']);
     LadderEngine.setDefenseFleet(curDeck, newDoc);
     renderLadderView();
     const dObj = DOCTRINES.find(d => d.id === newDoc);
@@ -6535,8 +6542,10 @@ window.addEventListener('appinstalled', () => {
 });
 
 function showHelp(activeTab = 'rules') {
+  const onboardBar = $('#onboardCoachBar');
+  if (onboardBar) onboardBar.hidden = true;
   if (typeof PosterHelpModule !== 'undefined' && typeof PosterHelpModule.showHelp === 'function') {
-    PosterHelpModule.showHelp(activeTab, { $, LS, toast });
+    PosterHelpModule.showHelp(activeTab, { $, LS, toast, onClose: () => renderOnboardingGuide() });
   }
 }
 $('#btnHelp').onclick = () => showHelp('rules');
@@ -7138,7 +7147,12 @@ function getTournamentPlayerProfile() {
   if (!localUid) {
     localUid = (typeof LadderEngine !== 'undefined' && LadderEngine.generateCommanderUID)
       ? LadderEngine.generateCommanderUID()
-      : ('CMD-' + Math.floor(1000 + Math.random() * 9000));
+      : (() => {
+          const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+          let code = '';
+          for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+          return `CMD-${code}`;
+        })();
     localStorage.setItem('topwarlords_user_uid', localUid);
   }
   const myUid = (p && p.uid && p.uid !== 'CMD-7392') ? p.uid : localUid;
@@ -8862,7 +8876,7 @@ function downloadTournamentChampionPoster(championTeam) {
   for (let x = 0; x < W; x += 54) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
   for (let y = 0; y < H; y += 54) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
 
-  g.fillStyle = '#fbbf24'; g.font = '700 28px "JetBrains Mono",monospace'; g.fillText('TOP CLASH 15 · WORLD CHAMPIONSHIP', 80, 110);
+  g.fillStyle = '#fbbf24'; g.font = '700 28px "JetBrains Mono",monospace'; g.fillText('TOP WARLORDS 15 · WORLD CHAMPIONSHIP', 80, 110);
   g.fillStyle = '#ffffff'; g.font = '900 68px "Noto Sans TC",sans-serif'; g.fillText('世界盃淘汰大獎賽', 80, 200);
 
   g.fillStyle = '#f59e0b'; g.font = '900 130px "Noto Sans TC",sans-serif';
@@ -8886,7 +8900,7 @@ function downloadTournamentChampionPoster(championTeam) {
     y += 138;
   });
 
-  const a = document.createElement('a'); a.download = 'topclash-champion.png'; a.href = c.toDataURL('image/png'); a.click();
+  const a = document.createElement('a'); a.download = 'topwarlords-champion.png'; a.href = c.toDataURL('image/png'); a.click();
   toast('🏆 世界冠軍戰報海報已成功下載！');
 }
 

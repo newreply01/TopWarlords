@@ -108,7 +108,7 @@
     <ul>
       <li><b>五大專屬兵團</b>：奔雷突騎 (CAV)、重甲陷陣 (ARM)、神射強弩 (ARC)、先登奇兵 (VAN)、軍師奇謀 (STR) 各選 1 位歷史名將，不可重複或留空。</li>
       <li><b>總軍令 $15 限額</b>：名將軍令由 $1 至 $5 不等，只要總軍令不超標，可自由配置多個 $5 傳世名將（如霍去病、衛青、白起、諸葛亮、上杉謙信、武田信玄、李舜臣等）。</li>
-      <li><b>收錄 164 位日韓中純歷史名將</b>：每個槽位提供 5 種價位、每種價位各有 A～H 共 8 款不同特性名將與兵器。可隨時點擊右上角「點將調撥兵符」重新召集候選名將。</li>
+      <li><b>收錄 125 位日韓中純歷史名將</b>：每個槽位提供 $1～$5 五種價位、每種價位各有 A～E 共 5 款不同特性名將與兵器。可隨時點擊右上角「點將調撥兵符」重新召集候選名將。</li>
     </ul>
 
     <h3>二、四大核心演習模式</h3>
@@ -172,7 +172,7 @@
       <div class="help-row">
         <div class="help-badge">🌪 疾如風</div>
         <div class="help-desc">
-          階段一、二攻擊火力 <b>+12%</b>，但承受傷害 <b>+5%</b>（兵貴神速，適合突騎千里奔襲與長程斬首突擊）。
+          階段一、二攻擊火力 <b>+26%</b>、階段三攻擊火力 <b>+20%</b>，但承受傷害 <b>+2%</b>（兵貴神速，適合突騎千里奔襲與猛攻速決）。
         </div>
       </div>
       <div class="help-row">
@@ -184,7 +184,7 @@
       <div class="help-row">
         <div class="help-badge">🌑 難知如陰</div>
         <div class="help-desc">
-          全軍謀略值 <b>×1.5 倍</b>（大幅強化奪取陣法先機機會），並使敵方全體命中率 <b>−8%</b>（神鬼莫測，適合奇謀算計與規避敵軍重擊）。
+          全軍謀略值 <b>×1.2 倍</b>（強化奪取陣法先機機會），並使敵方全體命中率 <b>−3%</b>（神鬼莫測，適合奇謀算計與規避敵軍重擊）。
         </div>
       </div>
     </div>
@@ -218,7 +218,7 @@
       <div class="help-row">
         <div class="help-badge">⚡ 運籌決勝</div>
         <div class="help-desc">
-          全軍謀略總值超越對手 <b>≥ 10</b> 點時奪取戰局先機，敵方全體命中率最高 <b>−15%</b>、我方戰力最高 <b>+8%</b>。
+          全軍謀略總值超越對手 <b>≥ 10</b> 點時奪取戰局先機，敵方全體命中率最高 <b>−8%</b>、我方戰力最高 <b>+5%</b>。
         </div>
       </div>
     </div>
@@ -329,15 +329,14 @@
     });
 
     $('#helpModal').hidden = false;
-    $('#helpClose').onclick = () => {
+    const closeHelpModal = () => {
       $('#helpModal').hidden = true;
       if (LS) LS.set('wl15_seen', 1);
+      if (typeof ctx.onClose === 'function') ctx.onClose();
     };
+    $('#helpClose').onclick = closeHelpModal;
     $('#helpModal').onclick = (e) => {
-      if (e.target === $('#helpModal')) {
-        $('#helpModal').hidden = true;
-        if (LS) LS.set('wl15_seen', 1);
-      }
+      if (e.target === $('#helpModal')) closeHelpModal();
     };
 
     const btnInstall = $('#btnPwaInstallPrompt');

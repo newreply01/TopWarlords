@@ -33,9 +33,9 @@ const TRAITS = {
   AEGIS:   '斷騎護陣：階段二可協同神射攔截敵方突騎（火力 55%）',
   SUB:     '潛行夜襲：隱匿極高；對未設防部隊傷害 ×1.3',
   ASW:     '看破反伏：專克潛行夜襲與忍者，傷害 ×1.6',
-  AMBUSH:  '奇襲（跨軍種）：每場首次成功攻擊高費（+2 費以上）目標，傷害 ×1.25',
+  AMBUSH:  '奇襲（跨軍種）：每場首次成功攻擊高費目標（高出 ≥2 費，或四／五費精銳對決四／五費目標），傷害 ×1.25',
   SWARM:   '多路並進：同時攻擊兩個目標（單次傷害 ×0.6）',
-  EW:      '運籌帷幄：謀略值領先越多，敵方命中最多 −15%、己方攻擊最多 +8%',
+  EW:      '運籌帷幄：謀略值領先越多，敵方命中最多 −8%、己方攻擊最多 +5%',
   SEAD:    '先制破陣：階段一先制打擊敵方神射箭陣',
   DEEP:    '十面埋伏：階段一直擊敵方最昂貴主帥核心',
   ARTY:    '攻城砲火：第三階段持續以投石火砲轟擊敵陣',
@@ -430,7 +430,7 @@ const UNIT_SKILLS = {
 };
 
 const UNIT_SKILL_EFFECTS = {
-  HUO: { damage: 1.22, highCostDamage: 0.12 },
+  HUO: { damage: 1.22, bonusVs: { air_defense: 0.16, support: 0.16 }, enemyHit: 0.03 },
   WEI: { damage: 1.08, teamGuard: 0.06, teamHit: 0.03 },
   CHENQINGZHI: { damage: 1.2, teamHit: 0.04 },
   LUBU: { damage: 1.3 },

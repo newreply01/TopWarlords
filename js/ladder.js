@@ -17,6 +17,34 @@ const LadderEngine = (function() {
     return `CMD-${code}`;
   }
 
+  const DEFAULT_DEFENSE_DECK = ['ZHANGLIAO', 'DIANWEI', 'HUANGZHONG', 'GANNING', 'SUNBIN'];
+
+  function normalizeDefenseDoc(doc) {
+    if (doc === 'air_sup') return 'strike';
+    if (doc === 'electronic') return 'deception';
+    if (doc === 'strike' || doc === 'defense' || doc === 'deception') return doc;
+    return 'defense';
+  }
+
+  function sanitizeDefenseDeck(deck) {
+    const fallback = (typeof LADDER_PRESETS !== 'undefined' && Array.isArray(LADDER_PRESETS) && LADDER_PRESETS[0] && Array.isArray(LADDER_PRESETS[0].deck))
+      ? LADDER_PRESETS[0].deck.slice()
+      : DEFAULT_DEFENSE_DECK.slice();
+    if (!Array.isArray(deck) || deck.length !== 5) return fallback;
+    if (typeof UNIT_MAP !== 'undefined' && typeof SLOTS !== 'undefined') {
+      const seen = new Set();
+      let total = 0;
+      for (let i = 0; i < 5; i++) {
+        const u = UNIT_MAP[deck[i]];
+        if (!u || seen.has(u.id) || (SLOTS[i] && u.cat !== SLOTS[i].fixed)) return fallback;
+        seen.add(u.id);
+        total += u.cost;
+      }
+      if (total > 15) return fallback;
+    }
+    return deck.slice();
+  }
+
   let state = {
     version: 'v5.5.0',
     player: {
@@ -32,7 +60,7 @@ const LadderEngine = (function() {
       lastResetDate: '',
       lastResetHour: '',
       streakDays: 1, // 連續維持該名次天數
-      defenseDeck: ['F16V', 'M1A2', 'TC2', 'TJ', 'FPV'],
+      defenseDeck: DEFAULT_DEFENSE_DECK.slice(),
       defenseDoc: 'strike',
       stats: { wins: 0, losses: 0, highestRank: 101, highestRP: 0, miracleKills: 0, streakBreaks: 0 }
     },
@@ -61,7 +89,7 @@ const LadderEngine = (function() {
     const db = getFirebaseDb();
     if (!db || !state.player || !state.player.uid) return;
     const key = String(state.player.uid).replace(/[^a-zA-Z0-9_-]/g, '_');
-    const deck = (state.player.defenseDeck || []).map(id => (id === 'TUOCHIANG' ? 'TJ' : id));
+    const deck = sanitizeDefenseDeck(state.player.defenseDeck);
     if (typeof validateDeck === 'function' && validateDeck(deck).length > 0) return;
     db.ref('ladder_ghosts/' + key).set({
       uid: state.player.uid,
@@ -69,7 +97,7 @@ const LadderEngine = (function() {
       flag: state.player.flag || '🇹🇼',
       rp: state.player.rp || 2055,
       deck: deck,
-      doc: state.player.defenseDoc === 'air_sup' ? 'strike' : (state.player.defenseDoc || 'defense'),
+      doc: normalizeDefenseDoc(state.player.defenseDoc),
       streakDays: state.player.streakDays || 1,
       updatedAt: Date.now()
     }).catch(() => {});
@@ -141,6 +169,8 @@ const LadderEngine = (function() {
           if (!state.player.uid) {
             state.player.uid = generateCommanderUID();
           }
+          state.player.defenseDeck = sanitizeDefenseDeck(state.player.defenseDeck);
+          state.player.defenseDoc = normalizeDefenseDoc(state.player.defenseDoc);
 
           // 每小時整點補給檢查 / 舊版派遣令自動升級為 30 次
           const curHour = getCurrentHourStr();
@@ -615,10 +645,10 @@ const LadderEngine = (function() {
 
   function setDefenseFleet(deck, doc) {
     if (Array.isArray(deck) && deck.length === 5) {
-      state.player.defenseDeck = [...deck];
+      state.player.defenseDeck = sanitizeDefenseDeck(deck);
     }
     if (doc) {
-      state.player.defenseDoc = doc;
+      state.player.defenseDoc = normalizeDefenseDoc(doc);
     }
     save();
     pushDefenseFleetToCloud();

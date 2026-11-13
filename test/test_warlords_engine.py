@@ -245,7 +245,7 @@ try:
             const removedIds = [
                 'FUMA', 'KEIJI', 'OBATA', 'HULU', 'ZANGBA', 'CAOZHANG', 'DIQING', 'LIDIAN', 'PANMEI', 'NIWA',
                 'LIUYU', 'YANGSU', 'CHENTANG', 'WEIXIAOKUAN', 'SEOHUI', 'KIMBUSHIK', 'EKEI', 'MASANOBU',
-                'FANLI', 'CHENGYU', 'YAMAMOTO', 'NAOIE', 'SESSAI', 'MASASHIGE', 'WENPING', 'QUYI', 'CAOZHEN',
+                'FANLI', 'CHENGYU', 'PANGJUAN', 'NAOIE', 'SESSAI', 'MASASHIGE', 'WENPING', 'QUYI', 'CAOZHEN',
                 'CAOCHUN', 'MENGGONG', 'ZUTI', 'GAOSHUN', 'MANCHONG', 'YUWENTAI', 'GANGCHO', 'SANADA_NOB',
                 'WANGPING', 'MILYU', 'TSUDA_SAN', 'GENGGONG', 'SHIMOTSUMA', 'WANGBA', 'KUKI_MORI', 'MIURA',
                 'BAEJEONG', 'TAKAKAGE', 'CHENGONG', 'GANGGAMCHAN'

@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.10.6';
+  const ASSET_VER = '7.10.7';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -54,7 +54,11 @@ const Battle3DEngine = (function () {
   let occupationZones = [];
   let lastOccupationZoneUpdate = 0;
   let groundCover = null;
-  let reserveArmy = null;
+  let campFortificationsGroup = null;
+  let campPennantsRef = null;
+  let campPennantTex = null;
+  let campBrazierFlamesRef = null;
+  const _campAnimObj = new THREE.Object3D();
   let dustTexture = null;
   let lastMarchSoundAt = 0;
   let lastMeleeSoundAt = 0;
@@ -615,8 +619,255 @@ const Battle3DEngine = (function () {
     return tex;
   }
 
+  function mergeStaticGeos(entries) {
+    const prepped = [];
+    const m = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    const e = new THREE.Euler();
+    const p = new THREE.Vector3();
+    let totalVerts = 0;
+    for (const item of entries) {
+      const g = item.geo.index ? item.geo.toNonIndexed() : item.geo.clone();
+      item.geo.dispose();
+      p.set(item.pos[0], item.pos[1], item.pos[2]);
+      e.set(item.rot ? item.rot[0] : 0, item.rot ? item.rot[1] : 0, item.rot ? item.rot[2] : 0);
+      q.setFromEuler(e);
+      m.compose(p, q, new THREE.Vector3(1, 1, 1));
+      g.applyMatrix4(m);
+      totalVerts += g.attributes.position.count;
+      prepped.push({ g, count: g.attributes.position.count });
+    }
+    const posArr = new Float32Array(totalVerts * 3);
+    const normArr = new Float32Array(totalVerts * 3);
+    const uvArr = new Float32Array(totalVerts * 2);
+    let o3 = 0, o2 = 0;
+    for (const { g, count } of prepped) {
+      posArr.set(g.attributes.position.array, o3);
+      if (g.attributes.normal) normArr.set(g.attributes.normal.array, o3);
+      if (g.attributes.uv) uvArr.set(g.attributes.uv.array, o2);
+      o3 += count * 3;
+      o2 += count * 2;
+      g.dispose();
+    }
+    const out = new THREE.BufferGeometry();
+    out.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+    out.setAttribute('normal', new THREE.BufferAttribute(normArr, 3));
+    out.setAttribute('uv', new THREE.BufferAttribute(uvArr, 2));
+    return out;
+  }
+
+  function createCampPennantTexture() {
+    if (campPennantTex) return campPennantTex;
+    const c = document.createElement('canvas');
+    c.width = 96;
+    c.height = 256;
+    const ctx = c.getContext('2d');
+    const bg = ctx.createLinearGradient(0, 0, 0, 256);
+    bg.addColorStop(0, '#ffffff');
+    bg.addColorStop(0.55, '#d4d4d8');
+    bg.addColorStop(1, '#52525b');
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.moveTo(4, 4);
+    ctx.lineTo(92, 4);
+    ctx.lineTo(86, 250);
+    ctx.lineTo(48, 212);
+    ctx.lineTo(10, 250);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 6;
+    ctx.stroke();
+
+    // 營盤軍旗簡潔戰紋菱格
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+    ctx.beginPath();
+    ctx.moveTo(48, 44);
+    ctx.lineTo(72, 84);
+    ctx.lineTo(48, 124);
+    ctx.lineTo(24, 84);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(253, 224, 71, 0.85)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    campPennantTex = tex;
+    return tex;
+  }
+
+  function buildCampFortifications() {
+    campFortificationsGroup = new THREE.Group();
+    const stakeGeo = mergeStaticGeos([
+      { geo: new THREE.CylinderGeometry(0.042, 0.052, 1.18, 5), pos: [-0.46, 0.59, 0] },
+      { geo: new THREE.ConeGeometry(0.052, 0.24, 5), pos: [-0.46, 1.30, 0] },
+      { geo: new THREE.CylinderGeometry(0.044, 0.054, 1.28, 5), pos: [-0.23, 0.64, 0.02] },
+      { geo: new THREE.ConeGeometry(0.054, 0.24, 5), pos: [-0.23, 1.40, 0.02] },
+      { geo: new THREE.CylinderGeometry(0.045, 0.055, 1.22, 5), pos: [0.0, 0.61, -0.01] },
+      { geo: new THREE.ConeGeometry(0.055, 0.24, 5), pos: [0.0, 1.34, -0.01] },
+      { geo: new THREE.CylinderGeometry(0.044, 0.054, 1.32, 5), pos: [0.23, 0.66, 0.01] },
+      { geo: new THREE.ConeGeometry(0.054, 0.24, 5), pos: [0.23, 1.44, 0.01] },
+      { geo: new THREE.CylinderGeometry(0.042, 0.052, 1.20, 5), pos: [0.46, 0.60, 0] },
+      { geo: new THREE.ConeGeometry(0.052, 0.24, 5), pos: [0.46, 1.32, 0] },
+      { geo: new THREE.BoxGeometry(1.18, 0.075, 0.075), pos: [0, 0.44, 0] },
+      { geo: new THREE.BoxGeometry(1.18, 0.075, 0.075), pos: [0, 0.92, 0] }
+    ]);
+    const palisadeSpots = [];
+    for (const sideSign of [-1, 1]) {
+      // 北翼山腰防禦木柵防線（取代空曠積木區，與營圍相連成一氣）
+      for (let k = 0; k < 8; k++) {
+        const t = k / 7;
+        palisadeSpots.push({
+          x: sideSign * (8.4 + t * 7.6),
+          z: -7.9 + t * 0.85,
+          rotY: (sideSign < 0 ? 0.12 : -0.12) + ((k % 2) * 0.03 - 0.015),
+          scale: 0.95 + (k % 3) * 0.05
+        });
+      }
+      // 東西後方連營圍柵（退至營帳外側 x=±16.2，中軍大道 z=0 留出營門）
+      for (const zPos of [-6.5, -5.4, -4.3, -3.2, -2.0, 2.0, 3.2, 4.3, 5.4, 6.5]) {
+        palisadeSpots.push({
+          x: sideSign * 16.2,
+          z: zPos,
+          rotY: Math.PI / 2 + (Math.sin(zPos) * 0.04),
+          scale: 0.96 + (Math.abs(Math.round(zPos)) % 2) * 0.06
+        });
+      }
+      // 南側本陣外緣拒柵
+      for (let k = 0; k < 5; k++) {
+        const t = k / 4;
+        palisadeSpots.push({
+          x: sideSign * (15.6 - t * 5.0),
+          z: 7.0 + t * 0.9,
+          rotY: sideSign < 0 ? -0.18 : 0.18,
+          scale: 0.94 + (k % 2) * 0.05
+        });
+      }
+    }
+    const palisadeMesh = new THREE.InstancedMesh(
+      stakeGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, metalness: 0.05 }),
+      palisadeSpots.length
+    );
+    palisadeMesh.receiveShadow = true;
+    palisadeMesh.frustumCulled = false;
+    palisadeMesh.userData.palisadeSpots = palisadeSpots;
+    campFortificationsGroup.add(palisadeMesh);
+
+    const poleGeo = mergeStaticGeos([
+      { geo: new THREE.CylinderGeometry(0.020, 0.028, 2.55, 5), pos: [0, 1.275, 0] },
+      { geo: new THREE.CylinderGeometry(0.012, 0.012, 0.36, 4), pos: [0.16, 2.42, 0], rot: [0, 0, Math.PI / 2] },
+      { geo: new THREE.ConeGeometry(0.042, 0.16, 5), pos: [0, 2.62, 0] }
+    ]);
+    const allCampFlags = [];
+    const westOffsets = [
+      [-9.0, -7.8], [-11.3, -7.6], [-13.6, -7.3], [-15.8, -6.8],
+      [-15.8, -4.4], [-12.8, -0.9], [-12.8, 0.9], [-15.8, 4.4],
+      [-15.6, 6.8], [-13.2, 7.3], [-11.0, 7.7], [-12.6, -3.8]
+    ];
+    const perSideCount = isLowPowerDevice ? 7 : 12;
+    for (const sideSign of [-1, 1]) {
+      for (let i = 0; i < perSideCount; i++) {
+        const [wx, wz] = westOffsets[i];
+        allCampFlags.push({
+          sideSign,
+          x: Math.abs(wx) * sideSign,
+          z: wz,
+          scale: 0.92 + (i % 4) * 0.08,
+          phase: i * 0.75 + (sideSign > 0 ? 1.6 : 0)
+        });
+      }
+    }
+    const campPoles = new THREE.InstancedMesh(
+      poleGeo,
+      new THREE.MeshStandardMaterial({ color: 0x4b3621, roughness: 0.78, metalness: 0.22 }),
+      allCampFlags.length
+    );
+    campPoles.frustumCulled = false;
+    campPoles.userData.campFlags = allCampFlags;
+
+    const pennantGeo = new THREE.PlaneGeometry(0.38, 1.28, 1, 2);
+    pennantGeo.translate(0.18, -0.64, 0);
+    const campPennants = new THREE.InstancedMesh(
+      pennantGeo,
+      new THREE.MeshStandardMaterial({
+        map: createCampPennantTexture(),
+        alphaTest: 0.35,
+        side: THREE.DoubleSide,
+        roughness: 0.70,
+        metalness: 0.06
+      }),
+      allCampFlags.length
+    );
+    campPennants.frustumCulled = false;
+    campPennants.userData.campFlags = allCampFlags;
+    campPennantsRef = campPennants;
+
+    campFortificationsGroup.add(campPoles, campPennants);
+    scene.add(campFortificationsGroup);
+    updateCampFortifications();
+  }
+
+  function updateCampFortifications() {
+    if (!campFortificationsGroup) return;
+    const obj = new THREE.Object3D();
+    const mountain = currentBattleTerrain === 'mountain';
+    const [palisadeMesh, campPoles, campPennants] = campFortificationsGroup.children;
+
+    if (palisadeMesh && palisadeMesh.userData.palisadeSpots) {
+      const woodPalette = [0x4c3520, 0x3f2b19, 0x573e26];
+      palisadeMesh.userData.palisadeSpots.forEach((spot, i) => {
+        const px = mountain ? spot.x * 0.85 : spot.x;
+        const pz = mountain ? spot.z * 0.62 : spot.z;
+        obj.position.set(px, getBattleTerrainHeight(px, pz), pz);
+        obj.rotation.set(0, spot.rotY, 0);
+        obj.scale.setScalar(mountain ? spot.scale * 0.88 : spot.scale);
+        obj.updateMatrix();
+        palisadeMesh.setMatrixAt(i, obj.matrix);
+        palisadeMesh.setColorAt(i, new THREE.Color(woodPalette[i % woodPalette.length]).convertSRGBToLinear());
+      });
+      palisadeMesh.instanceMatrix.needsUpdate = true;
+      if (palisadeMesh.instanceColor) palisadeMesh.instanceColor.needsUpdate = true;
+    }
+
+    if (campPoles && campPennants && campPoles.userData.campFlags) {
+      const sideAPalette = [0x1e4b85, 0x265c9e, 0x183c6b];
+      const sideBPalette = [0x8f221f, 0xa32924, 0x731917];
+      campPoles.userData.campFlags.forEach((fl, i) => {
+        const fx = mountain ? fl.x * 0.85 : fl.x;
+        const fz = mountain ? fl.z * 0.62 : fl.z;
+        const fy = getBattleTerrainHeight(fx, fz);
+        fl.curX = fx;
+        fl.curY = fy;
+        fl.curZ = fz;
+        const s = mountain ? fl.scale * 0.88 : fl.scale;
+        fl.curScale = s;
+        obj.position.set(fx, fy, fz);
+        obj.rotation.set(0, fl.sideSign < 0 ? 0.18 : Math.PI - 0.18, 0);
+        obj.scale.setScalar(s);
+        obj.updateMatrix();
+        campPoles.setMatrixAt(i, obj.matrix);
+
+        obj.position.set(fx, fy + 2.42 * s, fz);
+        obj.rotation.set(0, (fl.sideSign < 0 ? 0.18 : Math.PI - 0.18) + 0.25, 0);
+        obj.scale.setScalar(s);
+        obj.updateMatrix();
+        campPennants.setMatrixAt(i, obj.matrix);
+        const pal = fl.sideSign < 0 ? sideAPalette : sideBPalette;
+        campPennants.setColorAt(i, new THREE.Color(pal[i % pal.length]).convertSRGBToLinear());
+      });
+      campPoles.instanceMatrix.needsUpdate = true;
+      campPennants.instanceMatrix.needsUpdate = true;
+      if (campPennants.instanceColor) campPennants.instanceColor.needsUpdate = true;
+    }
+  }
+
   function buildAncientBattlefieldTerrain() {
     brazierLights = [];
+    campBrazierFlamesRef = null;
 
     // 1. 廣袤起伏戰場地形平面
     const groundGeo = new THREE.PlaneGeometry(240, 180, 160, 120);
@@ -679,26 +930,27 @@ const Battle3DEngine = (function () {
     riverMeshRef.receiveShadow = true;
     waterwayGroup.add(riverMeshRef);
 
-    // 3. 三座古木戰橋橫跨淺灘 (北橋 z=-3.8、中軍大橋 z=0、南橋 z=+3.8)
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x5c4328, roughness: 0.88, metalness: 0.05 });
-    const railMat = new THREE.MeshStandardMaterial({ color: 0x3b2410, roughness: 0.80 });
+    // 3. 三座古木戰橋橫跨淺灘（合併網格並加上陳舊橡木與橋橫樑質感）
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x3f2e1d, roughness: 0.94, metalness: 0.04 });
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x2b1d10, roughness: 0.88, metalness: 0.05 });
+    const deckEntries = [];
+    const trimEntries = [];
     [-3.8, 0.0, 3.8].forEach((bz, idx) => {
       const bw = idx === 1 ? 1.65 : 1.25;
-      const bridge = new THREE.Group();
-      const deck = new THREE.Mesh(new THREE.BoxGeometry(3.45, 0.08, bw), woodMat);
-      deck.position.set(0, 0.015, bz);
-      deck.castShadow = true;
-      deck.receiveShadow = true;
-      bridge.add(deck);
-
+      deckEntries.push({ geo: new THREE.BoxGeometry(3.45, 0.08, bw), pos: [0, 0.015, bz] });
       [-bw / 2 + 0.08, bw / 2 - 0.08].forEach((rz) => {
-        const rail = new THREE.Mesh(new THREE.BoxGeometry(3.45, 0.08, 0.05), railMat);
-        rail.position.set(0, 0.09, bz + rz);
-        rail.castShadow = true;
-        bridge.add(rail);
+        trimEntries.push({ geo: new THREE.BoxGeometry(3.45, 0.08, 0.055), pos: [0, 0.09, bz + rz] });
       });
-      waterwayGroup.add(bridge);
+      for (let p = -1.4; p <= 1.45; p += 0.56) {
+        trimEntries.push({ geo: new THREE.BoxGeometry(0.11, 0.025, bw + 0.04), pos: [p, 0.055, bz] });
+      }
     });
+    const bridgeDeckMesh = new THREE.Mesh(mergeStaticGeos(deckEntries), woodMat);
+    bridgeDeckMesh.receiveShadow = true;
+    const bridgeTrimMesh = new THREE.Mesh(mergeStaticGeos(trimEntries), railMat);
+    bridgeTrimMesh.castShadow = true;
+    bridgeTrimMesh.receiveShadow = true;
+    waterwayGroup.add(bridgeDeckMesh, bridgeTrimMesh);
 
     const forestGroup = new THREE.Group();
     const mountainGroup = new THREE.Group();
@@ -773,43 +1025,47 @@ const Battle3DEngine = (function () {
     }));
     groundCover.receiveShadow = true;
     scene.add(groundCover);
-    reserveArmy = new THREE.Group();
-    for (const side of ['A', 'B']) {
-      reserveArmy.add(BattleFigures.createReserveRanks(isLowPowerDevice ? 192 : 384, side));
-    }
-    const flagCount = isLowPowerDevice ? 16 : 32;
-    const reserveFlags = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.28, 0.56),
-      new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide }), flagCount);
-    reserveFlags.userData.reserveFlags = true;
-    reserveArmy.add(reserveFlags);
-    scene.add(reserveArmy);
 
-    // 4. 東西大營篝火火盆
+    // 4. 東西連營木柵圍牆與飄動陣旗林（取代呆板後方方陣）
+    buildCampFortifications();
+
+    // 5. 東西大營門篝火火盆（合併實例渲染壓低繪製開銷）
     const campBraziers = [
-      { x: -12.4, z: -2.8, c: 0x38bdf8 },
-      { x: -12.4, z: 2.8, c: 0xf97316 },
-      { x: 12.4, z: -2.8, c: 0xf97316 },
-      { x: 12.4, z: 2.8, c: 0xf59e0b }
+      { x: -13.2, z: -3.8 },
+      { x: -13.2, z: 3.8 },
+      { x: 13.2, z: -3.8 },
+      { x: 13.2, z: 3.8 }
     ];
     const ironMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.5, metalness: 0.7 });
-    campBraziers.forEach((bp) => {
-      const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.36, 0.65, 8), ironMat);
-      stand.position.set(bp.x, 0.32, bp.z);
-      stand.castShadow = true;
-      scene.add(stand);
+    const brazierStands = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.28, 0.36, 0.65, 8), ironMat, campBraziers.length);
+    brazierStands.frustumCulled = false;
+    const flameMat = new THREE.MeshBasicMaterial({ color: 0xfb923c });
+    const brazierFlames = new THREE.InstancedMesh(new THREE.ConeGeometry(0.26, 0.62, 7), flameMat, campBraziers.length);
+    brazierFlames.frustumCulled = false;
+    const bObj = new THREE.Object3D();
+    campBraziers.forEach((bp, idx) => {
+      const baseH = getBattleTerrainHeight(bp.x, bp.z);
+      bObj.position.set(bp.x, baseH + 0.32, bp.z);
+      bObj.rotation.set(0, 0, 0);
+      bObj.scale.setScalar(1);
+      bObj.updateMatrix();
+      brazierStands.setMatrixAt(idx, bObj.matrix);
 
-      const flameMat = new THREE.MeshBasicMaterial({ color: 0xfb923c });
-      const flame = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.62, 7), flameMat);
-      flame.position.set(bp.x, 0.84, bp.z);
-      scene.add(flame);
+      bObj.position.set(bp.x, baseH + 0.84, bp.z);
+      bObj.updateMatrix();
+      brazierFlames.setMatrixAt(idx, bObj.matrix);
 
       const pLight = new THREE.PointLight(0xff8c24, 1.85, 11.5);
-      pLight.position.set(bp.x, 1.35, bp.z);
+      pLight.position.set(bp.x, baseH + 1.35, bp.z);
       scene.add(pLight);
-      brazierLights.push({ light: pLight, fireMesh: flame, baseIntensity: 1.85, x: bp.x, y: 1.10, z: bp.z });
+      brazierLights.push({ light: pLight, baseIntensity: 1.85, x: bp.x, y: baseH + 0.84, z: bp.z, index: idx });
     });
+    brazierStands.instanceMatrix.needsUpdate = true;
+    brazierFlames.instanceMatrix.needsUpdate = true;
+    campBrazierFlamesRef = brazierFlames;
+    scene.add(brazierStands, brazierFlames);
 
-    // 5. 待 GLB 載入完成後布置 3D 營帳、箭樓、鹿角拒馬與山崖巨石
+    // 6. 待 GLB 載入完成後布置 3D 營帳、箭樓、鹿角拒馬與山崖巨石
     envPropsGroup = new THREE.Group();
     scene.add(envPropsGroup);
     ensureModelsLoaded().then(() => {
@@ -849,26 +1105,7 @@ const Battle3DEngine = (function () {
       });
     }
     updateEnvironmentLayout();
-    if (reserveArmy) {
-      const soldier = new THREE.Object3D();
-      reserveArmy.children.forEach(mesh => {
-        const flags = mesh.userData.reserveFlags;
-        for (let i = 0; i < mesh.count; i++) {
-          const sign = flags ? (i < mesh.count / 2 ? -1 : 1) : mesh.userData.reserveSide === 'A' ? -1 : 1;
-          const slot = flags ? i % (mesh.count / 2) * 24 + (i % 2) * 12 : i;
-          const x = sign * (7.2 + (slot % 24) * 0.35);
-          const z = -7.8 - Math.floor(slot / 24) * 0.44;
-          soldier.position.set(x, getBattleTerrainHeight(x, z) + (flags ? 1.45 : 0), z);
-          soldier.rotation.y = flags ? sign * 0.25 : -sign * Math.PI / 2;
-          soldier.scale.setScalar(flags ? 1.05 : 0.92 + (i % 3) * 0.04);
-          soldier.updateMatrix();
-          mesh.setMatrixAt(i, soldier.matrix);
-          if (flags) mesh.setColorAt(i, new THREE.Color(sign < 0 ? 0x1e3a8a : 0x7f1d1d).convertSRGBToLinear());
-        }
-        mesh.instanceMatrix.needsUpdate = true;
-        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-      });
-    }
+    updateCampFortifications();
     if (groundCover) {
       const tuft = new THREE.Object3D();
       groundCover.userData.positions.forEach(({ x, z, size }, i) => {
@@ -1054,55 +1291,66 @@ const Battle3DEngine = (function () {
    */
   function buildWoodenAbatis(width = 1.15, height = 0.62) {
     const abatis = new THREE.Group();
-    const beamMat = new THREE.MeshStandardMaterial({ color: 0x5c3a1e, roughness: 0.86, metalness: 0.05 });
-    const stakeMat = new THREE.MeshStandardMaterial({ color: 0x784b26, roughness: 0.82, metalness: 0.06 });
+    const stakeMat = new THREE.MeshStandardMaterial({ color: 0x704422, roughness: 0.84, metalness: 0.05 });
     const tipMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.42, metalness: 0.72 });
     const ropeMat = new THREE.MeshStandardMaterial({ color: 0xa16207, roughness: 0.90 });
 
-    // 橫貫主木樑
-    const mainBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, width, 7), beamMat);
-    mainBeam.rotation.z = Math.PI / 2;
-    mainBeam.position.set(0, height * 0.44, 0);
-    mainBeam.castShadow = true;
-    mainBeam.receiveShadow = true;
-    abatis.add(mainBeam);
+    const yMid = height * 0.44;
+    const woodEntries = [
+      { geo: new THREE.CylinderGeometry(0.055, 0.06, width, 7), pos: [0, yMid, 0], rot: [0, 0, Math.PI / 2] }
+    ];
+    const tipEntries = [];
+    const ropeEntries = [];
 
-    // 多組交叉削尖圓木樁 + 鐵包尖頭 + 麻繩綑紮
+    // 多組交叉削尖圓木樁 + 鐵包尖頭 + 麻繩綑紮（依材質合併為 3 個靜態網格大幅壓低 drawCalls）
     const pairCount = Math.max(3, Math.round(width / 0.30));
     const stakeLen = height * 1.28;
+    const fwdAngle = Math.PI * 0.27;
+    const fwdDy = stakeLen * 0.5 + 0.06;
+    const bwdAngle = -Math.PI * 0.25;
+    const bwdDy = stakeLen * 0.47 + 0.05;
+
     for (let i = 0; i < pairCount; i++) {
       const x = pairCount === 1 ? 0 : (-width * 0.42 + (width * 0.84 * i) / (pairCount - 1));
 
       // 朝前斜刺 (+Z 敵陣方向)
-      const fwd = new THREE.Group();
-      fwd.position.set(x, height * 0.44, 0);
-      fwd.rotation.x = Math.PI * 0.27;
-      const fwdShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.045, stakeLen, 6), stakeMat);
-      fwdShaft.castShadow = true;
-      fwd.add(fwdShaft);
-      const fwdTip = new THREE.Mesh(new THREE.ConeGeometry(0.034, 0.14, 6), tipMat);
-      fwdTip.position.y = stakeLen * 0.5 + 0.06;
-      fwd.add(fwdTip);
-      abatis.add(fwd);
+      woodEntries.push({
+        geo: new THREE.CylinderGeometry(0.032, 0.045, stakeLen, 6),
+        pos: [x, yMid, 0],
+        rot: [fwdAngle, 0, 0]
+      });
+      tipEntries.push({
+        geo: new THREE.ConeGeometry(0.034, 0.14, 6),
+        pos: [x, yMid + fwdDy * Math.cos(fwdAngle), fwdDy * Math.sin(fwdAngle)],
+        rot: [fwdAngle, 0, 0]
+      });
 
       // 朝後支撐斜樁 (-Z 方向抓地)
-      const bwd = new THREE.Group();
-      bwd.position.set(x + 0.03, height * 0.44, 0);
-      bwd.rotation.x = -Math.PI * 0.25;
-      const bwdShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.030, 0.042, stakeLen * 0.94, 6), stakeMat);
-      bwdShaft.castShadow = true;
-      bwd.add(bwdShaft);
-      const bwdTip = new THREE.Mesh(new THREE.ConeGeometry(0.032, 0.12, 6), stakeMat);
-      bwdTip.position.y = stakeLen * 0.47 + 0.05;
-      bwd.add(bwdTip);
-      abatis.add(bwd);
+      woodEntries.push({
+        geo: new THREE.CylinderGeometry(0.030, 0.042, stakeLen * 0.94, 6),
+        pos: [x + 0.03, yMid, 0],
+        rot: [bwdAngle, 0, 0]
+      });
+      woodEntries.push({
+        geo: new THREE.ConeGeometry(0.032, 0.12, 6),
+        pos: [x + 0.03, yMid + bwdDy * Math.cos(bwdAngle), bwdDy * Math.sin(bwdAngle)],
+        rot: [bwdAngle, 0, 0]
+      });
 
       // 麻繩十字結節
-      const knot = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.018, 5, 8), ropeMat);
-      knot.rotation.y = Math.PI / 2;
-      knot.position.set(x + 0.015, height * 0.44, 0);
-      abatis.add(knot);
+      ropeEntries.push({
+        geo: new THREE.TorusGeometry(0.065, 0.018, 5, 8),
+        pos: [x + 0.015, yMid, 0],
+        rot: [0, Math.PI / 2, 0]
+      });
     }
+
+    const woodMesh = new THREE.Mesh(mergeStaticGeos(woodEntries), stakeMat);
+    woodMesh.castShadow = true;
+    woodMesh.receiveShadow = true;
+    const tipMesh = new THREE.Mesh(mergeStaticGeos(tipEntries), tipMat);
+    const ropeMesh = new THREE.Mesh(mergeStaticGeos(ropeEntries), ropeMat);
+    abatis.add(woodMesh, tipMesh, ropeMesh);
     return abatis;
   }
 
@@ -1161,36 +1409,36 @@ const Battle3DEngine = (function () {
   function populateBattlefieldProps() {
     if (!envPropsGroup || envPropsGroup.children.length > 0) return;
 
-    // 東西雙方本陣營帳與箭樓
+    // 東西雙方本陣營帳與箭樓（嵌於連營木柵之內側，避免遮擋後軍）
     [
       { side: 'A', sx: -1, tint: 0x2563eb },
       { side: 'B', sx: 1, tint: 0xdc2626 }
     ].forEach(({ sx, tint }) => {
       const faceY = sx < 0 ? Math.PI / 2 : -Math.PI / 2;
 
-      [-4.8, 4.8].forEach((zPos) => {
+      [-5.6, 5.6].forEach((zPos) => {
         const tower = spawnModelInstance('watchtower', { targetHeight: 2.25, tintHex: tint, tintStrength: 0.14 });
         if (tower) {
-          tower.group.position.set(sx * 13.0, 0, zPos);
+          tower.group.position.set(sx * 14.8, 0, zPos);
           tower.group.rotation.y = faceY;
           tower.group.userData.terrainRole = 'tower';
           envPropsGroup.add(tower.group);
         }
       });
 
-      [-1.9, 1.9].forEach((zPos) => {
+      [-2.3, 2.3].forEach((zPos) => {
         const tent = spawnModelInstance('tent', { targetHeight: 1.35, tintHex: tint, tintStrength: 0.25 });
         if (tent) {
-          tent.group.position.set(sx * 13.4, 0, zPos);
+          tent.group.position.set(sx * 14.2, 0, zPos);
           tent.group.rotation.y = faceY;
           envPropsGroup.add(tent.group);
         }
       });
 
-      [-6.2, -2.9, 2.9, 6.2].forEach((zPos) => {
+      [-6.8, -3.8, 3.8, 6.8].forEach((zPos) => {
         const flag = spawnModelInstance('banner', { targetHeight: 1.95, tintHex: tint, tintStrength: 0.42 });
         if (flag) {
-          flag.group.position.set(sx * 11.8, 0, zPos);
+          flag.group.position.set(sx * 12.6, 0, zPos);
           flag.group.rotation.y = faceY;
           envPropsGroup.add(flag.group);
         }
@@ -1293,8 +1541,8 @@ const Battle3DEngine = (function () {
      3. 打造《三國志》立體部隊方陣托盤 + 全 3D 骨骼動畫兵種
      ---------------------------------------------------- */
   function getFormationOffset(layout, index, count, mounted) {
-    const stepX = mounted ? 0.50 : 0.40;
-    const stepZ = mounted ? 0.85 : 0.45;
+    const stepX = mounted ? 0.54 : 0.43;
+    const stepZ = mounted ? 0.88 : 0.47;
     if (layout === 'wedge' || layout === 'cone') {
       const maxColumns = mounted ? 4 : 6;
       let row = 0, column = index;
@@ -1345,8 +1593,8 @@ const Battle3DEngine = (function () {
     const ranks = BattleFigures.createRanks(token, count, (i, total) => {
       const offset = getFormationOffset(token.formationLayout, i, total, mounted);
       const columns = mounted ? 4 : 6;
-      return offset || { x: (i % columns - (columns - 1) / 2) * (mounted ? 0.50 : 0.40),
-        z: -Math.floor(i / columns) * (mounted ? 0.85 : 0.45) };
+      return offset || { x: (i % columns - (columns - 1) / 2) * (mounted ? 0.54 : 0.43),
+        z: -Math.floor(i / columns) * (mounted ? 0.88 : 0.47) };
     });
     token.troopsContainer.add(ranks);
   }
@@ -1498,43 +1746,6 @@ const Battle3DEngine = (function () {
     return tex;
   }
 
-  function mergeBannerStaticGeos(entries) {
-    const prepped = [];
-    const m = new THREE.Matrix4();
-    const q = new THREE.Quaternion();
-    const e = new THREE.Euler();
-    const p = new THREE.Vector3();
-    let totalVerts = 0;
-    for (const item of entries) {
-      const g = item.geo.index ? item.geo.toNonIndexed() : item.geo.clone();
-      item.geo.dispose();
-      p.set(item.pos[0], item.pos[1], item.pos[2]);
-      e.set(item.rot ? item.rot[0] : 0, item.rot ? item.rot[1] : 0, item.rot ? item.rot[2] : 0);
-      q.setFromEuler(e);
-      m.compose(p, q, new THREE.Vector3(1, 1, 1));
-      g.applyMatrix4(m);
-      totalVerts += g.attributes.position.count;
-      prepped.push({ g, count: g.attributes.position.count });
-    }
-    const posArr = new Float32Array(totalVerts * 3);
-    const normArr = new Float32Array(totalVerts * 3);
-    const uvArr = new Float32Array(totalVerts * 2);
-    let o3 = 0, o2 = 0;
-    for (const { g, count } of prepped) {
-      posArr.set(g.attributes.position.array, o3);
-      if (g.attributes.normal) normArr.set(g.attributes.normal.array, o3);
-      if (g.attributes.uv) uvArr.set(g.attributes.uv.array, o2);
-      o3 += count * 3;
-      o2 += count * 2;
-      g.dispose();
-    }
-    const out = new THREE.BufferGeometry();
-    out.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
-    out.setAttribute('normal', new THREE.BufferAttribute(normArr, 3));
-    out.setAttribute('uv', new THREE.BufferAttribute(uvArr, 2));
-    return out;
-  }
-
   function createFactionBannerGroup(token) {
     const group = new THREE.Group();
     group.userData.isFactionBanners = true;
@@ -1573,7 +1784,7 @@ const Battle3DEngine = (function () {
       banners.push({ root: sub, cloth, phase: cloth.userData.phase });
       group.add(sub);
     });
-    group.add(new THREE.Mesh(mergeBannerStaticGeos(poleParts), poleMat));
+    group.add(new THREE.Mesh(mergeStaticGeos(poleParts), poleMat));
     group.userData.banners = banners;
     return group;
   }
@@ -1825,35 +2036,93 @@ const Battle3DEngine = (function () {
 
   function spawnFloatingDamagePopup(worldPos, text, colorHex = '#ef4444', isBig = false) {
     const c = document.createElement('canvas');
-    c.width = 256;
+    const fontSpec = `900 ${isBig ? 44 : 36}px "Noto Sans TC", sans-serif`;
+    const measureCtx = c.getContext('2d');
+    measureCtx.font = fontSpec;
+    const textW = Math.ceil(measureCtx.measureText(text).width);
+    c.width = Math.max(256, Math.min(480, textW + 40));
     c.height = 84;
     const ctx = c.getContext('2d');
-    ctx.font = `900 ${isBig ? 48 : 38}px "Noto Sans TC", sans-serif`;
+    ctx.font = fontSpec;
     ctx.textAlign = 'center';
     ctx.lineWidth = 8;
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.92)';
-    ctx.strokeText(text, 128, 56);
+    ctx.strokeText(text, c.width / 2, 56);
     ctx.fillStyle = isBig ? '#fde68a' : colorHex;
     if (isBig) {
       ctx.shadowColor = colorHex;
       ctx.shadowBlur = 10;
     }
-    ctx.fillText(text, 128, 56);
+    ctx.fillText(text, c.width / 2, 56);
 
     const tex = new THREE.CanvasTexture(c);
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, fog: false });
     const sp = new THREE.Sprite(mat);
-    sp.position.set(
-      worldPos.x + (Math.random() - 0.5) * 0.9,
-      worldPos.y + (isBig ? 2.75 : 2.50),
-      worldPos.z + (Math.random() - 0.5) * 0.65
+    const h = isBig ? 0.64 : 0.50;
+    const w = h * (c.width / c.height);
+    const spawnPos = new THREE.Vector3(
+      worldPos.x,
+      worldPos.y + (isBig ? 2.25 : 2.02),
+      worldPos.z + (Math.random() - 0.5) * 0.55
     );
-    const w = isBig ? 2.6 : 2.0;
-    sp.scale.set(w, w * 0.33, 1);
+    let chosenRect = null;
+    if (camera && container && container.clientWidth > 0 && container.clientHeight > 0) {
+      const cw = container.clientWidth;
+      const ch = container.clientHeight;
+      const depth = spawnPos.clone().applyMatrix4(camera.matrixWorldInverse).z;
+      const perPixel = Math.max(0.001, -2 * depth * Math.tan(camera.fov * Math.PI / 360) / ch);
+      const popW = w / perPixel;
+      const popH = h / perPixel;
+      const occupied = [];
+      unitsMap.forEach((tok) => {
+        if (tok.hud && tok.hud.sprite && tok.hud.sprite.userData.screenRect) {
+          occupied.push(tok.hud.sprite.userData.screenRect);
+        }
+      });
+      floatingPopups.forEach((fp) => { if (fp.screenRect) occupied.push(fp.screenRect); });
+      const proj = spawnPos.clone().project(camera);
+      const minX = popW / 2 + 8;
+      const maxX = Math.max(minX, cw - popW / 2 - 8);
+      const minY = Math.max(36, popH / 2 + 10);
+      const maxY = Math.max(minY, ch - 84 - popH / 2);
+      const basePx = Math.max(minX, Math.min(maxX, (proj.x + 1) * cw / 2));
+      const basePy = Math.max(minY, Math.min(maxY, (1 - proj.y) * ch / 2));
+      // 預留足夠跨越名牌寬度 (104-132px + popW) 的候選偏移，並將上升飄移半徑計入安全框避免碰撞上方或兩側名牌
+      const candidates = [
+        [0, 0], [0, -60], [0, -104], [0, 56],
+        [-128, -42], [128, -42], [-156, 0], [156, 0],
+        [-148, 52], [148, 52], [0, -148], [0, 98],
+        [-195, -72], [195, -72], [-195, 34], [195, 34],
+        [-96, -138], [96, -138], [-240, -18], [240, -18]
+      ];
+      let best = { x: basePx, y: basePy, score: Infinity };
+      const risePad = 12;
+      for (const [dx, dy] of candidates) {
+        const cx = Math.max(minX, Math.min(maxX, basePx + dx));
+        const cy = Math.max(minY, Math.min(maxY, basePy + dy));
+        const checkCy = cy - risePad * 0.5;
+        let overlapArea = 0;
+        for (const r of occupied) {
+          const ox = Math.max(0, (popW + r.width) / 2 + 10 - Math.abs(cx - r.x));
+          const oy = Math.max(0, (popH + risePad + r.height) / 2 + 8 - Math.abs(checkCy - r.y));
+          overlapArea += ox * oy;
+        }
+        if (overlapArea === 0) {
+          best = { x: cx, y: cy, score: 0 };
+          break;
+        }
+        if (overlapArea < best.score) best = { x: cx, y: cy, score: overlapArea };
+      }
+      chosenRect = { x: best.x, y: best.y, width: popW, height: popH };
+      proj.set(best.x / cw * 2 - 1, 1 - best.y / ch * 2, proj.z).unproject(camera);
+      spawnPos.copy(proj);
+    }
+    sp.position.copy(spawnPos);
+    sp.scale.set(w, h, 1);
     sp.renderOrder = 30;
     scene.add(sp);
 
-    floatingPopups.push({ sprite: sp, tex, mat, text, startedAt: combatNow(), duration: isBig ? 980 : 850 });
+    floatingPopups.push({ sprite: sp, tex, mat, text, screenRect: chosenRect, startedAt: combatNow(), duration: isBig ? 980 : 850 });
   }
 
   /* ----------------------------------------------------
@@ -3189,7 +3458,7 @@ const Battle3DEngine = (function () {
     unitsMap.forEach(token => {
       const sprite = token.hud.sprite;
       const desiredWidth = showUnitLabels ? Math.min(186, width * 0.38)
-        : Math.max(108, Math.min(144, token.name.length * 15 + 38, (width - 12) / 2));
+        : Math.max(104, Math.min(132, token.name.length * 14 + 34, (width - 12) / 2));
       const pixels = narrow ? Math.min(desiredWidth, Math.max(1, labelAreaHeight / sideRows[token.side] - 4) * 512 / 176) : desiredWidth;
       const labelHeight = pixels * 176 / 512;
       const anchor = token.mesh.position.clone().add(new THREE.Vector3(
@@ -3491,14 +3760,33 @@ const Battle3DEngine = (function () {
       updateCommanderLabels();
       updateFieldAudio(now);
 
-      // 3. 營寨火盆躍動、裊裊烽煙與流動河水波光
+      // 3. 營寨火盆躍動、本陣旗林迎風飄盪、裊裊烽煙與流動河水波光
       for (let i = 0; i < brazierLights.length; i++) {
         const b = brazierLights[i];
         b.light.intensity = b.baseIntensity + Math.sin(elapsed * 7.5 + i * 1.7) * 0.42;
-        if (b.fireMesh) {
+        if (campBrazierFlamesRef) {
           const s = 1 + Math.sin(elapsed * 10 + i) * 0.16;
-          b.fireMesh.scale.set(s, s * 1.26, s);
+          _campAnimObj.position.set(b.x, b.y, b.z);
+          _campAnimObj.rotation.set(0, elapsed * 1.4 + i, 0);
+          _campAnimObj.scale.set(s, s * 1.26, s);
+          _campAnimObj.updateMatrix();
+          campBrazierFlamesRef.setMatrixAt(i, _campAnimObj.matrix);
         }
+      }
+      if (campBrazierFlamesRef) campBrazierFlamesRef.instanceMatrix.needsUpdate = true;
+      if (campPennantsRef && campPennantsRef.userData.campFlags) {
+        campPennantsRef.userData.campFlags.forEach((fl, i) => {
+          const s = fl.curScale || fl.scale || 1;
+          const baseYaw = fl.sideSign < 0 ? 0.18 : Math.PI - 0.18;
+          const sway = Math.sin(elapsed * 2.7 + fl.phase) * 0.24;
+          const tilt = Math.cos(elapsed * 3.1 + fl.phase * 1.3) * 0.08;
+          _campAnimObj.position.set(fl.curX ?? fl.x, (fl.curY ?? 0) + 2.42 * s, fl.curZ ?? fl.z);
+          _campAnimObj.rotation.set(tilt, baseYaw + 0.25 + sway, Math.sin(elapsed * 2.2 + fl.phase) * 0.06);
+          _campAnimObj.scale.setScalar(s);
+          _campAnimObj.updateMatrix();
+          campPennantsRef.setMatrixAt(i, _campAnimObj.matrix);
+        });
+        campPennantsRef.instanceMatrix.needsUpdate = true;
       }
       if (battleMotionActive && brazierLights.length > 0 && now - lastBrazierSmokeAt > 440) {
         lastBrazierSmokeAt = now;
@@ -3672,7 +3960,7 @@ const Battle3DEngine = (function () {
       // 9. 浮動兵損數字上升消退
       for (let i = floatingPopups.length - 1; i >= 0; i--) {
         const fp = floatingPopups[i];
-        fp.sprite.position.y += 1.35 * dt;
+        fp.sprite.position.y += 0.85 * dt;
         const remaining = Math.max(0, 1 - (now - fp.startedAt) / fp.duration);
         fp.mat.opacity = Math.min(1, remaining * 1.4);
         if (remaining === 0) {
@@ -3847,8 +4135,10 @@ const Battle3DEngine = (function () {
         const point = popup.sprite.position.clone().project(camera);
         return { text: popup.text, x: (point.x + 1) / 2, y: (1 - point.y) / 2 };
       }),
-      reserveSoldiers: reserveArmy ? reserveArmy.children.filter(mesh => !mesh.userData.reserveFlags).reduce((sum, mesh) => sum + mesh.count, 0) : 0,
-      reserveFlags: reserveArmy ? reserveArmy.children.find(mesh => mesh.userData.reserveFlags).count : 0,
+      reserveSoldiers: 0,
+      reserveFlags: 0,
+      campFortifications: campFortificationsGroup ? campFortificationsGroup.children.length : 0,
+      campBannerCount: campPennantsRef ? campPennantsRef.count : 0,
       audioPaused,
       activeAttackers: [...activeAttackers],
       peakConcurrentAttackers,

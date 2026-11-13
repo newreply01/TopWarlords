@@ -116,8 +116,10 @@ try:
         assert all(unit["nameLabelVisible"] and unit["commanderName"] for unit in terrain_state["battalions"]), \
             "Commander names must remain visible without enabling detailed crests"
         print("[TEST 3a] Models, troops and name labels ready")
-        assert terrain_state["reserveSoldiers"] == (384 if terrain_state["lowPowerDevice"] else 768)
-        assert terrain_state["reserveFlags"] == (16 if terrain_state["lowPowerDevice"] else 32)
+        assert terrain_state["reserveSoldiers"] == 0
+        assert terrain_state["reserveFlags"] == 0
+        assert terrain_state["campFortifications"] == 3
+        assert terrain_state["campBannerCount"] == (14 if terrain_state["lowPowerDevice"] else 24)
         assert terrain_state['battleMotionActive'], 'All battalions must keep fighting between resolved volleys'
         page.evaluate("""() => {
             document.querySelector('#btnPause').click();

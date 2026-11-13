@@ -62,14 +62,14 @@ async def main():
         await page.wait_for_timeout(300)
         cn_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-1] 篩選 🇨🇳 中國名將數量: {cn_cards} 張")
-        assert cn_cards == 78, f"預期 78 位中國名將，實際得到 {cn_cards}"
+        assert cn_cards == 77, f"預期 77 位中國名將，實際得到 {cn_cards}"
 
         # 🇯🇵 日本
         await page.locator("button[data-nat='🇯🇵']").click()
         await page.wait_for_timeout(300)
         jp_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-2] 篩選 🇯🇵 日本名將數量: {jp_cards} 張")
-        assert jp_cards == 36, f"預期 36 位日本名將，實際得到 {jp_cards}"
+        assert jp_cards == 37, f"預期 37 位日本名將，實際得到 {jp_cards}"
 
         # 🇰🇷 韓國
         await page.locator("button[data-nat='🇰🇷']").click()
@@ -140,7 +140,7 @@ async def main():
         assert search_cards >= 1, "未找到諸葛亮卡片"
 
         # 5. 點擊卡片展開全息模態窗
-        await page.locator(".unit-card").first.click()
+        await page.locator(".unit-card[data-unit-id='ZHUGELIANG']").click()
         await page.wait_for_selector("#intelModal:not([hidden])", timeout=3000)
         intel_title = await page.locator("#intelTitle").inner_text()
         print(f"[TEST 5] 展開全息名將情報成功: {intel_title}")

@@ -94,15 +94,27 @@ try:
                 return {
                     skills: cards.every(card => {
                         const unit = UNIT_MAP[card.dataset.id];
+                        const nation = card.querySelector('.m-nation');
+                        const phase = card.querySelector('.m-skill-phase');
+                        const expectedThirdVal = unit.cat === 'armor'
+                            ? `${Math.round((unit.def || 0) * 100)}%`
+                            : String(Math.max(unit.ew, unit.st));
+                        const expectedThirdLabel = unit.cat === 'armor'
+                            ? `甲 ${expectedThirdVal}`
+                            : `${unit.ew > unit.st ? '謀' : '隱'} ${expectedThirdVal}`;
+                        const expectedThirdAria = unit.cat === 'armor'
+                            ? `護甲減傷 ${expectedThirdVal}`
+                            : `${unit.ew > unit.st ? '謀略' : '隱匿'} ${expectedThirdVal}`;
                         return card.querySelector('.m-skill strong').textContent === unit.skill.name
                             && !card.querySelector('.m-skill-effect, .m-role-hint')
+                            && !card.querySelector('.m-avatar-wrap .m-env-badge')
+                            && Boolean(nation && ['中', '日', '韓', '將'].includes(nation.textContent.trim()))
+                            && (!unit.skill.phase || (phase && phase.textContent.trim() === unit.skill.phase))
                             && card.querySelector('.m-card-info-col .m-skill').dataset.infoId === unit.id
                             && [...card.querySelectorAll('.m-stats b')].map(value => value.textContent).join(',')
-                                === [unit.hp, unit.atk, Math.max(unit.ew, unit.st)].join(',')
-                            && card.querySelector('.m-stats span:last-child').textContent.trim()
-                                === `${unit.ew > unit.st ? '謀' : '隱'} ${Math.max(unit.ew, unit.st)}`
-                            && card.querySelector('.m-stats span:last-child').getAttribute('aria-label')
-                                === `${unit.ew > unit.st ? '謀略' : '隱匿'} ${Math.max(unit.ew, unit.st)}`;
+                                === [unit.hp, unit.atk, expectedThirdVal].join(',')
+                            && card.querySelector('.m-stats span:last-child').textContent.trim() === expectedThirdLabel
+                            && card.querySelector('.m-stats span:last-child').getAttribute('aria-label') === expectedThirdAria;
                     }),
                     readable: visible.every(card => {
                         const avatar = card.querySelector('.m-avatar-wrap').getBoundingClientRect();
@@ -110,9 +122,18 @@ try:
                         const info = card.querySelector('.m-card-info-col').getBoundingClientRect();
                         const stats = card.querySelector('.m-stats').getBoundingClientRect();
                         const statCells = [...card.querySelectorAll('.m-stats span')].map(cell => cell.getBoundingClientRect());
+                        const briefEl = card.querySelector('.m-mobile-brief');
+                        const briefStyle = briefEl ? getComputedStyle(briefEl) : null;
+                        const briefRect = briefEl ? briefEl.getBoundingClientRect() : null;
                         const bounds = card.getBoundingClientRect();
                         const compact = innerWidth > 768 && innerHeight <= 540;
                         const portrait = card.querySelector('.m-avatar-img');
+                        const mobileBriefOk = !briefEl ? false : (
+                            innerWidth > 768
+                                ? briefStyle.display === 'none'
+                                : (briefStyle.display !== 'none' && briefRect.height > 0 && briefRect.height <= 24
+                                   && briefRect.right <= info.right + 1 && briefRect.bottom <= bounds.bottom + 0.5)
+                        );
                         return Math.abs(avatar.height - (bounds.height - 2 * parseFloat(getComputedStyle(card).borderTopWidth))) <= 1
                             && Math.abs(avatar.width - Math.min(avatar.height,
                                 card.querySelector('.m-card-main-row').clientWidth * 0.4)) <= 1
@@ -127,6 +148,7 @@ try:
                             && statCells.every(cell => Math.abs(cell.top - statCells[0].top) < 1)
                             && statCells.every(cell => cell.right <= bounds.right && cell.left >= bounds.left)
                             && stats.left >= info.left && stats.right <= info.right + 1
+                            && mobileBriefOk
                             && getComputedStyle(card.querySelector('.m-stats b')).color === getComputedStyle(card.querySelector('.m-stats')).color
                             && parseFloat(getComputedStyle(card.querySelector('.m-stats b')).fontSize) >= (compact ? 11 : 12);
                     }),
@@ -159,6 +181,9 @@ try:
         deck_before_details = page.evaluate("() => localStorage.getItem('wl15_deck')")
         page.locator(".m-card .m-skill").first.click()
         assert page.locator("#unitDetailModal").is_visible(), "Skill badge must open details without selecting the unit"
+        assert page.locator("#unitDetailModal .u-tt-skill .m-skill-phase").is_visible(), "Unit detail modal must show skill phase badge"
+        modal_text = page.locator("#unitDetailModal").inner_text()
+        assert "電戰值" not in modal_text and "主武裝" not in modal_text, f"Legacy terminology remained in detail modal: {modal_text}"
         assert page.evaluate("() => localStorage.getItem('wl15_deck')") == deck_before_details, "Opening skill details selected a unit"
         page.locator("#btnUnitSheetClose").click()
         page.locator(".m-card .m-skill").first.focus()
@@ -168,6 +193,8 @@ try:
         page.locator("#btnUnitSheetClose").click()
         page.locator(".m-card").first.hover()
         assert page.locator("#unitTooltip .u-tt-skill").is_visible(), "Desktop hover must show skill details"
+        tooltip_text = page.locator("#unitTooltip").inner_text()
+        assert "電戰值" not in tooltip_text and "主武裝" not in tooltip_text, f"Legacy terminology remained in tooltip: {tooltip_text}"
         print("[TEST 1b] 桌機／平板／手機頭像、字級、專屬技能與捲動可達性通過")
 
         same_role_result = page.evaluate("""() => {

@@ -19286,11 +19286,11 @@ button, a, select, input, .unit-card, .btn-action {
    ===================================================== */
 .m-env-badge {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 800;
   padding: 1px 4px;
   border-radius: 3px;
-  margin-left: auto;
+  margin-left: 0;
   white-space: nowrap;
   letter-spacing: 0.01em;
   line-height: 1.25;
@@ -20132,9 +20132,21 @@ select:focus-visible,
   width: auto; max-width: 40%; height: 100%; aspect-ratio: 1; flex: 0 0 auto;
   border: 0; border-radius: 6px 0 0 6px; box-shadow: none;
 }
+#matrixBoard .m-avatar-wrap::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 12px rgba(9, 14, 24, 0.32);
+}
 #matrixBoard .m-avatar-img { object-fit: cover !important; }
 #matrixBoard .m-card:hover .m-avatar-wrap,
 #matrixBoard .m-card.sel .m-avatar-wrap { transform: none; box-shadow: none !important; }
+#matrixBoard .m-card.syn-ready:not(.sel) {
+  border-color: rgba(251, 191, 36, 0.62);
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.22), 0 4px 12px -4px rgba(251, 191, 36, 0.35);
+}
+[data-theme="light"] #matrixBoard .m-card.syn-ready:not(.sel) {
+  border-color: rgba(217, 119, 6, 0.65);
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.2), 0 3px 10px -3px rgba(217, 119, 6, 0.25);
+}
 #matrixBoard .m-card-info-col {
   min-width: 0; padding: 5px 5px 3px 0; gap: 3px;
 }
@@ -20142,11 +20154,42 @@ select:focus-visible,
   top: 4px; left: 4px; right: auto; bottom: auto;
   font-size: 13px; line-height: 20px; padding: 0 4px; border-radius: 4px;
 }
-#matrixBoard .m-top { padding-right: 0; flex-shrink: 0; }
-#matrixBoard .m-name { font-size: 14px !important; line-height: 1.3; white-space: nowrap; }
+#matrixBoard .m-top { display: flex; align-items: center; gap: 4px; padding-right: 0; flex-shrink: 0; }
+#matrixBoard .m-name {
+  display: flex; align-items: center; gap: 4px; min-width: 0;
+  font-size: 14px !important; line-height: 1.3; white-space: nowrap;
+}
+.m-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.m-nation {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 15px; height: 15px; border-radius: 3px; font-size: 10px; font-weight: 800; line-height: 1;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.m-nation.nat-cn { background: rgba(220, 38, 38, 0.22); color: #fca5a5; border-color: rgba(248, 113, 113, 0.42); }
+.m-nation.nat-jp { background: rgba(99, 102, 241, 0.22); color: #c7d2fe; border-color: rgba(129, 140, 248, 0.42); }
+.m-nation.nat-kr { background: rgba(14, 165, 233, 0.22); color: #7dd3fc; border-color: rgba(56, 189, 248, 0.42); }
+.m-nation.nat-other { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.4); }
+[data-theme="light"] .m-nation.nat-cn { background: #fee2e2; color: #b91c1c; border-color: rgba(185, 28, 28, 0.35); }
+[data-theme="light"] .m-nation.nat-jp { background: #e0e7ff; color: #3730a3; border-color: rgba(55, 48, 163, 0.32); }
+[data-theme="light"] .m-nation.nat-kr { background: #e0f2fe; color: #0369a1; border-color: rgba(3, 105, 161, 0.32); }
+[data-theme="light"] .m-nation.nat-other { background: #f1f5f9; color: #334155; border-color: rgba(51, 65, 85, 0.28); }
+.m-top-badges {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto;
+}
+.m-syn-pill {
+  font-size: 9.5px; font-weight: 800; line-height: 1.25; padding: 1px 4px; border-radius: 3px;
+  white-space: nowrap; color: #fbbf24; background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(251, 191, 36, 0.48);
+}
+[data-theme="light"] .m-syn-pill {
+  color: #b45309; background: rgba(254, 243, 199, 0.95); border-color: rgba(217, 119, 6, 0.5);
+}
 #matrixBoard .m-info-btn { display: none; }
 #matrixBoard .m-tag { font-size: 12px; line-height: 1.4; white-space: normal; }
-#matrixBoard .m-weapon-strip, #matrixBoard .m-mobile-intel { display: none !important; }
+#matrixBoard .m-weapon-strip, #matrixBoard .m-mobile-intel, #matrixBoard .m-mobile-brief { display: none !important; }
+#matrixBoard .m-skill-row {
+  display: flex; align-items: center; gap: 4px; min-width: 0; width: 100%;
+}
 #matrixBoard .m-skill {
   display: inline-flex; align-self: flex-start; align-items: center;
   min-width: 0; width: fit-content; max-width: 100%; min-height: 22px; padding: 2px 5px;
@@ -20165,8 +20208,30 @@ select:focus-visible,
 #matrixBoard .m-skill:hover, #matrixBoard .m-skill:focus-visible {
   outline: 2px solid var(--c); outline-offset: 2px;
 }
-.u-tt-skill { padding: 8px; border-left: 3px solid var(--amber); background: rgba(180, 130, 50, 0.1); font-size: 13px; line-height: 1.5; }
+.m-skill-phase {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 800; line-height: 1.25;
+  padding: 1px 4px; border-radius: 3px; flex: 0 0 auto; pointer-events: none;
+  border: 1px solid transparent;
+}
+.m-skill-phase.phase-p1 { color: #38bdf8; background: rgba(56, 189, 248, 0.14); border-color: rgba(56, 189, 248, 0.35); }
+.m-skill-phase.phase-p2 { color: #fbbf24; background: rgba(251, 191, 36, 0.14); border-color: rgba(251, 191, 36, 0.35); }
+.m-skill-phase.phase-p3 { color: #fb7185; background: rgba(251, 113, 133, 0.14); border-color: rgba(251, 113, 133, 0.35); }
+[data-theme="light"] .m-skill-phase.phase-p1 { color: #0369a1; background: #e0f2fe; border-color: rgba(3, 105, 161, 0.32); }
+[data-theme="light"] .m-skill-phase.phase-p2 { color: #b45309; background: #fef3c7; border-color: rgba(180, 83, 9, 0.32); }
+[data-theme="light"] .m-skill-phase.phase-p3 { color: #be123c; background: #ffe4e6; border-color: rgba(190, 18, 60, 0.32); }
+.m-ap-chip {
+  font-size: 9.5px; font-weight: 800; line-height: 1.25; padding: 1px 4px; border-radius: 3px;
+  flex: 0 0 auto; pointer-events: none; white-space: nowrap;
+  color: #fdba74; background: rgba(249, 115, 22, 0.16); border: 1px solid rgba(251, 146, 60, 0.38);
+}
+[data-theme="light"] .m-ap-chip {
+  color: #c2410c; background: #ffedd5; border-color: rgba(194, 65, 12, 0.32);
+}
+.u-tt-skill { padding: 8px; border-left: 3px solid var(--amber); background: rgba(180, 130, 50, 0.1); font-size: 13px; line-height: 1.5; border-radius: 0 6px 6px 0; }
 .u-tt-skill strong { color: var(--amber); font-size: 15px; }
+[data-theme="light"] .u-tt-skill strong { color: #b45309; }
+.u-tt-skill-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.u-tt-skill-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600; }
 .u-tt-skill p { margin: 4px 0 0; }
 .u-tt-role { font-size: 12px; color: var(--muted); }
 #matrixBoard .m-bot { margin-top: auto !important; flex-wrap: nowrap; gap: 3px; width: 100%; }
@@ -20188,7 +20253,39 @@ select:focus-visible,
 @media (max-width: 768px) {
   #matrixBoard { overflow: visible !important; }
   #matrixBoard .col-category { height: auto !important; }
-  #matrixBoard .m-card { flex: 0 0 auto !important; min-height: 82px !important; }
+  #matrixBoard .m-card { flex: 0 0 auto !important; min-height: 108px !important; }
+  #matrixBoard .m-card-info-col { padding: 6px 8px 6px 0; gap: 3px; }
+  #matrixBoard .m-bot { margin-top: 2px !important; }
+  #matrixBoard .m-stats { justify-content: flex-start; gap: 12px !important; }
+  #matrixBoard .m-mobile-brief {
+    display: flex !important; align-items: center; gap: 5px; flex: 0 0 auto;
+    min-width: 0; width: 100%; margin-top: 2px; min-height: 17px; overflow: hidden;
+  }
+  #matrixBoard .m-card.sel .m-mobile-brief { padding-right: 22px; }
+  .m-tac-chip {
+    flex: 0 0 auto; font-size: 10px; font-weight: 700; line-height: 1.25;
+    padding: 1px 5px; border-radius: 3px; white-space: nowrap;
+    color: var(--cyan); background: rgba(61, 224, 255, 0.12); border: 1px solid rgba(61, 224, 255, 0.3);
+  }
+  .m-tac-chip.tag-ap { color: #fdba74; background: rgba(249, 115, 22, 0.14); border-color: rgba(251, 146, 60, 0.35); }
+  .m-tac-chip.tag-fy { color: #fde047; background: rgba(234, 179, 8, 0.14); border-color: rgba(250, 204, 21, 0.35); }
+  .m-tac-chip.tag-def { color: #93c5fd; background: rgba(59, 130, 246, 0.14); border-color: rgba(96, 165, 250, 0.35); }
+  [data-theme="light"] .m-tac-chip { color: #0369a1; background: #e0f2fe; border-color: rgba(3, 105, 161, 0.28); }
+  [data-theme="light"] .m-tac-chip.tag-ap { color: #c2410c; background: #ffedd5; border-color: rgba(194, 65, 12, 0.28); }
+  [data-theme="light"] .m-tac-chip.tag-fy { color: #a16207; background: #fef9c3; border-color: rgba(161, 98, 7, 0.28); }
+  [data-theme="light"] .m-tac-chip.tag-def { color: #1d4ed8; background: #dbeafe; border-color: rgba(29, 78, 216, 0.28); }
+  .m-mobile-skill-text {
+    flex: 1 1 0; min-width: 0; font-size: 11px; line-height: 1.3;
+    color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+}
+@media (min-width: 769px) and (max-width: 1220px) {
+  #matrixBoard .m-card-main-row { gap: 4px; }
+  #matrixBoard .m-card-info-col { padding: 4px 3px 3px 0; }
+  #matrixBoard .m-ap-chip { display: none; }
+  #matrixBoard .m-stats { font-size: 10px !important; gap: 1px !important; }
+  #matrixBoard .m-stats span { gap: 1px; }
+  #matrixBoard .m-stats b { letter-spacing: -0.05em; }
 }
 @media (min-width: 769px) and (max-height: 640px) {
   #matrixBoard .col-category { padding: 4px 6px; gap: 4px; }
@@ -20201,11 +20298,15 @@ select:focus-visible,
   #matrixBoard .cat-head { height: 18px; padding: 0; }
   #matrixBoard .cat-title { font-size: 11px; }
   #matrixBoard .m-card { min-height: 52px !important; }
-  #matrixBoard .m-card-main-row { gap: 5px; }
+  #matrixBoard .m-card-main-row { gap: 4px; }
   #matrixBoard .m-card-info-col { padding: 2px 3px 2px 0; gap: 1px; }
-  #matrixBoard .m-avatar-cost { top: 2px; right: 2px; font-size: 11px; line-height: 16px; padding: 0 2px; }
+  #matrixBoard .m-avatar-cost { top: 2px; left: 2px; right: auto; font-size: 11px; line-height: 16px; padding: 0 3px; }
   #matrixBoard .m-name { font-size: 13px !important; line-height: 15px; }
+  #matrixBoard .m-nation { width: 13px; height: 13px; font-size: 9px; }
   #matrixBoard .m-skill { min-height: 16px; margin-top: 0; padding: 0 3px; font-size: 11px; line-height: 14px; }
+  #matrixBoard .m-skill-phase { font-size: 9px; padding: 0 3px; line-height: 13px; }
+  #matrixBoard .m-ap-chip, #matrixBoard .m-top-badges .m-env-badge { display: none; }
+  #matrixBoard .m-syn-pill { font-size: 8.5px; padding: 0 3px; }
   #matrixBoard .m-stats { line-height: 14px; }
   #matrixBoard .m-stats b { font-size: 11px; line-height: 14px; }
 }

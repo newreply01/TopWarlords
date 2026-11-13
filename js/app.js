@@ -1099,6 +1099,68 @@ function getUnitWeatherMod(u, ev) {
   return null;
 }
 
+/* ---------- 選將看板卡片與兵法協同輔助 ---------- */
+const NATION_META = {
+  '🇨🇳': { label: '中', cls: 'nat-cn', title: '中國名將' },
+  '🇯🇵': { label: '日', cls: 'nat-jp', title: '日本名將' },
+  '🇰🇷': { label: '韓', cls: 'nat-kr', title: '韓國名將' }
+};
+const SYN_SHORT_NAMES = { cec: '八陣', mumt: '奇正', asw_net: '伏波', iron_fist: '合圍' };
+const PHASE_TIPS = {
+  P1: '階段一 · 先聲謀略發動',
+  P2: '階段二 · 突騎箭雨發動',
+  P3: '階段三 · 決戰白刃發動'
+};
+
+function renderNationBadge(u, withOrigin = false) {
+  const m = NATION_META[u?.flag] || { label: '將', cls: 'nat-other', title: u?.origin || '名將' };
+  const originSuffix = withOrigin && u?.origin ? ` <span class="m-origin-text">${esc(u.origin)}</span>` : '';
+  return `<span class="m-nation ${m.cls}" title="${esc(m.title)}" aria-label="${esc(m.title)}">${m.label}</span>${originSuffix}`;
+}
+
+function getPrimaryTertiaryStat(u) {
+  if (u && u.cat === 'armor') {
+    return { label: '甲', fullLabel: '護甲減傷', val: `${Math.round((u.def || 0) * 100)}%` };
+  }
+  if ((u?.ew || 0) > (u?.st || 0)) {
+    return { label: '謀', fullLabel: '謀略', val: `${u.ew}` };
+  }
+  return { label: '隱', fullLabel: '隱匿', val: `${u?.st || 0}` };
+}
+
+function getCandidateNewSynergies(u, targetSlot, currentDeck, currentSynIds, needsFourYiHint) {
+  if (!u || !Array.isArray(currentDeck) || targetSlot < 0 || typeof getDeckSynergies !== 'function') return [];
+  const nextDeck = currentDeck.slice();
+  nextDeck[targetSlot] = u.id;
+  const out = [];
+  for (const syn of getDeckSynergies(nextDeck)) {
+    if (!currentSynIds.has(syn.id)) {
+      out.push({
+        id: syn.id,
+        label: SYN_SHORT_NAMES[syn.id] || syn.name,
+        title: `選入可成陣：${syn.name}（${syn.desc}）`
+      });
+    }
+  }
+  if (needsFourYiHint && (u.id === 'MENGHUO' || u.id === 'SHAMOKE')) {
+    out.push({ id: 'fourYi', label: '四夷', title: '領軍解鎖「四夷」陣形（山岳／森林攻防 +50%）' });
+  }
+  return out;
+}
+
+function getCardTacticalTags(u) {
+  if (!u) return [];
+  const tags = [];
+  const flags = u.roleFlags || [];
+  if (u.skill?.effects?.armorPierce) tags.push({ cls: 'tag-ap', text: '破甲', title: '專屬戰法附帶破甲無視部分護甲' });
+  if (u.id === 'MENGHUO' || u.id === 'SHAMOKE') tags.push({ cls: 'tag-fy', text: '四夷', title: '可解鎖四夷特殊陣形' });
+  if (flags.includes('PASSIVE_VOLLEY')) tags.push({ cls: 'tag-stealth', text: '隱伏', title: '隱蔽伏弩，階段一不易被優先鎖定' });
+  if (flags.includes('FORMATION_SHIELD')) tags.push({ cls: 'tag-shield', text: '護軍', title: '護軍大陣庇護友軍免受先制斬首' });
+  if (flags.includes('STAMINA_DEEP')) tags.push({ cls: 'tag-deep', text: '久戰', title: '百戰老將，持久戰氣力多 1 波' });
+  if (u.cat !== 'armor' && (u.def || 0) >= 0.1) tags.push({ cls: 'tag-def', text: `甲${Math.round(u.def * 100)}%`, title: '具備可觀護甲減傷' });
+  return tags;
+}
+
 /* ---------- 渲染：5x5 全景矩陣看板 (Matrix Board) ---------- */
 function renderMatrix() {
   renderMobileCatNav();
@@ -1107,6 +1169,11 @@ function renderMatrix() {
   const cats = ['air', 'armor', 'air_defense', 'naval', 'support'];
   const catSlots = { air: '突騎槽', armor: '重甲槽', air_defense: '神射槽', naval: '先登槽', support: '軍師槽' };
   const activeWeather = getActiveBuildWeather();
+  const pickedUnitsAll = (state.deck || []).map(id => (id ? UNIT_MAP[id] : null)).filter(Boolean);
+  const currentSynIds = new Set(typeof getDeckSynergies === 'function' ? getDeckSynergies(pickedUnitsAll).map(s => s.id) : []);
+  const hasFourYiLeader = pickedUnitsAll.some(x => x.id === 'MENGHUO' || x.id === 'SHAMOKE');
+  const activeFormationId = (Array.isArray(state.formations) ? state.formations[0] : '') || '';
+  const needsFourYiHint = !hasFourYiLeader && (activeFormationId === 'fourYi' || state.terrain === 'mountain' || state.terrain === 'forest');
 
   if (!state.marketPool) {
     generateRandomMarketPool();
@@ -1116,10 +1183,10 @@ function renderMatrix() {
     const c = CATS[cat].color;
     const isMobileActive = (state.mobileCat || 'air') === cat;
 
-    // 取得當前兵種隨機抽出的 5 筆武器選項
+    // 取得當前兵種隨機抽出的 5 筆名將選項
     let displayUnits = state.marketPool[cat] || [];
 
-    // 確保已在隊伍中的該兵種裝備精準對齊在同一價位槽位，嚴格維持 5, 4, 3, 2, 1 結構
+    // 確保已在隊伍中的該兵種名將精準對齊在同一價位槽位，嚴格維持 5, 4, 3, 2, 1 結構
     const equippedInDeck = state.deck.map(id => id ? UNIT_MAP[id] : null).find(unit => unit && unit.cat === cat);
     if (equippedInDeck) {
       const matchIdx = displayUnits.findIndex(u => u.cost === equippedInDeck.cost);
@@ -1129,7 +1196,7 @@ function renderMatrix() {
       }
     }
 
-    // 【重要修復】若該兵種有被 BAN 的單位（如大衛投石索），強制在看板該價位格位展示該單位本尊，杜絕被其他型號隱藏遮蔽！
+    // 若該兵種有被 BAN 的單位，強制在看板該價位格位展示該名將本尊，杜絕被其他款式遮蔽
     const bannedIds = currentBanned();
     if (bannedIds.length) {
       bannedIds.forEach(bId => {
@@ -1152,35 +1219,54 @@ function renderMatrix() {
       const why = canPickForSlot(u, targetSlot);
       const envMod = getUnitWeatherMod(u, activeWeather);
       const showWhy = Boolean(why && !isEquipped);
+      const stat3 = getPrimaryTertiaryStat(u);
+      const phase = u.skill?.phase || '';
+      const hasAp = Boolean(u.skill?.effects?.armorPierce);
+      const candSyns = (!isEquipped && !showWhy) ? getCandidateNewSynergies(u, targetSlot, state.deck, currentSynIds, needsFourYiHint) : [];
+      const isSynReady = candSyns.length > 0;
+      const tacTags = getCardTacticalTags(u);
+      const topBadgesHtml = [
+        candSyns.slice(0, 1).map(s => `<span class="m-syn-pill" title="${esc(s.title)}">✦${esc(s.label)}</span>`).join(''),
+        envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}">${envMod.short}</span>` : ''
+      ].filter(Boolean).join('');
 
-      return `<div class="m-card ${isEquipped ? 'sel' : ''} ${showWhy ? 'dis' : ''} ${isBanned ? 'banned' : ''}"
+      return `<div class="m-card ${isEquipped ? 'sel' : ''} ${showWhy ? 'dis' : ''} ${isBanned ? 'banned' : ''} ${isSynReady ? 'syn-ready' : ''}"
                    style="--c:${c}" data-id="${u.id}" data-cat="${cat}" data-cost="${u.cost}">
         <div class="m-card-main-row">
           <div class="m-avatar-wrap">
             <img class="m-avatar-img" src="${u.img || ''}" width="48" height="48" loading="lazy" decoding="async" alt="${esc(u.name)}" onerror="this.style.display='none'" />
             ${showWhy
               ? `<span class="m-why ${isBanned ? 'why-banned' : 'why-budget'}" title="${esc(why)}">${why}</span>`
-              : (envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}">${envMod.short}</span>` : '')}
+              : ''}
           </div>
           <span class="m-avatar-cost">$${u.cost}</span>
           <div class="m-card-info-col">
             <div class="m-top">
               <div class="m-name-group">
-                <div class="m-name" title="${esc(u.name)}"><span class="m-flag" style="margin-right:2px">${u.flag || ''}</span> ${esc(u.name)}</div>
+                <div class="m-name" title="${esc(u.name)}">${renderNationBadge(u)}<span class="m-name-text">${esc(u.name)}</span></div>
               </div>
+              ${topBadgesHtml ? `<div class="m-top-badges">${topBadgesHtml}</div>` : ''}
               <div class="m-actions">
                 <button class="m-info-btn" data-info-id="${u.id}" title="查看名將傳記與實戰數值">ℹ</button>
               </div>
             </div>
-            <button type="button" class="m-skill" data-info-id="${u.id}" aria-label="${esc(u.name)}：${esc(u.skill?.name || '未配置戰法')}，查看詳情">
-              <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
-            </button>
+            <div class="m-skill-row">
+              <button type="button" class="m-skill" data-info-id="${u.id}" aria-label="${esc(u.name)}：${phase ? phase + ' ' : ''}${esc(u.skill?.name || '未配置戰法')}，查看詳情">
+                <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
+              </button>
+              ${phase ? `<span class="m-skill-phase phase-${phase.toLowerCase()}" title="${esc(PHASE_TIPS[phase] || '')}">${esc(phase)}</span>` : ''}
+              ${hasAp ? `<span class="m-ap-chip" title="專屬戰法附帶破甲效果">破甲</span>` : ''}
+            </div>
             <div class="m-bot">
               <div class="m-stats" aria-label="基本數值">
-                <span title="生命" aria-label="生命 ${u.hp}">生 <b>${u.hp}</b></span>
-                <span title="攻擊" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
-                <span title="${u.ew > u.st ? '謀略' : '隱匿'}" aria-label="${u.ew > u.st ? '謀略' : '隱匿'} ${Math.max(u.ew, u.st)}">${u.ew > u.st ? '謀' : '隱'} <b>${Math.max(u.ew, u.st)}</b></span>
+                <span title="耐久 HP" aria-label="生命 ${u.hp}">生 <b>${u.hp}</b></span>
+                <span title="打擊 ATK" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
+                <span title="${stat3.fullLabel}" aria-label="${stat3.fullLabel} ${stat3.val}">${stat3.label} <b>${stat3.val}</b></span>
               </div>
+            </div>
+            <div class="m-mobile-brief">
+              ${tacTags.slice(0, 2).map(t => `<span class="m-tac-chip ${t.cls}" title="${esc(t.title)}">${esc(t.text)}</span>`).join('')}
+              <span class="m-mobile-skill-text">${esc(u.skill?.desc || getCombatRoleSummary(u))}</span>
             </div>
           </div>
         </div>
@@ -1197,6 +1283,43 @@ function renderMatrix() {
   }).join('');
 }
 
+/* ---------- 懸浮與詳情視窗共用情報區塊 ---------- */
+function renderUnitSkillBox(u, extraStyle = '') {
+  if (!u || !u.skill) return '';
+  const phase = u.skill.phase || '';
+  const phaseDesc = PHASE_TIPS[phase] || `${phase} · 每戰一次`;
+  return `<div class="u-tt-skill"${extraStyle ? ` style="${extraStyle}"` : ''}>
+    <div class="u-tt-skill-head"><strong>${esc(u.skill.name)}</strong><span class="m-skill-phase phase-${phase.toLowerCase()}">${esc(phase)}</span></div>
+    <div class="u-tt-skill-meta">${esc(phaseDesc)} · 每戰一次</div>
+    <p>${esc(u.skill.desc)}</p>
+  </div>`;
+}
+
+function renderUnitCommonMeta(u, envMod, { compact = false } = {}) {
+  const mbGap = compact ? '6px' : '10px';
+  const realismHtml = (() => {
+    const r = typeof getUnitRealismBadges === 'function' ? getUnitRealismBadges(u) : null;
+    if (!r) return '';
+    const spHtml = r.specials
+      .filter(s => !s.title.startsWith('專屬戰法'))
+      .map(s => `<div style="margin-top:${compact ? '3px' : '4px'};color:var(--amber);font-size:${compact ? '11.5px' : '12px'}"><b>${s.icon} ${esc(s.title)}：</b>${esc(s.desc)}</div>`)
+      .join('');
+    return `<div style="margin-bottom:${mbGap};padding:${compact ? '5px 8px' : '7px 10px'};border-radius:${compact ? '6px' : '8px'};background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.28);font-size:${compact ? '11.5px' : '12px'}"><div style="color:var(--cyan);font-weight:700">${esc(r.magLabel)}</div>${spHtml}</div>`;
+  })();
+  const masteryHtml = (() => {
+    const mb = typeof getUnitMasteryBadge === 'function' ? getUnitMasteryBadge(u.id) : null;
+    if (!mb) return '';
+    return `<div style="margin-bottom:${mbGap};padding:${compact ? '4px 8px' : '6px 10px'};border-radius:${compact ? '6px' : '8px'};background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.28);font-size:${compact ? '11px' : '12px'};color:${mb.color}"><div><b>${mb.icon} ${esc(mb.title)}：</b><span style="color:var(--text)">${esc(mb.summary)}</span></div>${mb.nextHint ? `<div style="margin-top:${compact ? '2px' : '3px'};font-size:${compact ? '10.5px' : '11px'};color:var(--muted)">▸ ${esc(mb.nextHint)}</div>` : ''}</div>`;
+  })();
+  return `
+    ${renderUnitSkillBox(u, compact ? '' : 'margin-bottom:8px')}
+    ${envMod ? `<div class="u-tt-env-box env-${envMod.type}"${compact ? '' : ' style="margin-bottom:8px"'}>${esc(envMod.tip)}</div>` : ''}
+    ${u.weapon ? `<div class="u-tt-weapon-box"${compact ? '' : ' style="margin-bottom:10px"'}><span>⚔️ 神兵／配備:</span> <b>${esc(u.weapon)}</b></div>` : ''}
+    ${realismHtml}
+    ${masteryHtml}
+  `;
+}
+
 /* ---------- 懸浮詳細情報 Tooltip (真實寬屏寫真展台) ---------- */
 const tooltip = $('#unitTooltip');
 function showTooltip(u, x, y) {
@@ -1211,33 +1334,20 @@ function showTooltip(u, x, y) {
     <div class="u-tt-header">
       ${u.img ? `<img class="u-tt-img" src="${u.img}" decoding="async" alt="${esc(u.name)}" onerror="this.style.display='none'" />` : ''}
       <div class="u-tt-overlay">
-        <h4><span>${u.flag || '🌐'}</span> ${esc(u.name)} ${isBanned ? '<span style="color:var(--red);font-size:11px">(已禁)</span>' : ''}</h4>
+        <h4>${renderNationBadge(u)} ${esc(u.name)} ${isBanned ? '<span style="color:var(--red);font-size:11px">(已禁)</span>' : ''}</h4>
         <div class="u-tt-sub">${esc(u.origin || '')} · $${u.cost} · ${esc(u.tag)}</div>
       </div>
     </div>
     <div class="u-tt-body">
-      ${u.skill ? `<div class="u-tt-skill"><strong>${esc(u.skill.name)}</strong><div>${esc(u.skill.phase)} · 每戰一次</div><p>${esc(u.skill.desc)}</p></div>` : ''}
       <p class="u-tt-role">${esc(getCombatRoleSummary(u))}</p>
-      ${envMod ? `<div class="u-tt-env-box env-${envMod.type}">${esc(envMod.tip)}</div>` : ''}
-      ${u.weapon ? `<div class="u-tt-weapon-box"><span>🎯 主武裝:</span> <b>${esc(u.weapon)}</b></div>` : ''}
-      ${(() => {
-        const r = typeof getUnitRealismBadges === 'function' ? getUnitRealismBadges(u) : null;
-        if (!r) return '';
-        const spHtml = r.specials.filter(s => !s.title.startsWith('專屬戰法')).map(s => `<div style="margin-top:3px;color:var(--amber);font-size:11.5px"><b>${s.icon} ${esc(s.title)}：</b>${esc(s.desc)}</div>`).join('');
-        return `<div style="margin-bottom:6px;padding:5px 8px;border-radius:6px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);font-size:11.5px"><div style="color:var(--cyan);font-weight:700">${esc(r.magLabel)}</div>${spHtml}</div>`;
-      })()}
-      ${(() => {
-        const mb = typeof getUnitMasteryBadge === 'function' ? getUnitMasteryBadge(u.id) : null;
-        if (!mb) return '';
-        return `<div style="margin-bottom:6px;padding:4px 8px;border-radius:6px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.28);font-size:11px;color:${mb.color}"><div><b>${mb.icon} ${esc(mb.title)}：</b><span style="color:var(--text)">${esc(mb.summary)}</span></div>${mb.nextHint ? `<div style="margin-top:2px;font-size:10.5px;color:var(--muted)">▸ ${esc(mb.nextHint)}</div>` : ''}</div>`;
-      })()}
+      ${renderUnitCommonMeta(u, envMod, { compact: true })}
       <p class="u-tt-desc">${esc(u.desc)}</p>
       <dl>
         <dt>耐久 HP</dt><dd>${u.hp}</dd>
         <dt>打擊 ATK</dt><dd>${u.atk}</dd>
-        <dt>隱匿值</dt><dd>${u.st}</dd>
-        <dt>電戰值</dt><dd>${u.ew}</dd>
-        <dt>減傷防禦</dt><dd>${Math.round(u.def * 100)}%</dd>
+        <dt>奇襲隱匿</dt><dd>${u.st}</dd>
+        <dt>謀略值</dt><dd>${u.ew}</dd>
+        <dt>護甲減傷</dt><dd>${Math.round(u.def * 100)}%</dd>
       </dl>
       ${u.traits && u.traits.length ? `<ul>${u.traits.map(t => `<li>${esc(TRAITS[t])}</li>`).join('')}</ul>` : ''}
       ${(() => {
@@ -1794,6 +1904,7 @@ document.addEventListener('change', event => {
       state.formations = normalizeArmyFormations(formationSelect.value, state.deck);
       syncActiveDeck();
       renderFormationEditor();
+      renderMatrix();
     }
     return;
   }
@@ -1802,6 +1913,7 @@ document.addEventListener('change', event => {
     state.terrain = normalizeTerrain(event.target.value);
     syncActiveDeck();
     renderFormationEditor();
+    renderMatrix();
   }
 });
 
@@ -1918,33 +2030,21 @@ function openUnitDetailModal(u) {
     </div>
     <div class="sheet-unit-meta" style="--c:${c}">
       <div>
-        <div class="sheet-unit-name"><span>${u.flag || ''}</span> ${esc(u.name)} ${isBanned ? '<span style="color:var(--red);font-size:12px">[BANNED]</span>' : ''}</div>
+        <div class="sheet-unit-name">${renderNationBadge(u)} ${esc(u.name)} ${isBanned ? '<span style="color:var(--red);font-size:12px">[BANNED]</span>' : ''}</div>
         <div class="sheet-unit-tag">${esc(u.origin || '')} · $${u.cost} · ${esc(u.tag)}</div>
       </div>
       <span class="sheet-unit-cost">$${u.cost}</span>
     </div>
     ${u.img ? `<div style="height:120px;border-radius:8px;overflow:hidden;margin:8px 0 10px;border:1px solid var(--line2);background:#020617"><img src="${u.img}" decoding="async" style="width:100%;height:100%;object-fit:cover" alt="${esc(u.name)}" onerror="this.parentElement.style.display='none'"/></div>` : ''}
-    ${envMod ? `<div class="u-tt-env-box env-${envMod.type}" style="margin-bottom:8px">${esc(envMod.tip)}</div>` : ''}
-    ${u.weapon ? `<div class="u-tt-weapon-box" style="margin-bottom:10px"><span>🎯 主武裝:</span> <b>${esc(u.weapon)}</b></div>` : ''}
-    ${(() => {
-      const r = typeof getUnitRealismBadges === 'function' ? getUnitRealismBadges(u) : null;
-      if (!r) return '';
-      const spHtml = r.specials.map(s => `<div style="margin-top:4px;color:var(--amber);font-size:12px"><b>${s.icon} ${esc(s.title)}：</b>${esc(s.desc)}</div>`).join('');
-      return `<div style="margin-bottom:10px;padding:7px 10px;border-radius:8px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.28);font-size:12px"><div style="color:var(--cyan);font-weight:700">${esc(r.magLabel)}</div>${spHtml}</div>`;
-    })()}
-    ${(() => {
-      const mb = typeof getUnitMasteryBadge === 'function' ? getUnitMasteryBadge(u.id) : null;
-      if (!mb) return '';
-      return `<div style="margin-bottom:10px;padding:6px 10px;border-radius:8px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.28);font-size:12px;color:${mb.color}"><div><b>${mb.icon} ${esc(mb.title)}：</b><span style="color:var(--text)">${esc(mb.summary)}</span></div>${mb.nextHint ? `<div style="margin-top:3px;font-size:11px;color:var(--muted)">▸ ${esc(mb.nextHint)}</div>` : ''}</div>`;
-    })()}
+    ${renderUnitCommonMeta(u, envMod, { compact: false })}
     <div class="sheet-unit-desc" style="--c:${c}">${esc(u.desc)}</div>
     <div class="sheet-label">作戰參數評級</div>
     <div class="sheet-stats-grid">
       <div class="sheet-stat-box"><span>耐久 HP</span><b>${u.hp}</b></div>
       <div class="sheet-stat-box"><span>打擊 ATK</span><b>${u.atk}</b></div>
-      <div class="sheet-stat-box"><span>隱匿值</span><b>${u.st}</b></div>
-      <div class="sheet-stat-box"><span>電戰值</span><b>${u.ew}</b></div>
-      <div class="sheet-stat-box" style="grid-column:span 2"><span>裝甲減傷</span><b>${Math.round(u.def * 100)}%</b></div>
+      <div class="sheet-stat-box"><span>奇襲隱匿</span><b>${u.st}</b></div>
+      <div class="sheet-stat-box"><span>謀略值</span><b>${u.ew}</b></div>
+      <div class="sheet-stat-box" style="grid-column:span 2"><span>護甲減傷</span><b>${Math.round(u.def * 100)}%</b></div>
     </div>
     ${u.traits && u.traits.length ? `
       <div class="sheet-label">特長能力 (TRAITS)</div>

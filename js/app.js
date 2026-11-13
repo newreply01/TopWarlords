@@ -4535,18 +4535,18 @@ function playFx(ln) {
       if (sVec) sVec.textContent = isClashOfTitans ? `🎯 頂峰對決 // CLASH ➔` : `⚡ [${aUnit.weapon ? aUnit.weapon.split(' ')[0] : '突襲'}] ➔`;
     }
 
-    // 連動全息雷達態勢帶
+    // 連動古代沙盤戰報態勢帶
     const lockTag = $('#holoLockTag');
     if (lockTag) {
-      if (ln.brevity === 'FOX-3') lockTag.textContent = '[TWS RADAR LOCK]';
-      else if (ln.brevity && ln.brevity.startsWith('SABOT')) lockTag.textContent = '[LASER RANGE LOCK]';
-      else if (ln.brevity && ln.brevity.startsWith('SEAD')) lockTag.textContent = '[ANTI-RAD TARGET]';
-      else if (ln.brevity === 'ABM-KILL') lockTag.textContent = '[EXO-ATMOS HIT-TO-KILL]';
-      else if (ln.brevity === 'APS-BLOCK') lockTag.textContent = '[APS HARD-KILL]';
-      else if (ln.ammoTier === 3) lockTag.textContent = '[AUX GUNS / OVERHEAT]';
-      else if (ln.ammoTier === 2) lockTag.textContent = '[SECONDARY MUNITION]';
-      else if (ln.kind === 'kill') lockTag.textContent = '[TARGET SPLASHED]';
-      else lockTag.textContent = '[FIRE CONTROL ON]';
+      if (ln.brevity === 'FOX-3') lockTag.textContent = '【千里飛騎馳突】';
+      else if (ln.brevity && ln.brevity.startsWith('SABOT')) lockTag.textContent = '【穿甲破陣突擊】';
+      else if (ln.brevity && ln.brevity.startsWith('SEAD')) lockTag.textContent = '【神機破策奪陣】';
+      else if (ln.brevity === 'ABM-KILL') lockTag.textContent = '【一騎討斬落馬】';
+      else if (ln.brevity === 'APS-BLOCK') lockTag.textContent = '【大盾鐵壁禦矢】';
+      else if (ln.ammoTier === 3) lockTag.textContent = '【名將無雙戰法】';
+      else if (ln.ammoTier === 2) lockTag.textContent = '【雙軍短兵相接】';
+      else if (ln.kind === 'kill') lockTag.textContent = '【主將陣亡擊破】';
+      else lockTag.textContent = '【中軍鼓號督戰】';
     }
 
     // 觸發兵種態勢燈高亮
@@ -4569,12 +4569,11 @@ function playFx(ln) {
       }
     }
 
-    // 動態經緯度模擬
+    // 古代戰區方位播報
     const camCoords = $('#camCoords');
     if (camCoords && Math.random() < 0.35) {
-      const minN = (18 + Math.random() * 0.9).toFixed(2);
-      const minE = (34 + Math.random() * 0.9).toFixed(2);
-      camCoords.textContent = `LAT 24°${minN}'N LON 120°${minE}'E`;
+      const sectors = ['中軍渡口・酉時三刻', '北翼林坡・申時正', '南岸馳道・日暮烽煙', '西營寨前・鼓角相聞', '東岸淺灘・血戰正酣'];
+      camCoords.textContent = sectors[Math.floor(Math.random() * sectors.length)];
     }
 
     // 【以小博大・戰術奇蹟警報 (Tactical Upset Alarm)】

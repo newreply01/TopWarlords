@@ -16,6 +16,216 @@ const Telemetry = (() => {
   let isInitialized = false;
   let onlineCount = 1;
   const CACHE_KEY_GLOBAL_VISITS = 'topwarlords_cached_global_visits';
+  const ADMIN_STORAGE_KEY = 'topwarlords_admin_auth';
+  const ADMIN_SALT = '_C4ISR_ADMIN_SALT_2026';
+  const ADMIN_HASH = '7df4073dafe01d32adc34c9036ce8ffc35f732c779f40e8d2e10794d955e88e0';
+
+  function isAdmin() {
+    try {
+      return localStorage.getItem(ADMIN_STORAGE_KEY) === ADMIN_HASH;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function sha256FallbackHex(inputStr) {
+    const bytes = new TextEncoder().encode(inputStr);
+    const k = [
+      0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+      0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+      0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+      0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+      0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+      0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+      0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+      0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+    ];
+    const h = [
+      0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+      0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+    ];
+    const len = bytes.length;
+    const bitLen = len * 8;
+    const paddedLen = Math.ceil((len + 9) / 64) * 64;
+    const msg = new Uint8Array(paddedLen);
+    msg.set(bytes);
+    msg[len] = 0x80;
+    const view = new DataView(msg.buffer);
+    view.setUint32(paddedLen - 4, bitLen >>> 0, false);
+    view.setUint32(paddedLen - 8, Math.floor(bitLen / 0x100000000) >>> 0, false);
+    const w = new Int32Array(64);
+    const rotr = (n, x) => (x >>> n) | (x << (32 - n));
+    for (let offset = 0; offset < paddedLen; offset += 64) {
+      for (let i = 0; i < 16; i++) w[i] = view.getInt32(offset + i * 4, false);
+      for (let i = 16; i < 64; i++) {
+        const s0 = rotr(7, w[i - 15]) ^ rotr(18, w[i - 15]) ^ (w[i - 15] >>> 3);
+        const s1 = rotr(17, w[i - 2]) ^ rotr(19, w[i - 2]) ^ (w[i - 2] >>> 10);
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      }
+      let [a, b, c, d, e, f, g, hh] = h;
+      for (let i = 0; i < 64; i++) {
+        const S1 = rotr(6, e) ^ rotr(11, e) ^ rotr(25, e);
+        const ch = (e & f) ^ (~e & g);
+        const temp1 = (hh + S1 + ch + k[i] + w[i]) | 0;
+        const S0 = rotr(2, a) ^ rotr(13, a) ^ rotr(22, a);
+        const maj = (a & b) ^ (a & c) ^ (b & c);
+        const temp2 = (S0 + maj) | 0;
+        hh = g; g = f; f = e; e = (d + temp1) | 0;
+        d = c; c = b; b = a; a = (temp1 + temp2) | 0;
+      }
+      h[0] = (h[0] + a) | 0; h[1] = (h[1] + b) | 0; h[2] = (h[2] + c) | 0; h[3] = (h[3] + d) | 0;
+      h[4] = (h[4] + e) | 0; h[5] = (h[5] + f) | 0; h[6] = (h[6] + g) | 0; h[7] = (h[7] + hh) | 0;
+    }
+    return h.map(v => (v >>> 0).toString(16).padStart(8, '0')).join('');
+  }
+
+  async function sha256Hex(str) {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+      try {
+        const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) { }
+    }
+    return sha256FallbackHex(str);
+  }
+
+  function syncAdminBadgeState() {
+    const btn = document.getElementById('btnOpenTelemetry');
+    if (!btn) return;
+    if (isAdmin()) {
+      btn.style.setProperty('cursor', 'pointer', 'important');
+      btn.title = '📡 全服 C4ISR 即時戰況大盤 (管理員已解鎖 · 點擊開啟)';
+    } else {
+      btn.style.setProperty('cursor', 'default', 'important');
+      btn.title = '全服累計到訪人次';
+    }
+  }
+
+  async function verifyAndUnlockAdmin(pwd) {
+    const digest = await sha256Hex(String(pwd || '').trim() + ADMIN_SALT);
+    if (digest === ADMIN_HASH) {
+      try {
+        localStorage.setItem(ADMIN_STORAGE_KEY, ADMIN_HASH);
+      } catch (e) { }
+      syncAdminBadgeState();
+      return true;
+    }
+    return false;
+  }
+
+  function lockAdmin() {
+    try {
+      localStorage.removeItem(ADMIN_STORAGE_KEY);
+    } catch (e) { }
+    syncAdminBadgeState();
+    closeTelemetryModal();
+    if (typeof window.toast === 'function') {
+      window.toast('🔒 已退出管理員模式並鎖定戰情大盤');
+    }
+  }
+
+  function showAdminAuthModal() {
+    let modal = document.getElementById('adminAuthModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.id = 'adminAuthModal';
+      modal.hidden = true;
+      modal.innerHTML = `
+        <div class="modal-card" style="max-width:400px;width:92%">
+          <div class="cloud-modal-header" style="margin-bottom:12px">
+            <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:#f59e0b;background:rgba(245,158,11,0.12);padding:2px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.35);">🔐 DEVELOPER CLEARANCE</div>
+            <h2 style="font-size:18px;margin:4px 0 6px;">C4ISR 開發者權限驗證</h2>
+            <p class="muted" style="font-size:12px;line-height:1.5;">此遙測大盤與 GA4 配置僅限授權開發者存取。驗證通過後將記憶於本機瀏覽器。</p>
+          </div>
+          <div style="margin-bottom:10px">
+            <input id="inputAdminAuthPwd" class="input" type="password" autocomplete="off" placeholder="請輸入開發者管理密碼" style="width:100%;font-family:var(--mono);font-size:14px">
+            <div id="adminAuthError" style="color:#ef4444;font-size:12px;margin-top:6px;min-height:16px"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+            <button class="btn ghost sm" id="btnAdminAuthCancel" type="button">取消</button>
+            <button class="btn primary sm" id="btnAdminAuthSubmit" type="button" style="font-weight:700">🔓 驗證並解鎖</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const submitPwd = async () => {
+        const input = document.getElementById('inputAdminAuthPwd');
+        const errEl = document.getElementById('adminAuthError');
+        if (!input) return;
+        const ok = await verifyAndUnlockAdmin(input.value);
+        if (ok) {
+          if (errEl) errEl.textContent = '';
+          input.value = '';
+          modal.hidden = true;
+          if (typeof window.toast === 'function') {
+            window.toast('🔓 管理員模式已解鎖！本機瀏覽器已記住權限。');
+          }
+          openTelemetryModal();
+        } else {
+          if (errEl) errEl.textContent = '⚠️ 管理員密碼錯誤，權限驗證失敗。';
+          input.select();
+        }
+      };
+
+      modal.addEventListener('click', ev => {
+        if (ev.target === modal || ev.target.closest('#btnAdminAuthCancel')) {
+          modal.hidden = true;
+          return;
+        }
+        if (ev.target.closest('#btnAdminAuthSubmit')) {
+          submitPwd();
+        }
+      });
+
+      const pwdInput = modal.querySelector('#inputAdminAuthPwd');
+      if (pwdInput) {
+        pwdInput.addEventListener('keydown', ev => {
+          if (ev.key === 'Enter') {
+            ev.preventDefault();
+            submitPwd();
+          } else if (ev.key === 'Escape') {
+            modal.hidden = true;
+          }
+        });
+      }
+    }
+
+    const inputEl = document.getElementById('inputAdminAuthPwd');
+    const errEl = document.getElementById('adminAuthError');
+    if (errEl) errEl.textContent = '';
+    if (inputEl) inputEl.value = '';
+    modal.hidden = false;
+    setTimeout(() => { if (inputEl) inputEl.focus(); }, 30);
+  }
+
+  function checkUrlAdminTrigger() {
+    try {
+      const url = new URL(window.location.href);
+      const qAdmin = url.searchParams.get('admin');
+      const hashMatch = /(?:^|[#&])admin=1(?:&|$)/.test(url.hash || '');
+      if (qAdmin === '1' || hashMatch) {
+        url.searchParams.delete('admin');
+        if (hashMatch) {
+          let cleanHash = (url.hash || '')
+            .replace(/([#&])admin=1(?=&|$)/g, '$1')
+            .replace(/[&#]+$/, '')
+            .replace(/^#&/, '#');
+          if (cleanHash === '#') cleanHash = '';
+          url.hash = cleanHash;
+        }
+        const cleanUrl = url.pathname + url.search + url.hash;
+        window.history.replaceState({}, document.title, cleanUrl || '/');
+
+        if (isAdmin()) {
+          setTimeout(() => openTelemetryModal(), 60);
+        } else {
+          setTimeout(() => showAdminAuthModal(), 60);
+        }
+      }
+    } catch (e) { }
+  }
 
   // 取得快取的全服人次，預設保底 1002，絕不使用本機單次計數 (如 4)
   function getCachedGlobalVisits() {
@@ -166,8 +376,10 @@ const Telemetry = (() => {
       } catch (e) { }
     }
 
-    // 綁定 UI 點擊事件（無論離線或連線皆可開啟戰情大盤）
+    // 綁定 UI 點擊事件與管理員暗號檢查
     setupUIEvents();
+    syncAdminBadgeState();
+    checkUrlAdminTrigger();
     initGA4();
 
     const database = initFirebase();
@@ -335,10 +547,12 @@ const Telemetry = (() => {
     if (mTodayVisits) mTodayVisits.textContent = todayVisits.toLocaleString();
     if (mPlayers) mPlayers.textContent = Math.max(totalPlayers, 1).toLocaleString();
     if (mToday) mToday.textContent = todayBattles.toLocaleString();
+    syncAdminBadgeState();
   }
 
-  // 開啟全域戰情大盤彈窗
+  // 開啟全域戰情大盤彈窗（僅限已解鎖管理員）
   function openTelemetryModal() {
+    if (!isAdmin()) return;
     const modal = document.getElementById('globalTelemetryModal');
     if (!modal) return;
 
@@ -361,7 +575,12 @@ const Telemetry = (() => {
   function setupUIEvents() {
     document.addEventListener('click', e => {
       if (e.target.closest('#btnOpenTelemetry') || e.target.closest('#hudGlobalTelemetry')) {
+        if (!isAdmin()) return;
         openTelemetryModal();
+        return;
+      }
+      if (e.target.closest('#btnLockTelemetryAdmin')) {
+        lockAdmin();
         return;
       }
       if (e.target.closest('#btnCloseTelemetryModal') || e.target.closest('#btnCancelTelemetry')) {
@@ -401,6 +620,9 @@ const Telemetry = (() => {
     getStats: () => ({ onlineCount, totalBattles, totalPlayers, todayBattles, totalVisits, todayVisits }),
     openTelemetryModal,
     closeTelemetryModal,
+    isAdmin,
+    lockAdmin,
+    verifyAndUnlockAdmin,
     setGA4MeasurementId,
     getGA4MeasurementId
   };

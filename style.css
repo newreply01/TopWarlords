@@ -12255,7 +12255,7 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   border-radius: 6px !important;
   font-family: var(--mono) !important;
   font-size: 11.5px !important;
-  cursor: pointer !important;
+  cursor: default;
   transition: all 0.2s ease !important;
 }
 

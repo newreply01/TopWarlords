@@ -18,8 +18,8 @@
 <meta name="twitter:image" content="https://newreply01.github.io/TopWarlords/assets/warlords/GUANYU.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.10.11">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=7.10.12">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
@@ -42,7 +42,7 @@
 
 <header class="topbar">
   <div class="brand">
-    <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 12l6-6" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div>
+    <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.2 19.2 5.4 21.8 12 19.2 18.6 12 21.8 4.8 18.6 2.2 12 4.8 5.4Z" fill="none" stroke="currentColor" stroke-width="1.45"/><path d="M6.2 17.8 17.8 6.2M17.8 17.8 6.2 6.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M15.4 5.2 18.6 5.4 18.4 8.6M8.6 5.2 5.4 5.4 5.6 8.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.4 15.8 12 12 16.6 8.2 12Z" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="1.35"/><circle cx="12" cy="12" r="1.45" fill="currentColor"/></svg></div>
     <div>
       <div class="brand-title-wrap">
         <h1 class="brand-title">頂尖對戰</h1>
@@ -84,7 +84,7 @@
   <div class="hud-right">
     <!-- 全服 C4ISR 即時戰況/到訪人次膠囊 (固定寬度防彈跳，初始立即掛載全服快取次數避免抖動與跳動) -->
     <div class="hud-stats" id="hudStats">
-      <span class="chip-stat chip-telemetry" id="btnOpenTelemetry" style="cursor:pointer" title="📡 全服 C4ISR 即時戰況大盤 (點擊查看在線人數與對戰數據)">
+      <span class="chip-stat chip-telemetry" id="btnOpenTelemetry" style="cursor:default" title="全服累計到訪人次">
         <span class="live-pulse-dot"></span>
         <span>到訪 <b id="telemetryVisitsVal">1,002</b> 人次</span>
       </span>
@@ -1061,7 +1061,8 @@
       </div>
     </div>
 
-    <div style="margin-top:16px;display:flex;justify-content:flex-end">
+    <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <button class="btn ghost sm" id="btnLockTelemetryAdmin" type="button" style="color:var(--amber);border-color:rgba(245,158,11,0.35)">🔒 鎖定並退出管理員</button>
       <button class="btn secondary" id="btnCloseTelemetryModal" type="button">關閉戰情報告</button>
     </div>
   </div>
@@ -1091,28 +1092,28 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script defer src="js/data.js?v=7.10.11"></script>
-<script defer src="js/ladder-data.js?v=7.10.11"></script>
-<script defer src="js/ladder.js?v=7.10.11"></script>
-<script defer src="js/engine.js?v=7.10.11"></script>
+<script defer src="js/data.js?v=7.10.12"></script>
+<script defer src="js/ladder-data.js?v=7.10.12"></script>
+<script defer src="js/ladder.js?v=7.10.12"></script>
+<script defer src="js/engine.js?v=7.10.12"></script>
 <!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script defer src="js/firebase-config.js?v=7.10.11"></script>
-<script defer src="js/firebase-tourney.js?v=7.10.11"></script>
-<script defer src="js/tournament.js?v=7.10.11"></script>
-<script defer src="js/online-pvp.js?v=7.10.11"></script>
-<script defer src="js/telemetry.js?v=7.10.11"></script>
-<script defer src="js/cloud-sync.js?v=7.10.11"></script>
-<script defer src="js/sound.js?v=7.10.11"></script>
-<script defer src="js/poster-help.js?v=7.10.11"></script>
-<script defer src="js/libs/three.min.js?v=7.10.11"></script>
-<script defer src="js/libs/GLTFLoader.js?v=7.10.11"></script>
-<script defer src="js/libs/SkeletonUtils.js?v=7.10.11"></script>
-<script defer src="js/battle-figures.js?v=7.10.11"></script>
-<script defer src="js/battle-3d.js?v=7.10.11"></script>
-<script defer src="js/app.js?v=7.10.11"></script>
+<script defer src="js/firebase-config.js?v=7.10.12"></script>
+<script defer src="js/firebase-tourney.js?v=7.10.12"></script>
+<script defer src="js/tournament.js?v=7.10.12"></script>
+<script defer src="js/online-pvp.js?v=7.10.12"></script>
+<script defer src="js/telemetry.js?v=7.10.12"></script>
+<script defer src="js/cloud-sync.js?v=7.10.12"></script>
+<script defer src="js/sound.js?v=7.10.12"></script>
+<script defer src="js/poster-help.js?v=7.10.12"></script>
+<script defer src="js/libs/three.min.js?v=7.10.12"></script>
+<script defer src="js/libs/GLTFLoader.js?v=7.10.12"></script>
+<script defer src="js/libs/SkeletonUtils.js?v=7.10.12"></script>
+<script defer src="js/battle-figures.js?v=7.10.12"></script>
+<script defer src="js/battle-3d.js?v=7.10.12"></script>
+<script defer src="js/app.js?v=7.10.12"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let refreshing = false;
@@ -1123,7 +1124,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.10.11').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.10.12').then(r => r.update()).catch(() => {});
   });
 }
 </script>

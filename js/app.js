@@ -1775,8 +1775,11 @@ function renderHud() {
         visitsValEl.textContent = targetVisits;
       }
     } else {
+      const isTelAdmin = typeof Telemetry !== 'undefined' && typeof Telemetry.isAdmin === 'function' && Telemetry.isAdmin();
+      const telCursor = isTelAdmin ? 'pointer' : 'default';
+      const telTitle = isTelAdmin ? '📡 全服 C4ISR 即時戰況大盤 (管理員已解鎖 · 點擊開啟)' : '全服累計到訪人次';
       hudStats.innerHTML = `
-        <span class="chip-stat chip-telemetry" id="btnOpenTelemetry" style="cursor:pointer" title="📡 全服 C4ISR 即時戰況大盤 (點擊查看在線人數與對戰數據)">
+        <span class="chip-stat chip-telemetry" id="btnOpenTelemetry" style="cursor:${telCursor}" title="${telTitle}">
           <span class="live-pulse-dot"></span>
           <span>到訪 <b id="telemetryVisitsVal">${targetVisits}</b> 人次</span>
         </span>

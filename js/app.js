@@ -97,6 +97,8 @@ const state = {
   quickSubMode: 'ai', // 'ai' (預設 AI 演習) 或 'ghost' (全球名將異步幽靈)
   deck: [null, null, null, null, null],
   formations: savedFormations.slice(),
+  isWeatherRandom: true,
+  isFormationRandom: LS.get('wl15_formation_random', true),
   terrain: savedTerrain,
   active: 0,
   flexCat: { 3: 'naval', 4: 'support' },
@@ -698,15 +700,46 @@ function handleMatrixCardClick(u) {
   }
 }
 
+const WEATHER_SVGS = {
+  random: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="2.8" y="2.8" width="12.4" height="12.4" rx="2.4"/><circle cx="6.2" cy="6.2" r="1.05" fill="currentColor" stroke="none"/><circle cx="11.8" cy="6.2" r="1.05" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="1.05" fill="currentColor" stroke="none"/><circle cx="6.2" cy="11.8" r="1.05" fill="currentColor" stroke="none"/><circle cx="11.8" cy="11.8" r="1.05" fill="currentColor" stroke="none"/></svg>',
+  plain: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13.5c4-1.5 10-1.5 14 0"/><path d="M5.5 12.6V6.5m0 3.2-2-1.8m2 .5 1.8-1.6"/><path d="M12.5 12.6V5m0 3.8-1.8-1.6m1.8.4 2-1.8"/></svg>',
+  strait: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 3.5 5.8 6l-.8 9.5M15.5 3.5 12.2 6l.8 9.5"/><path d="M9 4.5c-1.3 2 1.5 4 0 6s-1.2 3.5 0 5"/></svg>',
+  storm: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 10.5h8.2a2.5 2.5 0 0 0 .4-4.96A3.6 3.6 0 0 0 6.5 4.8a2.8 2.8 0 0 0-1.7 5.7Z"/><path d="M9.5 10.5 7.8 13.5h2.2l-1.3 2.5M4.8 13l-1 2.2M13.5 13l-1 2.2"/></svg>',
+  urban: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 15h13M3.5 15V7.5h2.2V5h2v2.5h2.6V5h2v2.5h2.2V15"/><path d="M7.5 15v-3.2a1.5 1.5 0 0 1 3 0V15"/></svg>',
+  em: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 5.5c2.2-1 4.2-1 6.4 0s4.2 1 5.6 0"/><path d="M2.5 9.2c2.5-1 4.5-1 6.8 0s4 1 6.2 0"/><path d="M3.5 13c2.2-1 4-1 6 0s3.6 1 5 0"/></svg>',
+  clear: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="9" r="3.4"/><path d="M9 2.2v1.6M9 14.2v1.6M2.2 9h1.6M14.2 9h1.6M4.2 4.2l1.1 1.1M12.7 12.7l1.1 1.1M13.8 4.2l-1.1 1.1M5.3 12.7l-1.1 1.1"/></svg>'
+};
+
+function getWeatherSvg(id) {
+  return WEATHER_SVGS[id] || WEATHER_SVGS.random;
+}
+
+function getWeatherBuffPills(ev) {
+  const m = (ev && ev.mod) || {};
+  const pills = [];
+  if (m.armorDmg > 1) pills.push({ t: `重甲/突騎+${Math.round((m.armorDmg - 1) * 100)}%`, cls: 'buff' });
+  else if (m.armorDmg < 1) pills.push({ t: `重甲-${Math.round((1 - m.armorDmg) * 100)}%`, cls: 'debuff' });
+  if (m.navalDmg > 1) pills.push({ t: `先登+${Math.round((m.navalDmg - 1) * 100)}%`, cls: 'buff' });
+  else if (m.navalDmg < 1) pills.push({ t: `先登-${Math.round((1 - m.navalDmg) * 100)}%`, cls: 'debuff' });
+  if (m.airHit < 0) pills.push({ t: `突騎/神射命中-${Math.round(-m.airHit * 100)}%`, cls: 'debuff' });
+  if (m.droneDmg > 1) pills.push({ t: `死士奇襲+${Math.round((m.droneDmg - 1) * 100)}%`, cls: 'buff' });
+  else if (m.droneDmg < 1) pills.push({ t: `火計暗襲-${Math.round((1 - m.droneDmg) * 100)}%`, cls: 'debuff' });
+  if (m.artyDmg < 1) pills.push({ t: `火砲-${Math.round((1 - m.artyDmg) * 100)}%`, cls: 'debuff' });
+  if (m.ewMult > 1) pills.push({ t: `謀略×${m.ewMult}`, cls: 'buff' });
+  if (m.stealthAdd > 0) pills.push({ t: `全軍隱匿+${m.stealthAdd}`, cls: 'buff' });
+  if (!pills.length) pills.push({ t: '無天候修正', cls: 'neutral' });
+  return pills.map(p => `<span class="form-pill ${p.cls}">${p.t}</span>`).join('');
+}
+
 /* ---------- 戰場場景自選下拉選單元件 (100% 絕對垂直對齊) ---------- */
 function renderTacticalWeatherDropdown(contextMode = 'quick') {
   const isRandom = Boolean(state.isWeatherRandom);
   const currentEv = state.event;
-  const currentIcon = isRandom ? '🎲' : (currentEv ? currentEv.icon : '🎲');
+  const currentIcon = getWeatherSvg(isRandom ? 'random' : (currentEv ? currentEv.id : 'random'));
   const currentName = isRandom ? '隨機天候' : (currentEv ? currentEv.name : '隨機天候');
   const weatherTitle = isRandom
     ? '隨機天候：開戰自動自 6 大戰場環境隨機抽選'
-    : (currentEv ? `${currentEv.name}：${currentEv.desc}` : '自選戰場場景');
+    : (currentEv ? `${currentEv.name}：${currentEv.desc}` : '自選戰場天候');
 
   return `
     <div class="mission-item custom-weather-dropdown" id="weatherDropdown" style="margin-left:4px" data-context="${contextMode}">
@@ -716,18 +749,32 @@ function renderTacticalWeatherDropdown(contextMode = 'quick') {
         <span class="tw-arrow">▾</span>
       </button>
       <div class="custom-weather-menu" id="weatherDropdownMenu" role="listbox" hidden>
-        <div class="weather-opt-item ${isRandom ? 'active' : ''}" data-val="random" role="option">
-          <span class="weather-opt-icon">🎲</span>
-          <span class="weather-opt-name">隨機天候</span>
+        <div class="weather-opt-list">
+          <button type="button" class="weather-opt-item ${isRandom ? 'active' : ''}" data-val="random" role="option" aria-selected="${isRandom ? 'true' : 'false'}">
+            <span class="weather-opt-svg" aria-hidden="true">${getWeatherSvg('random')}</span>
+            <span class="weather-opt-body">
+              <span class="weather-opt-head">
+                <span class="weather-opt-name">隨機天候</span>
+                <span class="weather-opt-pills"><span class="form-pill buff">開戰自動抽選</span></span>
+              </span>
+              <span class="weather-opt-desc">每場開戰自 6 大古戰場天候環境隨機抽選。</span>
+            </span>
+          </button>
+          ${EVENTS.map(ev => {
+            const isActive = (!isRandom && currentEv && currentEv.id === ev.id);
+            return `
+              <button type="button" class="weather-opt-item ${isActive ? 'active' : ''}" data-val="${ev.id}" role="option" aria-selected="${isActive ? 'true' : 'false'}">
+                <span class="weather-opt-svg" aria-hidden="true">${getWeatherSvg(ev.id)}</span>
+                <span class="weather-opt-body">
+                  <span class="weather-opt-head">
+                    <span class="weather-opt-name">${esc(ev.name)}</span>
+                    <span class="weather-opt-pills">${getWeatherBuffPills(ev)}</span>
+                  </span>
+                  <span class="weather-opt-desc">${esc(ev.desc)}</span>
+                </span>
+              </button>`;
+          }).join('')}
         </div>
-        ${EVENTS.map(ev => {
-          const isActive = (!isRandom && currentEv && currentEv.id === ev.id);
-          return `
-            <div class="weather-opt-item ${isActive ? 'active' : ''}" data-val="${ev.id}" role="option" title="${esc(ev.desc)}">
-              <span class="weather-opt-icon">${ev.icon}</span>
-              <span class="weather-opt-name">${esc(ev.name)}</span>
-            </div>`;
-        }).join('')}
       </div>
       <select id="bo3EventSel" style="display:none" tabindex="-1" aria-hidden="true">
         <option value="random" ${isRandom ? 'selected' : ''}>🎲 隨機天候</option>
@@ -765,26 +812,39 @@ function selectWeatherEvent(evId, contextMode) {
 const ARCHETYPE_ICONS = {
   random: '🎲',
   armor: '🛡️',
-  air: '✈️',
-  hedgehog: '🦔',
+  air: '🐎',
+  hedgehog: '🏹',
   balanced: '⚖️',
-  naval: '⚓',
-  ew: '📡'
+  naval: '⚔️',
+  ew: '🪶'
 };
+
+const ARCHETYPE_SVGS = {
+  random: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="2.8" y="2.8" width="12.4" height="12.4" rx="2.4"/><circle cx="6.2" cy="6.2" r="1.05" fill="currentColor" stroke="none"/><circle cx="11.8" cy="6.2" r="1.05" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="1.05" fill="currentColor" stroke="none"/><circle cx="6.2" cy="11.8" r="1.05" fill="currentColor" stroke="none"/><circle cx="11.8" cy="11.8" r="1.05" fill="currentColor" stroke="none"/></svg>',
+  armor: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.4 14.5 4.6v4.6c0 3.3-2.3 5.5-5.5 6.6-3.2-1.1-5.5-3.3-5.5-6.6V4.6L9 2.4Z"/><circle cx="9" cy="8.8" r="1.5" fill="currentColor" stroke="none"/></svg>',
+  air: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13.5c2.2-3 4.8-5 8.5-6.2L15 4l-1.5 4.2-3 1.4 1 3.4"/><path d="M4.5 7.5 11.8 3.2"/><path d="M3 10.5 7.5 8.2"/></svg>',
+  hedgehog: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14.5h12M4.5 14.5l4.5-6 4.5 6"/><path d="M9 3v5.5M5.2 4.8 9 7.8l3.8-3"/></svg>',
+  balanced: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"><polygon points="9,2.4 15.2,6.9 12.8,14.2 5.2,14.2 2.8,6.9"/><circle cx="9" cy="9.2" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  naval: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 13.5 3.5m-1.8 5.2 2.3 2.3M14 11.5 4.5 3.5m1.8 5.2L4 11"/><path d="M2.5 14.6c2.2-1 4.2-1 6.5 0s4.3 1 6.5 0"/></svg>',
+  ew: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.8 9 9.5"/><path d="M7.2 11.2C5.2 8.2 6.8 3.8 13.5 2.8c-1 6.7-5.4 8.3-6.3 8.4Z"/><path d="M8.5 9.8 12 6.2"/></svg>'
+};
+
+function getAiArchSvg(id) {
+  return ARCHETYPE_SVGS[id] || ARCHETYPE_SVGS.random;
+}
 
 function renderTacticalAiDropdown() {
   const currentArchId = state.aiArch || 'random';
   const isRandom = currentArchId === 'random';
   const currentArch = isRandom ? null : ARCHETYPES.find(a => a.id === currentArchId);
-  const currentIcon = ARCHETYPE_ICONS[currentArchId] || '🎲';
+  const currentIcon = getAiArchSvg(currentArchId);
   const currentName = currentArch ? currentArch.name : '隨機對手';
   const aiTitle = currentArch
     ? `AI對手【${currentArch.name}】：${currentArch.desc}`
     : 'AI對手【隨機對手】：每局開戰自動隨機配對 AI 戰略流派風格';
 
   return `
-    <span class="mission-label-text" style="font-weight:700;margin-left:8px;margin-right:2px">AI對手：</span>
-    <div class="mission-item custom-ai-dropdown" id="aiDropdown">
+    <div class="mission-item custom-ai-dropdown" id="aiDropdown" style="margin-left:6px">
       <button class="select sm ai-dropdown-btn" id="btnAiDropdown" type="button" title="${esc(aiTitle)}" aria-haspopup="listbox" aria-expanded="false">
         <span class="tai-icon">${currentIcon}</span>
         <span class="tai-name">${esc(currentName)}</span>
@@ -792,15 +852,14 @@ function renderTacticalAiDropdown() {
       </button>
       <div class="custom-ai-menu" id="aiDropdownMenu" role="listbox" hidden>
         <div class="ai-opt-item ${isRandom ? 'active' : ''}" data-val="random" role="option">
-          <span class="ai-opt-icon">🎲</span>
+          <span class="ai-opt-icon">${getAiArchSvg('random')}</span>
           <span class="ai-opt-name">隨機對手</span>
         </div>
         ${ARCHETYPES.map(a => {
           const isActive = (!isRandom && currentArchId === a.id);
-          const icon = ARCHETYPE_ICONS[a.id] || '⚔️';
           return `
             <div class="ai-opt-item ${isActive ? 'active' : ''}" data-val="${a.id}" role="option" title="${esc(a.desc)}">
-              <span class="ai-opt-icon">${icon}</span>
+              <span class="ai-opt-icon">${getAiArchSvg(a.id)}</span>
               <span class="ai-opt-name">${esc(a.name)}</span>
             </div>`;
         }).join('')}
@@ -1418,14 +1477,23 @@ function analyzeDeckArchetype(deck) {
 
 /* ---------- 渲染：底部常駐指揮台 (Command Deck) ---------- */
 const FORMATION_SVGS = {
-  fishscale: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12.5" cy="8" r="1.4" fill="currentColor" stroke="none"/><circle cx="8.5" cy="5.2" r="1.3" fill="currentColor" stroke="none"/><circle cx="8.5" cy="10.8" r="1.3" fill="currentColor" stroke="none"/><circle cx="4" cy="3" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="8" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="13" r="1.2" fill="currentColor" stroke="none"/><path d="M5.5 3.8 11 7.2M5.5 12.2 11 8.8" opacity=".55"/></svg>',
-  spearhead: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 3.5 13.5 8 9 12.5"/><path d="M4.5 5 8 8l-3.5 3" opacity=".55"/></svg>',
-  square: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2.5" width="11" height="11" rx="1.8"/><circle cx="8" cy="8" r="2.2" fill="currentColor" stroke="none"/></svg>',
-  crane: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3c2.5 1.8 4.2 3.5 5 5-0.8 1.5-2.5 3.2-5 5"/><path d="M13 3c-2.5 1.8-4.2 3.5-5 5 0.8 1.5 2.5 3.2 5 5"/><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none"/></svg>',
-  goose: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 12.5 13 3.5" opacity=".5"/><circle cx="3" cy="12.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="6.3" cy="9.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="9.7" cy="6.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="13" cy="3.5" r="1.4" fill="currentColor" stroke="none"/></svg>',
-  longsnake: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2.5 11.5c2-4 3.5-7 5.5-7s3.5 7 5.5 0"/><circle cx="13.5" cy="4.5" r="1.3" fill="currentColor" stroke="none"/></svg>',
-  cone: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><polygon points="14,8 3,3.5 5.2,8 3,12.5"/></svg>',
-  fourYi: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2.5v11M2.5 8h11" opacity=".55"/><circle cx="8" cy="2.8" r="1.3" fill="currentColor" stroke="none"/><circle cx="8" cy="13.2" r="1.3" fill="currentColor" stroke="none"/><circle cx="2.8" cy="8" r="1.3" fill="currentColor" stroke="none"/><circle cx="13.2" cy="8" r="1.3" fill="currentColor" stroke="none"/></svg>'
+  // 三國志經典陣圖（全數朝上方敵陣方向）：
+  // 魚鱗：前鋒一點突破，後方呈弧形層層展開如魚鱗重疊
+  fishscale: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"><path d="M5.5 6.8a4.2 4.2 0 0 1 7 0M3.5 11a6.5 6.5 0 0 1 11 0" opacity=".45"/><circle cx="9" cy="3.2" r="1.45" fill="currentColor" stroke="none"/><circle cx="6.2" cy="7.2" r="1.3" fill="currentColor" stroke="none"/><circle cx="11.8" cy="7.2" r="1.3" fill="currentColor" stroke="none"/><circle cx="3.8" cy="11.4" r="1.25" fill="currentColor" stroke="none"/><circle cx="9" cy="11.4" r="1.25" fill="currentColor" stroke="none"/><circle cx="14.2" cy="11.4" r="1.25" fill="currentColor" stroke="none"/><circle cx="6.5" cy="14.8" r="1.2" fill="currentColor" stroke="none"/><circle cx="11.5" cy="14.8" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  // 鋒矢：銳利箭鏃前鋒搭配中央縱貫矢桿與後翼護衛
+  spearhead: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5v13M4.2 7.8 9 2.5l4.8 5.3"/><path d="M5.8 14.2 9 11.2l3.2 3" opacity=".6"/><circle cx="9" cy="2.6" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  // 方圓：外圍八方結陣環衛，中央主將穩坐固守
+  square: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"><rect x="3.2" y="3.2" width="11.6" height="11.6" rx="2.4" opacity=".45"/><circle cx="9" cy="3.2" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="14.8" r="1.2" fill="currentColor" stroke="none"/><circle cx="3.2" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="14.8" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.8" cy="4.8" r="1.05" fill="currentColor" stroke="none"/><circle cx="13.2" cy="4.8" r="1.05" fill="currentColor" stroke="none"/><circle cx="4.8" cy="13.2" r="1.05" fill="currentColor" stroke="none"/><circle cx="13.2" cy="13.2" r="1.05" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="2.1" fill="currentColor" stroke="none"/></svg>',
+  // 鶴翼：中軍略退，雙翼朝前上方大幅展開包抄（如飛鶴展翅）
+  crane: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 4.2C4.5 9.2 6.8 12.2 9 12.2s4.5-3 6.4-8"/><circle cx="2.8" cy="4.2" r="1.3" fill="currentColor" stroke="none"/><circle cx="5.4" cy="9.2" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="12.2" r="1.5" fill="currentColor" stroke="none"/><circle cx="12.6" cy="9.2" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.2" cy="4.2" r="1.3" fill="currentColor" stroke="none"/></svg>',
+  // 雁行：斜列一字排開，利於遠距弓弩齊射互不遮擋
+  goose: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3.2 14.5 14.8 3.5" opacity=".45"/><path d="M4.2 11.2 4.2 8.8M7.6 8 7.6 5.6M11 4.8 11 2.4" opacity=".55"/><circle cx="3.2" cy="14.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="7.1" cy="10.8" r="1.35" fill="currentColor" stroke="none"/><circle cx="10.9" cy="7.2" r="1.35" fill="currentColor" stroke="none"/><circle cx="14.8" cy="3.5" r="1.35" fill="currentColor" stroke="none"/></svg>',
+  // 長蛇：縱向 S 形蜿蜒行軍縱隊，蛇首朝上靈活應變
+  longsnake: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"><path d="M9 15.6c4.2-1.8 4.2-4.2 0-6.2s-4.2-4.2 0-6.4"/><circle cx="9" cy="2.8" r="1.5" fill="currentColor" stroke="none"/><circle cx="6.2" cy="6.2" r="1.1" fill="currentColor" stroke="none"/><circle cx="11.8" cy="12.5" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  // 錐行：極窄銳角長楔形，高速機動穿插敵陣
+  cone: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"><polygon points="9,2.2 13,15.2 9,12.8 5,15.2"/></svg>',
+  // 四夷：四隅山林伏兵向中央包圍突襲
+  fourYi: '<svg viewBox="0 0 18 18" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 4 7.2 7.2M14 4l-3.2 3.2M4 14l3.2-3.2M14 14l-3.2-3.2" opacity=".55"/><circle cx="3.6" cy="3.6" r="1.4" fill="currentColor" stroke="none"/><circle cx="14.4" cy="3.6" r="1.4" fill="currentColor" stroke="none"/><circle cx="3.6" cy="14.4" r="1.4" fill="currentColor" stroke="none"/><circle cx="14.4" cy="14.4" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="9" r="1.3" stroke="currentColor" fill="none"/></svg>'
 };
 
 function getFormationSvg(id) {
@@ -1449,6 +1517,21 @@ function getFormationBuffPills(f) {
   return pills.map(p => `<span class="form-pill ${p.cls}">${p.t}</span>`).join('');
 }
 
+function getEligibleFormations(deck = state.deck) {
+  return BATTLE_FORMATION_DEFS.filter(option =>
+    !option.eligibleUnitIds || (Array.isArray(deck) && deck.some(unitId => option.eligibleUnitIds.includes(unitId)))
+  );
+}
+
+function getBattleActiveFormations(deck = state.deck) {
+  if (state.isFormationRandom) {
+    const pool = getEligibleFormations(deck);
+    const chosen = pick(pool.length ? pool : BATTLE_FORMATION_DEFS);
+    return Array(5).fill(chosen.id);
+  }
+  return normalizeArmyFormations(state.formations, deck);
+}
+
 function renderFormationEditor() {
   const menu = $('#formationDropdownMenu');
   const summary = $('#formationSummary');
@@ -1462,23 +1545,34 @@ function renderFormationEditor() {
     syncActiveDeck();
   }
   const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
+  const isRandom = Boolean(state.isFormationRandom);
   const activeId = selectedIds[0];
   const activeFormation = getBattleFormation(activeId);
-  summary.textContent = activeFormation.name;
-  if (svgIcon) svgIcon.innerHTML = getFormationSvg(activeId);
+  summary.textContent = isRandom ? '隨機陣型' : activeFormation.name;
+  if (svgIcon) svgIcon.innerHTML = isRandom ? '🎲' : getFormationSvg(activeId);
   button.disabled = formationEditingLocked;
   button.title = formationEditingLocked
     ? '陣容已鎖定，本局陣形已提交'
-    : `陣型：${activeFormation.name}（${activeFormation.desc}）`;
+    : isRandom
+      ? '隨機陣型：開戰自動自可用陣型隨機抽選'
+      : `出征陣型：${activeFormation.name}（${activeFormation.desc}）`;
 
-  const availableFormations = BATTLE_FORMATION_DEFS.filter(option =>
-    !option.eligibleUnitIds || state.deck.some(unitId => option.eligibleUnitIds.includes(unitId))
-  );
+  const availableFormations = getEligibleFormations(state.deck);
 
   menu.innerHTML = `
     <div class="formation-opt-list">
+      <button type="button" class="formation-opt-item ${isRandom ? 'active' : ''}" data-val="random" role="option" aria-selected="${isRandom ? 'true' : 'false'}" ${formationEditingLocked ? 'disabled' : ''}>
+        <span class="formation-opt-svg" aria-hidden="true">🎲</span>
+        <span class="formation-opt-body">
+          <span class="formation-opt-head">
+            <span class="formation-opt-name">隨機陣型</span>
+            <span class="formation-opt-pills"><span class="form-pill buff">開戰自動抽選</span></span>
+          </span>
+          <span class="formation-opt-desc">每場開戰隨機選用最適合當前陣容的出征陣型。</span>
+        </span>
+      </button>
       ${availableFormations.map(option => {
-        const isActive = option.id === activeId;
+        const isActive = !isRandom && option.id === activeId;
         return `<button type="button" class="formation-opt-item ${isActive ? 'active' : ''}" data-val="${option.id}" role="option" aria-selected="${isActive ? 'true' : 'false'}" ${formationEditingLocked ? 'disabled' : ''}>
           <span class="formation-opt-svg" aria-hidden="true">${getFormationSvg(option.id)}</span>
           <span class="formation-opt-body">
@@ -1950,7 +2044,14 @@ document.addEventListener('click', event => {
   if (optItem) {
     const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
     const val = optItem.dataset.val;
-    if (!formationEditingLocked && val && validFormationIds.has(val)) {
+    if (!formationEditingLocked && val === 'random') {
+      state.isFormationRandom = true;
+      LS.set('wl15_formation_random', true);
+      renderFormationEditor();
+      renderMatrix();
+    } else if (!formationEditingLocked && val && validFormationIds.has(val)) {
+      state.isFormationRandom = false;
+      LS.set('wl15_formation_random', false);
       state.formations = normalizeArmyFormations(val, state.deck);
       syncActiveDeck();
       renderFormationEditor();
@@ -4162,12 +4263,13 @@ function startBattle() {
   const seed = state.mode === 'daily' ? hashStr(dateKey() + deck.join('.') + state.doctrine) : (Math.random() * 4294967296) >>> 0;
   const battleTerrain = getBattleEnvironment(state.event, state.terrain).terrain;
   const enemyFormations = getRecommendedFormations(state.enemy, battleTerrain);
+  const activeFormations = getBattleActiveFormations(deck);
   const res = resolveBattle(deck, state.enemy, {
     seed,
     event: state.event,
     docA: state.doctrine,
     docB: state.enemyDoc,
-    formationsA: state.formations,
+    formationsA: activeFormations,
     formationsB: enemyFormations,
     terrain: state.terrain
   });

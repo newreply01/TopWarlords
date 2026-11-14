@@ -24,7 +24,7 @@ function hashStr(s) {
 /* ---------- 古戰場環境（賽前公開，每場輪動，Meta 不會固化） ---------- */
 const EVENTS = [
   { id: 'plain',  icon: '🌾', name: '開闊曠野', desc: '平野利於大軍衝殺：重甲與突騎火力 +20%，先登奇兵伏擊 −25%。', mod: { armorDmg: 1.2, navalDmg: 0.75 } },
-  { id: 'strait', icon: '🌊', name: '險峻峽谷', desc: '江河水網林地險阻：先登奇兵火力 +25%，中軍重甲火力 −15%。', mod: { navalDmg: 1.25, armorDmg: 0.85 } },
+  { id: 'strait', icon: '🏞️', name: '險峻峽谷', desc: '江河水網林地險阻：先登奇兵火力 +25%，中軍重甲火力 −15%。', mod: { navalDmg: 1.25, armorDmg: 0.85 } },
   { id: 'storm',  icon: '⛈', name: '暴雨雷暴', desc: '暴風驟雨視線昏暗：突騎與神射命中率 −15%，奇謀火計暗襲 −25%。', mod: { airHit: -0.15, droneDmg: 0.75 } },
   { id: 'urban',  icon: '🏯', name: '城下巷戰', desc: '城防隘口地狹：攻城火砲 −25%、重甲 −10%，忍軍死士奇襲 +30%。', mod: { artyDmg: 0.75, droneDmg: 1.3, armorDmg: 0.9 } },
   { id: 'em',     icon: '🌫', name: '大霧彌天', desc: '天地莫測：軍師謀略效果 ×1.6；全軍隱匿 +10。', mod: { ewMult: 1.6, stealthAdd: 10 } },

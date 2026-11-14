@@ -19210,9 +19210,9 @@ button, a, select, input, .unit-card, .btn-action {
   /* 兩大按鈕寬度與水平位置嚴格相等，左緣對齊第5欄軍師卡片左緣，右緣於垂直方向完全平齊 */
   .btn-reroll-top,
   .mega-launch-btn {
-    width: clamp(212px, calc(20vw - 20px), 420px) !important;
-    min-width: clamp(212px, calc(20vw - 20px), 420px) !important;
-    max-width: clamp(212px, calc(20vw - 20px), 420px) !important;
+    width: max(212px, calc(20vw - 20px), calc(50vw - 504px)) !important;
+    min-width: max(212px, calc(20vw - 20px), calc(50vw - 504px)) !important;
+    max-width: max(212px, calc(20vw - 20px), calc(50vw - 504px)) !important;
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
@@ -19254,7 +19254,7 @@ button, a, select, input, .unit-card, .btn-action {
 }
 
 @media (min-width: 769px) {
-  /* 主標題 17.5px 粗體、垂直高度置中；副標題置於其後下方且底度 (baseline) 精準切齊 */
+  /* 字級與開戰按鈕完全一致（15px 主標 + 10.5px 副標），骰子與文字置中對齊同一水平線 */
   .btn-reroll-top {
     display: inline-flex !important;
     align-items: center !important;
@@ -19263,8 +19263,9 @@ button, a, select, input, .unit-card, .btn-action {
   }
 
   .btn-reroll-top .reroll-icon {
-    font-size: 20px !important;
+    font-size: 16px !important;
     line-height: 1 !important;
+    height: 20px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -19274,23 +19275,24 @@ button, a, select, input, .unit-card, .btn-action {
   .btn-reroll-top .reroll-texts {
     display: inline-flex !important;
     flex-direction: row !important;
-    align-items: baseline !important;
+    align-items: center !important;
     gap: 6px !important;
-    line-height: 1 !important;
+    line-height: 1.15 !important;
     min-width: 0 !important;
     white-space: nowrap !important;
   }
 
   .btn-reroll-top .reroll-title {
     font-family: var(--head) !important;
-    font-size: 17.5px !important;
+    font-size: 15px !important;
     font-weight: 900 !important;
-    letter-spacing: 0.03em !important;
-    line-height: 1 !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.15 !important;
     color: #fbbf24 !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
-    display: inline-block !important;
+    display: inline-flex !important;
+    align-items: center !important;
   }
 
   [data-theme="light"] .btn-reroll-top .reroll-title {
@@ -19298,20 +19300,33 @@ button, a, select, input, .unit-card, .btn-action {
   }
 
   .btn-reroll-top .reroll-sub {
-    display: inline-block !important;
+    display: inline-flex !important;
+    align-items: center !important;
     font-family: var(--mono) !important;
     font-size: 10.5px !important;
     font-weight: 700 !important;
     letter-spacing: 0.02em !important;
-    line-height: 1 !important;
+    line-height: 1.1 !important;
     color: var(--muted) !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
-    opacity: 0.82 !important;
+    opacity: 0.85 !important;
   }
 
   [data-theme="light"] .btn-reroll-top .reroll-sub {
     color: #78350f !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1249px) {
+  .btn-reroll-top .reroll-icon {
+    font-size: 14px !important;
+  }
+  .btn-reroll-top .reroll-title {
+    font-size: 13px !important;
+  }
+  .btn-reroll-top .reroll-sub {
+    font-size: 8.5px !important;
   }
 }
 

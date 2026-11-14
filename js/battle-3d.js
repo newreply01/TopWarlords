@@ -1212,7 +1212,9 @@ const Battle3DEngine = (function () {
             const ridge = kind === 'canyon'
               ? 8 + layer * 3 + Math.sin(x * 0.075 + layer) * 2 + Math.sin(x * 0.31) * 0.7
               : 5.5 + layer * 3.8 + Math.sin(x * 0.036 + layer * 2) * 2.4 + Math.sin(x * 0.12) * 0.9;
-            const z = side * (kind === 'canyon' ? 11.5 + layer * 6 + t * 1.6 : 25 + layer * 12);
+            const z = kind === 'canyon'
+              ? (side < 0 ? -(12.5 + layer * 6 + t * 1.6) : (42 + layer * 7 + t * 1.6))
+              : side * (25 + layer * 12);
             position.setXYZ(i, x, t * ridge - 0.2,
               z + Math.sin(x * 0.13 + layer) * (kind === 'canyon' ? 1.2 : 2.6));
             const strata = kind === 'canyon' ? Math.sin(t * 70 + x * 0.15) * 0.035 : 0;

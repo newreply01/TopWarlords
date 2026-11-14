@@ -27697,6 +27697,7 @@ html:not([data-theme="light"]) .custom-formation-menu {
 .battle-skill-ticker-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
   gap: 8px;
   margin-bottom: 4px;
 }
@@ -27705,12 +27706,45 @@ html:not([data-theme="light"]) .custom-formation-menu {
   display: none !important;
 }
 
+.battle-skill-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.battle-skill-stack[hidden] {
+  display: none !important;
+}
+
+.battle-skill-stack.side-a {
+  grid-column: 1;
+}
+
+.battle-skill-stack.side-b {
+  grid-column: 2;
+}
+
 .battle-skill-ticker {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
   margin-bottom: 0;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.battle-skill-ticker.is-entering {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.battle-skill-ticker.is-leaving {
+  opacity: 0;
+  transform: translateY(-4px);
+}
   padding: 5px 10px;
   border-radius: 3px;
   border: 1px solid var(--skill-edge);

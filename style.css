@@ -24900,8 +24900,8 @@ input,
   }
 
   .mission-right-tools .formation-open-btn {
-    padding: 0 9px !important;
-    gap: 5px !important;
+    padding: 0 24px 0 8px !important;
+    gap: 6px !important;
     flex-shrink: 0 !important;
   }
 
@@ -25519,24 +25519,18 @@ select:focus-visible,
 }
 
 .formation-open-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 34px;
-  padding: 5px 10px;
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  position: relative !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 24px 0 8px !important;
   border-radius: 7px;
-  background: rgba(56, 189, 248, 0.08);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px !important;
+  font-weight: 700 !important;
   white-space: nowrap;
   cursor: pointer;
-}
-
-.formation-open-btn:hover:not(:disabled) {
-  border-color: var(--cyan);
-  background: rgba(56, 189, 248, 0.15);
 }
 
 .formation-open-btn:disabled {
@@ -25548,14 +25542,17 @@ select:focus-visible,
   position: relative;
   display: inline-flex;
   align-items: center;
+  gap: 4px;
 }
 
 .formation-open-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
   color: var(--cyan);
-  line-height: 1;
+  line-height: 1 !important;
+  flex: none;
 }
 
 .formation-open-icon svg {
@@ -25565,20 +25562,26 @@ select:focus-visible,
 }
 
 .formation-open-btn .tw-arrow {
-  font-size: 10px;
-  opacity: 0.72;
-  transition: transform 0.16s ease;
+  position: absolute !important;
+  right: 7px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 10px !important;
+  color: #64748b !important;
+  pointer-events: none !important;
+  transition: transform 0.15s ease !important;
 }
 
 .custom-formation-dropdown.open .formation-open-btn .tw-arrow {
-  transform: rotate(180deg);
+  transform: translateY(-50%) rotate(180deg) !important;
 }
 
 .formation-open-btn strong {
-  padding-left: 7px;
-  border-left: 1px solid var(--line);
-  color: var(--cyan);
-  font-size: 11px;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  color: inherit !important;
+  white-space: nowrap !important;
 }
 
 .custom-formation-menu {

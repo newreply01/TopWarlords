@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.11.7">
+<link rel="stylesheet" href="style.css?v=7.11.9">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
@@ -107,7 +107,7 @@
     <button class="nav-google-avatar" id="btnCommanderCapsule" type="button" aria-label="指揮官中心" title="指揮官中心：暱稱、Google 登入與存檔狀態">
       <span class="avatar-letter" id="navAvatarCircle" hidden></span>
     </button>
-    <a href="armory.html" class="nav-armory-btn" id="btnArmory" title="瀏覽 125 位日韓中歷史名將點將錄" target="_blank">📜 名將點將錄</a>
+    <a href="armory.html" class="nav-armory-btn" id="btnArmory" title="瀏覽 125 位日韓中歷史名將錄" target="_blank">📜 名將錄</a>
     <div class="hud-icon-group" id="hudUtilityGroup">
       <button class="icon-btn" id="btnAudio" aria-label="切換戰場音效" title="開啟/關閉真實戰場音效"><span id="audioIcon">🔊</span></button>
       <button class="icon-btn" id="btnTheme" aria-label="切換深淺色主題" title="切換為深色模式 (夜間指揮所)"><span id="themeIcon">🌙</span></button>
@@ -121,9 +121,9 @@
   <div class="mission-content" id="missionContent"></div>
   <div class="mission-right-tools" id="missionRightTools">
     <div class="mission-item custom-formation-dropdown" id="formationDropdown">
-      <button class="formation-open-btn" id="btnOpenFormation" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="formationDropdownMenu">
+      <span class="mission-label-text">陣型：</span>
+      <button class="select sm formation-open-btn" id="btnOpenFormation" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="formationDropdownMenu">
         <span class="formation-open-icon" id="formationSvgIcon" aria-hidden="true"></span>
-        <span>陣型</span>
         <strong id="formationSummary">魚鱗</strong>
         <span class="tw-arrow">▾</span>
       </button>
@@ -1075,28 +1075,28 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script defer src="js/data.js?v=7.11.7"></script>
-<script defer src="js/ladder-data.js?v=7.11.7"></script>
-<script defer src="js/ladder.js?v=7.11.7"></script>
-<script defer src="js/engine.js?v=7.11.7"></script>
+<script defer src="js/data.js?v=7.11.9"></script>
+<script defer src="js/ladder-data.js?v=7.11.9"></script>
+<script defer src="js/ladder.js?v=7.11.9"></script>
+<script defer src="js/engine.js?v=7.11.9"></script>
 <!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script defer src="js/firebase-config.js?v=7.11.7"></script>
-<script defer src="js/firebase-tourney.js?v=7.11.7"></script>
-<script defer src="js/tournament.js?v=7.11.7"></script>
-<script defer src="js/online-pvp.js?v=7.11.7"></script>
-<script defer src="js/telemetry.js?v=7.11.7"></script>
-<script defer src="js/cloud-sync.js?v=7.11.7"></script>
-<script defer src="js/sound.js?v=7.11.7"></script>
-<script defer src="js/poster-help.js?v=7.11.7"></script>
-<script defer src="js/libs/three.min.js?v=7.11.7"></script>
-<script defer src="js/libs/GLTFLoader.js?v=7.11.7"></script>
-<script defer src="js/libs/SkeletonUtils.js?v=7.11.7"></script>
-<script defer src="js/battle-figures.js?v=7.11.7"></script>
-<script defer src="js/battle-3d.js?v=7.11.7"></script>
-<script defer src="js/app.js?v=7.11.7"></script>
+<script defer src="js/firebase-config.js?v=7.11.9"></script>
+<script defer src="js/firebase-tourney.js?v=7.11.9"></script>
+<script defer src="js/tournament.js?v=7.11.9"></script>
+<script defer src="js/online-pvp.js?v=7.11.9"></script>
+<script defer src="js/telemetry.js?v=7.11.9"></script>
+<script defer src="js/cloud-sync.js?v=7.11.9"></script>
+<script defer src="js/sound.js?v=7.11.9"></script>
+<script defer src="js/poster-help.js?v=7.11.9"></script>
+<script defer src="js/libs/three.min.js?v=7.11.9"></script>
+<script defer src="js/libs/GLTFLoader.js?v=7.11.9"></script>
+<script defer src="js/libs/SkeletonUtils.js?v=7.11.9"></script>
+<script defer src="js/battle-figures.js?v=7.11.9"></script>
+<script defer src="js/battle-3d.js?v=7.11.9"></script>
+<script defer src="js/app.js?v=7.11.9"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let refreshing = false;
@@ -1107,7 +1107,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.11.7').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.11.9').then(r => r.update()).catch(() => {});
   });
 }
 </script>

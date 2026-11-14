@@ -919,6 +919,11 @@ function formatWeatherBadge(ev) {
 function renderMissionBar() {
   const mb = $('#missionContent');
   if (!mb) return;
+  const pvpSlot = $('#missionBo3PvpSlot');
+  if (pvpSlot) {
+    pvpSlot.innerHTML = '';
+    pvpSlot.hidden = true;
+  }
   const mode = state.mode;
   let h = '';
 
@@ -1059,10 +1064,11 @@ function renderMissionBar() {
       h = `<span class="mission-tag bo3-mission-tag" style="background:rgba(255,179,64,.16);color:var(--amber);border-color:rgba(255,179,64,.4);font-weight:700;display:inline-flex;align-items:center;gap:4px">⚔️ BO${maxG}·${isFree ? '自由' : '鎖定'} <span style="opacity:0.4">▪</span> ${b.round}/${maxG}局 <span style="opacity:0.4">▪</span> ${scoreBadge}</span>
         ${settingsHtml}
         ${eventSelHtml}
-        ${bansHtml}
-        <div class="mission-actions" style="margin-left:2px;gap:4px">
-          <button class="btn amber sm" id="btnOnlinePvp" style="white-space:nowrap;padding:4px 8px;font-weight:700" title="建立或加入線上雙人 P2P 即時對戰房間">🌐 線上開房對戰</button>
-        </div>`;
+        ${bansHtml}`;
+      if (pvpSlot) {
+        pvpSlot.innerHTML = `<button class="btn amber sm" id="btnOnlinePvp" style="white-space:nowrap;padding:4px 8px;font-weight:700" title="建立或加入線上雙人 P2P 即時對戰房間">🌐 線上開房對戰</button>`;
+        pvpSlot.hidden = false;
+      }
     }
   } else if (mode === 'daily') {
     const k = state.dailyPlanId === 'today' ? ('wl15_daily_' + dateKey()) : ('wl15_daily_' + dateKey() + '_' + state.dailyPlanId);

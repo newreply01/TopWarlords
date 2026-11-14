@@ -19207,12 +19207,12 @@ button, a, select, input, .unit-card, .btn-action {
     flex: 0 0 auto !important;
   }
 
-  /* 兩大按鈕寬度與水平位置嚴格相等，左緣與右緣各自在垂直方向完全平齊（縮減 1/6：280 -> 234px） */
+  /* 兩大按鈕寬度與水平位置嚴格相等，左緣對齊第5欄軍師卡片左緣，右緣於垂直方向完全平齊 */
   .btn-reroll-top,
   .mega-launch-btn {
-    width: 234px !important;
-    min-width: 234px !important;
-    max-width: 234px !important;
+    width: clamp(212px, calc(20vw - 20px), 420px) !important;
+    min-width: clamp(212px, calc(20vw - 20px), 420px) !important;
+    max-width: clamp(212px, calc(20vw - 20px), 420px) !important;
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
@@ -19226,10 +19226,6 @@ button, a, select, input, .unit-card, .btn-action {
 @media (min-width: 769px) and (max-width: 1249px) {
   .btn-reroll-top,
   .mega-launch-btn {
-    width: 212px !important;
-    min-width: 212px !important;
-    max-width: 212px !important;
-    height: 44px !important;
     padding: 0 10px !important;
     gap: 5px !important;
   }

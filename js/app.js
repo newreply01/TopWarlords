@@ -973,12 +973,12 @@ function renderMissionBar() {
       const bansHtml = (banAHtml || banBHtml) ? `<div class="mission-item" style="gap:4px">${banAHtml}${banBHtml}</div>` : '';
       const seriesRuleLabel = ` (${isFree ? '自由調撥' : '開戰鎖定'})`;
       const scoreBadge = `<span style="font-family:var(--head);font-weight:800;letter-spacing:.05em;color:var(--amber);margin-left:2px">${b.winsA} : ${b.winsB}</span>`;
-      h = `<span class="mission-tag bo3-mission-tag" style="background:rgba(255,179,64,.16);color:var(--amber);border-color:rgba(255,179,64,.4);font-weight:700;display:inline-flex;align-items:center;gap:6px">⚔️ BO${maxG} (${isFree ? '自由調撥' : '開戰鎖定'}) <span style="opacity:0.4">▪</span> 第 ${b.round}/${maxG} 局 <span style="opacity:0.4">▪</span> ${scoreBadge}</span>
+      h = `<span class="mission-tag bo3-mission-tag" style="background:rgba(255,179,64,.16);color:var(--amber);border-color:rgba(255,179,64,.4);font-weight:700;display:inline-flex;align-items:center;gap:4px">⚔️ BO${maxG}·${isFree ? '自由' : '鎖定'} <span style="opacity:0.4">▪</span> ${b.round}/${maxG}局 <span style="opacity:0.4">▪</span> ${scoreBadge}</span>
         ${settingsHtml}
         ${eventSelHtml}
         ${bansHtml}
-        <div class="mission-actions" style="margin-left:6px;gap:5px">
-          <button class="btn amber sm" id="btnOnlinePvp" style="white-space:nowrap;padding:4px 10px;font-weight:700" title="建立或加入線上雙人 P2P 即時對戰房間">🌐 線上即時開房對戰</button>
+        <div class="mission-actions" style="margin-left:2px;gap:4px">
+          <button class="btn amber sm" id="btnOnlinePvp" style="white-space:nowrap;padding:4px 8px;font-weight:700" title="建立或加入線上雙人 P2P 即時對戰房間">🌐 線上開房對戰</button>
         </div>`;
     }
   } else if (mode === 'daily') {
@@ -1082,19 +1082,24 @@ function getUnitWeatherMod(u, ev) {
   const traits = u.traits || [];
   if (id === 'plain') {
     if (u.cat === 'armor') return { type: 'buff', short: '▲ +20%', tip: `${activeEv.icon} ${activeEv.name}：重甲步陣戰力 +20%` };
-    if (u.cat === 'naval') return { type: 'debuff', short: '▼ -30%', tip: `${activeEv.icon} ${activeEv.name}：先登水師奇襲 −30%` };
+    if (u.cat === 'naval') return { type: 'debuff', short: '▼-30%', tip: `${activeEv.icon} ${activeEv.name}：先登水師奇襲 −30%` };
   } else if (id === 'strait') {
-    if (u.cat === 'naval') return { type: 'buff', short: '▲ +25%', tip: `${activeEv.icon} ${activeEv.name}：先登水師戰力 +25%` };
-    if (u.cat === 'armor') return { type: 'debuff', short: '▼ -15%', tip: `${activeEv.icon} ${activeEv.name}：重甲步陣 −15%` };
+    if (u.cat === 'naval') return { type: 'buff', short: '▲+25%', tip: `${activeEv.icon} ${activeEv.name}：先登水師戰力 +25%` };
+    if (u.cat === 'armor') return { type: 'debuff', short: '▼-15%', tip: `${activeEv.icon} ${activeEv.name}：重甲步陣 −15%` };
   } else if (id === 'storm') {
-    if (u.cat === 'air') return { type: 'debuff', short: '▼ -15%命中', tip: `${activeEv.icon} ${activeEv.name}：突騎奔襲命中 −15%` };
-    if (u.cat === 'support' && traits.includes('TRUE_AT')) return { type: 'debuff', short: '▼ -25%', tip: `${activeEv.icon} ${activeEv.name}：火攻奇器威力 −25%` };
+    if (u.cat === 'air') return { type: 'debuff', short: '▼命中-15%', tip: `${activeEv.icon} ${activeEv.name}：突騎奔襲命中 −15%` };
+    if (u.cat === 'support' && traits.includes('TRUE_AT')) return { type: 'debuff', short: '▼-25%', tip: `${activeEv.icon} ${activeEv.name}：火攻奇器威力 −25%` };
   } else if (id === 'urban') {
-    if (u.cat === 'support' && traits.includes('TRUE_AT')) return { type: 'buff', short: '▲ +30%', tip: `${activeEv.icon} ${activeEv.name}：攻城奇器威力 +30%` };
-    if (u.cat === 'support' && (traits.includes('ARTY') || traits.includes('DEEP'))) return { type: 'debuff', short: '▼ -25%', tip: `${activeEv.icon} ${activeEv.name}：遠程投石／斬首 −25%` };
-    if (u.cat === 'armor') return { type: 'debuff', short: '▼ -10%', tip: `${activeEv.icon} ${activeEv.name}：重甲展開受限 −10%` };
+    if (u.cat === 'support' && traits.includes('TRUE_AT')) return { type: 'buff', short: '▲+30%', tip: `${activeEv.icon} ${activeEv.name}：攻城奇器威力 +30%` };
+    if (u.cat === 'support' && (traits.includes('ARTY') || traits.includes('DEEP'))) return { type: 'debuff', short: '▼-25%', tip: `${activeEv.icon} ${activeEv.name}：遠程投石／斬首 −25%` };
+    if (u.cat === 'armor') return { type: 'debuff', short: '▼-10%', tip: `${activeEv.icon} ${activeEv.name}：重甲展開受限 −10%` };
   } else if (id === 'em') {
-    if ((u.ew || 0) >= 25) return { type: 'buff', short: '▲ 奇謀×1.6', tip: `${activeEv.icon} ${activeEv.name}：軍師奇謀 ×1.6，全軍伏兵隱匿 +10` };
+    if ((u.ew || 0) >= 25) return {
+      type: 'buff',
+      short: '▲ 奇謀×1.6',
+      shortHtml: '<svg class="m-env-svg" width="11" height="11" viewBox="0 0 16 16" aria-hidden="true"><polygon points="8,1.2 12.8,3.2 14.8,8 12.8,12.8 8,14.8 3.2,12.8 1.2,8 3.2,3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2.2" fill="currentColor"/><path d="M8 2.8V4.6M8 11.4V13.2M2.8 8H4.6M11.4 8H13.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><span>×1.6</span>',
+      tip: `${activeEv.icon} ${activeEv.name}：軍師奇謀 ×1.6，全軍伏兵隱匿 +10`
+    };
   }
   return null;
 }
@@ -1227,7 +1232,7 @@ function renderMatrix() {
       const tacTags = getCardTacticalTags(u);
       const topBadgesHtml = [
         candSyns.slice(0, 1).map(s => `<span class="m-syn-pill" title="${esc(s.title)}">✦${esc(s.label)}</span>`).join(''),
-        envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}">${envMod.short}</span>` : ''
+        envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}" aria-label="${esc(envMod.tip)}">${envMod.shortHtml || esc(envMod.short)}</span>` : ''
       ].filter(Boolean).join('');
 
       return `<div class="m-card ${isEquipped ? 'sel' : ''} ${showWhy ? 'dis' : ''} ${isBanned ? 'banned' : ''} ${isSynReady ? 'syn-ready' : ''}"
@@ -1245,7 +1250,6 @@ function renderMatrix() {
               <div class="m-name-group">
                 <div class="m-name" title="${esc(u.name)}">${renderNationBadge(u)}<span class="m-name-text">${esc(u.name)}</span></div>
               </div>
-              ${topBadgesHtml ? `<div class="m-top-badges">${topBadgesHtml}</div>` : ''}
               <div class="m-actions">
                 <button class="m-info-btn" data-info-id="${u.id}" title="查看名將傳記與實戰數值">ℹ</button>
               </div>
@@ -1263,6 +1267,7 @@ function renderMatrix() {
                 <span title="打擊 ATK" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
                 <span title="${stat3.fullLabel}" aria-label="${stat3.fullLabel} ${stat3.val}">${stat3.label} <b>${stat3.val}</b></span>
               </div>
+              ${topBadgesHtml ? `<div class="m-top-badges">${topBadgesHtml}</div>` : ''}
             </div>
             <div class="m-mobile-brief">
               ${tacTags.slice(0, 2).map(t => `<span class="m-tac-chip ${t.cls}" title="${esc(t.title)}">${esc(t.text)}</span>`).join('')}

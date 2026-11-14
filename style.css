@@ -430,7 +430,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   content: '✓';
   position: absolute;
   right: 6px;
-  bottom: 5px;
+  top: 5px;
   width: 17px;
   height: 17px;
   border-radius: 50%;
@@ -454,8 +454,8 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   font-weight: 800;
   color: #fef3c7;
 }
-.m-card.sel .m-bot{
-  padding-right: 20px;
+.m-card.sel .m-top{
+  padding-right: 22px;
 }
 .m-card.sel:hover{
   transform: translateY(-2px);
@@ -13290,14 +13290,14 @@ html:not([data-theme="light"]) .mode-btn:not(.active) .mode-sub { color: #a8a29e
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 12px !important;
+  gap: 8px !important;
   box-sizing: border-box !important;
 }
 
 .mission-content {
   display: flex !important;
   align-items: center !important;
-  gap: 10px !important;
+  gap: 6px !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
   white-space: nowrap !important;
@@ -19182,7 +19182,15 @@ button, a, select, input, .unit-card, .btn-action {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
+    gap: 6px !important;
     flex: 0 0 auto !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+  .mission-right-tools .formation-open-btn {
+    padding: 0 9px !important;
+    gap: 5px !important;
+    flex-shrink: 0 !important;
   }
 
   .command-deck {
@@ -19288,16 +19296,23 @@ button, a, select, input, .unit-card, .btn-action {
    v5.9.136 戰場天候微徽章 (.m-env-badge) 與 30 秒新手戰術引導列 (.onboard-coach-bar)
    ===================================================== */
 .m-env-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5px;
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 800;
-  padding: 1px 4px;
+  padding: 0 2.5px;
   border-radius: 3px;
   margin-left: 0;
   white-space: nowrap;
-  letter-spacing: 0.01em;
-  line-height: 1.25;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   flex-shrink: 0;
+}
+.m-env-svg {
+  display: block;
+  flex: 0 0 auto;
 }
 
 .m-env-badge.env-buff {
@@ -20248,10 +20263,10 @@ select:focus-visible,
 [data-theme="light"] .m-nation.nat-kr { background: #e0f2fe; color: #0369a1; border-color: rgba(3, 105, 161, 0.32); }
 [data-theme="light"] .m-nation.nat-other { background: #f1f5f9; color: #334155; border-color: rgba(51, 65, 85, 0.28); }
 .m-top-badges {
-  margin-left: auto; display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto;
+  margin-left: auto; display: inline-flex; align-items: center; gap: 2px; flex: 0 0 auto;
 }
 .m-syn-pill {
-  font-size: 9.5px; font-weight: 800; line-height: 1.25; padding: 1px 4px; border-radius: 3px;
+  font-size: 8.5px; font-weight: 800; line-height: 1.2; padding: 0 2.5px; border-radius: 3px;
   white-space: nowrap; color: #fbbf24; background: rgba(245, 158, 11, 0.18);
   border: 1px solid rgba(251, 191, 36, 0.48);
 }
@@ -20308,12 +20323,12 @@ select:focus-visible,
 .u-tt-skill-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600; }
 .u-tt-skill p { margin: 4px 0 0; }
 .u-tt-role { font-size: 12px; color: var(--muted); }
-#matrixBoard .m-bot { margin-top: auto !important; flex-wrap: nowrap; gap: 3px; width: 100%; }
+#matrixBoard .m-bot { margin-top: auto !important; flex-wrap: nowrap; gap: 2px; width: 100%; }
 #matrixBoard .m-stats {
-  display: flex; flex: 1; min-width: 0; align-items: center; justify-content: space-between;
-  gap: 2px !important; font-size: 11px !important; color: var(--muted); line-height: 16px;
+  display: flex; flex: 0 0 auto; min-width: 0; align-items: center; justify-content: flex-start;
+  gap: 3px !important; font-size: 10.5px !important; color: var(--muted); line-height: 16px;
 }
-#matrixBoard .m-stats span { display: inline-flex; align-items: baseline; gap: 2px; white-space: nowrap; }
+#matrixBoard .m-stats span { display: inline-flex; align-items: baseline; gap: 1px; white-space: nowrap; }
 #matrixBoard .m-stats b { font-family: var(--mono); font-size: 12px; line-height: 16px; font-weight: 500; }
 #matrixBoard .m-stats, #matrixBoard .m-stats b { color: var(--muted) !important; }
 #matrixBoard .m-avatar-wrap > span {
@@ -20357,9 +20372,10 @@ select:focus-visible,
   #matrixBoard .m-card-main-row { gap: 4px; }
   #matrixBoard .m-card-info-col { padding: 4px 3px 3px 0; }
   #matrixBoard .m-ap-chip { display: none; }
-  #matrixBoard .m-stats { font-size: 10px !important; gap: 1px !important; }
+  #matrixBoard .m-stats { font-size: 10px !important; gap: 4px !important; }
   #matrixBoard .m-stats span { gap: 1px; }
   #matrixBoard .m-stats b { letter-spacing: -0.05em; }
+  #matrixBoard .m-bot .m-env-badge, #matrixBoard .m-bot .m-syn-pill { font-size: 8.5px; padding: 0 3px; }
 }
 @media (min-width: 769px) and (max-height: 640px) {
   #matrixBoard .col-category { padding: 4px 6px; gap: 4px; }

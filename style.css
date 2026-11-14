@@ -25874,11 +25874,6 @@ html:not([data-theme="light"]) .custom-weather-menu {
   border-color: rgba(52, 211, 153, 0.4) !important;
 }
 
-.custom-formation-menu {
-  left: 0;
-  right: auto;
-}
-
 .formation-open-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -25933,8 +25928,8 @@ html:not([data-theme="light"]) .custom-weather-menu {
 .custom-formation-menu {
   position: absolute;
   top: calc(100% + 5px);
-  right: 0;
-  left: auto;
+  left: 0;
+  right: auto;
   z-index: 120;
   width: min(350px, calc(100vw - 24px));
   background: #ffffff;
@@ -26221,13 +26216,41 @@ html:not([data-theme="light"]) .custom-formation-menu {
 }
 
 @media (max-width: 760px) {
-  .formation-open-btn {
-    padding: 5px 7px;
-    gap: 5px;
+  #missionBar {
+    position: relative !important;
   }
 
-  .formation-open-btn strong {
-    padding-left: 5px;
+  #missionBar .custom-ai-dropdown,
+  #missionBar .custom-weather-dropdown,
+  #missionBar .custom-formation-dropdown {
+    position: static !important;
+  }
+
+  #missionBar .custom-ai-menu,
+  #missionBar .custom-weather-menu,
+  #missionBar .custom-formation-menu {
+    position: absolute !important;
+    top: calc(100% + 4px) !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  #btnAiDropdown,
+  #btnWeatherDropdown,
+  #btnOpenFormation {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 22px 0 8px !important;
+    gap: 5px !important;
+  }
+
+  #btnAiDropdown .tai-name,
+  #btnWeatherDropdown .tw-name,
+  #btnOpenFormation strong {
+    font-size: 12.5px !important;
+    padding-left: 0 !important;
   }
 
   .formation-dialog-inner {

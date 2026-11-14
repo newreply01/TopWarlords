@@ -23724,17 +23724,17 @@ html {
   align-items: center !important;
   gap: 6px !important;
   cursor: pointer !important;
-  padding: 0 24px 0 8px !important;
+  padding: 0 26px 0 10px !important;
   position: relative !important;
-  height: 32px !important;
-  min-height: 32px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   line-height: 1 !important;
   user-select: none !important;
   font-family: inherit !important;
 }
 
 .weather-dropdown-btn .tw-icon {
-  font-size: 15px !important;
+  font-size: 16px !important;
   line-height: 1 !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -23744,8 +23744,8 @@ html {
 }
 
 .weather-dropdown-btn .tw-name {
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
   letter-spacing: 0.02em !important;
   white-space: nowrap !important;
 }
@@ -23767,19 +23767,131 @@ html {
 
 .custom-ai-menu {
   position: absolute !important;
-  top: calc(100% + 4px) !important;
+  top: calc(100% + 5px) !important;
   left: 0 !important;
-  z-index: 100 !important;
-  min-width: 100% !important;
-  width: max-content !important;
-  max-width: 135px !important;
+  z-index: 120 !important;
+  width: min(350px, calc(100vw - 24px)) !important;
+  max-width: none !important;
   background: #ffffff !important;
   border: 1px solid rgba(15, 23, 42, 0.2) !important;
-  border-radius: 7px !important;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
-  padding: 3px 0 !important;
+  border-radius: 9px !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  padding: 6px !important;
+  box-sizing: border-box !important;
   user-select: none !important;
   animation: fadeInDown 0.12s ease-out !important;
+}
+
+.custom-ai-menu[hidden] {
+  display: none !important;
+}
+
+html:not([data-theme="light"]) .custom-ai-menu {
+  background: #0f172a !important;
+  border-color: rgba(251, 113, 133, 0.4) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
+}
+
+.ai-opt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: min(440px, 72vh);
+  overflow-y: auto;
+}
+
+.ai-opt-item {
+  width: 100%;
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 9px;
+  padding: 6px 8px !important;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer !important;
+  text-align: left;
+  color: #0f172a !important;
+  transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+
+.ai-opt-item:hover {
+  background: rgba(225, 29, 72, 0.08) !important;
+}
+
+.ai-opt-item.active {
+  background: rgba(225, 29, 72, 0.12) !important;
+  border-color: rgba(225, 29, 72, 0.42) !important;
+}
+
+.ai-opt-svg {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(225, 29, 72, 0.12);
+  color: #e11d48;
+  margin-top: 1px;
+}
+
+html:not([data-theme="light"]) .ai-opt-svg {
+  color: #fda4af;
+}
+
+.ai-opt-item.active .ai-opt-svg {
+  background: #e11d48;
+  color: #ffffff;
+}
+
+.ai-opt-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.ai-opt-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ai-opt-name {
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text);
+  margin-right: 2px;
+}
+
+.ai-opt-pills {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.ai-opt-desc {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--muted);
+  white-space: normal;
+}
+
+.form-pill.ai-core {
+  color: #e11d48;
+  background: rgba(225, 29, 72, 0.1);
+  border: 1px solid rgba(225, 29, 72, 0.28);
+}
+
+html:not([data-theme="light"]) .form-pill.ai-core {
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.16);
+  border-color: rgba(251, 113, 133, 0.34);
 }
 
 .custom-weather-menu {
@@ -23897,18 +24009,6 @@ html:not([data-theme="light"]) .weather-opt-svg {
   border: 1px solid rgba(100, 116, 139, 0.28);
 }
 
-.ai-opt-item {
-  display: flex !important;
-  align-items: center !important;
-  padding: 4.5px 8px !important;
-  cursor: pointer !important;
-  font-size: 13px !important;
-  line-height: 1.2 !important;
-  color: #0f172a !important;
-  transition: background 0.12s ease, color 0.12s ease !important;
-  white-space: nowrap !important;
-}
-
 html:not([data-theme="light"]) .weather-opt-item,
 html:not([data-theme="light"]) .ai-opt-item {
   color: #f1f5f9 !important;
@@ -23947,25 +24047,6 @@ html:not([data-theme="light"]) .ai-opt-item {
   flex-shrink: 0 !important;
 }
 
-.ai-opt-name {
-  flex: 1 1 auto !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.02em !important;
-  white-space: nowrap !important;
-  text-align: left !important;
-}
-
-/* 項目 Hover 或 Active 狀態：AI 對手選單維持經典現代藍底白字高亮 */
-.ai-opt-item:hover,
-.ai-opt-item.active {
-  background: #2563eb !important;
-  color: #ffffff !important;
-}
-
-.ai-opt-item.active .ai-opt-name {
-  font-weight: 700 !important;
-}
-
 /* --- AI對手自選下拉選單 (Custom AI Opponent Dropdown) --- */
 .custom-ai-dropdown {
   position: relative !important;
@@ -23981,17 +24062,17 @@ html:not([data-theme="light"]) .ai-opt-item {
   align-items: center !important;
   gap: 6px !important;
   cursor: pointer !important;
-  padding: 0 24px 0 8px !important;
+  padding: 0 26px 0 10px !important;
   position: relative !important;
-  height: 32px !important;
-  min-height: 32px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   line-height: 1 !important;
   user-select: none !important;
   font-family: inherit !important;
 }
 
 .ai-dropdown-btn .tai-icon {
-  font-size: 15px !important;
+  font-size: 16px !important;
   line-height: 1 !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -24001,8 +24082,8 @@ html:not([data-theme="light"]) .ai-opt-item {
 }
 
 .ai-dropdown-btn .tai-name {
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
   letter-spacing: 0.02em !important;
   white-space: nowrap !important;
 }
@@ -25020,7 +25101,7 @@ input,
     z-index: 2 !important;
   }
 
-  .mission-right-tools .formation-open-btn {
+  .custom-formation-dropdown .formation-open-btn {
     padding: 0 24px 0 8px !important;
     gap: 6px !important;
     flex-shrink: 0 !important;
@@ -25644,54 +25725,152 @@ select:focus-visible,
   align-items: center !important;
   gap: 6px !important;
   position: relative !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  padding: 0 24px 0 8px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 26px 0 10px !important;
   border-radius: 7px;
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
   white-space: nowrap;
   cursor: pointer;
 }
 
 /* 第二列三大下拉選單語意色條區隔（紅＝對手、綠＝場景、藍＝陣型） */
-#btnAiDropdown {
-  border-color: rgba(225, 29, 72, 0.32) !important;
-  border-left: 3px solid #e11d48 !important;
+/* --- 第二列三大戰術下拉選單（對手＝緋紅、天候＝蒼翠、陣型＝靛藍）專屬底色與邊框區分 --- */
+#missionContent {
+  flex: 0 1 auto !important;
 }
-#btnAiDropdown:hover {
-  border-color: rgba(225, 29, 72, 0.58) !important;
+
+#missionBar:has(.mission-actions) #missionContent {
+  flex: 1 1 auto !important;
+}
+
+#missionBar>#formationDropdown {
+  margin-left: 4px;
+}
+
+#btnAiDropdown {
+  background: rgba(225, 29, 72, 0.08) !important;
+  border-color: rgba(225, 29, 72, 0.36) !important;
+  border-left: 3px solid #e11d48 !important;
+  color: #881337 !important;
+}
+
+#btnAiDropdown .tai-icon,
+#btnAiDropdown .tai-arrow {
+  color: #e11d48 !important;
+}
+
+#btnAiDropdown:hover,
+.custom-ai-dropdown.open #btnAiDropdown {
+  background: rgba(225, 29, 72, 0.15) !important;
+  border-color: rgba(225, 29, 72, 0.62) !important;
   border-left-color: #e11d48 !important;
 }
+
 html:not([data-theme="light"]) #btnAiDropdown {
-  border-color: rgba(251, 113, 133, 0.35) !important;
+  background: rgba(244, 63, 94, 0.14) !important;
+  border-color: rgba(251, 113, 133, 0.42) !important;
   border-left: 3px solid #fb7185 !important;
+  color: #ffe4e6 !important;
+}
+
+html:not([data-theme="light"]) #btnAiDropdown .tai-icon,
+html:not([data-theme="light"]) #btnAiDropdown .tai-arrow {
+  color: #fda4af !important;
+}
+
+html:not([data-theme="light"]) #btnAiDropdown:hover,
+html:not([data-theme="light"]) .custom-ai-dropdown.open #btnAiDropdown {
+  background: rgba(244, 63, 94, 0.24) !important;
+  border-color: rgba(251, 113, 133, 0.68) !important;
 }
 
 #btnWeatherDropdown {
-  border-color: rgba(5, 150, 105, 0.32) !important;
+  background: rgba(5, 150, 105, 0.08) !important;
+  border-color: rgba(5, 150, 105, 0.36) !important;
   border-left: 3px solid #059669 !important;
+  color: #064e3b !important;
 }
-#btnWeatherDropdown:hover {
-  border-color: rgba(5, 150, 105, 0.58) !important;
+
+#btnWeatherDropdown .tw-icon,
+#btnWeatherDropdown .tw-arrow {
+  color: #059669 !important;
+}
+
+#btnWeatherDropdown:hover,
+.custom-weather-dropdown.open #btnWeatherDropdown {
+  background: rgba(5, 150, 105, 0.15) !important;
+  border-color: rgba(5, 150, 105, 0.62) !important;
   border-left-color: #059669 !important;
 }
+
 html:not([data-theme="light"]) #btnWeatherDropdown {
-  border-color: rgba(52, 211, 153, 0.35) !important;
+  background: rgba(16, 185, 129, 0.14) !important;
+  border-color: rgba(52, 211, 153, 0.42) !important;
   border-left: 3px solid #34d399 !important;
+  color: #d1fae5 !important;
+}
+
+html:not([data-theme="light"]) #btnWeatherDropdown .tw-icon,
+html:not([data-theme="light"]) #btnWeatherDropdown .tw-arrow {
+  color: #6ee7b7 !important;
+}
+
+html:not([data-theme="light"]) #btnWeatherDropdown:hover,
+html:not([data-theme="light"]) .custom-weather-dropdown.open #btnWeatherDropdown {
+  background: rgba(16, 185, 129, 0.24) !important;
+  border-color: rgba(52, 211, 153, 0.68) !important;
 }
 
 #btnOpenFormation {
-  border-color: rgba(2, 132, 199, 0.35) !important;
+  background: rgba(2, 132, 199, 0.09) !important;
+  border-color: rgba(2, 132, 199, 0.38) !important;
   border-left: 3px solid #0284c7 !important;
+  color: #0c4a6e !important;
 }
-#btnOpenFormation:hover:not(:disabled) {
+
+#btnOpenFormation .formation-open-icon,
+#btnOpenFormation .tw-arrow {
+  color: #0284c7 !important;
+}
+
+#btnOpenFormation:hover:not(:disabled),
+.custom-formation-dropdown.open #btnOpenFormation {
+  background: rgba(2, 132, 199, 0.16) !important;
   border-color: rgba(2, 132, 199, 0.65) !important;
   border-left-color: #0284c7 !important;
 }
+
 html:not([data-theme="light"]) #btnOpenFormation {
-  border-color: rgba(56, 189, 248, 0.38) !important;
+  background: rgba(56, 189, 248, 0.14) !important;
+  border-color: rgba(56, 189, 248, 0.44) !important;
   border-left: 3px solid #38bdf8 !important;
+  color: #e0f2fe !important;
+}
+
+html:not([data-theme="light"]) #btnOpenFormation .formation-open-icon,
+html:not([data-theme="light"]) #btnOpenFormation .tw-arrow {
+  color: #7dd3fc !important;
+}
+
+html:not([data-theme="light"]) #btnOpenFormation:hover:not(:disabled),
+html:not([data-theme="light"]) .custom-formation-dropdown.open #btnOpenFormation {
+  background: rgba(56, 189, 248, 0.24) !important;
+  border-color: rgba(56, 189, 248, 0.7) !important;
+}
+
+html:not([data-theme="light"]) .custom-ai-menu {
+  border-color: rgba(251, 113, 133, 0.4) !important;
+}
+
+html:not([data-theme="light"]) .custom-weather-menu {
+  border-color: rgba(52, 211, 153, 0.4) !important;
+}
+
+.custom-formation-menu {
+  left: 0;
+  right: auto;
 }
 
 .formation-open-btn:disabled {
@@ -25738,8 +25917,8 @@ html:not([data-theme="light"]) #btnOpenFormation {
 }
 
 .formation-open-btn strong {
-  font-size: 13px !important;
-  font-weight: 700 !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
   letter-spacing: 0.02em !important;
   color: inherit !important;
   white-space: nowrap !important;

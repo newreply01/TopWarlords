@@ -38,7 +38,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.11.11">
+<link rel="stylesheet" href="style.css?v=7.11.12">
 <link rel="manifest" href="manifest.json">
 <style>
 /* =====================================================
@@ -1067,8 +1067,8 @@ body {
 </div>
 
 <!-- 腳本引入 -->
-<script defer src="js/data.js?v=7.11.11"></script>
-<script defer src="js/armory.js?v=7.11.11"></script>
+<script defer src="js/data.js?v=7.11.12"></script>
+<script defer src="js/armory.js?v=7.11.12"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   let refreshing = false;
@@ -1079,7 +1079,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.11.11').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.11.12').then(r => r.update()).catch(() => {});
   });
 }
 </script>

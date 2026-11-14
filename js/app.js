@@ -833,6 +833,16 @@ function getAiArchSvg(id) {
   return ARCHETYPE_SVGS[id] || ARCHETYPE_SVGS.random;
 }
 
+function getAiArchPills(arch) {
+  if (!arch || !Array.isArray(arch.plan)) return '';
+  const catNames = { air: '突騎', armor: '重甲', air_defense: '神射', naval: '先登', support: '軍師' };
+  const cores = arch.plan.filter(([, cost]) => cost >= 5);
+  if (cores.length) {
+    return cores.map(([cat, cost]) => `<span class="form-pill ai-core">核心 $${cost} ${catNames[cat] || cat}</span>`).join('');
+  }
+  return '<span class="form-pill neutral">全軍均衡 $3×5</span>';
+}
+
 function renderTacticalAiDropdown() {
   const currentArchId = state.aiArch || 'random';
   const isRandom = currentArchId === 'random';
@@ -851,18 +861,32 @@ function renderTacticalAiDropdown() {
         <span class="tai-arrow">▾</span>
       </button>
       <div class="custom-ai-menu" id="aiDropdownMenu" role="listbox" hidden>
-        <div class="ai-opt-item ${isRandom ? 'active' : ''}" data-val="random" role="option">
-          <span class="ai-opt-icon">${getAiArchSvg('random')}</span>
-          <span class="ai-opt-name">隨機對手</span>
+        <div class="ai-opt-list">
+          <button type="button" class="ai-opt-item ${isRandom ? 'active' : ''}" data-val="random" role="option" aria-selected="${isRandom ? 'true' : 'false'}">
+            <span class="ai-opt-svg" aria-hidden="true">${getAiArchSvg('random')}</span>
+            <span class="ai-opt-body">
+              <span class="ai-opt-head">
+                <span class="ai-opt-name">隨機對手</span>
+                <span class="ai-opt-pills"><span class="form-pill ai-core">開戰自動抽選</span></span>
+              </span>
+              <span class="ai-opt-desc">每局開戰自動隨機配對 6 大 AI 戰略流派風格。</span>
+            </span>
+          </button>
+          ${ARCHETYPES.map(a => {
+            const isActive = (!isRandom && currentArchId === a.id);
+            return `
+              <button type="button" class="ai-opt-item ${isActive ? 'active' : ''}" data-val="${a.id}" role="option" aria-selected="${isActive ? 'true' : 'false'}">
+                <span class="ai-opt-svg" aria-hidden="true">${getAiArchSvg(a.id)}</span>
+                <span class="ai-opt-body">
+                  <span class="ai-opt-head">
+                    <span class="ai-opt-name">${esc(a.name)}</span>
+                    <span class="ai-opt-pills">${getAiArchPills(a)}</span>
+                  </span>
+                  <span class="ai-opt-desc">${esc(a.desc)}</span>
+                </span>
+              </button>`;
+          }).join('')}
         </div>
-        ${ARCHETYPES.map(a => {
-          const isActive = (!isRandom && currentArchId === a.id);
-          return `
-            <div class="ai-opt-item ${isActive ? 'active' : ''}" data-val="${a.id}" role="option" title="${esc(a.desc)}">
-              <span class="ai-opt-icon">${getAiArchSvg(a.id)}</span>
-              <span class="ai-opt-name">${esc(a.name)}</span>
-            </div>`;
-        }).join('')}
       </div>
       <select id="aiSel" style="display:none" tabindex="-1" aria-hidden="true">
         <option value="random" ${isRandom ? 'selected' : ''}>🎲 隨機對手</option>

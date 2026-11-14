@@ -13938,7 +13938,7 @@ html:not([data-theme="light"]) .mode-btn:not(.active) .mode-sub { color: #a8a29e
 
   /* Command Deck & Controls */
   .command-deck:not([hidden]) {
-    padding: 0 16px !important;
+    padding: 0 10px !important;
     gap: 4px !important;
   }
   .indicators-dock-wrap {
@@ -14220,7 +14220,7 @@ html:not([data-theme="light"]) .mode-btn:not(.active) .mode-sub { color: #a8a29e
 
   /* Command Deck compact on 1024px: Zero Truncation & Right-Aligned with Mission Bar */
   .command-deck:not([hidden]) {
-    padding: 0 16px !important;
+    padding: 0 10px !important;
     gap: 4px !important;
   }
   .deck-section-label {
@@ -19171,7 +19171,7 @@ button, a, select, input, .unit-card, .btn-action {
 /* ---------- 終極鎖定 (桌面版 min-width: 769px)：調撥戰區軍火按鈕與下方開戰按鈕 寬度、水平位置、文字排版絕對一致 ---------- */
 @media (min-width: 769px) {
   .mission-bar {
-    padding-right: 16px !important;
+    padding-right: 10px !important;
     box-sizing: border-box !important;
   }
 
@@ -19195,7 +19195,7 @@ button, a, select, input, .unit-card, .btn-action {
 
   .command-deck,
   .command-deck:not([hidden]) {
-    padding-right: 16px !important;
+    padding-right: 10px !important;
     box-sizing: border-box !important;
   }
 

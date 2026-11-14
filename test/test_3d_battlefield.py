@@ -69,7 +69,7 @@ try:
             const terrain = document.querySelector('#formationTerrain');
             terrain.value = 'mountain';
             terrain.dispatchEvent(new Event('change', { bubbles: true }));
-            document.querySelector('#btnCloseFormation').click();
+            document.querySelector('#btnOpenFormation').click();
         }""")
 
         # 隨機補滿陣容 (使用 evaluate 杜絕引導模態窗指針攔截)

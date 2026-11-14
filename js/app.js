@@ -1417,11 +1417,27 @@ function analyzeDeckArchetype(deck) {
 }
 
 /* ---------- 渲染：底部常駐指揮台 (Command Deck) ---------- */
+const FORMATION_SVGS = {
+  fishscale: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12.5" cy="8" r="1.4" fill="currentColor" stroke="none"/><circle cx="8.5" cy="5.2" r="1.3" fill="currentColor" stroke="none"/><circle cx="8.5" cy="10.8" r="1.3" fill="currentColor" stroke="none"/><circle cx="4" cy="3" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="8" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="13" r="1.2" fill="currentColor" stroke="none"/><path d="M5.5 3.8 11 7.2M5.5 12.2 11 8.8" opacity=".55"/></svg>',
+  spearhead: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 3.5 13.5 8 9 12.5"/><path d="M4.5 5 8 8l-3.5 3" opacity=".55"/></svg>',
+  square: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2.5" width="11" height="11" rx="1.8"/><circle cx="8" cy="8" r="2.2" fill="currentColor" stroke="none"/></svg>',
+  crane: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3c2.5 1.8 4.2 3.5 5 5-0.8 1.5-2.5 3.2-5 5"/><path d="M13 3c-2.5 1.8-4.2 3.5-5 5 0.8 1.5 2.5 3.2 5 5"/><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  goose: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 12.5 13 3.5" opacity=".5"/><circle cx="3" cy="12.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="6.3" cy="9.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="9.7" cy="6.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="13" cy="3.5" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  longsnake: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2.5 11.5c2-4 3.5-7 5.5-7s3.5 7 5.5 0"/><circle cx="13.5" cy="4.5" r="1.3" fill="currentColor" stroke="none"/></svg>',
+  cone: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><polygon points="14,8 3,3.5 5.2,8 3,12.5"/></svg>',
+  fourYi: '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2.5v11M2.5 8h11" opacity=".55"/><circle cx="8" cy="2.8" r="1.3" fill="currentColor" stroke="none"/><circle cx="8" cy="13.2" r="1.3" fill="currentColor" stroke="none"/><circle cx="2.8" cy="8" r="1.3" fill="currentColor" stroke="none"/><circle cx="13.2" cy="8" r="1.3" fill="currentColor" stroke="none"/></svg>'
+};
+
+function getFormationSvg(id) {
+  return FORMATION_SVGS[id] || FORMATION_SVGS.fishscale;
+}
+
 function renderFormationEditor() {
-  const rows = $('#formationRows');
+  const menu = $('#formationDropdownMenu');
   const summary = $('#formationSummary');
+  const svgIcon = $('#formationSvgIcon');
   const button = $('#btnOpenFormation');
-  if (!rows || !summary || !button) return;
+  if (!menu || !summary || !button) return;
 
   const selectedIds = normalizeArmyFormations(state.formations, state.deck);
   if (selectedIds.some((id, i) => id !== state.formations[i])) {
@@ -1430,31 +1446,41 @@ function renderFormationEditor() {
   }
   const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
   const terrainLockedByRoom = state.isOnlinePvp && !OnlinePvPEngine.isHostUser();
-  summary.textContent = getBattleFormation(selectedIds[0]).name;
+  const activeId = selectedIds[0];
+  const activeFormation = getBattleFormation(activeId);
+  summary.textContent = activeFormation.name;
+  if (svgIcon) svgIcon.innerHTML = getFormationSvg(activeId);
   button.disabled = formationEditingLocked;
-  button.title = formationEditingLocked ? '陣容已鎖定，本局陣形已提交' : '設定全軍統一陣形與戰場地形';
+  button.title = formationEditingLocked
+    ? '陣容已鎖定，本局陣形已提交'
+    : `陣型：${activeFormation.name}（${activeFormation.desc}）`;
 
-  {
-    const id = selectedIds[0];
-    const formation = getBattleFormation(id);
-    const availableFormations = BATTLE_FORMATION_DEFS.filter(option =>
-      !option.eligibleUnitIds || state.deck.some(unitId => option.eligibleUnitIds.includes(unitId))
-    );
-    rows.innerHTML = `<label class="formation-row">
-      <span class="formation-row-name">全軍共同出征陣形</span>
-      <select id="armyFormation" aria-label="全軍陣形" ${formationEditingLocked ? 'disabled' : ''}>
-        ${availableFormations.map(option => `<option value="${option.id}" title="${esc(option.desc)}" ${option.id === id ? 'selected' : ''}>${esc(option.name)}</option>`).join('')}
+  const availableFormations = BATTLE_FORMATION_DEFS.filter(option =>
+    !option.eligibleUnitIds || state.deck.some(unitId => option.eligibleUnitIds.includes(unitId))
+  );
+  const currentTerrain = normalizeTerrain(state.terrain);
+
+  menu.innerHTML = `
+    <div class="formation-opt-list">
+      ${availableFormations.map(option => {
+        const isActive = option.id === activeId;
+        return `<button type="button" class="formation-opt-item ${isActive ? 'active' : ''}" data-val="${option.id}" role="option" aria-selected="${isActive ? 'true' : 'false'}" ${formationEditingLocked ? 'disabled' : ''}>
+          <span class="formation-opt-svg" aria-hidden="true">${getFormationSvg(option.id)}</span>
+          <span class="formation-opt-body">
+            <span class="formation-opt-name">${esc(option.name)}</span>
+            <span class="formation-opt-desc">${esc(option.desc)}</span>
+          </span>
+        </button>`;
+      }).join('')}
+    </div>
+    <label class="formation-terrain-row" for="formationTerrain" title="${terrainLockedByRoom ? '本局地形由房主設定並同步' : '選擇戰場地形'}">
+      <span>地形</span>
+      <select id="formationTerrain" class="select sm" ${(formationEditingLocked || terrainLockedByRoom) ? 'disabled' : ''}>
+        <option value="plain" ${currentTerrain === 'plain' ? 'selected' : ''}>平原</option>
+        <option value="mountain" ${currentTerrain === 'mountain' ? 'selected' : ''}>山岳</option>
+        <option value="forest" ${currentTerrain === 'forest' ? 'selected' : ''}>森林</option>
       </select>
-      <span class="formation-row-desc">${esc(formation.desc)}</span>
     </label>`;
-  }
-
-  const terrainSelect = $('#formationTerrain');
-  if (terrainSelect) {
-    terrainSelect.value = normalizeTerrain(state.terrain);
-    terrainSelect.disabled = formationEditingLocked || terrainLockedByRoom;
-    terrainSelect.title = terrainLockedByRoom ? '本局地形由房主設定並同步' : '';
-  }
 }
 
 function renderCommandDeck() {
@@ -1891,42 +1917,51 @@ function renderAll() {
 }
 
 document.addEventListener('click', event => {
-  if (event.target.closest('#btnOpenFormation')) {
-    const dialog = $('#formationDialog');
-    renderFormationEditor();
-    if (dialog && typeof dialog.showModal === 'function') dialog.showModal();
-    else if (dialog) dialog.setAttribute('open', '');
+  const openBtn = event.target.closest('#btnOpenFormation');
+  if (openBtn) {
+    const dropdown = $('#formationDropdown');
+    const menu = $('#formationDropdownMenu');
+    if (menu) {
+      const willOpen = menu.hasAttribute('hidden');
+      if (willOpen) {
+        renderFormationEditor();
+        menu.removeAttribute('hidden');
+        dropdown?.classList.add('open');
+        openBtn.setAttribute('aria-expanded', 'true');
+      } else {
+        menu.setAttribute('hidden', '');
+        dropdown?.classList.remove('open');
+        openBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
     return;
   }
-  if (event.target.closest('#btnCloseFormation')) {
-    $('#formationDialog')?.close();
+  const optItem = event.target.closest('#formationDropdownMenu .formation-opt-item');
+  if (optItem) {
+    const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
+    const val = optItem.dataset.val;
+    if (!formationEditingLocked && val && validFormationIds.has(val)) {
+      state.formations = normalizeArmyFormations(val, state.deck);
+      syncActiveDeck();
+      renderFormationEditor();
+      renderMatrix();
+    }
+    $('#formationDropdownMenu')?.setAttribute('hidden', '');
+    $('#formationDropdown')?.classList.remove('open');
+    $('#btnOpenFormation')?.setAttribute('aria-expanded', 'false');
+    return;
   }
 });
 
 document.addEventListener('change', event => {
   const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
   const terrainLockedByRoom = state.isOnlinePvp && !OnlinePvPEngine.isHostUser();
-  const formationSelect = event.target.closest('#armyFormation');
-  if (formationSelect && !formationEditingLocked) {
-    if (validFormationIds.has(formationSelect.value)) {
-      state.formations = normalizeArmyFormations(formationSelect.value, state.deck);
-      syncActiveDeck();
-      renderFormationEditor();
-      renderMatrix();
-    }
-    return;
-  }
-
   if (event.target.id === 'formationTerrain' && !formationEditingLocked && !terrainLockedByRoom) {
     state.terrain = normalizeTerrain(event.target.value);
     syncActiveDeck();
     renderFormationEditor();
     renderMatrix();
   }
-});
-
-$('#formationDialog')?.addEventListener('click', event => {
-  if (event.target === event.currentTarget) event.currentTarget.close();
 });
 
 /* ---------- 常用自訂編制與參謀部推薦模板管理 ---------- */
@@ -9884,15 +9919,23 @@ document.addEventListener('click', e => {
     const btnAi = document.getElementById('btnAiDropdown');
     if (btnAi) btnAi.setAttribute('aria-expanded', 'false');
   }
+  if (!e.target.closest('.custom-formation-dropdown')) {
+    document.querySelectorAll('.custom-formation-menu').forEach(m => m.setAttribute('hidden', ''));
+    document.querySelectorAll('.custom-formation-dropdown').forEach(d => d.classList.remove('open'));
+    const btnForm = document.getElementById('btnOpenFormation');
+    if (btnForm) btnForm.setAttribute('aria-expanded', 'false');
+  }
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    document.querySelectorAll('.custom-weather-menu, .custom-ai-menu').forEach(m => m.setAttribute('hidden', ''));
-    document.querySelectorAll('.custom-weather-dropdown, .custom-ai-dropdown').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.custom-weather-menu, .custom-ai-menu, .custom-formation-menu').forEach(m => m.setAttribute('hidden', ''));
+    document.querySelectorAll('.custom-weather-dropdown, .custom-ai-dropdown, .custom-formation-dropdown').forEach(d => d.classList.remove('open'));
     const btn = document.getElementById('btnWeatherDropdown');
     if (btn) btn.setAttribute('aria-expanded', 'false');
     const btnAi = document.getElementById('btnAiDropdown');
     if (btnAi) btnAi.setAttribute('aria-expanded', 'false');
+    const btnForm = document.getElementById('btnOpenFormation');
+    if (btnForm) btnForm.setAttribute('aria-expanded', 'false');
   }
 });
 

@@ -241,12 +241,12 @@ try:
         time.sleep(0.5)
 
         page.locator('#btnOpenFormation').click()
-        assert page.locator('#armyFormation').count() == 1
+        assert page.locator('#formationDropdownMenu').is_visible()
         assert page.locator('[data-formation-slot]').count() == 0
-        page.locator('#armyFormation').select_option('square')
+        page.locator('#formationDropdownMenu .formation-opt-item[data-val="square"]').click()
         assert page.evaluate("() => JSON.parse(localStorage.getItem('wl15_formations'))") == ['square'] * 5
         assert page.locator('#formationSummary').inner_text() == '方圓'
-        page.locator('#btnCloseFormation').click()
+        assert page.locator('#formationDropdownMenu').is_hidden()
         page.locator('#btnWeatherDropdown').click()
         page.locator('.weather-opt-item[data-val="strait"]').click()
 

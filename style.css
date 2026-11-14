@@ -25089,9 +25089,8 @@ input,
   }
 
   .mission-right-tools {
-    margin-left: auto !important;
+    margin: 0 0 0 auto !important;
     padding: 0 !important;
-    margin: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
@@ -25735,8 +25734,11 @@ select:focus-visible,
   cursor: pointer;
 }
 
-/* 第二列三大下拉選單語意色條區隔（紅＝對手、綠＝場景、藍＝陣型） */
 /* --- 第二列三大戰術下拉選單（對手＝緋紅、天候＝蒼翠、陣型＝靛藍）專屬底色與邊框區分 --- */
+#missionBar {
+  justify-content: flex-start !important;
+}
+
 #missionContent {
   flex: 0 1 auto !important;
 }
@@ -25746,7 +25748,11 @@ select:focus-visible,
 }
 
 #missionBar>#formationDropdown {
-  margin-left: 4px;
+  margin-left: 6px;
+}
+
+#missionBar>#missionRightTools {
+  margin-left: auto !important;
 }
 
 #btnAiDropdown {

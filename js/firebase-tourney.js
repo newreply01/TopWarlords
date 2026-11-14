@@ -10,7 +10,7 @@
    6. 🤖 斷線自動判定與 AI 託管 (onDisconnect Presence & AI Takeover)
    ===================================================== */
 
-const FirebaseTourneyEngine = (function() {
+const FirebaseTourneyEngine = (function () {
   const firebaseConfig = (typeof window !== 'undefined' && window.TOPCLASH_FIREBASE_CONFIG) || {
     apiKey: "AIzaSyCcqIW2P88KMBTCkNJhneADRjdJzjBOcI0",
     authDomain: "top-game-913c0.firebaseapp.com",
@@ -56,7 +56,22 @@ const FirebaseTourneyEngine = (function() {
     { name: '新羅花郎誓天衛', flag: '🇰🇷', doc: 'defense', callsign: 'SILLA HWARANG' }
   ];
 
-    // 陣列反序列化安全轉換 (防 Firebase RTDB 將陣列還原為純 Object 導致 push/length 失效)
+  const TOURNEY_KEY_PREFIX = 'WL_';
+
+  function toRoomDbKey(code) {
+    const clean = String(code || '').trim().toUpperCase().replace(/^WL_/, '');
+    return TOURNEY_KEY_PREFIX + clean;
+  }
+
+  function fromRoomDbKey(key) {
+    return String(key || '').replace(/^WL_/, '');
+  }
+
+  function getRoomRef(code) {
+    return db.ref(`tournaments/${toRoomDbKey(code)}`);
+  }
+
+  // 陣列反序列化安全轉換 (防 Firebase RTDB 將陣列還原為純 Object 導致 push/length 失效)
   function ensureArray(val) {
     if (!val) return [];
     if (Array.isArray(val)) return val.slice();
@@ -96,7 +111,7 @@ const FirebaseTourneyEngine = (function() {
   function emit(evt, data) {
     if (listeners[evt]) {
       listeners[evt].forEach(fn => {
-        try { fn(data); } catch(e) { console.error('FirebaseTourneyEngine emit error', e); }
+        try { fn(data); } catch (e) { console.error('FirebaseTourneyEngine emit error', e); }
       });
     }
   }
@@ -146,7 +161,7 @@ const FirebaseTourneyEngine = (function() {
 
   /* 監聽公開大廳等待中房間列表 (自動過濾過期殭屍房，優先使用索引查詢節省頻寬) */
   function listenPublicRooms(callback) {
-    if (!init()) return () => {};
+    if (!init()) return () => { };
     const roomsRef = db.ref('tournaments').orderByChild('status').equalTo('waiting').limitToLast(30);
 
     const handleSnap = snap => {
@@ -159,22 +174,25 @@ const FirebaseTourneyEngine = (function() {
       const list = [];
 
       Object.keys(val).forEach(code => {
+        if (code.startsWith('TC_')) return;
         const r = val[code];
-        if (!r) return;
-        // 僅列出：公開房 + 等待中 + 房主在線 + 30 分鐘內建立
+        if (!r || (r.gameId && r.gameId !== 'topwarlords')) return;
+        // 僅列出：本作公開房 + 等待中 + 房主在線 + 30 分鐘內建立
+        const isWarlordsRoom = (r.gameId === 'topwarlords') || code.startsWith(TOURNEY_KEY_PREFIX);
         const isRecent = r.createdAt && (now - r.createdAt < 30 * 60 * 1000);
         const isWaiting = r.status === 'waiting';
         const isPublic = r.isPublic === true;
         const isAlive = r.hostOnline !== false;
 
-        if (isWaiting && isPublic && isRecent && isAlive) {
-          const filledCount = Array.isArray(r.participants) 
-            ? r.participants.filter(Boolean).length 
+        if (isWarlordsRoom && isWaiting && isPublic && isRecent && isAlive) {
+          const cleanCode = fromRoomDbKey(code);
+          const filledCount = Array.isArray(r.participants)
+            ? r.participants.filter(Boolean).length
             : Object.values(r.participants || {}).filter(Boolean).length;
 
           list.push({
-            code,
-            name: r.name || `第 ${code} 號錦標賽`,
+            code: cleanCode,
+            name: r.name || `第 ${cleanCode} 號錦標賽`,
             size: r.size || 4,
             format: r.format || 'hybrid',
             armoryRule: r.armoryRule || 'locked',
@@ -207,7 +225,7 @@ const FirebaseTourneyEngine = (function() {
     const now = Date.now();
     const battleTerrain = ['plain', 'mountain', 'forest'].includes(playerProfile.terrain) ? playerProfile.terrain : 'plain';
     const hostFormations = Array.isArray(playerProfile.formations) ? playerProfile.formations.slice(0, 5) : Array(5).fill('fishscale');
-    const roomRef = db.ref(`tournaments/${shortCode}`);
+    const roomRef = getRoomRef(shortCode);
 
     // 初始化席位 (Slot 0 為房主)
     const participants = new Array(size).fill(null);
@@ -241,6 +259,7 @@ const FirebaseTourneyEngine = (function() {
     }
 
     const roomPayload = {
+      gameId: 'topwarlords',
       id: shortCode,
       name: name || `2026 世界盃大獎賽 #${shortCode}`,
       size,
@@ -284,12 +303,15 @@ const FirebaseTourneyEngine = (function() {
   /* 加入現有線上錦標賽房間 */
   async function joinRoom(roomCode, playerProfile) {
     if (!init()) throw new Error('Firebase 尚未初始化');
-    const upperCode = roomCode.toUpperCase().trim();
-    const roomRef = db.ref(`tournaments/${upperCode}`);
+    const rawInput = String(roomCode || '').trim().toUpperCase();
+    if (rawInput.startsWith('TC_')) throw new Error('此房間代碼屬於其他遊戲專案，無法加入');
+    const upperCode = fromRoomDbKey(rawInput);
+    const roomRef = getRoomRef(upperCode);
 
     const snap = await roomRef.once('value');
     const room = snap.val();
     if (!room) throw new Error('找不到該錦標賽房間，請確認代碼是否正確');
+    if (room.gameId && room.gameId !== 'topwarlords') throw new Error('此房間屬於其他遊戲專案，無法加入');
     if (room.status !== 'waiting') throw new Error('該錦標賽已經開賽或已結束，無法加入');
 
     let mySlotIdx = -1;
@@ -345,18 +367,21 @@ const FirebaseTourneyEngine = (function() {
     if (!['free', 'locked'].includes(preferredArmory)) preferredArmory = 'locked';
 
     return new Promise((resolve, reject) => {
-      const roomsRef = db.ref('tournaments');
+      const roomsRef = db.ref('tournaments').orderByChild('status').equalTo('waiting').limitToLast(30);
       roomsRef.once('value').then(async snap => {
         const val = snap.val() || {};
         const now = Date.now();
         let targetRoomCode = null;
 
         for (const code of Object.keys(val)) {
+          if (code.startsWith('TC_')) continue;
           const r = val[code];
-          if (r && r.status === 'waiting' && r.isPublic === true && r.size === preferredSize && (r.format || 'hybrid') === preferredFormat && (r.armoryRule || 'locked') === preferredArmory && r.hostOnline !== false && (now - r.createdAt < 30 * 60 * 1000)) {
+          if (!r || (r.gameId && r.gameId !== 'topwarlords')) continue;
+          const isWarlordsRoom = (r.gameId === 'topwarlords') || code.startsWith(TOURNEY_KEY_PREFIX);
+          if (isWarlordsRoom && r.status === 'waiting' && r.isPublic === true && r.size === preferredSize && (r.format || 'hybrid') === preferredFormat && (r.armoryRule || 'locked') === preferredArmory && r.hostOnline !== false && (now - r.createdAt < 30 * 60 * 1000)) {
             const filled = Array.isArray(r.participants) ? r.participants.filter(Boolean).length : Object.values(r.participants || {}).filter(Boolean).length;
             if (filled < r.size) {
-              targetRoomCode = code;
+              targetRoomCode = fromRoomDbKey(code);
               break;
             }
           }
@@ -366,7 +391,7 @@ const FirebaseTourneyEngine = (function() {
           try {
             const res = await joinRoom(targetRoomCode, playerProfile);
             resolve(Object.assign({ isNew: false }, res));
-          } catch(e) {
+          } catch (e) {
             // 加入失敗則轉為建房
             const res = await createRoom({ name: `軍武世界盃 ${preferredSize}強公開賽`, size: preferredSize, format: preferredFormat, armoryRule: preferredArmory, isPublic: true, playerProfile });
             resolve(Object.assign({ isNew: true }, res));
@@ -425,7 +450,7 @@ const FirebaseTourneyEngine = (function() {
   function listenRoom(roomCode, myUid) {
     if (roomListenerUnsub) roomListenerUnsub();
     currentRoomCode = roomCode;
-    const roomRef = db.ref(`tournaments/${roomCode}`);
+    const roomRef = getRoomRef(roomCode);
 
     const listener = roomRef.on('value', snap => {
       const room = snap.val();
@@ -469,7 +494,7 @@ const FirebaseTourneyEngine = (function() {
   /* 設置斷線清理 Presence */
   function setupPresence(roomCode, myUid, isHost) {
     if (!db) return;
-    const roomRef = db.ref(`tournaments/${roomCode}`);
+    const roomRef = getRoomRef(roomCode);
     const userPresenceRef = roomRef.child(`presence/${myUid}`);
 
     userPresenceRef.set({
@@ -487,7 +512,7 @@ const FirebaseTourneyEngine = (function() {
   /* 一鍵 AI 補齊席位 (autoStart 預設為 false，需手動點擊正式開賽；倒數逾時自動熔斷時傳入 true) */
   async function fillWithAI(roomCode, autoStart = false) {
     if (!db || !currentRoomData) return;
-    const roomRef = db.ref(`tournaments/${roomCode}`);
+    const roomRef = getRoomRef(roomCode);
     const snap = await roomRef.once('value');
     const room = snap.val();
     if (!room || room.status !== 'waiting') return;
@@ -528,7 +553,7 @@ const FirebaseTourneyEngine = (function() {
   /* 重置已完賽房間：清空對戰樹與賽事歷史，保留原有名冊席位，重返 waiting 狀態準備重新開賽 */
   async function resetRoom(roomCode) {
     if (!db) return;
-    const roomRef = db.ref(`tournaments/${roomCode}`);
+    const roomRef = getRoomRef(roomCode);
     const snap = await roomRef.once('value');
     const room = snap.val();
     if (!room) return;
@@ -575,7 +600,7 @@ const FirebaseTourneyEngine = (function() {
   /* 正式開賽：種子保護、Round 1 對抗配對、純 AI 自動推演 */
   async function startOnlineTournament(roomCode) {
     if (!db) return;
-    const roomRef = db.ref(`tournaments/${roomCode}`);
+    const roomRef = getRoomRef(roomCode);
     const snap = await roomRef.once('value');
     const room = snap.val();
     if (!room || (room.status !== 'waiting' && room.status !== 'completed')) return;
@@ -673,7 +698,7 @@ const FirebaseTourneyEngine = (function() {
         crypto.getRandomValues(arr);
         return Array.from(arr, n => n.toString(16).padStart(8, '0')).join('');
       }
-    } catch (_) {}
+    } catch (_) { }
     return Math.random().toString(36).slice(2, 12);
   }
 
@@ -702,14 +727,14 @@ const FirebaseTourneyEngine = (function() {
         const hex = Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
         return 'sha256:' + hex;
       }
-    } catch (_) {}
+    } catch (_) { }
     return computeCommitHash(deck, doc, salt, formations, terrain);
   }
 
   /* 雙階段盲提提交 (Commit-Reveal)：先提交雜湊摘要與就緒狀態，待雙方皆就緒才揭曉明文陣容 */
   async function submitMatchDeck(roomCode, matchId, playerUid, deck, doctrine, formations) {
     if (!db || !currentRoomData) return;
-    const roomRef = db.ref(`tournaments/${roomCode}`);
+    const roomRef = getRoomRef(roomCode);
     const match = currentRoomData.matches[matchId];
     if (!match) return;
 
@@ -737,7 +762,7 @@ const FirebaseTourneyEngine = (function() {
     // 2. 斷線自動揭曉保險：若玩家在等待對手時關閉視窗，Firebase 自動補交其鎖定陣容
     try {
       roomRef.child(`matches/${matchId}/submission${slotKey}`).onDisconnect().set(subPayload);
-    } catch (e) {}
+    } catch (e) { }
 
     // 3. 若對手尚未就緒且為真人，僅先寫入 commitHash 與 ready 標記（隱藏明文 deck）
     const updateObj = {};
@@ -761,7 +786,7 @@ const FirebaseTourneyEngine = (function() {
   /* 揭曉陣容並調用確定性推演引擎進行裁決 (支援 BO1 / BO3 多小局累計、戰鬥廣播與季殿軍分流) */
   async function revealAndResolveMatch(roomCode, matchId) {
     if (!db || !currentRoomData) return;
-    const roomRef = db.ref(`tournaments/${roomCode}`);
+    const roomRef = getRoomRef(roomCode);
     const match = currentRoomData.matches[matchId];
     if (!match || match.status === 'finished') return;
 
@@ -1010,7 +1035,7 @@ const FirebaseTourneyEngine = (function() {
           updateObj[`matches/${matchId}/readyA`] = true;
           updateObj[`matches/${matchId}/readyB`] = true;
           updateObj[`matches/${matchId}/forfeit`] = 'A';
-          await db.ref(`tournaments/${roomCode}`).update(updateObj);
+          await getRoomRef(roomCode).update(updateObj);
           await revealAndResolveMatch(roomCode, matchId);
           continue;
         }
@@ -1020,7 +1045,7 @@ const FirebaseTourneyEngine = (function() {
           updateObj[`matches/${matchId}/readyA`] = true;
           updateObj[`matches/${matchId}/readyB`] = true;
           updateObj[`matches/${matchId}/forfeit`] = 'B';
-          await db.ref(`tournaments/${roomCode}`).update(updateObj);
+          await getRoomRef(roomCode).update(updateObj);
           await revealAndResolveMatch(roomCode, matchId);
           continue;
         }
@@ -1045,7 +1070,7 @@ const FirebaseTourneyEngine = (function() {
           neededUpdate = true;
         }
         if (neededUpdate) {
-          await db.ref(`tournaments/${roomCode}`).update(updateObj);
+          await getRoomRef(roomCode).update(updateObj);
         }
         await revealAndResolveMatch(roomCode, matchId);
       }
@@ -1055,7 +1080,7 @@ const FirebaseTourneyEngine = (function() {
   /* 檢查並推進錦標賽輪次 */
   async function checkAndAdvanceOnlineRound(roomCode) {
     if (!db || !currentRoomData) return;
-    const roomRef = db.ref(`tournaments/${roomCode}`);
+    const roomRef = getRoomRef(roomCode);
     const snap = await roomRef.once('value');
     const room = snap.val();
     if (!room || room.status !== 'in_progress') return;
@@ -1102,9 +1127,9 @@ const FirebaseTourneyEngine = (function() {
         const mySlot = isMeA ? 'A' : (isMeB ? 'B' : null);
         const myPending = mySlot ? pendingSubmissions[m.id + '_' + mySlot] : null;
         if (mySlot && myPending && !m[`submission${mySlot}`]) {
-          db.ref(`tournaments/${room.id}/matches/${m.id}/submission${mySlot}`).set(myPending).then(() => {
+          getRoomRef(room.id).child(`matches/${m.id}/submission${mySlot}`).set(myPending).then(() => {
             revealAndResolveMatch(room.id, m.id);
-          }).catch(() => {});
+          }).catch(() => { });
           return;
         }
         // 當雙方明文皆已到位（或一方為 AI），啟動確定性推演

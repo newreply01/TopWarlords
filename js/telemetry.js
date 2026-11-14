@@ -15,7 +15,7 @@ const Telemetry = (() => {
   let db = null;
   let isInitialized = false;
   let onlineCount = 1;
-  const CACHE_KEY_GLOBAL_VISITS = 'topclash_cached_global_visits';
+  const CACHE_KEY_GLOBAL_VISITS = 'topwarlords_cached_global_visits';
 
   // 取得快取的全服人次，預設保底 1002，絕不使用本機單次計數 (如 4)
   function getCachedGlobalVisits() {
@@ -33,11 +33,11 @@ const Telemetry = (() => {
   let totalVisits = getCachedGlobalVisits();
   let todayVisits = 1;
   let myPresenceRef = null;
-  let mySessionId = 'sess_' + Math.random().toString(36).substring(2, 10);
+  let mySessionId = 'wl_' + Math.random().toString(36).substring(2, 10);
 
   // 取得或生成不變的本機玩家 UID (與 LadderEngine 共用 32 字元無混淆字元集)
   function getMyUid() {
-    let uid = localStorage.getItem('topclash_user_uid');
+    let uid = localStorage.getItem('topwarlords_user_uid');
     if (!uid) {
       if (typeof LadderEngine !== 'undefined' && typeof LadderEngine.generateCommanderUID === 'function') {
         uid = LadderEngine.generateCommanderUID();
@@ -47,13 +47,13 @@ const Telemetry = (() => {
         for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
         uid = `CMD-${code}`;
       }
-      localStorage.setItem('topclash_user_uid', uid);
+      localStorage.setItem('topwarlords_user_uid', uid);
     }
     return uid;
   }
 
   function getMyCallsign() {
-    return localStorage.getItem('topclash_auto_callsign') || '無名大將';
+    return localStorage.getItem('topwarlords_auto_callsign') || '無名大將';
   }
 
   function getTodayKey() {
@@ -88,12 +88,12 @@ const Telemetry = (() => {
     try {
       window.dataLayer = window.dataLayer || [];
       if (typeof window.gtag !== 'function') {
-        window.gtag = function() { window.dataLayer.push(arguments); };
+        window.gtag = function () { window.dataLayer.push(arguments); };
       }
       window.gtag('js', new Date());
 
-      // 讀取站長設定的 GA4 ID (優先: localStorage -> window.TOPCLASH_GA_ID -> 預設)
-      const gaId = localStorage.getItem('topclash_ga_id') || window.TOPCLASH_GA_ID;
+      // 讀取站長設定的 GA4 ID (優先: localStorage -> window.TOPWARLORDS_GA_ID -> 預設)
+      const gaId = localStorage.getItem('topwarlords_ga_id') || window.TOPWARLORDS_GA_ID;
       if (gaId && gaId.startsWith('G-')) {
         loadGAScript(gaId);
       }
@@ -125,16 +125,16 @@ const Telemetry = (() => {
       throw new Error('GA4 評估 ID 格式必須以 "G-" 開頭（例如：G-ABC123XYZ）');
     }
     if (cleanId) {
-      localStorage.setItem('topclash_ga_id', cleanId);
+      localStorage.setItem('topwarlords_ga_id', cleanId);
       loadGAScript(cleanId);
     } else {
-      localStorage.removeItem('topclash_ga_id');
+      localStorage.removeItem('topwarlords_ga_id');
     }
     return true;
   }
 
   function getGA4MeasurementId() {
-    return localStorage.getItem('topclash_ga_id') || window.TOPCLASH_GA_ID || '';
+    return localStorage.getItem('topwarlords_ga_id') || window.TOPWARLORDS_GA_ID || '';
   }
 
   // 觸發自訂事件 (同時派發至 GA4 與自訂監聽)
@@ -144,7 +144,7 @@ const Telemetry = (() => {
         window.gtag('event', eventName, params);
       }
       // 派發自訂 DOM 事件方便內部除錯或擴充
-      window.dispatchEvent(new CustomEvent('topclash:telemetry', { detail: { eventName, params } }));
+      window.dispatchEvent(new CustomEvent('topwarlords:telemetry', { detail: { eventName, params } }));
     } catch (e) {
       // 靜默防止阻斷遊戲
     }
@@ -156,14 +156,14 @@ const Telemetry = (() => {
     isInitialized = true;
 
     // 每次瀏覽器工作階段 (Session) 到訪計數 +1 (本機保底 + 雲端同步)
-    const sessionVisited = sessionStorage.getItem('topclash_session_visit_counted');
+    const sessionVisited = sessionStorage.getItem('topwarlords_session_visit_counted');
     if (!sessionVisited) {
-      const localV = Math.max(0, parseInt(localStorage.getItem('topclash_local_visits') || '0', 10)) + 1;
-      localStorage.setItem('topclash_local_visits', String(localV));
+      const localV = Math.max(0, parseInt(localStorage.getItem('topwarlords_local_visits') || '0', 10)) + 1;
+      localStorage.setItem('topwarlords_local_visits', String(localV));
       totalVisits += 1;
       try {
         localStorage.setItem(CACHE_KEY_GLOBAL_VISITS, String(totalVisits));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // 綁定 UI 點擊事件（無論離線或連線皆可開啟戰情大盤）
@@ -172,7 +172,7 @@ const Telemetry = (() => {
 
     const database = initFirebase();
     if (!database) {
-      sessionStorage.setItem('topclash_session_visit_counted', '1');
+      sessionStorage.setItem('topwarlords_session_visit_counted', '1');
       updateUI();
       return;
     }
@@ -181,31 +181,32 @@ const Telemetry = (() => {
     const callsign = getMyCallsign();
     const todayKey = getTodayKey();
 
-    // 0. 網站到訪人次累計 (Total & Daily Site Visits)
+    // 0. 網站到訪人次累計 (Total & Daily Site Visits - 隔離於 warlords 子空間)
     if (!sessionVisited) {
-      sessionStorage.setItem('topclash_session_visit_counted', '1');
-      database.ref('global_stats/summary/total_visits').transaction(c => (c || 0) + 1).then(res => {
+      sessionStorage.setItem('topwarlords_session_visit_counted', '1');
+      database.ref('global_stats/warlords/summary/total_visits').transaction(c => (c || 0) + 1).then(res => {
         if (res && res.committed && res.snapshot) {
           const cloudV = res.snapshot.val();
           if (cloudV && cloudV > totalVisits) {
             totalVisits = cloudV;
             try {
               localStorage.setItem(CACHE_KEY_GLOBAL_VISITS, String(totalVisits));
-            } catch (e) {}
+            } catch (e) { }
             updateUI();
           }
         }
-      }).catch(() => {});
-      database.ref(`global_stats/daily/${todayKey}/visits`).transaction(c => (c || 0) + 1).catch(() => {});
+      }).catch(() => { });
+      database.ref(`global_stats/warlords/daily/${todayKey}/visits`).transaction(c => (c || 0) + 1).catch(() => { });
     }
 
-    // 1. 在線狀態管理 (Online Presence)
+    // 1. 在線狀態管理 (Online Presence - 隔離於 warlords 子空間)
     const connectedRef = database.ref('.info/connected');
     connectedRef.on('value', snap => {
       if (snap.val() === true) {
-        myPresenceRef = database.ref(`global_presence/${mySessionId}`);
+        myPresenceRef = database.ref(`global_stats/warlords/presence/${mySessionId}`);
         myPresenceRef.onDisconnect().remove();
         myPresenceRef.set({
+          gameId: 'topwarlords',
           uid: uid,
           callsign: callsign,
           time: window.firebase.database.ServerValue.TIMESTAMP
@@ -213,17 +214,22 @@ const Telemetry = (() => {
       }
     });
 
-    // 監聽全服在線人數
-    database.ref('global_presence').on('value', snap => {
+    // 監聽全服在線人數 (僅納入本作在線工作階段)
+    database.ref('global_stats/warlords/presence').on('value', snap => {
       const val = snap.val() || {};
-      onlineCount = Math.max(1, Object.keys(val).length);
+      const activeCount = Object.entries(val).filter(([k, v]) => {
+        if (k.startsWith('tc_') || k.startsWith('TC_')) return false;
+        if (v && v.gameId && v.gameId !== 'topwarlords') return false;
+        return true;
+      }).length;
+      onlineCount = Math.max(1, activeCount);
       updateUI();
     });
 
     // 2. 指揮官累計登記統計 (去重計數)
-    const hasRegistered = localStorage.getItem('topclash_telemetry_registered');
+    const hasRegistered = localStorage.getItem('topwarlords_telemetry_registered');
     if (!hasRegistered) {
-      const playerRef = database.ref(`global_stats/players/${uid}`);
+      const playerRef = database.ref(`global_stats/warlords/players/${uid}`);
       playerRef.once('value').then(pSnap => {
         if (!pSnap.exists()) {
           playerRef.set({
@@ -231,17 +237,17 @@ const Telemetry = (() => {
             callsign: callsign,
             lastActive: window.firebase.database.ServerValue.TIMESTAMP
           });
-          database.ref('global_stats/summary/total_players').transaction(c => (c || 0) + 1);
+          database.ref('global_stats/warlords/summary/total_players').transaction(c => (c || 0) + 1);
         }
-        localStorage.setItem('topclash_telemetry_registered', '1');
-      }).catch(() => {});
+        localStorage.setItem('topwarlords_telemetry_registered', '1');
+      }).catch(() => { });
     } else {
       // 每日更新最後活躍時間
-      database.ref(`global_stats/players/${uid}/lastActive`).set(window.firebase.database.ServerValue.TIMESTAMP).catch(() => {});
+      database.ref(`global_stats/warlords/players/${uid}/lastActive`).set(window.firebase.database.ServerValue.TIMESTAMP).catch(() => { });
     }
 
     // 3. 監聽全域到訪總人次、推演總局數與部隊總數
-    database.ref('global_stats/summary').on('value', snap => {
+    database.ref('global_stats/warlords/summary').on('value', snap => {
       const val = snap.val() || {};
       totalBattles = val.total_battles || 0;
       totalPlayers = val.total_players || 0;
@@ -249,12 +255,12 @@ const Telemetry = (() => {
       totalVisits = Math.max(cloudV, totalPlayers, onlineCount, totalVisits, 1002);
       try {
         localStorage.setItem(CACHE_KEY_GLOBAL_VISITS, String(totalVisits));
-      } catch (e) {}
+      } catch (e) { }
       updateUI();
     });
 
     // 4. 監聽今日全服對戰局數與今日到訪人次
-    database.ref(`global_stats/daily/${todayKey}`).on('value', snap => {
+    database.ref(`global_stats/warlords/daily/${todayKey}`).on('value', snap => {
       const val = snap.val() || {};
       todayBattles = typeof val === 'object' ? (val.battles || 0) : 0;
       todayVisits = typeof val === 'object' ? Math.max(val.visits || 0, 1) : 1;
@@ -276,25 +282,25 @@ const Telemetry = (() => {
       flagship: flagshipId || 'unknown'
     });
 
-    // 軌道 1：Firebase 原子計數自增
+    // 軌道 1：Firebase 原子計數自增 (隔離於 warlords 子空間)
     if (!db) return;
 
     try {
       // 1. 全服累計局數 +1
-      db.ref('global_stats/summary/total_battles').transaction(c => (c || 0) + 1);
+      db.ref('global_stats/warlords/summary/total_battles').transaction(c => (c || 0) + 1);
 
       // 2. 今日全服局數 +1
       const today = getTodayKey();
-      db.ref(`global_stats/daily/${today}/battles`).transaction(c => (c || 0) + 1);
+      db.ref(`global_stats/warlords/daily/${today}/battles`).transaction(c => (c || 0) + 1);
 
       // 3. 今日特定模式局數 +1
       if (mode) {
-        db.ref(`global_stats/daily/${today}/modes/${mode}`).transaction(c => (c || 0) + 1);
+        db.ref(`global_stats/warlords/daily/${today}/modes/${mode}`).transaction(c => (c || 0) + 1);
       }
 
-      // 4. 旗艦軍武出戰熱度計數
-      if (flagshipId) {
-        db.ref(`global_stats/summary/flagships/${flagshipId}`).transaction(c => (c || 0) + 1);
+      // 4. 旗艦軍武出戰熱度計數 (僅記錄本專案合法名將 ID)
+      if (flagshipId && (typeof UNIT_MAP === 'undefined' || UNIT_MAP[flagshipId])) {
+        db.ref(`global_stats/warlords/summary/flagships/${flagshipId}`).transaction(c => (c || 0) + 1);
       }
     } catch (e) {
       console.warn('[Telemetry] 戰果回傳異常 (靜默處理):', e);

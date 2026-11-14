@@ -62,17 +62,41 @@ const CloudSync = (() => {
     }
   }
 
+  function readCommanderCloudRecord(database, id) {
+    return database.ref(`commanders/${id}/warlords`).once('value').then(primarySnap => {
+      if (primarySnap.exists()) return primarySnap.val();
+      return database.ref(`global_stats/warlords/commanders/${id}`).once('value').then(mirrorSnap => {
+        return mirrorSnap.exists() ? mirrorSnap.val() : null;
+      }).catch(() => null);
+    }).catch(() => {
+      return database.ref(`global_stats/warlords/commanders/${id}`).once('value').then(mirrorSnap => {
+        return mirrorSnap.exists() ? mirrorSnap.val() : null;
+      }).catch(() => null);
+    });
+  }
+
+  async function writeCommanderCloudRecord(database, id, payload) {
+    try {
+      await database.ref(`commanders/${id}/warlords`).set(payload);
+    } catch (e) {
+      await database.ref(`global_stats/warlords/commanders/${id}`).set(payload);
+      return true;
+    }
+    database.ref(`global_stats/warlords/commanders/${id}`).set(payload).catch(() => {});
+    return true;
+  }
+
   /* 取得當前本機綁定狀態 */
   function getAccount() {
-    return LS.get('db15_cloud_account', null);
+    return LS.get('wl15_cloud_account', null);
   }
 
   /* 儲存綁定狀態 */
   function setAccount(acc) {
     if (acc) {
-      LS.set('db15_cloud_account', acc);
+      LS.set('wl15_cloud_account', acc);
     } else {
-      localStorage.removeItem('db15_cloud_account');
+      localStorage.removeItem('wl15_cloud_account');
     }
   }
 
@@ -80,7 +104,7 @@ const CloudSync = (() => {
     return !!getAccount();
   }
 
-  /* 收集當前本機所有遊戲戰績與設定 (精準支援天梯 topclash_ladder_v5、記憶體實時名冊與 A/B 槽雙牌組) */
+  /* 收集當前本機所有遊戲戰績與設定 (對齊 TopWarlords 天梯 wl15_ladder_v1、記憶體實時名冊與 wl15_* 陣容設定) */
   function collectLocalSaveData() {
     // 1. 取得天梯完整存檔 (優先從 LadderEngine 實時記憶體取得，其次讀取 localStorage)
     let ladderData = null;
@@ -90,25 +114,25 @@ const CloudSync = (() => {
       } catch (e) {}
     }
     if (!ladderData) {
-      ladderData = LS.get('topclash_ladder_v5', null) || LS.get('topbattle_ladder_v3', null) || LS.get('db15_ladder', null);
+      ladderData = LS.get('wl15_ladder_v1', null) || LS.get('topwarlords_ladder_v1', null);
     }
 
     // 2. 戰績統計與呼號影子
-    const statsData = LS.get('db15_stats', { played: 0, win: 0, streak: 0, best: 0, bo3Won: 0 });
-    const ghostData = LS.get('db15_player_ghost', null);
+    const statsData = LS.get('wl15_stats', { played: 0, win: 0, streak: 0, best: 0, bo3Won: 0 });
+    const ghostData = LS.get('wl15_player_ghost', null);
 
     // 3. 玩家真實呼號、軍階與國旗
     const realNickname = ladderData?.player?.name
       || ghostData?.callsign
-      || (typeof localStorage !== 'undefined' && localStorage.getItem('topclash_auto_callsign'))
-      || '黑貓縱深特巡連';
+      || (typeof localStorage !== 'undefined' && localStorage.getItem('topwarlords_auto_callsign'))
+      || '虎步先鋒鐵騎營';
 
     const realFlag = ladderData?.player?.flag
       || ghostData?.flag
       || '🇹🇼';
 
     const realUid = ladderData?.player?.uid
-      || (typeof localStorage !== 'undefined' && localStorage.getItem('topclash_user_uid'))
+      || (typeof localStorage !== 'undefined' && localStorage.getItem('topwarlords_user_uid'))
       || 'CMD-7392';
 
     const realRP = (ladderData && ladderData.player && typeof ladderData.player.rp === 'number')
@@ -116,19 +140,15 @@ const CloudSync = (() => {
       : (ghostData?.rp || 0);
 
     return {
+      gameId: 'topwarlords',
       stats: statsData,
       ladder: ladderData,
       playerGhost: ghostData,
-      // 完整牌組與戰術教條槽位支援 (A/B 雙槽 + 啟動槽 + 自訂預設)
-      deckA: LS.get('db15_deck_A', null),
-      deckB: LS.get('db15_deck_B', null),
-      docA: LS.get('db15_doc_A', 'strike'),
-      docB: LS.get('db15_doc_B', 'defense'),
-      activeSlot: LS.get('db15_active_slot', 'A'),
-      customPresets: LS.get('db15_custom_presets', null),
-      // 舊版單牌組相容性欄位
-      deck: LS.get('db15_deck', null) || LS.get('db15_deck_A', null),
-      doctrine: LS.get('db15_doctrine', null) || LS.get('db15_doc_A', 'strike'),
+      deck: LS.get('wl15_deck', null),
+      doctrine: LS.get('wl15_doc', 'strike'),
+      formations: LS.get('wl15_formations', null),
+      terrain: LS.get('wl15_terrain', 'plain'),
+      customPresets: LS.get('wl15_custom_presets', null),
       // 指揮官呼號設定
       profile: {
         name: realNickname,
@@ -139,21 +159,20 @@ const CloudSync = (() => {
       flag: realFlag,
       uid: realUid,
       rp: realRP,
-      theme: LS.get('db15_theme', 'dark'),
-      sound: LS.get('db15_sound', true),
+      theme: LS.get('wl15_theme', 'dark'),
+      sound: LS.get('wl15_sound', true),
       version: Date.now()
     };
   }
 
   /* 將雲端記錄覆蓋寫入本地 localStorage 並刷新記憶體引擎 */
   function restoreSaveDataToLocal(cloudData) {
-    if (!cloudData) return;
-    if (cloudData.stats) LS.set('db15_stats', cloudData.stats);
+    if (!cloudData || (cloudData.gameId && cloudData.gameId !== 'topwarlords')) return;
+    if (cloudData.stats) LS.set('wl15_stats', cloudData.stats);
 
-    // 1. 還原天梯存檔至 topclash_ladder_v5
+    // 1. 還原天梯存檔至 wl15_ladder_v1
     if (cloudData.ladder) {
-      LS.set('topclash_ladder_v5', cloudData.ladder);
-      LS.set('db15_ladder', cloudData.ladder); // 向下相容
+      LS.set('wl15_ladder_v1', cloudData.ladder);
       if (typeof window !== 'undefined' && window.LadderEngine && typeof window.LadderEngine.load === 'function') {
         try { window.LadderEngine.load(); } catch (e) {}
       }
@@ -162,33 +181,30 @@ const CloudSync = (() => {
     // 2. 還原呼號與 UID
     const nick = cloudData.nickname || cloudData.profile?.name;
     if (nick && typeof localStorage !== 'undefined') {
-      localStorage.setItem('topclash_auto_callsign', nick);
-      localStorage.setItem('topclash_callsign_set', '1');
+      localStorage.setItem('topwarlords_auto_callsign', nick);
+      localStorage.setItem('topwarlords_callsign_set', '1');
     }
     const uid = cloudData.uid || cloudData.profile?.uid;
     if (uid && typeof localStorage !== 'undefined') {
-      localStorage.setItem('topclash_user_uid', uid);
+      localStorage.setItem('topwarlords_user_uid', uid);
     }
 
-    // 3. 還原牌組槽位
-    if (cloudData.deckA) LS.set('db15_deck_A', cloudData.deckA);
-    if (cloudData.deckB) LS.set('db15_deck_B', cloudData.deckB);
-    if (cloudData.docA) LS.set('db15_doc_A', cloudData.docA);
-    if (cloudData.docB) LS.set('db15_doc_B', cloudData.docB);
-    if (cloudData.activeSlot) LS.set('db15_active_slot', cloudData.activeSlot);
-    if (cloudData.customPresets) LS.set('db15_custom_presets', cloudData.customPresets);
-    if (cloudData.deck && !cloudData.deckA) LS.set('db15_deck_A', cloudData.deck);
-    if (cloudData.doctrine && !cloudData.docA) LS.set('db15_doc_A', cloudData.doctrine);
+    // 3. 還原陣容、教條、陣形、地形與自訂預設
+    if (cloudData.deck) LS.set('wl15_deck', cloudData.deck);
+    if (cloudData.doctrine) LS.set('wl15_doc', cloudData.doctrine);
+    if (cloudData.formations) LS.set('wl15_formations', cloudData.formations);
+    if (cloudData.terrain) LS.set('wl15_terrain', cloudData.terrain);
+    if (cloudData.customPresets) LS.set('wl15_custom_presets', cloudData.customPresets);
 
-    if (cloudData.playerGhost) LS.set('db15_player_ghost', cloudData.playerGhost);
-    if (cloudData.theme) LS.set('db15_theme', cloudData.theme);
-    if (typeof cloudData.sound === 'boolean') LS.set('db15_sound', cloudData.sound);
+    if (cloudData.playerGhost) LS.set('wl15_player_ghost', cloudData.playerGhost);
+    if (cloudData.theme) LS.set('wl15_theme', cloudData.theme);
+    if (typeof cloudData.sound === 'boolean') LS.set('wl15_sound', cloudData.sound);
   }
 
   /* 密碼 SHA-256 安全雜湊 (相容舊版) */
   async function hashPassword(pwd) {
     const encoder = new TextEncoder();
-    const data = encoder.encode(pwd + '_TOPCLASH_SALT_2026');
+    const data = encoder.encode(pwd + '_TOPWARLORDS_SALT_2026');
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     return Array.from(new Uint8Array(hashBuffer))
       .map(b => b.toString(16).padStart(2, '0'))
@@ -260,22 +276,14 @@ const CloudSync = (() => {
     };
     setAccount(account);
 
-    // 檢查雲端現有存檔
-    let remoteData = null;
-    try {
-      const snap = await database.ref(`commanders/${user.uid}`).once('value');
-      if (snap.exists()) {
-        remoteData = snap.val();
-      }
-    } catch (e) {
-      console.warn('[CloudSync] 讀取遠端存檔失敗:', e);
-    }
+    // 檢查雲端現有存檔 (獨立讀取 warlords 子欄位與備援鏡像)
+    const remoteData = await readCommanderCloudRecord(database, user.uid);
 
     const localData = collectLocalSaveData();
     let needsReload = false;
 
     if (remoteData && remoteData.saveData && typeof saveResolver === 'function') {
-      const localNickname = localData.nickname || localData.profile?.name || '黑貓縱深特巡連';
+      const localNickname = localData.nickname || localData.profile?.name || '虎步先鋒鐵騎營';
       const localPlayed = localData.stats?.played || 0;
       const localRP = (localData.ladder?.player && typeof localData.ladder.player.rp === 'number')
         ? localData.ladder.player.rp
@@ -357,11 +365,12 @@ const CloudSync = (() => {
       ? localData.ladder.player.rp
       : (typeof localData.rp === 'number' ? localData.rp : 0);
     const payload = {
+      gameId: 'topwarlords',
       id: account.id,
       displayId: account.displayId,
       email: account.email || '',
       updatedAt: now,
-      nickname: localData.nickname || account.nickname || '黑貓縱深特巡連',
+      nickname: localData.nickname || account.nickname || '虎步先鋒鐵騎營',
       flag: localData.flag || account.flag || '🇹🇼',
       rp: rp,
       played: localData.stats?.played || 0,
@@ -370,7 +379,7 @@ const CloudSync = (() => {
     };
 
     try {
-      await database.ref(`commanders/${account.id}`).set(payload);
+      await writeCommanderCloudRecord(database, account.id, payload);
       setStatus('synced');
       return true;
     } catch (e) {
@@ -378,7 +387,7 @@ const CloudSync = (() => {
       if (currentUser && (rawMsg.includes('PERMISSION_DENIED') || rawMsg.includes('Permission denied'))) {
         try {
           await currentUser.getIdToken(true);
-          await database.ref(`commanders/${account.id}`).set(payload);
+          await writeCommanderCloudRecord(database, account.id, payload);
           setStatus('synced');
           return true;
         } catch (retryErr) {
@@ -433,18 +442,19 @@ const CloudSync = (() => {
     const database = initFirebase();
     if (!database) throw new Error('雲端資料庫尚未就緒');
     const cleanId = id.toLowerCase();
-    const snap = await database.ref(`commanders/${cleanId}`).once('value');
-    if (snap.exists()) throw new Error(`指揮官代號【${id}】已被搶先註冊！`);
+    const existing = await readCommanderCloudRecord(database, cleanId);
+    if (existing) throw new Error(`指揮官代號【${id}】已被搶先註冊！`);
     const passHash = await hashPassword(pwd);
     const authToken = generateAuthToken();
     const localData = collectLocalSaveData();
     const now = Date.now();
     const payload = {
+      gameId: 'topwarlords',
       id: cleanId, displayId: id, passHash, authToken, createdAt: now, updatedAt: now,
       nickname: customNickname || localData.profile?.name || '特遣隊指揮官',
       flag: localData.profile?.flag || '🇹🇼', saveData: localData
     };
-    await database.ref(`commanders/${cleanId}`).set(payload);
+    await writeCommanderCloudRecord(database, cleanId, payload);
     const account = { id: cleanId, displayId: id, authToken, nickname: payload.nickname, flag: payload.flag, boundAt: now };
     setAccount(account);
     setStatus('synced');
@@ -457,9 +467,8 @@ const CloudSync = (() => {
     const database = initFirebase();
     if (!database) throw new Error('雲端資料庫尚未就緒');
     const cleanId = id.toLowerCase();
-    const snap = await database.ref(`commanders/${cleanId}`).once('value');
-    if (!snap.exists()) throw new Error(`找不到指揮官【${id}】的雲端記錄`);
-    const cloudUser = snap.val();
+    const cloudUser = await readCommanderCloudRecord(database, cleanId);
+    if (!cloudUser) throw new Error(`找不到指揮官【${id}】的雲端記錄`);
     const inputHash = await hashPassword(pwd);
     if (cloudUser.passHash !== inputHash) throw new Error('戰術密碼不相符');
     let authToken = cloudUser.authToken || generateAuthToken();
@@ -476,9 +485,8 @@ const CloudSync = (() => {
     const database = initFirebase();
     if (!database) return false;
     const cleanId = id.toLowerCase();
-    const snap = await database.ref(`commanders/${cleanId}`).once('value');
-    if (!snap.exists()) return false;
-    const cloudUser = snap.val();
+    const cloudUser = await readCommanderCloudRecord(database, cleanId);
+    if (!cloudUser) return false;
     if (cloudUser.authToken !== token) return false;
     if (cloudUser.saveData) restoreSaveDataToLocal(cloudUser.saveData);
     const account = { id: cleanId, displayId: cloudUser.displayId || id, authToken: token, nickname: cloudUser.nickname || '特遣隊指揮官', flag: cloudUser.flag || '🇹🇼', boundAt: Date.now() };

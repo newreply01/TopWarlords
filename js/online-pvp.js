@@ -6,7 +6,7 @@
 
 const OnlinePvPEngine = (function () {
   const PEERJS_CDN = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
-  const ROOM_PREFIX = 'TOPCLASH-BO5-';
+  const ROOM_PREFIX = 'TOPWARLORDS-BO5-';
 
   let peer = null;
   let conn = null;
@@ -44,12 +44,13 @@ const OnlinePvPEngine = (function () {
   }
 
   function attachFirebaseRelay(code, hostFlag, playerProfile) {
+    if (!code || /^(TC_|TOPCLASH-BO5-)/i.test(String(code).trim())) return false;
     const db = getFbDb();
     if (!db) return false;
     cleanupFirebaseRelay();
-    fbRoomRef = db.ref('pvp_rooms/' + code);
+    fbRoomRef = db.ref('pvp_rooms/WL_' + code);
     if (hostFlag) {
-      fbRoomRef.set({ createdAt: Date.now(), hostId: senderId, status: 'waiting' }).catch(() => { });
+      fbRoomRef.set({ gameId: 'topwarlords', createdAt: Date.now(), hostId: senderId, status: 'waiting' }).catch(() => { });
       fbRoomRef.onDisconnect().remove();
     }
     const msgsRef = fbRoomRef.child('messages');
@@ -60,6 +61,7 @@ const OnlinePvPEngine = (function () {
         useFirebaseRelay = true;
         pvpState.connected = true;
         sendPacket('HANDSHAKE', {
+          gameId: 'topwarlords',
           name: playerProfile.name,
           uid: playerProfile.uid,
           flag: playerProfile.flag,
@@ -192,7 +194,11 @@ const OnlinePvPEngine = (function () {
     await ensurePeerJS();
     closeConnection();
 
-    const cleanCode = roomCode.trim().toUpperCase().replace(/^TOPCLASH-BO5-/, '');
+    const rawCode = String(roomCode || '').trim().toUpperCase();
+    if (rawCode.startsWith('TC_') || rawCode.startsWith('TOPCLASH-BO5-')) {
+      throw new Error('此對戰代碼屬於其他遊戲專案，無法加入');
+    }
+    const cleanCode = rawCode.replace(/^(TOPWARLORDS-BO5-|WL_)/, '');
     currentRoomId = cleanCode;
     isHost = false;
     pvpState.connected = false;
@@ -237,6 +243,7 @@ const OnlinePvPEngine = (function () {
           useFirebaseRelay = true;
           fbRoomRef.child('messages').push({ sender: senderId, type: '__RELAY_JOIN__', ts: Date.now() }).catch(() => { });
           sendPacket('HANDSHAKE', {
+            gameId: 'topwarlords',
             name: playerProfile.name,
             uid: playerProfile.uid,
             flag: playerProfile.flag,
@@ -309,6 +316,7 @@ const OnlinePvPEngine = (function () {
       pvpState.connected = true;
       // 發送身分握手封包 (Handshake)
       sendPacket('HANDSHAKE', {
+        gameId: 'topwarlords',
         name: playerProfile.name,
         uid: playerProfile.uid,
         flag: playerProfile.flag,
@@ -337,6 +345,11 @@ const OnlinePvPEngine = (function () {
 
     switch (data.type) {
       case 'HANDSHAKE':
+        if (data.payload && data.payload.gameId && data.payload.gameId !== 'topwarlords') {
+          closeConnection();
+          emit('error', '對手來自不同遊戲專案，已自動中斷連線');
+          return;
+        }
         opponentInfo = data.payload;
         emit('opponent_joined', { opponent: opponentInfo, isHost });
         break;

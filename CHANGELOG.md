@@ -4,6 +4,18 @@
 
 ---
 
+## [7.10.10] - 2026-11-14
+### Fixed & Isolated (Firebase & LocalStorage 跨專案安全切分)
+- **雲端資料庫子命名空間隔離（方案 A+B 結合，免更動 Firebase Security Rules）**：
+  - `js/cloud-sync.js`：改讀寫 `commanders/{uid}/warlords` 獨立子節點（防止 `.set()` 與前作互覆），並雙寫鏡像備份至 `global_stats/warlords/commanders/{uid}`；加入 `gameId: 'topwarlords'`、`restoreSaveDataToLocal()` 跨專案防護與獨立密碼加鹽 `_TOPWARLORDS_SALT_2026`。
+  - `js/telemetry.js`：全服在線人數（`wl_*` 工作階段前綴與 `gameId` 過濾）、訪問量、日統計、玩家名冊與經 `UNIT_MAP` 校驗之出戰旗艦數據全部遷移至 `global_stats/warlords/` 子樹。
+  - `js/ladder.js`：天梯雲端駐防遷往 `global_stats/warlords/ladder_ghosts`（同步鏡像 `ladder_ghosts/WL_{uid}`），以空值合併 `rp ?? 0` 保存零分資料並檢查 `TC_` 前綴與 `gameId === 'topwarlords'`。
+  - `js/firebase-tourney.js`：線上錦標賽底層鍵名全面改用 `tournaments/WL_{code}`（UI 維持 6 碼代碼）、附帶 `gameId: 'topwarlords'`，公開房清單與快速匹配配合索引 `.orderByChild('status').equalTo('waiting').limitToLast(30)` 僅納入名將版房間，並於 `joinRoom()` 攔截 `TC_` 與異專案房間。
+  - `js/online-pvp.js` & `js/app.js`：雙人連線 PeerJS 前綴改為 `TOPWARLORDS-BO5-`，Firebase 中繼路徑改用 `pvp_rooms/WL_{code}`、主動拒絕 `TC_` / `TOPCLASH-BO5-` 代碼，並在 `HANDSHAKE` 檢驗 `gameId === 'topwarlords'`（不符立即斷線）。
+- **本機儲存（LocalStorage / SessionStorage）與架構文件**：
+  - 全面移除 `db15_*`、`topclash_*`、`topbattle_*` 殘留鍵名（包含修復 `CloudSync` 先前誤讀 `db15_*` 導致無法正確備份 `wl15_*` 陣容與戰績的問題），統一對齊 `wl15_cloud_account`、`wl15_ladder_v1`、`wl15_*` 與 `topwarlords_*`。
+  - 新增跨專案隔離規格文件 [`docs/FIREBASE_ISOLATION_SPEC.md`](docs/FIREBASE_ISOLATION_SPEC.md)，並對齊全域規則庫與 `shared-firebase-isolation` 技能。
+
 ## [7.10.9] - 2026-11-14
 ### Added & Improved
 - **選將卡片情報結構與陣營篆印化**：

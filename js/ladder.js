@@ -4,9 +4,10 @@
    實作 CRS-15 戰略勝點數學模型、每日 00:00 截算、戰術迷霧偵察與排名躍升
    ===================================================== */
 
-const LadderEngine = (function() {
-  const STORAGE_KEY = 'topclash_ladder_v5';
-  const LEGACY_STORAGE_KEY = 'topbattle_ladder_v3';
+const LadderEngine = (function () {
+  const STORAGE_KEY = 'wl15_ladder_v1';
+  const LEGACY_STORAGE_KEY = 'topwarlords_ladder_v1';
+  const GHOST_DB_PATH = 'global_stats/warlords/ladder_ghosts';
 
   function generateCommanderUID() {
     const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -75,13 +76,13 @@ const LadderEngine = (function() {
     setTimeout(() => syncCloudGhosts(), 600);
   }
 
-  /* 雲端鏡像駐防同步 (Firebase Realtime Database: ladder_ghosts) */
+  /* 雲端鏡像駐防同步 (隔離於 global_stats/warlords/ladder_ghosts 並雙寫前綴鏡像) */
   function getFirebaseDb() {
     try {
       if (typeof window !== 'undefined' && window.firebase && window.firebase.apps && window.firebase.apps.length) {
         return window.firebase.database();
       }
-    } catch (e) {}
+    } catch (e) { }
     return null;
   }
 
@@ -89,29 +90,35 @@ const LadderEngine = (function() {
     const db = getFirebaseDb();
     if (!db || !state.player || !state.player.uid) return;
     const key = String(state.player.uid).replace(/[^a-zA-Z0-9_-]/g, '_');
+    if (key.startsWith('TC_')) return;
     const deck = sanitizeDefenseDeck(state.player.defenseDeck);
     if (typeof validateDeck === 'function' && validateDeck(deck).length > 0) return;
-    db.ref('ladder_ghosts/' + key).set({
+    const ghostPayload = {
+      gameId: 'topwarlords',
       uid: state.player.uid,
       name: state.player.name || '無名指揮官',
       flag: state.player.flag || '🇹🇼',
-      rp: state.player.rp || 2055,
+      rp: state.player.rp ?? 0,
       deck: deck,
       doc: normalizeDefenseDoc(state.player.defenseDoc),
       streakDays: state.player.streakDays || 1,
       updatedAt: Date.now()
-    }).catch(() => {});
+    };
+    db.ref(`${GHOST_DB_PATH}/${key}`).set(ghostPayload).catch(() => { });
+    db.ref(`ladder_ghosts/WL_${key}`).set(ghostPayload).catch(() => { });
   }
 
   function syncCloudGhosts(onUpdated) {
     const db = getFirebaseDb();
     if (!db) return;
-    db.ref('ladder_ghosts').orderByChild('updatedAt').limitToLast(20).once('value').then(snap => {
+    db.ref(GHOST_DB_PATH).orderByChild('updatedAt').limitToLast(20).once('value').then(snap => {
       const val = snap.val();
       if (!val || typeof val !== 'object') return;
       let changed = false;
-      Object.values(val).forEach(g => {
+      Object.entries(val).forEach(([key, g]) => {
+        if (key.startsWith('TC_')) return;
         if (!g || !g.uid || g.uid === state.player.uid) return;
+        if (g.gameId && g.gameId !== 'topwarlords') return;
         if (!Array.isArray(g.deck) || g.deck.length !== 5) return;
         if (typeof validateDeck === 'function' && validateDeck(g.deck).length > 0) return;
         const existing = state.roster.find(u => u.uid === g.uid || (u.isCloudGhost && u.name === g.name));
@@ -143,7 +150,7 @@ const LadderEngine = (function() {
         save();
         if (typeof onUpdated === 'function') onUpdated();
       }
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   const MAX_ORDERS = 30;
@@ -432,12 +439,12 @@ const LadderEngine = (function() {
       hash = (hash * 31 + today.charCodeAt(i)) >>> 0;
     }
     const eventList = (typeof EVENTS !== 'undefined' && EVENTS.length) ? EVENTS : [
-      { id: 'plain',  icon: '🏜', name: '荒漠平原', desc: '地面開闊：裝甲火力 +20%，艦艇火力 −30%。', mod: { armorDmg: 1.2, navalDmg: 0.7 } },
+      { id: 'plain', icon: '🏜', name: '荒漠平原', desc: '地面開闊：裝甲火力 +20%，艦艇火力 −30%。', mod: { armorDmg: 1.2, navalDmg: 0.7 } },
       { id: 'strait', icon: '🌊', name: '島嶼海峽', desc: '海空主導：艦艇火力 +25%，裝甲火力 −15%。', mod: { navalDmg: 1.25, armorDmg: 0.85 } },
-      { id: 'storm',  icon: '⛈', name: '暴雨雷暴', desc: '能見度低：空中命中率 −15%，無人機傷害 −25%。', mod: { airHit: -0.15, droneDmg: 0.75 } },
-      { id: 'urban',  icon: '🏙', name: '都會巷戰', desc: '重砲受限：火砲 −25%、裝甲 −10%，無人機 +30%。', mod: { artyDmg: 0.75, droneDmg: 1.3, armorDmg: 0.9 } },
-      { id: 'em',     icon: '⚡', name: '電磁風暴', desc: '電戰效果 ×1.6；全體隱匿 +10。', mod: { ewMult: 1.6, stealthAdd: 10 } },
-      { id: 'clear',  icon: '☀', name: '晴朗無風', desc: '標準環境，無任何修正。', mod: {} }
+      { id: 'storm', icon: '⛈', name: '暴雨雷暴', desc: '能見度低：空中命中率 −15%，無人機傷害 −25%。', mod: { airHit: -0.15, droneDmg: 0.75 } },
+      { id: 'urban', icon: '🏙', name: '都會巷戰', desc: '重砲受限：火砲 −25%、裝甲 −10%，無人機 +30%。', mod: { artyDmg: 0.75, droneDmg: 1.3, armorDmg: 0.9 } },
+      { id: 'em', icon: '⚡', name: '電磁風暴', desc: '電戰效果 ×1.6；全體隱匿 +10。', mod: { ewMult: 1.6, stealthAdd: 10 } },
+      { id: 'clear', icon: '☀', name: '晴朗無風', desc: '標準環境，無任何修正。', mod: {} }
     ];
     return eventList[hash % eventList.length];
   }

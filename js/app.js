@@ -6743,7 +6743,7 @@ async function joinTargetRoom() {
     if (input) input.focus();
     return;
   }
-  const cleanCode = rawCode.replace(/^TOPCLASH-BO5-/, '');
+  const cleanCode = rawCode.replace(/^(TOPWARLORDS-BO5-|TOPCLASH-BO5-)/, '');
   if (cleanCode.length < 5) {
     toast('⚠️ 房間代碼格式不符，請輸入 6 位代碼！');
     return;

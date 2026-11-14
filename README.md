@@ -84,6 +84,8 @@ TopWarlords/
 ├── assets/
 │   ├── icons/              # PWA 應用圖示
 │   └── warlords/           # 名將專屬古典水墨卡牌圖資 (*.jpg)
+├── docs/
+│   └── FIREBASE_ISOLATION_SPEC.md # 跨專案 Firebase RTDB 與同源本機儲存隔離規格
 └── test/                   # Playwright 自動化 E2E 驗證套件
 ```
 

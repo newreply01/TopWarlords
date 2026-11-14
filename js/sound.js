@@ -5,29 +5,29 @@
    支援左右陣營立體聲定位、多取樣輪替防機械感、戶外山谷空間殘響與平滑 BGM 交叉淡入淡出
    ===================================================== */
 (function () {
-  const AUDIO_VER = '7.10.9';
+  const AUDIO_VER = '7.10.10';
   const BASE_PATH = 'assets/audio/';
 
   const CLIP_MANIFEST = {
-    bgm_prep:       `${BASE_PATH}bgm_prep.mp3?v=${AUDIO_VER}`,
-    bgm_battle:     `${BASE_PATH}bgm_battle.mp3?v=${AUDIO_VER}`,
-    war_drum:       `${BASE_PATH}war_drum.mp3?v=${AUDIO_VER}`,
-    war_horn:       `${BASE_PATH}war_horn.mp3?v=${AUDIO_VER}`,
+    bgm_prep: `${BASE_PATH}bgm_prep.mp3?v=${AUDIO_VER}`,
+    bgm_battle: `${BASE_PATH}bgm_battle.mp3?v=${AUDIO_VER}`,
+    war_drum: `${BASE_PATH}war_drum.mp3?v=${AUDIO_VER}`,
+    war_horn: `${BASE_PATH}war_horn.mp3?v=${AUDIO_VER}`,
     cavalry_charge: `${BASE_PATH}cavalry_charge.mp3?v=${AUDIO_VER}`,
     cavalry_hooves: `${BASE_PATH}cavalry_hooves.mp3?v=${AUDIO_VER}`,
-    blade_clash_1:  `${BASE_PATH}blade_clash_1.mp3?v=${AUDIO_VER}`,
-    blade_clash_2:  `${BASE_PATH}blade_clash_2.mp3?v=${AUDIO_VER}`,
-    blade_clash_3:  `${BASE_PATH}blade_clash_3.mp3?v=${AUDIO_VER}`,
-    heavy_strike:   `${BASE_PATH}heavy_strike.mp3?v=${AUDIO_VER}`,
-    shield_block:   `${BASE_PATH}shield_block.mp3?v=${AUDIO_VER}`,
-    arrow_volley:   `${BASE_PATH}arrow_volley.mp3?v=${AUDIO_VER}`,
-    fire_attack:    `${BASE_PATH}fire_attack.mp3?v=${AUDIO_VER}`,
-    strategy_gong:  `${BASE_PATH}strategy_gong.mp3?v=${AUDIO_VER}`,
-    warlord_fall:   `${BASE_PATH}warlord_fall.mp3?v=${AUDIO_VER}`,
-    ui_click:       `${BASE_PATH}ui_click.mp3?v=${AUDIO_VER}`,
-    equip:          `${BASE_PATH}equip.mp3?v=${AUDIO_VER}`,
-    victory:        `${BASE_PATH}victory.mp3?v=${AUDIO_VER}`,
-    defeat:         `${BASE_PATH}defeat.mp3?v=${AUDIO_VER}`
+    blade_clash_1: `${BASE_PATH}blade_clash_1.mp3?v=${AUDIO_VER}`,
+    blade_clash_2: `${BASE_PATH}blade_clash_2.mp3?v=${AUDIO_VER}`,
+    blade_clash_3: `${BASE_PATH}blade_clash_3.mp3?v=${AUDIO_VER}`,
+    heavy_strike: `${BASE_PATH}heavy_strike.mp3?v=${AUDIO_VER}`,
+    shield_block: `${BASE_PATH}shield_block.mp3?v=${AUDIO_VER}`,
+    arrow_volley: `${BASE_PATH}arrow_volley.mp3?v=${AUDIO_VER}`,
+    fire_attack: `${BASE_PATH}fire_attack.mp3?v=${AUDIO_VER}`,
+    strategy_gong: `${BASE_PATH}strategy_gong.mp3?v=${AUDIO_VER}`,
+    warlord_fall: `${BASE_PATH}warlord_fall.mp3?v=${AUDIO_VER}`,
+    ui_click: `${BASE_PATH}ui_click.mp3?v=${AUDIO_VER}`,
+    equip: `${BASE_PATH}equip.mp3?v=${AUDIO_VER}`,
+    victory: `${BASE_PATH}victory.mp3?v=${AUDIO_VER}`,
+    defeat: `${BASE_PATH}defeat.mp3?v=${AUDIO_VER}`
   };
 
   // 先載入戰場核心音效，再載入長篇 BGM，確保首戰零延遲
@@ -43,13 +43,10 @@
     try {
       if (window.LS && typeof window.LS.get === 'function') {
         const wl = window.LS.get('wl15_sound', null);
-        if (wl !== null && wl !== undefined) return Boolean(wl);
-        return Boolean(window.LS.get('db15_sound', true));
+        return wl !== null && wl !== undefined ? Boolean(wl) : true;
       }
       const rawWl = localStorage.getItem('wl15_sound');
-      if (rawWl !== null) return Boolean(JSON.parse(rawWl));
-      const rawDb = localStorage.getItem('db15_sound');
-      return rawDb !== null ? Boolean(JSON.parse(rawDb)) : true;
+      return rawWl !== null ? Boolean(JSON.parse(rawWl)) : true;
     } catch (e) {
       return true;
     }
@@ -59,12 +56,10 @@
     try {
       if (window.LS && typeof window.LS.set === 'function') {
         window.LS.set('wl15_sound', val);
-        window.LS.set('db15_sound', val);
       } else {
         localStorage.setItem('wl15_sound', JSON.stringify(val));
-        localStorage.setItem('db15_sound', JSON.stringify(val));
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   const SoundEngine = {
@@ -195,7 +190,7 @@
           if (this.enabled && this.currentBgmMode && !this.currentBgmNode) {
             this._startBgmSource(this.currentBgmMode);
           }
-        }).catch(() => {});
+        }).catch(() => { });
       } else if (this.ctx && this.ctx.state === 'running') {
         this.unlocked = true;
       }
@@ -264,7 +259,7 @@
           oldGain.gain.setValueAtTime(Math.max(0.0001, oldGain.gain.value), now);
           oldGain.gain.linearRampToValueAtTime(0.0001, now + fadeSec);
           oldNode.stop(now + fadeSec + 0.05);
-        } catch (e) {}
+        } catch (e) { }
       }
     },
 
@@ -287,7 +282,7 @@
           prevGain.gain.setValueAtTime(Math.max(0.0001, prevGain.gain.value), now);
           prevGain.gain.linearRampToValueAtTime(0.0001, now + 0.85);
           prevNode.stop(now + 0.9);
-        } catch (e) {}
+        } catch (e) { }
       }
 
       const src = this.ctx.createBufferSource();
@@ -305,7 +300,7 @@
         src.start(now);
         this.currentBgmNode = src;
         this.currentBgmGain = g;
-      } catch (e) {}
+      } catch (e) { }
     },
 
     _duckBgm(duckGain = 0.12, holdSec = 2.4) {
@@ -501,7 +496,7 @@
             panScale: spec.panScale
           });
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   };
 

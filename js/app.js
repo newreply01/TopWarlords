@@ -1432,6 +1432,23 @@ function getFormationSvg(id) {
   return FORMATION_SVGS[id] || FORMATION_SVGS.fishscale;
 }
 
+function getFormationBuffPills(f) {
+  const pills = [];
+  if (f.attack > 1) pills.push({ t: `攻+${Math.round((f.attack - 1) * 100)}%`, cls: 'buff' });
+  else if (f.attack < 1) pills.push({ t: `攻-${Math.round((1 - f.attack) * 100)}%`, cls: 'debuff' });
+  if (f.damageTaken < 1) pills.push({ t: `承傷-${Math.round((1 - f.damageTaken) * 100)}%`, cls: 'buff' });
+  else if (f.damageTaken > 1) pills.push({ t: `承傷+${Math.round((f.damageTaken - 1) * 100)}%`, cls: 'debuff' });
+  if (f.hit > 0) pills.push({ t: `命中+${Math.round(f.hit * 100)}%`, cls: 'buff' });
+  else if (f.hit < 0) pills.push({ t: `命中-${Math.round(-f.hit * 100)}%`, cls: 'debuff' });
+  if (f.tacticChance > 0) pills.push({ t: `戰法+${Math.round(f.tacticChance * 100)}%`, cls: 'buff' });
+  else pills.push({ t: '無戰法', cls: 'debuff' });
+  if (f.terrainMultiplier > 1) pills.push({ t: `山林+${Math.round((f.terrainMultiplier - 1) * 100)}%`, cls: 'buff' });
+  if (f.mobility > 1) pills.push({ t: `機動+${Math.round((f.mobility - 1) * 100)}%`, cls: 'buff' });
+  if (f.duelImmune) pills.push({ t: '免單挑', cls: 'buff' });
+  if (f.canCapture === false) pills.push({ t: '不俘將', cls: 'debuff' });
+  return pills.map(p => `<span class="form-pill ${p.cls}">${p.t}</span>`).join('');
+}
+
 function renderFormationEditor() {
   const menu = $('#formationDropdownMenu');
   const summary = $('#formationSummary');
@@ -1445,7 +1462,6 @@ function renderFormationEditor() {
     syncActiveDeck();
   }
   const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
-  const terrainLockedByRoom = state.isOnlinePvp && !OnlinePvPEngine.isHostUser();
   const activeId = selectedIds[0];
   const activeFormation = getBattleFormation(activeId);
   summary.textContent = activeFormation.name;
@@ -1458,7 +1474,6 @@ function renderFormationEditor() {
   const availableFormations = BATTLE_FORMATION_DEFS.filter(option =>
     !option.eligibleUnitIds || state.deck.some(unitId => option.eligibleUnitIds.includes(unitId))
   );
-  const currentTerrain = normalizeTerrain(state.terrain);
 
   menu.innerHTML = `
     <div class="formation-opt-list">
@@ -1467,20 +1482,15 @@ function renderFormationEditor() {
         return `<button type="button" class="formation-opt-item ${isActive ? 'active' : ''}" data-val="${option.id}" role="option" aria-selected="${isActive ? 'true' : 'false'}" ${formationEditingLocked ? 'disabled' : ''}>
           <span class="formation-opt-svg" aria-hidden="true">${getFormationSvg(option.id)}</span>
           <span class="formation-opt-body">
-            <span class="formation-opt-name">${esc(option.name)}</span>
+            <span class="formation-opt-head">
+              <span class="formation-opt-name">${esc(option.name)}</span>
+              <span class="formation-opt-pills">${getFormationBuffPills(option)}</span>
+            </span>
             <span class="formation-opt-desc">${esc(option.desc)}</span>
           </span>
         </button>`;
       }).join('')}
-    </div>
-    <label class="formation-terrain-row" for="formationTerrain" title="${terrainLockedByRoom ? '本局地形由房主設定並同步' : '選擇戰場地形'}">
-      <span>地形</span>
-      <select id="formationTerrain" class="select sm" ${(formationEditingLocked || terrainLockedByRoom) ? 'disabled' : ''}>
-        <option value="plain" ${currentTerrain === 'plain' ? 'selected' : ''}>平原</option>
-        <option value="mountain" ${currentTerrain === 'mountain' ? 'selected' : ''}>山岳</option>
-        <option value="forest" ${currentTerrain === 'forest' ? 'selected' : ''}>森林</option>
-      </select>
-    </label>`;
+    </div>`;
 }
 
 function renderCommandDeck() {

@@ -64,13 +64,9 @@ try:
 
         page.locator('#btnWeatherDropdown').click()
         page.locator('.weather-opt-item[data-val="clear"]').click()
-        page.evaluate("""() => {
-            document.querySelector('#btnOpenFormation').click();
-            const terrain = document.querySelector('#formationTerrain');
-            terrain.value = 'mountain';
-            terrain.dispatchEvent(new Event('change', { bubbles: true }));
-            document.querySelector('#btnOpenFormation').click();
-        }""")
+        page.locator('#btnOpenFormation').click()
+        page.locator('#formationDropdownMenu .formation-opt-item[data-val="fishscale"]').click()
+        page.evaluate("() => { if (window.__db15 && window.__db15.state) window.__db15.state.terrain = 'mountain'; }")
 
         # 隨機補滿陣容 (使用 evaluate 杜絕引導模態窗指針攔截)
         page.evaluate("() => document.querySelector('#btnRand').click()")

@@ -25587,7 +25587,7 @@ select:focus-visible,
   right: 0;
   left: auto;
   z-index: 120;
-  width: min(300px, calc(100vw - 24px));
+  width: min(350px, calc(100vw - 24px));
   background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.2);
   border-radius: 9px;
@@ -25610,7 +25610,7 @@ html:not([data-theme="light"]) .custom-formation-menu {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-height: 300px;
+  max-height: min(440px, 72vh);
   overflow-y: auto;
 }
 
@@ -25667,11 +25667,60 @@ html:not([data-theme="light"]) .custom-formation-menu {
   gap: 1px;
 }
 
+.formation-opt-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 .formation-opt-name {
   font-size: 12.5px;
   font-weight: 800;
   line-height: 1.25;
   color: var(--text);
+  margin-right: 2px;
+}
+
+.formation-opt-pills {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.form-pill {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 1px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.form-pill.buff {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.32);
+}
+
+.form-pill.debuff {
+  color: #fb7185;
+  background: rgba(244, 63, 94, 0.13);
+  border: 1px solid rgba(251, 113, 133, 0.32);
+}
+
+[data-theme="light"] .form-pill.buff {
+  color: #047857;
+  background: #d1fae5;
+  border-color: rgba(4, 120, 87, 0.3);
+}
+
+[data-theme="light"] .form-pill.debuff {
+  color: #be123c;
+  background: #ffe4e6;
+  border-color: rgba(190, 18, 60, 0.3);
 }
 
 .formation-opt-desc {

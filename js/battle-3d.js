@@ -2889,7 +2889,8 @@ const Battle3DEngine = (function () {
     const anchor = targetToken.mesh.position.clone();
     const casterAnchor = aToken ? aToken.mesh.position.clone() : anchor.clone();
     const groundY = getBattleTerrainHeight(anchor.x, anchor.z);
-    const mult = isUltimate ? 1.32 : 0.78;
+    const mult = isUltimate ? 1.65 : 1.05;
+    const durMult = isUltimate ? 1.45 : 1.0;
     const now = combatNow();
     skillVfxPlayed++;
 
@@ -2901,6 +2902,7 @@ const Battle3DEngine = (function () {
       }
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.copy(pos);
+      mesh.renderOrder = 24;
       if (opts.lookAt) mesh.lookAt(opts.lookAt);
       if (opts.rotateX !== undefined) mesh.rotateX(opts.rotateX);
       if (opts.rotateY !== undefined) mesh.rotateY(opts.rotateY);
@@ -2912,145 +2914,191 @@ const Battle3DEngine = (function () {
         vy: opts.vy || 0,
         vz: opts.vz || 0,
         startedAt: now,
-        duration: opts.duration || 420,
-        opacity: mat.opacity ?? 0.85,
+        duration: Math.round((opts.duration || 680) * durMult),
+        opacity: mat.opacity ?? 0.9,
         gravity: opts.gravity || 0,
         scaleGrowth: opts.scaleGrowth || 0
       });
     }
 
-    function addBaguaRing(pos, colorHex, size, duration, spin = 2.0) {
+    function addBaguaRing(pos, colorHex, size, duration, spin = 2.2) {
       if (shockwaves.length >= 24) return;
       const ringGeo = new THREE.PlaneGeometry(size, size);
       const ringMat = new THREE.MeshBasicMaterial({
         map: getBaguaTexture(colorHex),
         transparent: true,
-        opacity: isUltimate ? 0.92 : 0.65,
+        opacity: isUltimate ? 0.96 : 0.82,
         depthWrite: false,
         side: THREE.DoubleSide
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.rotation.x = -Math.PI / 2;
-      ring.position.set(pos.x, getBattleTerrainHeight(pos.x, pos.z) + 0.09, pos.z);
+      ring.position.set(pos.x, getBattleTerrainHeight(pos.x, pos.z) + 0.11, pos.z);
+      ring.renderOrder = 22;
       scene.add(ring);
       shockwaves.push({
         mesh: ring,
         startedAt: now,
-        duration,
-        startScale: 0.42,
-        endScale: 1.25 * mult,
-        opacity: isUltimate ? 0.92 : 0.65,
+        duration: Math.round(duration * durMult),
+        startScale: 0.45,
+        endScale: 1.45 * (isUltimate ? 1.25 : 1.0),
+        opacity: isUltimate ? 0.96 : 0.78,
         spinRate: spin
       });
     }
 
+    const commandCenter = new THREE.Vector3(aToken?.side === 'A' ? 2.2 : -2.2, getBattleTerrainHeight(0, 0), 0);
+
     if (key === 'fire_storm') {
+      const fxPos = !tToken ? commandCenter : anchor;
+      const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
       addVfxMesh(
-        new THREE.CylinderGeometry(0.16 * mult, 0.66 * mult, 3.4 * mult, 10, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: isUltimate ? 0.82 : 0.56, depthWrite: false, side: THREE.DoubleSide }),
-        new THREE.Vector3(anchor.x, groundY + 1.55 * mult, anchor.z),
-        { vy: 0.025, duration: isUltimate ? 480 : 300, scaleGrowth: 0.012 }
+        new THREE.CylinderGeometry(0.28 * mult, 1.05 * mult, 4.4 * mult, 12, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0xea580c, transparent: true, opacity: 0.92, depthWrite: false, side: THREE.DoubleSide }),
+        new THREE.Vector3(fxPos.x, fxY + 2.0 * mult, fxPos.z),
+        { vy: 0.032, duration: 720, scaleGrowth: 0.018 }
+      );
+      addVfxMesh(
+        new THREE.CylinderGeometry(0.65 * mult, 1.45 * mult, 3.2 * mult, 12, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0xdc2626, transparent: true, opacity: 0.68, depthWrite: false, side: THREE.DoubleSide }),
+        new THREE.Vector3(fxPos.x, fxY + 1.4 * mult, fxPos.z),
+        { vy: 0.024, duration: 800, scaleGrowth: 0.022 }
+      );
+      addVfxMesh(
+        new THREE.TorusGeometry(0.95 * mult, 0.16 * mult, 8, 22),
+        new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.9, depthWrite: false }),
+        new THREE.Vector3(fxPos.x, fxY + 0.45, fxPos.z),
+        { rotateX: Math.PI / 2, vy: 0.055, duration: 680, scaleGrowth: 0.032 }
       );
       if (isUltimate) {
-        addVfxMesh(
-          new THREE.CylinderGeometry(0.42 * mult, 0.98 * mult, 2.5 * mult, 10, 1, true),
-          new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.48, depthWrite: false, side: THREE.DoubleSide }),
-          new THREE.Vector3(anchor.x, groundY + 1.15 * mult, anchor.z),
-          { vy: 0.018, duration: 520, scaleGrowth: 0.016 }
-        );
-        spawnBattleScar(anchor, 1.38, true);
-        spawnWarSmoke(anchor, 2, 0x3b2114, 1.9 * mult, 0.42);
-        playFieldSound('fire_attack', targetToken, 0.6);
+        spawnBattleScar(fxPos, 1.75, true);
+        spawnWarSmoke(fxPos, 2, 0x3b2114, 2.2 * mult, 0.46);
+        playFieldSound('fire_attack', targetToken, 0.65);
       }
-      spawnShockwaveRing(anchor, 0xf97316, 2.5 * mult, 460);
-      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 0.9, 0)), isUltimate ? 22 : 12, 0xfb923c);
+      spawnShockwaveRing(fxPos, 0xea580c, 3.4 * mult, 740);
+      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), isUltimate ? 26 : 16, 0xf97316);
     } else if (key === 'thunder_strike') {
+      const fxPos = !tToken ? commandCenter : anchor;
+      const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
       addVfxMesh(
-        new THREE.CylinderGeometry(0.08 * mult, 0.22 * mult, 7.6, 6),
-        new THREE.MeshBasicMaterial({ color: 0xe0f2fe, transparent: true, opacity: isUltimate ? 0.95 : 0.72, depthWrite: false }),
-        new THREE.Vector3(anchor.x, groundY + 3.8, anchor.z),
-        { duration: isUltimate ? 320 : 210, scaleGrowth: 0.008 }
+        new THREE.CylinderGeometry(0.16 * mult, 0.34 * mult, 9.5, 8),
+        new THREE.MeshBasicMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.98, depthWrite: false }),
+        new THREE.Vector3(fxPos.x, fxY + 4.7, fxPos.z),
+        { duration: 520, scaleGrowth: 0.012 }
+      );
+      addVfxMesh(
+        new THREE.CylinderGeometry(0.42 * mult, 0.85 * mult, 9.2, 8),
+        new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.72, depthWrite: false }),
+        new THREE.Vector3(fxPos.x, fxY + 4.6, fxPos.z),
+        { duration: 600, scaleGrowth: 0.02 }
       );
       if (isUltimate) {
         addVfxMesh(
-          new THREE.CylinderGeometry(0.24 * mult, 0.54 * mult, 7.2, 6),
-          new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.5, depthWrite: false }),
-          new THREE.Vector3(anchor.x, groundY + 3.6, anchor.z),
-          { duration: 360, scaleGrowth: 0.014 }
+          new THREE.CylinderGeometry(0.12 * mult, 0.24 * mult, 8.2, 6),
+          new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9, depthWrite: false }),
+          new THREE.Vector3(fxPos.x + 0.6, fxY + 4.0, fxPos.z - 0.5),
+          { rotateZ: 0.24, duration: 540 }
         );
-        triggerCameraShake(0.24);
+        triggerCameraShake(0.28);
         triggerHitStop(50);
       }
-      spawnShockwaveRing(anchor, 0x38bdf8, 2.5 * mult, 380);
-      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 0.95, 0)), isUltimate ? 22 : 12, 0x7dd3fc);
+      spawnShockwaveRing(fxPos, 0x0284c7, 3.3 * mult, 700);
+      spawnShockwaveRing(fxPos, 0x38bdf8, 2.2 * mult, 520);
+      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), isUltimate ? 26 : 16, 0x38bdf8);
     } else if (key === 'bagua_array') {
-      addBaguaRing(anchor, '#fbbf24', 2.7 * mult, isUltimate ? 820 : 540, 2.0);
-      if (isUltimate && aToken && aToken !== targetToken) {
-        addBaguaRing(casterAnchor, '#38bdf8', 2.4, 720, -1.8);
+      const fxPos = !tToken ? new THREE.Vector3(aToken?.side === 'A' ? -1.4 : 1.4, getBattleTerrainHeight(0, 0), 0) : anchor;
+      const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
+      addBaguaRing(fxPos, '#d97706', 3.4 * mult, 860, 2.2);
+      if (aToken && (!tToken || aToken !== targetToken)) {
+        addBaguaRing(casterAnchor, '#0284c7', 3.2, 780, -2.0);
       }
-      if (isUltimate) {
-        addVfxMesh(
-          new THREE.CylinderGeometry(0.76 * mult, 0.95 * mult, 3.4 * mult, 14, 1, true),
-          new THREE.MeshBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0.34, depthWrite: false, side: THREE.DoubleSide }),
-          new THREE.Vector3(anchor.x, groundY + 1.7 * mult, anchor.z),
-          { vy: 0.012, duration: 540 }
-        );
-      }
-      spawnShockwaveRing(anchor, 0xfbbf24, 2.3 * mult, 440);
-      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 1.0, 0)), isUltimate ? 18 : 10, 0xfde047);
+      addVfxMesh(
+        new THREE.CylinderGeometry(0.95 * mult, 1.25 * mult, 4.2 * mult, 16, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide }),
+        new THREE.Vector3(fxPos.x, fxY + 2.0 * mult, fxPos.z),
+        { vy: 0.015, duration: 720 }
+      );
+      spawnShockwaveRing(fxPos, 0xd97706, 3.2 * mult, 700);
+      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), isUltimate ? 22 : 14, 0xfbbf24);
     } else if (key === 'piercing_volley') {
-      const start = casterAnchor.clone().add(new THREE.Vector3(0, 1.05, 0));
-      const end = anchor.clone().add(new THREE.Vector3(0, 0.95, 0));
-      const dist = Math.max(1.8, start.distanceTo(end));
+      const start = casterAnchor.clone().add(new THREE.Vector3(0, 1.1, 0));
+      const end = anchor.clone().add(new THREE.Vector3(0, 1.0, 0));
+      const dist = Math.max(2.4, start.distanceTo(end));
       const mid = start.clone().lerp(end, 0.5);
       addVfxMesh(
-        new THREE.CylinderGeometry(0.05 * mult, 0.11 * mult, dist, 6),
-        new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: isUltimate ? 0.92 : 0.68, depthWrite: false }),
+        new THREE.CylinderGeometry(0.11 * mult, 0.22 * mult, dist, 8),
+        new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.94, depthWrite: false }),
         mid,
-        { lookAt: end, rotateX: Math.PI / 2, duration: isUltimate ? 320 : 220 }
+        { lookAt: end, rotateX: Math.PI / 2, duration: 540 }
       );
-      spawnShockwaveRing(anchor, 0xfacc15, 2.0 * mult, 320);
-      spawnSparkBurst(end, isUltimate ? 20 : 10, 0xfef08a);
-    } else if (key === 'tidal_surge') {
-      addBaguaRing(anchor, '#06b6d4', 2.5 * mult, isUltimate ? 680 : 450, 2.6);
       addVfxMesh(
-        new THREE.TorusGeometry(0.68 * mult, 0.13 * mult, 8, 20),
-        new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: isUltimate ? 0.85 : 0.62, depthWrite: false }),
-        new THREE.Vector3(anchor.x, groundY + 0.35, anchor.z),
-        { rotateX: Math.PI / 2, vy: 0.042, duration: isUltimate ? 440 : 300, scaleGrowth: 0.025 }
+        new THREE.TorusGeometry(0.65 * mult, 0.1 * mult, 8, 20),
+        new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.9, depthWrite: false }),
+        end,
+        { lookAt: start, duration: 560, scaleGrowth: 0.036 }
       );
-      spawnShockwaveRing(anchor, 0x22d3ee, 2.6 * mult, 420);
-      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 0.85, 0)), isUltimate ? 18 : 10, 0x67e8f9);
+      spawnShockwaveRing(anchor, 0xf59e0b, 2.8 * mult, 600);
+      spawnSparkBurst(end, isUltimate ? 24 : 14, 0xfbbf24);
+    } else if (key === 'tidal_surge') {
+      const fxPos = !tToken ? commandCenter : anchor;
+      const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
+      addBaguaRing(fxPos, '#0891b2', 3.2 * mult, 780, 2.8);
+      addVfxMesh(
+        new THREE.TorusGeometry(0.95 * mult, 0.22 * mult, 10, 24),
+        new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.9, depthWrite: false }),
+        new THREE.Vector3(fxPos.x, fxY + 0.45, fxPos.z),
+        { rotateX: Math.PI / 2, vy: 0.05, duration: 660, scaleGrowth: 0.032 }
+      );
+      addVfxMesh(
+        new THREE.CylinderGeometry(1.1 * mult, 0.55 * mult, 2.8 * mult, 14, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.54, depthWrite: false, side: THREE.DoubleSide }),
+        new THREE.Vector3(fxPos.x, fxY + 1.3 * mult, fxPos.z),
+        { vy: 0.028, duration: 640, scaleGrowth: 0.02 }
+      );
+      spawnShockwaveRing(fxPos, 0x0891b2, 3.4 * mult, 700);
+      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.0, 0)), isUltimate ? 24 : 14, 0x22d3ee);
     } else if (key === 'aegis_command') {
       const shieldTarget = (isUltimate && aToken) ? aToken : targetToken;
       const shPos = shieldTarget.mesh.position.clone();
       const shGround = getBattleTerrainHeight(shPos.x, shPos.z);
       addVfxMesh(
-        new THREE.SphereGeometry(1.05 * mult, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.56),
-        new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: isUltimate ? 0.55 : 0.38, wireframe: true, depthWrite: false }),
-        new THREE.Vector3(shPos.x, shGround + 0.06, shPos.z),
-        { duration: isUltimate ? 540 : 340, scaleGrowth: 0.015 }
+        new THREE.SphereGeometry(1.45 * mult, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.58),
+        new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.78, wireframe: true, depthWrite: false }),
+        new THREE.Vector3(shPos.x, shGround + 0.08, shPos.z),
+        { duration: 780, scaleGrowth: 0.02 }
       );
-      spawnShockwaveRing(shPos, 0x34d399, 2.2 * mult, 420);
-      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 0.9, 0)), isUltimate ? 18 : 10, 0x34d399);
-    } else if (key === 'shadow_ambush') {
-      const hitPos = anchor.clone().add(new THREE.Vector3(0, 0.95, 0));
-      spawnSlashArc(hitPos, aToken?.side || 'A', 0xa855f7, 1.32 * mult, isUltimate);
       addVfxMesh(
-        new THREE.ConeGeometry(0.42 * mult, 2.1 * mult, 6),
-        new THREE.MeshBasicMaterial({ color: 0xc084fc, transparent: true, opacity: isUltimate ? 0.65 : 0.45, wireframe: true, depthWrite: false }),
-        new THREE.Vector3(anchor.x, groundY + 1.05 * mult, anchor.z),
-        { vy: 0.022, duration: isUltimate ? 420 : 280, scaleGrowth: 0.012 }
+        new THREE.CylinderGeometry(1.05 * mult, 1.15 * mult, 2.8 * mult, 14, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0x059669, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide }),
+        new THREE.Vector3(shPos.x, shGround + 1.4 * mult, shPos.z),
+        { vy: 0.018, duration: 720 }
       );
-      spawnShockwaveRing(anchor, 0x9333ea, 2.2 * mult, 360);
-      spawnSparkBurst(hitPos, isUltimate ? 18 : 10, 0xc084fc);
+      spawnShockwaveRing(shPos, 0x059669, 3.0 * mult, 700);
+      spawnSparkBurst(shPos.clone().add(new THREE.Vector3(0, 1.0, 0)), isUltimate ? 22 : 14, 0x10b981);
+    } else if (key === 'shadow_ambush') {
+      const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.05, 0));
+      spawnSlashArc(hitPos, aToken?.side || 'A', 0x9333ea, 1.75 * mult, true);
+      addVfxMesh(
+        new THREE.ConeGeometry(0.68 * mult, 3.0 * mult, 6),
+        new THREE.MeshBasicMaterial({ color: 0x7e22ce, transparent: true, opacity: 0.82, wireframe: true, depthWrite: false }),
+        new THREE.Vector3(anchor.x, groundY + 1.45 * mult, anchor.z),
+        { vy: 0.028, duration: 640, scaleGrowth: 0.018 }
+      );
+      spawnShockwaveRing(anchor, 0x7e22ce, 3.1 * mult, 640);
+      spawnSparkBurst(hitPos, isUltimate ? 24 : 14, 0xa855f7);
     } else {
       // overlord_cleave（💥 霸王破甲）
-      const hitPos = anchor.clone().add(new THREE.Vector3(0, 0.95, 0));
-      spawnSlashArc(hitPos, aToken?.side || 'A', isUltimate ? 0xf43f5e : 0xfbbf24, 1.38 * mult, isUltimate);
-      spawnShockwaveRing(anchor, isUltimate ? 0xef4444 : 0xf59e0b, 2.4 * mult, 380);
-      spawnSparkBurst(hitPos, isUltimate ? 20 : 12, isUltimate ? 0xfb7185 : 0xfbbf24);
-      if (isUltimate) triggerCameraShake(0.24);
+      const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.05, 0));
+      spawnSlashArc(hitPos, aToken?.side || 'A', isUltimate ? 0xe11d48 : 0xd97706, 1.85 * mult, true);
+      addVfxMesh(
+        new THREE.TorusGeometry(0.88 * mult, 0.16 * mult, 8, 20),
+        new THREE.MeshBasicMaterial({ color: isUltimate ? 0xe11d48 : 0xd97706, transparent: true, opacity: 0.9, depthWrite: false }),
+        new THREE.Vector3(anchor.x, groundY + 0.55, anchor.z),
+        { rotateX: Math.PI / 2, vy: 0.032, duration: 600, scaleGrowth: 0.03 }
+      );
+      spawnShockwaveRing(anchor, isUltimate ? 0xe11d48 : 0xd97706, 3.2 * mult, 660);
+      spawnSparkBurst(hitPos, isUltimate ? 24 : 16, isUltimate ? 0xf43f5e : 0xf59e0b);
+      if (isUltimate) triggerCameraShake(0.28);
     }
   }
 

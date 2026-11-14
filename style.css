@@ -27694,11 +27694,23 @@ html:not([data-theme="light"]) .custom-formation-menu {
   font-size: 12px;
 }
 
+.battle-skill-ticker-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.battle-skill-ticker-row[hidden] {
+  display: none !important;
+}
+
 .battle-skill-ticker {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+  min-width: 0;
+  margin-bottom: 0;
   padding: 5px 10px;
   border-radius: 3px;
   border: 1px solid var(--skill-edge);
@@ -27910,11 +27922,23 @@ html:not([data-theme="light"]) .custom-formation-menu {
     font-size: 10px;
   }
 
+  .battle-skill-ticker-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .battle-skill-ticker-row[hidden] {
+    display: none !important;
+  }
+
   .battle-skill-ticker {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 4px;
+    min-width: 0;
+    margin-bottom: 0;
     padding: 5px 10px;
     border-radius: 3px;
     border: 1px solid var(--skill-edge);

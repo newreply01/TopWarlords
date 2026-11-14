@@ -4599,8 +4599,12 @@ async function showBattle(res, opts = {}) {
   updateFieldStrength();
   $('#fieldPhase').textContent = '兩軍列陣';
   $('#battleRecentEvents').replaceChildren();
-  const skillTickerInit = $('#battleSkillTicker');
-  if (skillTickerInit) { skillTickerInit.hidden = true; skillTickerInit.replaceChildren(); }
+  const skillTickerRowInit = $('#battleSkillTickerRow');
+  if (skillTickerRowInit) skillTickerRowInit.hidden = true;
+  for (const sid of ['#battleSkillTickerA', '#battleSkillTickerB']) {
+    const el = $(sid);
+    if (el) { clearTimeout(el._hideTimer); el.hidden = true; el.replaceChildren(); }
+  }
   $('#battleLog').innerHTML = '';
   $('#phaseTitle').textContent = '戰 場 就 緒';
   const initTimer = $('#camTimer');
@@ -4730,18 +4734,25 @@ async function showBattle(res, opts = {}) {
         const attacker = UNIT_MAP[ln.auid?.split('-')[0]];
         const target = UNIT_MAP[ln.tuid?.split('-')[0]];
         if (ln.skillActivation || ln.ambushActivation) {
-          const ticker = $('#battleSkillTicker');
+          const isSideA = ln.side === 'A';
+          const tickerRow = $('#battleSkillTickerRow');
+          const ticker = $(isSideA ? '#battleSkillTickerA' : '#battleSkillTickerB');
           if (ticker) {
             const rawTxt = String(ln.text || '');
             const colonIdx = rawTxt.indexOf('：');
             const descTxt = colonIdx >= 0 ? rawTxt.slice(colonIdx + 1).trim() : rawTxt;
-            ticker.className = `battle-skill-ticker side-${ln.side === 'A' ? 'a' : 'b'}`;
-            ticker.innerHTML = `<span class="skill-tag">${ln.side === 'A' ? '我軍' : '敵軍'} · ${esc(attacker?.name || '')} ⚡ ${esc(ln.brevity || '')}</span><span class="skill-desc">${esc(descTxt)}</span>`;
+            ticker.className = `battle-skill-ticker side-${isSideA ? 'a' : 'b'}`;
+            ticker.innerHTML = `<span class="skill-tag">${isSideA ? '我軍' : '敵軍'} · ${esc(attacker?.name || '')} ⚡ ${esc(ln.brevity || '')}</span><span class="skill-desc">${esc(descTxt)}</span>`;
             ticker.hidden = false;
+            if (tickerRow) tickerRow.hidden = false;
             clearTimeout(ticker._hideTimer);
             ticker._hideTimer = setTimeout(() => {
-              if (token === playToken) ticker.hidden = true;
-            }, 3500);
+              if (token === playToken) {
+                ticker.hidden = true;
+                const aEl = $('#battleSkillTickerA'), bEl = $('#battleSkillTickerB');
+                if (tickerRow && (!aEl || aEl.hidden) && (!bEl || bEl.hidden)) tickerRow.hidden = true;
+              }
+            }, 3800);
           }
         }
         if (ln.kind === 'info' && !ln.skillActivation) return;

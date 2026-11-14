@@ -13938,8 +13938,8 @@ html:not([data-theme="light"]) .mode-btn:not(.active) .mode-sub { color: #a8a29e
 
   /* Command Deck & Controls */
   .command-deck:not([hidden]) {
-    padding: 0 10px !important;
-    gap: 6px !important;
+    padding: 0 16px !important;
+    gap: 4px !important;
   }
   .indicators-dock-wrap {
     padding: 1px 2px !important;
@@ -19193,7 +19193,8 @@ button, a, select, input, .unit-card, .btn-action {
     flex-shrink: 0 !important;
   }
 
-  .command-deck {
+  .command-deck,
+  .command-deck:not([hidden]) {
     padding-right: 16px !important;
     box-sizing: border-box !important;
   }
@@ -19227,6 +19228,28 @@ button, a, select, input, .unit-card, .btn-action {
     min-width: 255px !important;
     max-width: 255px !important;
     height: 44px !important;
+  }
+}
+
+@media (min-width: 1250px) and (max-width: 1360px) {
+  .command-deck:not([hidden]) {
+    gap: 4px !important;
+  }
+  .command-deck .deck-right {
+    gap: 5px !important;
+  }
+  .command-deck .syn-indicator {
+    padding: 0 3px !important;
+  }
+  .command-deck .doc-btn {
+    padding: 0 6px !important;
+  }
+  .command-deck .tool-btn {
+    padding: 0 6px !important;
+  }
+  .command-deck .budget-badge {
+    min-width: 64px !important;
+    padding: 1px 4px !important;
   }
 }
 

@@ -19210,9 +19210,9 @@ button, a, select, input, .unit-card, .btn-action {
   /* 兩大按鈕寬度與水平位置嚴格相等，左緣對齊第5欄軍師卡片左緣，右緣於垂直方向完全平齊 */
   .btn-reroll-top,
   .mega-launch-btn {
-    width: max(212px, calc(20vw - 20px), calc(50vw - 504px)) !important;
-    min-width: max(212px, calc(20vw - 20px), calc(50vw - 504px)) !important;
-    max-width: max(212px, calc(20vw - 20px), calc(50vw - 504px)) !important;
+    width: max(160px, calc(20vw - 20px), calc(50vw - 504px)) !important;
+    min-width: max(160px, calc(20vw - 20px), calc(50vw - 504px)) !important;
+    max-width: max(160px, calc(20vw - 20px), calc(50vw - 504px)) !important;
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;

@@ -45,3 +45,4 @@
 
 1. 執行專案四大自動化測試套件（`test_warlords_engine.py`、`test_armory.py`、`test_full_gameplay.py`、`test_3d_battlefield.py`），確認端對端渲染、天梯載入與 3D 推演零回歸錯誤。
 2. 參考全域技能 `~/.gemini/config/skills/shared-firebase-isolation/SKILL.md` 之跨專案檢查表，確認無任何 `db15_*` / `topclash_*` 殘留、0 RP 未被預設值覆寫、且跨專案房間／幽靈／握手封包均遭主動攔截。
+

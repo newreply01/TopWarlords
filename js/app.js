@@ -142,7 +142,7 @@ function syncActiveDeck() {
    ===================================================== */
 const PvPTimerManager = (function() {
   let timerId = null;
-  let phase = null; // 'initial' (首局 60s) | 'result' (戰報 15s) | 'ban' (反制 25s) | 'refit' (次局 45s/60s)
+  let phase = null; // 'initial' (首局 60s) | 'result' (戰報 30s) | 'ban' (反制 25s) | 'refit' (次局 45s/60s)
   let deadline = 0;
   let duration = 0;
   let remaining = 0;
@@ -6360,7 +6360,7 @@ function showResult(res, bo3Custom) {
       ${(Boolean(state.isOnlinePvp || state.mode === 'tournament' || bo3Custom)) ? `
         <div class="aar-timeout-bar" id="aarTimeoutBar">
           <div class="aar-timeout-bar-head">
-            <span>⏱️ 戰報停留倒數 <b id="aarCountdownSec">15</b>s</span>
+            <span>⏱️ 戰報停留倒數 <b id="aarCountdownSec">30</b>s</span>
             <small>點擊按鈕或倒數歸零後將推進下一局</small>
           </div>
           <div class="aar-timeout-track">
@@ -6403,7 +6403,7 @@ function showResult(res, bo3Custom) {
 
     const isMultiRoundMatch = Boolean(state.isOnlinePvp || state.mode === 'tournament' || bo3Custom);
     if (isMultiRoundMatch) {
-      PvPTimerManager.start('result', 15, (rem, dur) => {
+      PvPTimerManager.start('result', 30, (rem, dur) => {
         const secEl = $('#aarCountdownSec');
         const fillEl = $('#aarTimeoutFill');
         if (secEl) secEl.textContent = rem;

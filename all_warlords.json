@@ -41,7 +41,7 @@
     "origin": "中國 · 西漢",
     "weapon": "漢軍玄甲鐵騎 + 環首刀",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HUO.jpg?v=7.10.10"
+    "img": "assets/warlords/HUO.jpg?v=7.10.11"
   },
   {
     "id": "WEI",
@@ -82,7 +82,7 @@
     "origin": "中國 · 西漢",
     "weapon": "武剛突騎大陣 + 漢劍",
     "sfx": "war_drum",
-    "img": "assets/warlords/WEI.jpg?v=7.10.10"
+    "img": "assets/warlords/WEI.jpg?v=7.10.11"
   },
   {
     "id": "LUBU",
@@ -122,7 +122,7 @@
     "origin": "中國 · 三國",
     "weapon": "方天畫戟 + 赤兔馬",
     "sfx": "blade_clash",
-    "img": "assets/warlords/LUBU.jpg?v=7.10.10"
+    "img": "assets/warlords/LUBU.jpg?v=7.10.11"
   },
   {
     "id": "YOSHITSUNE",
@@ -164,7 +164,7 @@
     "origin": "日本 · 源平",
     "weapon": "薄綠太刀 + 黑葦威鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YOSHITSUNE.jpg?v=7.10.10"
+    "img": "assets/warlords/YOSHITSUNE.jpg?v=7.10.11"
   },
   {
     "id": "SHINGEN",
@@ -205,7 +205,7 @@
     "origin": "日本 · 戰國",
     "weapon": "軍配團扇 + 諏訪法性兜",
     "sfx": "war_drum",
-    "img": "assets/warlords/SHINGEN.jpg?v=7.10.10"
+    "img": "assets/warlords/SHINGEN.jpg?v=7.10.11"
   },
   {
     "id": "GAISUWEN",
@@ -246,7 +246,7 @@
     "origin": "韓國 · 高句麗",
     "weapon": "五口寶刀 + 鐵騎長矛",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GAISUWEN.jpg?v=7.10.10"
+    "img": "assets/warlords/GAISUWEN.jpg?v=7.10.11"
   },
   {
     "id": "ZHAOYUN",
@@ -287,7 +287,7 @@
     "origin": "中國 · 三國",
     "weapon": "青釭劍 + 亮銀龍膽槍",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHAOYUN.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHAOYUN.jpg?v=7.10.11"
   },
   {
     "id": "MACHO",
@@ -330,7 +330,7 @@
     "origin": "中國 · 三國",
     "weapon": "虎頭湛金槍 + 白袍銀鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/MACHO.jpg?v=7.10.10"
+    "img": "assets/warlords/MACHO.jpg?v=7.10.11"
   },
   {
     "id": "ZHANGLIAO",
@@ -373,7 +373,7 @@
     "origin": "中國 · 三國",
     "weapon": "問天青龍雙戟 + 塞外駿馬",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHANGLIAO.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHANGLIAO.jpg?v=7.10.11"
   },
   {
     "id": "CHENQINGZHI",
@@ -414,7 +414,7 @@
     "origin": "中國 · 南北朝",
     "weapon": "白袍麾旗 + 輕騎快槍",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/CHENQINGZHI.jpg?v=7.10.10"
+    "img": "assets/warlords/CHENQINGZHI.jpg?v=7.10.11"
   },
   {
     "id": "KENSHIN",
@@ -456,7 +456,7 @@
     "origin": "日本 · 戰國",
     "weapon": "順慶手太刀 + 毘字旗",
     "sfx": "war_drum",
-    "img": "assets/warlords/KENSHIN.jpg?v=7.10.10"
+    "img": "assets/warlords/KENSHIN.jpg?v=7.10.11"
   },
   {
     "id": "YUKIMURA",
@@ -498,7 +498,7 @@
     "origin": "日本 · 戰國",
     "weapon": "十文字槍 + 六文錢赤備",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YUKIMURA.jpg?v=7.10.10"
+    "img": "assets/warlords/YUKIMURA.jpg?v=7.10.11"
   },
   {
     "id": "KIMYUSHIN",
@@ -539,7 +539,7 @@
     "origin": "韓國 · 新羅",
     "weapon": "龍鳳環首刀 + 金花官服戰鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/KIMYUSHIN.jpg?v=7.10.10"
+    "img": "assets/warlords/KIMYUSHIN.jpg?v=7.10.11"
   },
   {
     "id": "SUNCE",
@@ -579,7 +579,7 @@
     "origin": "中國 · 東漢末",
     "weapon": "霸王槍 + 江東戰旗",
     "sfx": "cavalry_charge",
-    "img": "assets/warlords/SUNCE.jpg?v=7.10.10"
+    "img": "assets/warlords/SUNCE.jpg?v=7.10.11"
   },
   {
     "id": "DENGAI",
@@ -620,7 +620,7 @@
     "origin": "中國 · 三國",
     "weapon": "登山步稍 + 奇襲輕甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/DENGAI.jpg?v=7.10.10"
+    "img": "assets/warlords/DENGAI.jpg?v=7.10.11"
   },
   {
     "id": "XIAHOUYUAN",
@@ -658,7 +658,7 @@
     "origin": "中國 · 三國",
     "weapon": "精鋼長矛 + 快馬大黃弓",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/XIAHOUYUAN.jpg?v=7.10.10"
+    "img": "assets/warlords/XIAHOUYUAN.jpg?v=7.10.11"
   },
   {
     "id": "GONGSUNDU",
@@ -700,7 +700,7 @@
     "origin": "中國 · 三國",
     "weapon": "白馬長槊 + 雕花角弓",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/GONGSUNDU.jpg?v=7.10.10"
+    "img": "assets/warlords/GONGSUNDU.jpg?v=7.10.11"
   },
   {
     "id": "DATE",
@@ -741,7 +741,7 @@
     "origin": "日本 · 戰國",
     "weapon": "黑漆弦月盔 + 騎鐵火繩槍",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/DATE.jpg?v=7.10.10"
+    "img": "assets/warlords/DATE.jpg?v=7.10.11"
   },
   {
     "id": "EULJI",
@@ -783,7 +783,7 @@
     "origin": "韓國 · 高句麗",
     "weapon": "高句麗環刀 + 輕步快騎",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/EULJI.jpg?v=7.10.10"
+    "img": "assets/warlords/EULJI.jpg?v=7.10.11"
   },
   {
     "id": "LINGTONG",
@@ -822,7 +822,7 @@
     "origin": "中國 · 三國",
     "weapon": "烈火大刀 + 隨身精短劍",
     "sfx": "blade_clash",
-    "img": "assets/warlords/LINGTONG.jpg?v=7.10.10"
+    "img": "assets/warlords/LINGTONG.jpg?v=7.10.11"
   },
   {
     "id": "YAMAGATA",
@@ -860,7 +860,7 @@
     "origin": "日本 · 戰國",
     "weapon": "長柄槍 + 赤漆塗胴具足",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YAMAGATA.jpg?v=7.10.10"
+    "img": "assets/warlords/YAMAGATA.jpg?v=7.10.11"
   },
   {
     "id": "TACHIBANA",
@@ -902,7 +902,7 @@
     "origin": "日本 · 戰國",
     "weapon": "雷切脇差 + 栗色鎧甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/TACHIBANA.jpg?v=7.10.10"
+    "img": "assets/warlords/TACHIBANA.jpg?v=7.10.11"
   },
   {
     "id": "ZHAOSHE",
@@ -941,7 +941,7 @@
     "origin": "中國 · 戰國",
     "weapon": "趙國鐵騎長矛 + 馬服良駒",
     "sfx": "cavalry_charge",
-    "img": "assets/warlords/ZHAOSHE.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHAOSHE.jpg?v=7.10.11"
   },
   {
     "id": "PANGDE",
@@ -979,7 +979,7 @@
     "origin": "中國 · 三國",
     "weapon": "截頭大刀 + 白馬重鐵鞍",
     "sfx": "blade_clash",
-    "img": "assets/warlords/PANGDE.jpg?v=7.10.10"
+    "img": "assets/warlords/PANGDE.jpg?v=7.10.11"
   },
   {
     "id": "MAEDATOSHI",
@@ -1017,7 +1017,7 @@
     "origin": "日本 · 戰國",
     "weapon": "朱柄長槍 + 赤母衣良駒",
     "sfx": "blade_clash",
-    "img": "assets/warlords/MAEDATOSHI.jpg?v=7.10.10"
+    "img": "assets/warlords/MAEDATOSHI.jpg?v=7.10.11"
   },
   {
     "id": "BAIQI",
@@ -1057,7 +1057,7 @@
     "origin": "中國 · 戰國",
     "weapon": "武安君銅劍 + 戰國玄甲",
     "sfx": "war_drum",
-    "img": "assets/warlords/BAIQI.jpg?v=7.10.10"
+    "img": "assets/warlords/BAIQI.jpg?v=7.10.11"
   },
   {
     "id": "XIANGYU",
@@ -1097,7 +1097,7 @@
     "origin": "中國 · 楚漢",
     "weapon": "霸王楚戟 + 烏騅馬鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/XIANGYU.jpg?v=7.10.10"
+    "img": "assets/warlords/XIANGYU.jpg?v=7.10.11"
   },
   {
     "id": "YUEFEI",
@@ -1141,7 +1141,7 @@
     "origin": "中國 · 南宋",
     "weapon": "瀝泉神槍 + 岳字白旄大旗",
     "sfx": "war_drum",
-    "img": "assets/warlords/YUEFEI.jpg?v=7.10.10"
+    "img": "assets/warlords/YUEFEI.jpg?v=7.10.11"
   },
   {
     "id": "WANGJIAN",
@@ -1181,7 +1181,7 @@
     "origin": "中國 · 秦朝",
     "weapon": "大秦青銅長戈 + 重甲鐵盾",
     "sfx": "war_drum",
-    "img": "assets/warlords/WANGJIAN.jpg?v=7.10.10"
+    "img": "assets/warlords/WANGJIAN.jpg?v=7.10.11"
   },
   {
     "id": "HONDA",
@@ -1224,7 +1224,7 @@
     "origin": "日本 · 戰國",
     "weapon": "蜻蛉切神槍 + 鹿角脇立兜",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HONDA.jpg?v=7.10.10"
+    "img": "assets/warlords/HONDA.jpg?v=7.10.11"
   },
   {
     "id": "SHIBATA",
@@ -1265,7 +1265,7 @@
     "origin": "日本 · 戰國",
     "weapon": "瓶割刀 + 漆黑重甲具足",
     "sfx": "blade_clash",
-    "img": "assets/warlords/SHIBATA.jpg?v=7.10.10"
+    "img": "assets/warlords/SHIBATA.jpg?v=7.10.11"
   },
   {
     "id": "LIANPO",
@@ -1305,7 +1305,7 @@
     "origin": "中國 · 戰國",
     "weapon": "青銅重戟 + 戰國大盾",
     "sfx": "war_drum",
-    "img": "assets/warlords/LIANPO.jpg?v=7.10.10"
+    "img": "assets/warlords/LIANPO.jpg?v=7.10.11"
   },
   {
     "id": "MENGTIAN",
@@ -1345,7 +1345,7 @@
     "origin": "中國 · 秦朝",
     "weapon": "秦軍重弩 + 狼毫筆",
     "sfx": "war_drum",
-    "img": "assets/warlords/MENGTIAN.jpg?v=7.10.10"
+    "img": "assets/warlords/MENGTIAN.jpg?v=7.10.11"
   },
   {
     "id": "GUANYU",
@@ -1386,7 +1386,7 @@
     "origin": "中國 · 三國",
     "weapon": "青龍偃月刀 + 美髯綠袍鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GUANYU.jpg?v=7.10.10"
+    "img": "assets/warlords/GUANYU.jpg?v=7.10.11"
   },
   {
     "id": "ZHANGFEI",
@@ -1426,7 +1426,7 @@
     "origin": "中國 · 三國",
     "weapon": "丈八蛇矛 + 烏金鐵環甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHANGFEI.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHANGFEI.jpg?v=7.10.11"
   },
   {
     "id": "HOJO_UJIYASU",
@@ -1467,7 +1467,7 @@
     "origin": "日本 · 戰國",
     "weapon": "采配 + 太刀",
     "sfx": "war_drum",
-    "img": "assets/warlords/HOJO_UJIYASU.jpg?v=7.10.10"
+    "img": "assets/warlords/HOJO_UJIYASU.jpg?v=7.10.11"
   },
   {
     "id": "XIAHOU_DUN",
@@ -1507,7 +1507,7 @@
     "origin": "中國 · 三國",
     "weapon": "環首刀 + 曹魏軍旗",
     "sfx": "blade_clash",
-    "img": "assets/warlords/XIAHOU_DUN.jpg?v=7.10.10"
+    "img": "assets/warlords/XIAHOU_DUN.jpg?v=7.10.11"
   },
   {
     "id": "TACHIBANAD",
@@ -1547,7 +1547,7 @@
     "origin": "日本 · 戰國",
     "weapon": "名刀雷切 + 轎載鐵盾",
     "sfx": "blade_clash",
-    "img": "assets/warlords/TACHIBANAD.jpg?v=7.10.10"
+    "img": "assets/warlords/TACHIBANAD.jpg?v=7.10.11"
   },
   {
     "id": "CHOIYOUNG",
@@ -1586,7 +1586,7 @@
     "origin": "韓國 · 高麗",
     "weapon": "高麗大刀 + 頭頂鐵胄",
     "sfx": "blade_clash",
-    "img": "assets/warlords/CHOIYOUNG.jpg?v=7.10.10"
+    "img": "assets/warlords/CHOIYOUNG.jpg?v=7.10.11"
   },
   {
     "id": "DIANWEI",
@@ -1627,7 +1627,7 @@
     "origin": "中國 · 三國",
     "weapon": "雙鐵戟 + 重裝近衛鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/DIANWEI.jpg?v=7.10.10"
+    "img": "assets/warlords/DIANWEI.jpg?v=7.10.11"
   },
   {
     "id": "XUCHU",
@@ -1665,7 +1665,7 @@
     "origin": "中國 · 三國",
     "weapon": "虎頭大金刀 + 粗鐵皮甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/XUCHU.jpg?v=7.10.10"
+    "img": "assets/warlords/XUCHU.jpg?v=7.10.11"
   },
   {
     "id": "SHIMAZUY",
@@ -1706,7 +1706,7 @@
     "origin": "日本 · 戰國",
     "weapon": "野太刀 + 黑漆塗二枚胴",
     "sfx": "blade_clash",
-    "img": "assets/warlords/SHIMAZUY.jpg?v=7.10.10"
+    "img": "assets/warlords/SHIMAZUY.jpg?v=7.10.11"
   },
   {
     "id": "SUNJIAN",
@@ -1746,7 +1746,7 @@
     "origin": "中國 · 東漢末",
     "weapon": "古錠刀 + 虎頭戰盔",
     "sfx": "blade_clash",
-    "img": "assets/warlords/SUNJIAN.jpg?v=7.10.10"
+    "img": "assets/warlords/SUNJIAN.jpg?v=7.10.11"
   },
   {
     "id": "GYEBAEK",
@@ -1784,7 +1784,7 @@
     "origin": "韓國 · 百濟",
     "weapon": "百濟環首大刀 + 鐵鱗背心",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GYEBAEK.jpg?v=7.10.10"
+    "img": "assets/warlords/GYEBAEK.jpg?v=7.10.11"
   },
   {
     "id": "YANGYE",
@@ -1825,7 +1825,7 @@
     "origin": "中國 · 北宋",
     "weapon": "九環金刀 + 雁門重甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YANGYE.jpg?v=7.10.10"
+    "img": "assets/warlords/YANGYE.jpg?v=7.10.11"
   },
   {
     "id": "CAOREN",
@@ -1865,7 +1865,7 @@
     "origin": "中國 · 三國",
     "weapon": "重鋼大盾 + 短刃佩刀",
     "sfx": "war_drum",
-    "img": "assets/warlords/CAOREN.jpg?v=7.10.10"
+    "img": "assets/warlords/CAOREN.jpg?v=7.10.11"
   },
   {
     "id": "ZHOUTAI",
@@ -1904,7 +1904,7 @@
     "origin": "中國 · 三國",
     "weapon": "截頭厚刃刀 + 肉盾鐵軀",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHOUTAI.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHOUTAI.jpg?v=7.10.11"
   },
   {
     "id": "IINAOMASA",
@@ -1943,7 +1943,7 @@
     "origin": "日本 · 戰國",
     "weapon": "朱漆大槍 + 金箔天衝脇立",
     "sfx": "blade_clash",
-    "img": "assets/warlords/IINAOMASA.jpg?v=7.10.10"
+    "img": "assets/warlords/IINAOMASA.jpg?v=7.10.11"
   },
   {
     "id": "KATOKIYOMASA",
@@ -1982,7 +1982,7 @@
     "origin": "日本 · 戰國",
     "weapon": "片鎌槍 + 長烏帽子形兜",
     "sfx": "blade_clash",
-    "img": "assets/warlords/KATOKIYOMASA.jpg?v=7.10.10"
+    "img": "assets/warlords/KATOKIYOMASA.jpg?v=7.10.11"
   },
   {
     "id": "YUJIN",
@@ -2021,7 +2021,7 @@
     "origin": "中國 · 三國",
     "weapon": "鐵環長刀 + 堅木大盾",
     "sfx": "war_drum",
-    "img": "assets/warlords/YUJIN.jpg?v=7.10.10"
+    "img": "assets/warlords/YUJIN.jpg?v=7.10.11"
   },
   {
     "id": "LIGUANG",
@@ -2062,7 +2062,7 @@
     "origin": "中國 · 西漢",
     "weapon": "漢家雕弓 + 白羽穿甲箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/LIGUANG.jpg?v=7.10.10"
+    "img": "assets/warlords/LIGUANG.jpg?v=7.10.11"
   },
   {
     "id": "YANGYOUJI",
@@ -2103,7 +2103,7 @@
     "origin": "中國 · 春秋",
     "weapon": "穿楊神弓 + 七札破甲箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/YANGYOUJI.jpg?v=7.10.10"
+    "img": "assets/warlords/YANGYOUJI.jpg?v=7.10.11"
   },
   {
     "id": "NOBUNAGA",
@@ -2147,7 +2147,7 @@
     "origin": "日本 · 戰國",
     "weapon": "南蠻鐵砲火銃 + 織田木瓜旗",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/NOBUNAGA.jpg?v=7.10.10"
+    "img": "assets/warlords/NOBUNAGA.jpg?v=7.10.11"
   },
   {
     "id": "YOICHI",
@@ -2188,7 +2188,7 @@
     "origin": "日本 · 源平",
     "weapon": "滋野籐弓 + 白羽神箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/YOICHI.jpg?v=7.10.10"
+    "img": "assets/warlords/YOICHI.jpg?v=7.10.11"
   },
   {
     "id": "JUMONG",
@@ -2229,7 +2229,7 @@
     "origin": "韓國 · 高句麗",
     "weapon": "高句麗神弓 + 鹿角箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/JUMONG.jpg?v=7.10.10"
+    "img": "assets/warlords/JUMONG.jpg?v=7.10.11"
   },
   {
     "id": "HUANGZHONG",
@@ -2269,7 +2269,7 @@
     "origin": "中國 · 三國",
     "weapon": "鐵胎寶弓 + 鳳嘴刀",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/HUANGZHONG.jpg?v=7.10.10"
+    "img": "assets/warlords/HUANGZHONG.jpg?v=7.10.11"
   },
   {
     "id": "TAISHICI",
@@ -2308,7 +2308,7 @@
     "origin": "中國 · 三國",
     "weapon": "狂歌戟 + 穿甲大黃弓",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/TAISHICI.jpg?v=7.10.10"
+    "img": "assets/warlords/TAISHICI.jpg?v=7.10.11"
   },
   {
     "id": "HANSHIZHONG",
@@ -2346,7 +2346,7 @@
     "origin": "中國 · 南宋",
     "weapon": "克敵勁弩 + 倒馬長槍",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/HANSHIZHONG.jpg?v=7.10.10"
+    "img": "assets/warlords/HANSHIZHONG.jpg?v=7.10.11"
   },
   {
     "id": "LIMU",
@@ -2390,7 +2390,7 @@
     "origin": "中國 · 戰國",
     "weapon": "趙國鐵角硬弓 + 破甲箭陣",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/LIMU.jpg?v=7.10.10"
+    "img": "assets/warlords/LIMU.jpg?v=7.10.11"
   },
   {
     "id": "AKECHI",
@@ -2428,7 +2428,7 @@
     "origin": "日本 · 戰國",
     "weapon": "名銃備前鐵砲 + 桔梗紋旗",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/AKECHI.jpg?v=7.10.10"
+    "img": "assets/warlords/AKECHI.jpg?v=7.10.11"
   },
   {
     "id": "SAIKA",
@@ -2472,7 +2472,7 @@
     "origin": "日本 · 戰國",
     "weapon": "三連發火繩銃 + 八咫烏標記",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/SAIKA.jpg?v=7.10.10"
+    "img": "assets/warlords/SAIKA.jpg?v=7.10.11"
   },
   {
     "id": "YANGMANCHUN",
@@ -2510,7 +2510,7 @@
     "origin": "韓國 · 高句麗",
     "weapon": "高句麗城防硬角弓 + 火弩",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/YANGMANCHUN.jpg?v=7.10.10"
+    "img": "assets/warlords/YANGMANCHUN.jpg?v=7.10.11"
   },
   {
     "id": "HULUGUANG",
@@ -2552,7 +2552,7 @@
     "origin": "中國 · 南北朝",
     "weapon": "黑角落雕強弓 + 鐵羽鑿子箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/HULUGUANG.jpg?v=7.10.10"
+    "img": "assets/warlords/HULUGUANG.jpg?v=7.10.11"
   },
   {
     "id": "ZHANGHE",
@@ -2596,7 +2596,7 @@
     "origin": "中國 · 三國",
     "weapon": "巧變長弓 + 綠沉槍",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/ZHANGHE.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHANGHE.jpg?v=7.10.11"
   },
   {
     "id": "ZHOUYAFU",
@@ -2638,7 +2638,7 @@
     "origin": "中國 · 西漢",
     "weapon": "漢軍武剛弩 + 精鋼大箭",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/ZHOUYAFU.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHOUYAFU.jpg?v=7.10.11"
   },
   {
     "id": "ZONGZE",
@@ -2679,7 +2679,7 @@
     "origin": "中國 · 南宋",
     "weapon": "連弩機樓 + 宣慰刀",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/ZONGZE.jpg?v=7.10.10"
+    "img": "assets/warlords/ZONGZE.jpg?v=7.10.11"
   },
   {
     "id": "TORII",
@@ -2718,7 +2718,7 @@
     "origin": "日本 · 戰國",
     "weapon": "三河火繩槍 + 伏見箭矢",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/TORII.jpg?v=7.10.10"
+    "img": "assets/warlords/TORII.jpg?v=7.10.11"
   },
   {
     "id": "CHOIMUSEON",
@@ -2757,7 +2757,7 @@
     "origin": "韓國 · 高麗",
     "weapon": "走火火箭 + 鎮浦銅砲",
     "sfx": "fire_attack",
-    "img": "assets/warlords/CHOIMUSEON.jpg?v=7.10.10"
+    "img": "assets/warlords/CHOIMUSEON.jpg?v=7.10.11"
   },
   {
     "id": "GENGYAN",
@@ -2796,7 +2796,7 @@
     "origin": "中國 · 東漢",
     "weapon": "雲台強弩 + 破甲箭匣",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/GENGYAN.jpg?v=7.10.10"
+    "img": "assets/warlords/GENGYAN.jpg?v=7.10.11"
   },
   {
     "id": "YAMAMOTO",
@@ -2836,7 +2836,7 @@
     "origin": "日本 · 戰國",
     "weapon": "軍配團扇 + 築城陣圖",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/YAMAMOTO.jpg?v=7.10.10"
+    "img": "assets/warlords/YAMAMOTO.jpg?v=7.10.11"
   },
   {
     "id": "FENGYI",
@@ -2877,7 +2877,7 @@
     "origin": "中國 · 東漢",
     "weapon": "大樹長弓 + 伏射箭列",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/FENGYI.jpg?v=7.10.10"
+    "img": "assets/warlords/FENGYI.jpg?v=7.10.11"
   },
   {
     "id": "ASAKURA_SOT",
@@ -2916,7 +2916,7 @@
     "origin": "日本 · 戰國",
     "weapon": "越前早期火繩銃",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/ASAKURA_SOT.jpg?v=7.10.10"
+    "img": "assets/warlords/ASAKURA_SOT.jpg?v=7.10.11"
   },
   {
     "id": "MATSUNAGA",
@@ -2954,7 +2954,7 @@
     "origin": "日本 · 戰國",
     "weapon": "南蠻炸藥引線 + 短鐵砲",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/MATSUNAGA.jpg?v=7.10.10"
+    "img": "assets/warlords/MATSUNAGA.jpg?v=7.10.11"
   },
   {
     "id": "TANDAOJI",
@@ -2994,7 +2994,7 @@
     "origin": "中國 · 南北朝",
     "weapon": "宋軍神臂大弓 + 鐵羽矢",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/TANDAOJI.jpg?v=7.10.10"
+    "img": "assets/warlords/TANDAOJI.jpg?v=7.10.11"
   },
   {
     "id": "KUANGZHANG",
@@ -3033,7 +3033,7 @@
     "origin": "中國 · 戰國",
     "weapon": "齊國臨淄強弩 + 箭陣纛旗",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/KUANGZHANG.jpg?v=7.10.10"
+    "img": "assets/warlords/KUANGZHANG.jpg?v=7.10.11"
   },
   {
     "id": "HONDA_TADATSUGU",
@@ -3074,7 +3074,7 @@
     "origin": "日本 · 戰國",
     "weapon": "三河軍制鐵砲 + 火藥袋",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/HONDA_TADATSUGU.jpg?v=7.10.10"
+    "img": "assets/warlords/HONDA_TADATSUGU.jpg?v=7.10.11"
   },
   {
     "id": "ZHOUYU",
@@ -3116,7 +3116,7 @@
     "origin": "中國 · 三國",
     "weapon": "赤壁督軍劍 + 樓船令旗",
     "sfx": "fire_attack",
-    "img": "assets/warlords/ZHOUYU.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHOUYU.jpg?v=7.10.11"
   },
   {
     "id": "YISUNSIN",
@@ -3162,7 +3162,7 @@
     "origin": "韓國 · 朝鮮",
     "weapon": "忠武公三尺寶劍 + 龜甲船",
     "sfx": "fire_attack",
-    "img": "assets/warlords/YISUNSIN.jpg?v=7.10.10"
+    "img": "assets/warlords/YISUNSIN.jpg?v=7.10.11"
   },
   {
     "id": "KUKI",
@@ -3204,7 +3204,7 @@
     "origin": "日本 · 戰國",
     "weapon": "海賊大太刀 + 安宅鐵甲船",
     "sfx": "war_drum",
-    "img": "assets/warlords/KUKI.jpg?v=7.10.10"
+    "img": "assets/warlords/KUKI.jpg?v=7.10.11"
   },
   {
     "id": "CHOSOKABE",
@@ -3244,7 +3244,7 @@
     "origin": "日本 · 戰國",
     "weapon": "長槍 + 一領具足兩棲甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/CHOSOKABE.jpg?v=7.10.10"
+    "img": "assets/warlords/CHOSOKABE.jpg?v=7.10.11"
   },
   {
     "id": "JANGPOGO",
@@ -3287,7 +3287,7 @@
     "origin": "韓國 · 新羅",
     "weapon": "清海鎮寶刀 + 大海船樓舵",
     "sfx": "war_drum",
-    "img": "assets/warlords/JANGPOGO.jpg?v=7.10.10"
+    "img": "assets/warlords/JANGPOGO.jpg?v=7.10.11"
   },
   {
     "id": "LUMENG",
@@ -3329,7 +3329,7 @@
     "origin": "中國 · 三國",
     "weapon": "白衣偽裝袍 + 吳地雙手劍",
     "sfx": "blade_clash",
-    "img": "assets/warlords/LUMENG.jpg?v=7.10.10"
+    "img": "assets/warlords/LUMENG.jpg?v=7.10.11"
   },
   {
     "id": "GANNING",
@@ -3371,7 +3371,7 @@
     "origin": "中國 · 三國",
     "weapon": "短戟飛刀 + 銅鈴錦帆",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GANNING.jpg?v=7.10.10"
+    "img": "assets/warlords/GANNING.jpg?v=7.10.11"
   },
   {
     "id": "HUANGGAI",
@@ -3411,7 +3411,7 @@
     "origin": "中國 · 三國",
     "weapon": "火攻燃引火箭 + 艨艟衝角",
     "sfx": "fire_attack",
-    "img": "assets/warlords/HUANGGAI.jpg?v=7.10.10"
+    "img": "assets/warlords/HUANGGAI.jpg?v=7.10.11"
   },
   {
     "id": "JIANGWEI",
@@ -3453,7 +3453,7 @@
     "origin": "中國 · 三國",
     "weapon": "天水綠沉長槍 + 蜀錦奇兵袍",
     "sfx": "war_drum",
-    "img": "assets/warlords/JIANGWEI.jpg?v=7.10.10"
+    "img": "assets/warlords/JIANGWEI.jpg?v=7.10.11"
   },
   {
     "id": "MURAKAMI",
@@ -3492,7 +3492,7 @@
     "origin": "日本 · 戰國",
     "weapon": "焙烙火玉 + 鯨船快櫓",
     "sfx": "fire_attack",
-    "img": "assets/warlords/MURAKAMI.jpg?v=7.10.10"
+    "img": "assets/warlords/MURAKAMI.jpg?v=7.10.11"
   },
   {
     "id": "XIEXUAN",
@@ -3533,7 +3533,7 @@
     "origin": "中國 · 兩晉",
     "weapon": "北府精鋼斬馬刀 + 艨艟",
     "sfx": "blade_clash",
-    "img": "assets/warlords/XIEXUAN.jpg?v=7.10.10"
+    "img": "assets/warlords/XIEXUAN.jpg?v=7.10.11"
   },
   {
     "id": "YUYUNWEN",
@@ -3573,7 +3573,7 @@
     "origin": "中國 · 南宋",
     "weapon": "采石督師劍 + 海鰍踏浪船",
     "sfx": "fire_attack",
-    "img": "assets/warlords/YUYUNWEN.jpg?v=7.10.10"
+    "img": "assets/warlords/YUYUNWEN.jpg?v=7.10.11"
   },
   {
     "id": "WEIYAN",
@@ -3613,7 +3613,7 @@
     "origin": "中國 · 三國",
     "weapon": "狂骨環刀 + 伏兵令旗",
     "sfx": "blade_clash",
-    "img": "assets/warlords/WEIYAN.jpg?v=7.10.10"
+    "img": "assets/warlords/WEIYAN.jpg?v=7.10.11"
   },
   {
     "id": "MOURI_MOTO",
@@ -3655,7 +3655,7 @@
     "origin": "日本 · 戰國",
     "weapon": "一文字太刀 + 村上嚴島樓船",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/MOURI_MOTO.jpg?v=7.10.10"
+    "img": "assets/warlords/MOURI_MOTO.jpg?v=7.10.11"
   },
   {
     "id": "HATTORI",
@@ -3697,7 +3697,7 @@
     "origin": "日本 · 戰國",
     "weapon": "伊賀鎖鎌 + 漆黑忍衣",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HATTORI.jpg?v=7.10.10"
+    "img": "assets/warlords/HATTORI.jpg?v=7.10.11"
   },
   {
     "id": "JEONGJI",
@@ -3737,7 +3737,7 @@
     "origin": "韓國 · 高麗",
     "weapon": "高麗火銃銅管 + 海上長矛",
     "sfx": "fire_attack",
-    "img": "assets/warlords/JEONGJI.jpg?v=7.10.10"
+    "img": "assets/warlords/JEONGJI.jpg?v=7.10.11"
   },
   {
     "id": "YUEJIN",
@@ -3777,7 +3777,7 @@
     "origin": "中國 · 三國",
     "weapon": "短柄破城大斧 + 先登飛爪",
     "sfx": "blade_clash",
-    "img": "assets/warlords/YUEJIN.jpg?v=7.10.10"
+    "img": "assets/warlords/YUEJIN.jpg?v=7.10.11"
   },
   {
     "id": "MENGHUO",
@@ -3818,7 +3818,7 @@
     "origin": "中國 · 三國",
     "weapon": "南中神木三叉戟 + 獸皮生藤甲",
     "sfx": "blade_clash",
-    "img": "assets/warlords/MENGHUO.jpg?v=7.10.10"
+    "img": "assets/warlords/MENGHUO.jpg?v=7.10.11"
   },
   {
     "id": "DINGFENG",
@@ -3856,7 +3856,7 @@
     "origin": "中國 · 三國",
     "weapon": "雪夜白刃 + 短皮小盾",
     "sfx": "blade_clash",
-    "img": "assets/warlords/DINGFENG.jpg?v=7.10.10"
+    "img": "assets/warlords/DINGFENG.jpg?v=7.10.11"
   },
   {
     "id": "XUHUANG",
@@ -3897,7 +3897,7 @@
     "origin": "中國 · 三國",
     "weapon": "宣花開山大斧 + 破陣鎧",
     "sfx": "heavy_strike",
-    "img": "assets/warlords/XUHUANG.jpg?v=7.10.10"
+    "img": "assets/warlords/XUHUANG.jpg?v=7.10.11"
   },
   {
     "id": "WAKIZAKA",
@@ -3934,7 +3934,7 @@
     "origin": "日本 · 戰國",
     "weapon": "賤岳長槍 + 淡路戰船",
     "sfx": "blade_clash",
-    "img": "assets/warlords/WAKIZAKA.jpg?v=7.10.10"
+    "img": "assets/warlords/WAKIZAKA.jpg?v=7.10.11"
   },
   {
     "id": "TOUDO",
@@ -3973,7 +3973,7 @@
     "origin": "日本 · 戰國",
     "weapon": "築城大銃 + 水軍旗艦",
     "sfx": "war_drum",
-    "img": "assets/warlords/TOUDO.jpg?v=7.10.10"
+    "img": "assets/warlords/TOUDO.jpg?v=7.10.11"
   },
   {
     "id": "SHAMOKE",
@@ -4012,7 +4012,7 @@
     "origin": "中國 · 三國",
     "weapon": "鐵蒺藜骨朵 + 蠻夷硬角弓",
     "sfx": "blade_clash",
-    "img": "assets/warlords/SHAMOKE.jpg?v=7.10.10"
+    "img": "assets/warlords/SHAMOKE.jpg?v=7.10.11"
   },
   {
     "id": "HEQI",
@@ -4053,7 +4053,7 @@
     "origin": "中國 · 三國",
     "weapon": "精鋼短戟 + 先登皮鎧",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HEQI.jpg?v=7.10.10"
+    "img": "assets/warlords/HEQI.jpg?v=7.10.11"
   },
   {
     "id": "CAOBIN",
@@ -4092,7 +4092,7 @@
     "origin": "中國 · 北宋",
     "weapon": "北宋大纛軍刀 + 浮橋長索",
     "sfx": "war_drum",
-    "img": "assets/warlords/CAOBIN.jpg?v=7.10.10"
+    "img": "assets/warlords/CAOBIN.jpg?v=7.10.11"
   },
   {
     "id": "ZHUGELIANG",
@@ -4134,7 +4134,7 @@
     "origin": "中國 · 三國",
     "weapon": "羽扇綸巾 + 諸葛八陣圖",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/ZHUGELIANG.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHUGELIANG.jpg?v=7.10.11"
   },
   {
     "id": "HANXIN",
@@ -4179,7 +4179,7 @@
     "origin": "中國 · 楚漢",
     "weapon": "兵仙令劍 + 十面埋伏陣",
     "sfx": "blade_clash",
-    "img": "assets/warlords/HANXIN.jpg?v=7.10.10"
+    "img": "assets/warlords/HANXIN.jpg?v=7.10.11"
   },
   {
     "id": "ZHANGLIANG",
@@ -4219,7 +4219,7 @@
     "origin": "中國 · 漢朝",
     "weapon": "太公兵法卷軸 + 漢印佩玉",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/ZHANGLIANG.jpg?v=7.10.10"
+    "img": "assets/warlords/ZHANGLIANG.jpg?v=7.10.11"
   },
   {
     "id": "SIMAYI",
@@ -4261,7 +4261,7 @@
     "origin": "中國 · 三國",
     "weapon": "宣帝佩劍 + 陣列令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SIMAYI.jpg?v=7.10.10"
+    "img": "assets/warlords/SIMAYI.jpg?v=7.10.11"
   },
   {
     "id": "TOYOTOMI",
@@ -4301,7 +4301,7 @@
     "origin": "日本 · 戰國",
     "weapon": "采配 + 陣太刀",
     "sfx": "war_drum",
-    "img": "assets/warlords/TOYOTOMI.jpg?v=7.10.10"
+    "img": "assets/warlords/TOYOTOMI.jpg?v=7.10.11"
   },
   {
     "id": "CAOCAO",
@@ -4343,7 +4343,7 @@
     "origin": "中國 · 東漢末／三國",
     "weapon": "環首刀 + 丞相令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/CAOCAO.jpg?v=7.10.10"
+    "img": "assets/warlords/CAOCAO.jpg?v=7.10.11"
   },
   {
     "id": "HANBEI",
@@ -4383,7 +4383,7 @@
     "origin": "日本 · 戰國",
     "weapon": "竹中軍配 + 一之谷形兜",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/HANBEI.jpg?v=7.10.10"
+    "img": "assets/warlords/HANBEI.jpg?v=7.10.11"
   },
   {
     "id": "KANBEI",
@@ -4425,7 +4425,7 @@
     "origin": "日本 · 戰國",
     "weapon": "合子形兜 + 水攻策圖卷",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/KANBEI.jpg?v=7.10.10"
+    "img": "assets/warlords/KANBEI.jpg?v=7.10.11"
   },
   {
     "id": "SUNBIN",
@@ -4466,7 +4466,7 @@
     "origin": "中國 · 戰國",
     "weapon": "孫臏兵法木牘 + 獨輪戰車",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SUNBIN.jpg?v=7.10.10"
+    "img": "assets/warlords/SUNBIN.jpg?v=7.10.11"
   },
   {
     "id": "WUQI",
@@ -4509,7 +4509,7 @@
     "origin": "中國 · 戰國",
     "weapon": "吳子兵書 + 魏武卒精矛",
     "sfx": "war_drum",
-    "img": "assets/warlords/WUQI.jpg?v=7.10.10"
+    "img": "assets/warlords/WUQI.jpg?v=7.10.11"
   },
   {
     "id": "GUOJIA",
@@ -4549,7 +4549,7 @@
     "origin": "中國 · 三國",
     "weapon": "十勝十敗論卷 + 謀士羽扇",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/GUOJIA.jpg?v=7.10.10"
+    "img": "assets/warlords/GUOJIA.jpg?v=7.10.11"
   },
   {
     "id": "XUNYU",
@@ -4590,7 +4590,7 @@
     "origin": "中國 · 三國",
     "weapon": "王佐印信 + 荀氏家傳竹簡",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/XUNYU.jpg?v=7.10.10"
+    "img": "assets/warlords/XUNYU.jpg?v=7.10.11"
   },
   {
     "id": "JIAXU",
@@ -4630,7 +4630,7 @@
     "origin": "中國 · 三國",
     "weapon": "離間策書 + 毒士算籌",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/JIAXU.jpg?v=7.10.10"
+    "img": "assets/warlords/JIAXU.jpg?v=7.10.11"
   },
   {
     "id": "LUXUN",
@@ -4671,7 +4671,7 @@
     "origin": "中國 · 三國",
     "weapon": "夷陵火計箭符 + 吳都督佩劍",
     "sfx": "fire_attack",
-    "img": "assets/warlords/LUXUN.jpg?v=7.10.10"
+    "img": "assets/warlords/LUXUN.jpg?v=7.10.11"
   },
   {
     "id": "SHIMAZU_YOSHIHISA",
@@ -4712,7 +4712,7 @@
     "origin": "日本 · 戰國",
     "weapon": "采配 + 島津家旗印",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SHIMAZU_YOSHIHISA.jpg?v=7.10.10"
+    "img": "assets/warlords/SHIMAZU_YOSHIHISA.jpg?v=7.10.11"
   },
   {
     "id": "PANGTONG",
@@ -4754,7 +4754,7 @@
     "origin": "中國 · 三國",
     "weapon": "鳳雛連環策 + 青銅短劍",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/PANGTONG.jpg?v=7.10.10"
+    "img": "assets/warlords/PANGTONG.jpg?v=7.10.11"
   },
   {
     "id": "FAZHENG",
@@ -4795,7 +4795,7 @@
     "origin": "中國 · 三國",
     "weapon": "定軍指旗 + 蜀川圖誌",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/FAZHENG.jpg?v=7.10.10"
+    "img": "assets/warlords/FAZHENG.jpg?v=7.10.11"
   },
   {
     "id": "SANADAMASA",
@@ -4836,7 +4836,7 @@
     "origin": "日本 · 戰國",
     "weapon": "上田城地圖 + 誘敵令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SANADAMASA.jpg?v=7.10.10"
+    "img": "assets/warlords/SANADAMASA.jpg?v=7.10.11"
   },
   {
     "id": "LUSU",
@@ -4877,7 +4877,7 @@
     "origin": "中國 · 三國",
     "weapon": "榻上策竹簡 + 結盟令劍",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/LUSU.jpg?v=7.10.10"
+    "img": "assets/warlords/LUSU.jpg?v=7.10.11"
   },
   {
     "id": "TIANDAN",
@@ -4917,7 +4917,7 @@
     "origin": "中國 · 戰國",
     "weapon": "火牛蘆葦火把 + 衝角雙刃",
     "sfx": "fire_attack",
-    "img": "assets/warlords/TIANDAN.jpg?v=7.10.10"
+    "img": "assets/warlords/TIANDAN.jpg?v=7.10.11"
   },
   {
     "id": "LIUBOWEN",
@@ -4957,7 +4957,7 @@
     "origin": "中國 · 明初",
     "weapon": "軍師羽扇 + 明軍令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/LIUBOWEN.jpg?v=7.10.10"
+    "img": "assets/warlords/LIUBOWEN.jpg?v=7.10.11"
   },
   {
     "id": "SUNWU",
@@ -5001,7 +5001,7 @@
     "origin": "中國 · 春秋",
     "weapon": "孫子兵法十三篇 + 吳王授鉞",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/SUNWU.jpg?v=7.10.10"
+    "img": "assets/warlords/SUNWU.jpg?v=7.10.11"
   },
   {
     "id": "LEYI",
@@ -5042,7 +5042,7 @@
     "origin": "中國 · 戰國",
     "weapon": "昌國君佩劍 + 五國聯軍令旗",
     "sfx": "strategy_gong",
-    "img": "assets/warlords/LEYI.jpg?v=7.10.10"
+    "img": "assets/warlords/LEYI.jpg?v=7.10.11"
   },
   {
     "id": "TOKUGAWA",
@@ -5085,6 +5085,6 @@
     "origin": "日本 · 戰國",
     "weapon": "葵紋軍配 + 三河統帥刀",
     "sfx": "war_drum",
-    "img": "assets/warlords/TOKUGAWA.jpg?v=7.10.10"
+    "img": "assets/warlords/TOKUGAWA.jpg?v=7.10.11"
   }
 ]

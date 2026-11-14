@@ -4,6 +4,10 @@
 
 ---
 
+## [7.10.11] - 2026-11-14
+### Changed
+- **延長戰報停留倒數時間**：將 `js/app.js` 中多回合／線上雙人對決／錦標賽模式於 `showResult()` 的「戰報停留倒數」上限由 `15s` 延長至 `30s`（同步更新 `PvPTimerManager` 計時起始秒數與 `#aarCountdownSec` 初始顯示）。
+
 ## [7.10.10] - 2026-11-14
 ### Fixed & Isolated (Firebase & LocalStorage 跨專案安全切分)
 - **雲端資料庫子命名空間隔離（方案 A+B 結合，免更動 Firebase Security Rules）**：

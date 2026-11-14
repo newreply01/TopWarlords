@@ -82,6 +82,7 @@ const Battle3DEngine = (function () {
   const activeAttackers = new Set();
   let peakConcurrentAttackers = 0;
   let completedVolleys = 0;
+  let skillVfxPlayed = 0;
 
   let unitsMap = new Map();      // uid -> battalion token
   let activeMixers = [];           // { mixer, actions, currentState }
@@ -97,7 +98,7 @@ const Battle3DEngine = (function () {
   let lastCutinAt = 0;
   let riverTexRef = null;
   let bannerTexCache = new Map();
-  let baguaTexture = null;
+  let baguaTexCache = new Map();
   let hitStopUntil = 0;
   let shakePower = 0;
   const camShakeOffset = new THREE.Vector3(0, 0, 0);
@@ -1567,6 +1568,9 @@ const Battle3DEngine = (function () {
       cost: unit.cost || 3,
       tag: unit.tag || '',
       wep: unit.wep || '',
+      skillFx: unit.skill?.fx || (typeof UNIT_MAP !== 'undefined' && UNIT_MAP[unit.id]?.skill?.fx) || 'overlord_cleave',
+      skillFxLabel: unit.skill?.fxLabel || (typeof UNIT_MAP !== 'undefined' && UNIT_MAP[unit.id]?.skill?.fxLabel) || '名將戰法',
+      skillFxIcon: unit.skill?.fxIcon || (typeof UNIT_MAP !== 'undefined' && UNIT_MAP[unit.id]?.skill?.fxIcon) || '⚡',
       side,
       cat,
       formationName: unit.formationName || '魚鱗',
@@ -2067,6 +2071,7 @@ const Battle3DEngine = (function () {
     activeAttackers.clear();
     peakConcurrentAttackers = 0;
     completedVolleys = 0;
+    skillVfxPlayed = 0;
     ambientArrowVolleys = 0;
     ambientSpellcasts = 0;
 
@@ -2333,12 +2338,25 @@ const Battle3DEngine = (function () {
     // 1. 戰法發動時於部隊上方顯示 3D 浮動技能字，並觸發光榮風格橫幅 Cut-in（帶入技能名稱與說明）
     const nowMs = combatNow();
     if (!ln.finale && aToken && (ln.skillActivation || ln.ambushActivation)) {
+      const fxIcon = ln.skillFxIcon || aToken.skillFxIcon || '⚡';
       spawnFloatingDamagePopup(
         aToken.mesh.position,
-        `⚡ ${ln.brevity || '戰法發動'}`,
+        `${fxIcon} ${ln.brevity || '戰法發動'}`,
         aToken.side === 'A' ? '#38bdf8' : '#fbbf24',
         true
       );
+      if (ln.hpRestored > 0) {
+        const healedTroops = Math.max(100, Math.round(ln.hpRestored * 100)).toLocaleString();
+        spawnFloatingDamagePopup(
+          aToken.mesh.position,
+          `💚 兵力重整 +${healedTroops}`,
+          '#34d399',
+          false
+        );
+      }
+      if (!tToken) {
+        performWarlordSkillVfx(aToken, null, ln.skillFx || aToken.skillFx, ln, true);
+      }
       if (nowMs - lastCutinAt > 1800) {
         lastCutinAt = nowMs;
         triggerWarlordCutin(aToken, ln.kind === 'kill', ln);
@@ -2363,6 +2381,11 @@ const Battle3DEngine = (function () {
       failEffects = reject;
     });
     let deferTargetEffects = false;
+
+    if (ln.kind === 'info') {
+      finishEffects();
+      return effectsFinished;
+    }
 
     // 3. 依五大兵種執行全 3D 模型骨骼動畫與彈道特效
     const ranged = aToken && (['air_defense', 'support'].includes(aToken.cat) || aToken.formationRanged);
@@ -2436,6 +2459,17 @@ const Battle3DEngine = (function () {
           spawnFloatingDamagePopup(tToken.mesh.position, '🛡️ 鐵壁格擋', '#fbbf24', false);
         } else if (ln.dmg && ln.dmg > 0) {
           if (!ln.duel) triggerSquadAnim(tToken, 'hit', 1.2);
+          const isUltimateFx = Boolean(ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation || ln.kind === 'kill');
+          performWarlordSkillVfx(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, isUltimateFx);
+          if (ln.skillTriggered && !ln.finale) {
+            const tagSuffix = ln.skillTag ? `・${ln.skillTag}` : '';
+            spawnFloatingDamagePopup(
+              tToken.mesh.position,
+              `${ln.skillFxIcon || aToken?.skillFxIcon || '⚡'} ${ln.brevity || aToken?.skillFxLabel || '戰法'}${tagSuffix}`,
+              '#fde047',
+              true
+            );
+          }
           const lostTroops = Math.max(100, Math.round(ln.dmg * 100)).toLocaleString();
           const isKill = ln.kind === 'kill' || ln.kind === 'capture';
           const isCaptured = ln.kind === 'capture';
@@ -2846,6 +2880,180 @@ const Battle3DEngine = (function () {
     applyImpactReaction(tToken, 0.08);
   }
 
+  /* 名將專屬戰法 3D 視覺特效（八大戰法特效家族全數映射 125 位武將） */
+  function performWarlordSkillVfx(aToken, tToken, fxKey, ln = null, isUltimate = false) {
+    if (!scene || battleSettled) return;
+    const targetToken = tToken || aToken;
+    if (!targetToken) return;
+    const key = fxKey || aToken?.skillFx || 'overlord_cleave';
+    const anchor = targetToken.mesh.position.clone();
+    const casterAnchor = aToken ? aToken.mesh.position.clone() : anchor.clone();
+    const groundY = getBattleTerrainHeight(anchor.x, anchor.z);
+    const mult = isUltimate ? 1.32 : 0.78;
+    const now = combatNow();
+    skillVfxPlayed++;
+
+    function addVfxMesh(geo, mat, pos, opts = {}) {
+      if (particleSystems.length >= 210) {
+        geo.dispose();
+        mat.dispose();
+        return;
+      }
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(pos);
+      if (opts.lookAt) mesh.lookAt(opts.lookAt);
+      if (opts.rotateX !== undefined) mesh.rotateX(opts.rotateX);
+      if (opts.rotateY !== undefined) mesh.rotateY(opts.rotateY);
+      if (opts.rotateZ !== undefined) mesh.rotateZ(opts.rotateZ);
+      scene.add(mesh);
+      particleSystems.push({
+        mesh,
+        vx: opts.vx || 0,
+        vy: opts.vy || 0,
+        vz: opts.vz || 0,
+        startedAt: now,
+        duration: opts.duration || 420,
+        opacity: mat.opacity ?? 0.85,
+        gravity: opts.gravity || 0,
+        scaleGrowth: opts.scaleGrowth || 0
+      });
+    }
+
+    function addBaguaRing(pos, colorHex, size, duration, spin = 2.0) {
+      if (shockwaves.length >= 24) return;
+      const ringGeo = new THREE.PlaneGeometry(size, size);
+      const ringMat = new THREE.MeshBasicMaterial({
+        map: getBaguaTexture(colorHex),
+        transparent: true,
+        opacity: isUltimate ? 0.92 : 0.65,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(pos.x, getBattleTerrainHeight(pos.x, pos.z) + 0.09, pos.z);
+      scene.add(ring);
+      shockwaves.push({
+        mesh: ring,
+        startedAt: now,
+        duration,
+        startScale: 0.42,
+        endScale: 1.25 * mult,
+        opacity: isUltimate ? 0.92 : 0.65,
+        spinRate: spin
+      });
+    }
+
+    if (key === 'fire_storm') {
+      addVfxMesh(
+        new THREE.CylinderGeometry(0.16 * mult, 0.66 * mult, 3.4 * mult, 10, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: isUltimate ? 0.82 : 0.56, depthWrite: false, side: THREE.DoubleSide }),
+        new THREE.Vector3(anchor.x, groundY + 1.55 * mult, anchor.z),
+        { vy: 0.025, duration: isUltimate ? 480 : 300, scaleGrowth: 0.012 }
+      );
+      if (isUltimate) {
+        addVfxMesh(
+          new THREE.CylinderGeometry(0.42 * mult, 0.98 * mult, 2.5 * mult, 10, 1, true),
+          new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.48, depthWrite: false, side: THREE.DoubleSide }),
+          new THREE.Vector3(anchor.x, groundY + 1.15 * mult, anchor.z),
+          { vy: 0.018, duration: 520, scaleGrowth: 0.016 }
+        );
+        spawnBattleScar(anchor, 1.38, true);
+        spawnWarSmoke(anchor, 2, 0x3b2114, 1.9 * mult, 0.42);
+        playFieldSound('fire_attack', targetToken, 0.6);
+      }
+      spawnShockwaveRing(anchor, 0xf97316, 2.5 * mult, 460);
+      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 0.9, 0)), isUltimate ? 22 : 12, 0xfb923c);
+    } else if (key === 'thunder_strike') {
+      addVfxMesh(
+        new THREE.CylinderGeometry(0.08 * mult, 0.22 * mult, 7.6, 6),
+        new THREE.MeshBasicMaterial({ color: 0xe0f2fe, transparent: true, opacity: isUltimate ? 0.95 : 0.72, depthWrite: false }),
+        new THREE.Vector3(anchor.x, groundY + 3.8, anchor.z),
+        { duration: isUltimate ? 320 : 210, scaleGrowth: 0.008 }
+      );
+      if (isUltimate) {
+        addVfxMesh(
+          new THREE.CylinderGeometry(0.24 * mult, 0.54 * mult, 7.2, 6),
+          new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.5, depthWrite: false }),
+          new THREE.Vector3(anchor.x, groundY + 3.6, anchor.z),
+          { duration: 360, scaleGrowth: 0.014 }
+        );
+        triggerCameraShake(0.24);
+        triggerHitStop(50);
+      }
+      spawnShockwaveRing(anchor, 0x38bdf8, 2.5 * mult, 380);
+      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 0.95, 0)), isUltimate ? 22 : 12, 0x7dd3fc);
+    } else if (key === 'bagua_array') {
+      addBaguaRing(anchor, '#fbbf24', 2.7 * mult, isUltimate ? 820 : 540, 2.0);
+      if (isUltimate && aToken && aToken !== targetToken) {
+        addBaguaRing(casterAnchor, '#38bdf8', 2.4, 720, -1.8);
+      }
+      if (isUltimate) {
+        addVfxMesh(
+          new THREE.CylinderGeometry(0.76 * mult, 0.95 * mult, 3.4 * mult, 14, 1, true),
+          new THREE.MeshBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0.34, depthWrite: false, side: THREE.DoubleSide }),
+          new THREE.Vector3(anchor.x, groundY + 1.7 * mult, anchor.z),
+          { vy: 0.012, duration: 540 }
+        );
+      }
+      spawnShockwaveRing(anchor, 0xfbbf24, 2.3 * mult, 440);
+      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 1.0, 0)), isUltimate ? 18 : 10, 0xfde047);
+    } else if (key === 'piercing_volley') {
+      const start = casterAnchor.clone().add(new THREE.Vector3(0, 1.05, 0));
+      const end = anchor.clone().add(new THREE.Vector3(0, 0.95, 0));
+      const dist = Math.max(1.8, start.distanceTo(end));
+      const mid = start.clone().lerp(end, 0.5);
+      addVfxMesh(
+        new THREE.CylinderGeometry(0.05 * mult, 0.11 * mult, dist, 6),
+        new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: isUltimate ? 0.92 : 0.68, depthWrite: false }),
+        mid,
+        { lookAt: end, rotateX: Math.PI / 2, duration: isUltimate ? 320 : 220 }
+      );
+      spawnShockwaveRing(anchor, 0xfacc15, 2.0 * mult, 320);
+      spawnSparkBurst(end, isUltimate ? 20 : 10, 0xfef08a);
+    } else if (key === 'tidal_surge') {
+      addBaguaRing(anchor, '#06b6d4', 2.5 * mult, isUltimate ? 680 : 450, 2.6);
+      addVfxMesh(
+        new THREE.TorusGeometry(0.68 * mult, 0.13 * mult, 8, 20),
+        new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: isUltimate ? 0.85 : 0.62, depthWrite: false }),
+        new THREE.Vector3(anchor.x, groundY + 0.35, anchor.z),
+        { rotateX: Math.PI / 2, vy: 0.042, duration: isUltimate ? 440 : 300, scaleGrowth: 0.025 }
+      );
+      spawnShockwaveRing(anchor, 0x22d3ee, 2.6 * mult, 420);
+      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 0.85, 0)), isUltimate ? 18 : 10, 0x67e8f9);
+    } else if (key === 'aegis_command') {
+      const shieldTarget = (isUltimate && aToken) ? aToken : targetToken;
+      const shPos = shieldTarget.mesh.position.clone();
+      const shGround = getBattleTerrainHeight(shPos.x, shPos.z);
+      addVfxMesh(
+        new THREE.SphereGeometry(1.05 * mult, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.56),
+        new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: isUltimate ? 0.55 : 0.38, wireframe: true, depthWrite: false }),
+        new THREE.Vector3(shPos.x, shGround + 0.06, shPos.z),
+        { duration: isUltimate ? 540 : 340, scaleGrowth: 0.015 }
+      );
+      spawnShockwaveRing(shPos, 0x34d399, 2.2 * mult, 420);
+      spawnSparkBurst(anchor.clone().add(new THREE.Vector3(0, 0.9, 0)), isUltimate ? 18 : 10, 0x34d399);
+    } else if (key === 'shadow_ambush') {
+      const hitPos = anchor.clone().add(new THREE.Vector3(0, 0.95, 0));
+      spawnSlashArc(hitPos, aToken?.side || 'A', 0xa855f7, 1.32 * mult, isUltimate);
+      addVfxMesh(
+        new THREE.ConeGeometry(0.42 * mult, 2.1 * mult, 6),
+        new THREE.MeshBasicMaterial({ color: 0xc084fc, transparent: true, opacity: isUltimate ? 0.65 : 0.45, wireframe: true, depthWrite: false }),
+        new THREE.Vector3(anchor.x, groundY + 1.05 * mult, anchor.z),
+        { vy: 0.022, duration: isUltimate ? 420 : 280, scaleGrowth: 0.012 }
+      );
+      spawnShockwaveRing(anchor, 0x9333ea, 2.2 * mult, 360);
+      spawnSparkBurst(hitPos, isUltimate ? 18 : 10, 0xc084fc);
+    } else {
+      // overlord_cleave（💥 霸王破甲）
+      const hitPos = anchor.clone().add(new THREE.Vector3(0, 0.95, 0));
+      spawnSlashArc(hitPos, aToken?.side || 'A', isUltimate ? 0xf43f5e : 0xfbbf24, 1.38 * mult, isUltimate);
+      spawnShockwaveRing(anchor, isUltimate ? 0xef4444 : 0xf59e0b, 2.4 * mult, 380);
+      spawnSparkBurst(hitPos, isUltimate ? 20 : 12, isUltimate ? 0xfb7185 : 0xfbbf24);
+      if (isUltimate) triggerCameraShake(0.24);
+    }
+  }
+
   function updateTokenHp(token, newHp, duration = 1200) {
     const previousHp = token.visualHp ?? token.currentHp;
     token.currentHp = Math.max(0, newHp);
@@ -3038,7 +3246,7 @@ const Battle3DEngine = (function () {
 
   function getBaguaTexture(colorHex = '#fbbf24') {
     const key = colorHex;
-    if (baguaTexture && baguaTexture._key === key) return baguaTexture;
+    if (baguaTexCache.has(key)) return baguaTexCache.get(key);
     const c = document.createElement('canvas');
     c.width = c.height = 256;
     const ctx = c.getContext('2d');
@@ -3068,8 +3276,7 @@ const Battle3DEngine = (function () {
     }
     const tex = new THREE.CanvasTexture(c);
     tex._key = key;
-    if (baguaTexture && baguaTexture.dispose) baguaTexture.dispose();
-    baguaTexture = tex;
+    baguaTexCache.set(key, tex);
     return tex;
   }
 
@@ -4092,6 +4299,7 @@ const Battle3DEngine = (function () {
       activeAttackers: [...activeAttackers],
       peakConcurrentAttackers,
       completedVolleys,
+      skillVfxPlayed,
       animationPaused: isAnimationPaused,
       modelsTotal: Object.keys(MODEL_MANIFEST).length,
       modelsLoaded: modelsLoadedCount,

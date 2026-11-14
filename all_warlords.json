@@ -35,7 +35,10 @@
           "support": 0.16
         },
         "enemyHit": 0.03
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
@@ -76,7 +79,10 @@
         "damage": 1.08,
         "teamGuard": 0.06,
         "teamHit": 0.03
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
@@ -116,7 +122,10 @@
       "desc": "P3 首次命中時，每戰一次：本次傷害 ×1.3。持續效果至戰鬥結束。",
       "effects": {
         "damage": 1.3
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -158,7 +167,10 @@
         "damage": 1.15,
         "armorPierce": 0.5,
         "hit": 0.06
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 源平",
@@ -199,7 +211,10 @@
         "damage": 1.14,
         "guard": 0.1,
         "teamHit": 0.02
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -240,7 +255,10 @@
       "effects": {
         "damage": 1.1,
         "armorPierce": 0.4
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 高句麗",
@@ -281,7 +299,10 @@
         "damage": 1.08,
         "missingHpDamage": 0.3,
         "guard": 0.1
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -324,7 +345,10 @@
           "armor": 0.18,
           "air_defense": 0.12
         }
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -367,7 +391,10 @@
       "effects": {
         "damage": 1.16,
         "highCostDamage": 0.22
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -408,7 +435,10 @@
       "effects": {
         "damage": 1.2,
         "teamHit": 0.04
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 南北朝",
@@ -450,7 +480,10 @@
         "damage": 1.12,
         "armorPierce": 0.45,
         "enemyHit": 0.03
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -492,7 +525,10 @@
       "effects": {
         "damage": 1.14,
         "highCostDamage": 0.26
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -533,7 +569,10 @@
         "damage": 1.08,
         "teamGuard": 0.07,
         "heal": 0.08
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 新羅",
@@ -573,7 +612,10 @@
       "effects": {
         "damage": 1.24,
         "hit": 0.04
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 東漢末",
@@ -614,7 +656,10 @@
       "effects": {
         "damage": 1.2,
         "hit": 0.12
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -652,7 +697,10 @@
       "effects": {
         "damage": 1.18,
         "hit": 0.1
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -694,7 +742,10 @@
         "damage": 1.1,
         "armorPierce": 0.3,
         "hit": 0.06
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -735,7 +786,10 @@
       "effects": {
         "damage": 1.14,
         "armorPierce": 0.55
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -777,7 +831,10 @@
         "damage": 1.08,
         "enemyHit": 0.06,
         "guard": 0.08
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 高句麗",
@@ -816,7 +873,10 @@
         "damage": 1.08,
         "teamGuard": 0.06,
         "guard": 0.08
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -854,7 +914,10 @@
       "effects": {
         "damage": 1.18,
         "teamHit": 0.02
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -896,7 +959,10 @@
         "damage": 1.12,
         "armorPierce": 0.25,
         "guard": 0.07
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -935,7 +1001,10 @@
         "damage": 1.12,
         "highCostDamage": 0.2,
         "hit": 0.04
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -973,7 +1042,10 @@
       "effects": {
         "damage": 1.06,
         "missingHpDamage": 0.5
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1011,7 +1083,10 @@
       "effects": {
         "damage": 1.08,
         "armorPierce": 0.65
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -1051,7 +1126,10 @@
       "effects": {
         "damage": 1.12,
         "woundedTargetDamage": 0.4
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -1091,7 +1169,10 @@
       "effects": {
         "damage": 1.28,
         "missingHpDamage": 0.12
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 楚漢",
@@ -1135,7 +1216,10 @@
           "air": 0.3
         },
         "teamGuard": 0.06
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 南宋",
@@ -1175,7 +1259,10 @@
       "effects": {
         "damage": 1.1,
         "teamGuard": 0.1
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 秦朝",
@@ -1218,7 +1305,10 @@
         "damage": 1.1,
         "guard": 0.16,
         "heal": 0.06
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -1259,7 +1349,10 @@
       "effects": {
         "damage": 1.22,
         "hit": 0.02
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -1299,7 +1392,10 @@
       "effects": {
         "damage": 1,
         "guard": 0.18
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -1339,7 +1435,10 @@
       "effects": {
         "damage": 1.04,
         "teamGuard": 0.12
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 秦朝",
@@ -1380,7 +1479,10 @@
       "effects": {
         "damage": 1.22,
         "woundedTargetDamage": 0.16
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1420,7 +1522,10 @@
       "effects": {
         "damage": 1.18,
         "enemyHit": 0.04
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1461,7 +1566,10 @@
         "damage": 1.04,
         "heal": 0.16,
         "guard": 0.06
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -1501,7 +1609,10 @@
       "effects": {
         "damage": 1.08,
         "missingHpDamage": 0.4
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1541,7 +1652,10 @@
       "effects": {
         "damage": 1.12,
         "guard": 0.12
-      }
+      },
+      "fx": "thunder_strike",
+      "fxLabel": "雷霆天罰",
+      "fxIcon": "⚡"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -1580,7 +1694,10 @@
       "effects": {
         "damage": 1.1,
         "guard": 0.14
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 高麗",
@@ -1621,7 +1738,10 @@
         "damage": 1.06,
         "teamGuard": 0.09,
         "guard": 0.04
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1659,7 +1779,10 @@
       "effects": {
         "damage": 1.14,
         "guard": 0.09
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1700,7 +1823,10 @@
       "effects": {
         "damage": 1.1,
         "missingHpDamage": 0.32
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -1740,7 +1866,10 @@
       "effects": {
         "damage": 1.26,
         "hit": 0.03
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 東漢末",
@@ -1778,7 +1907,10 @@
         "damage": 1,
         "missingHpDamage": 0.4,
         "guard": 0.12
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 百濟",
@@ -1819,7 +1951,10 @@
         "bonusVs": {
           "air": 0.35
         }
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 北宋",
@@ -1859,7 +1994,10 @@
       "effects": {
         "damage": 1.02,
         "guard": 0.2
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1898,7 +2036,10 @@
         "damage": 1.02,
         "guard": 0.16,
         "heal": 0.1
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1937,7 +2078,10 @@
       "effects": {
         "damage": 1.2,
         "hit": 0.08
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -1976,7 +2120,10 @@
         "damage": 1,
         "teamGuard": 0.1,
         "guard": 0.03
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -2015,7 +2162,10 @@
         "damage": 1.02,
         "teamGuard": 0.08,
         "teamHit": 0.02
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -2056,7 +2206,10 @@
         "damage": 1.08,
         "armorPierce": 0.45,
         "hit": 0.05
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
@@ -2097,7 +2250,10 @@
         "damage": 1.06,
         "hit": 0.18,
         "armorPierce": 0.35
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 春秋",
@@ -2141,7 +2297,10 @@
           "air": 0.12,
           "armor": 0.12
         }
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -2182,7 +2341,10 @@
         "damage": 1.04,
         "hit": 0.2,
         "armorPierce": 0.25
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 源平",
@@ -2223,7 +2385,10 @@
       "effects": {
         "damage": 1.1,
         "hit": 0.2
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 高句麗",
@@ -2263,7 +2428,10 @@
       "effects": {
         "damage": 1.1,
         "highCostDamage": 0.24
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -2302,7 +2470,10 @@
       "effects": {
         "damage": 1.16,
         "guard": 0.06
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -2340,7 +2511,10 @@
       "effects": {
         "damage": 1.08,
         "armorPierce": 0.6
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 南宋",
@@ -2384,7 +2558,10 @@
           "air": 0.24
         },
         "teamHit": 0.03
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -2422,7 +2599,10 @@
       "effects": {
         "damage": 1.24,
         "armorPierce": 0.1
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -2466,7 +2646,10 @@
           "air": 0.14
         },
         "hit": 0.05
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -2504,7 +2687,10 @@
       "effects": {
         "damage": 1.06,
         "guard": 0.15
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 高句麗",
@@ -2546,7 +2732,10 @@
           "air": 0.16
         },
         "hit": 0.04
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 南北朝",
@@ -2590,7 +2779,10 @@
         "bonusVs": {
           "air": 0.2
         }
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -2632,7 +2824,10 @@
         "damage": 1.04,
         "teamGuard": 0.1,
         "enemyHit": 0.02
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
@@ -2673,7 +2868,10 @@
         "bonusVs": {
           "air": 0.12
         }
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 南宋",
@@ -2712,7 +2910,10 @@
         "damage": 1.02,
         "guard": 0.12,
         "heal": 0.08
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -2751,7 +2952,10 @@
       "effects": {
         "damage": 1.26,
         "armorPierce": 0.15
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 高麗",
@@ -2790,7 +2994,10 @@
         "damage": 1.14,
         "enemyHit": 0.03,
         "hit": 0.03
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 東漢",
@@ -2830,7 +3037,10 @@
       "effects": {
         "commandAttack": 0.03,
         "teamHit": 0.04
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -2871,7 +3081,10 @@
         "damage": 1.08,
         "guard": 0.1,
         "hit": 0.04
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 東漢",
@@ -2910,7 +3123,10 @@
         "damage": 1.08,
         "hit": 0.12,
         "teamHit": 0.02
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -2948,7 +3164,10 @@
       "effects": {
         "damage": 1.28,
         "missingHpDamage": 0.1
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -2988,7 +3207,10 @@
         "damage": 1.04,
         "enemyHit": 0.07,
         "guard": 0.04
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 南北朝",
@@ -3027,7 +3249,10 @@
         "damage": 1.06,
         "armorPierce": 0.4,
         "enemyHit": 0.02
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -3068,7 +3293,10 @@
           "air": 0.18
         },
         "teamHit": 0.01
-      }
+      },
+      "fx": "piercing_volley",
+      "fxLabel": "神射貫穿",
+      "fxIcon": "🏹"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -3110,7 +3338,10 @@
         "commandAttack": 0.06,
         "enemyHit": 0.04,
         "teamHit": 0.02
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3156,7 +3387,10 @@
           "naval": 0.16
         },
         "guard": 0.08
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 朝鮮",
@@ -3198,7 +3432,10 @@
         "damage": 1.08,
         "guard": 0.12,
         "teamHit": 0.02
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -3238,7 +3475,10 @@
       "effects": {
         "damage": 1.12,
         "heal": 0.1
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -3281,7 +3521,10 @@
           "naval": 0.18
         },
         "teamHit": 0.03
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 新羅",
@@ -3323,7 +3566,10 @@
         "damage": 1.16,
         "hit": 0.14,
         "armorPierce": 0.2
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3365,7 +3611,10 @@
       "effects": {
         "damage": 1.24,
         "hit": 0.06
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3405,7 +3654,10 @@
         "bonusVs": {
           "naval": 0.1
         }
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3447,7 +3699,10 @@
         "damage": 1.1,
         "armorPierce": 0.35,
         "teamHit": 0.02
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3486,7 +3741,10 @@
       "effects": {
         "damage": 1.22,
         "armorPierce": 0.2
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -3527,7 +3785,10 @@
       "effects": {
         "damage": 1.12,
         "enemyHit": 0.06
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 兩晉",
@@ -3567,7 +3828,10 @@
         "bonusVs": {
           "naval": 0.14
         }
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 南宋",
@@ -3607,7 +3871,10 @@
       "effects": {
         "damage": 1.12,
         "highCostDamage": 0.25
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3649,7 +3916,10 @@
         "damage": 1.1,
         "enemyHit": 0.04,
         "teamGuard": 0.04
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -3691,7 +3961,10 @@
         "damage": 1.08,
         "highCostDamage": 0.28,
         "hit": 0.06
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -3731,7 +4004,10 @@
         "bonusVs": {
           "naval": 0.22
         }
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇰🇷",
     "origin": "韓國 · 高麗",
@@ -3771,7 +4047,10 @@
       "effects": {
         "damage": 1.12,
         "armorPierce": 0.55
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3812,7 +4091,10 @@
         "damage": 1.1,
         "guard": 0.14,
         "terrainDamage": 0.12
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3850,7 +4132,10 @@
       "effects": {
         "damage": 1.2,
         "missingHpDamage": 0.15
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3891,7 +4176,10 @@
       "effects": {
         "damage": 1.18,
         "armorPierce": 0.5
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -3928,7 +4216,10 @@
       "effects": {
         "damage": 1.18,
         "hit": 0.08
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -3967,7 +4258,10 @@
         "damage": 1.04,
         "teamGuard": 0.06,
         "teamHit": 0.04
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -4006,7 +4300,10 @@
         "damage": 1.1,
         "highCostDamage": 0.15,
         "terrainDamage": 0.16
-      }
+      },
+      "fx": "overlord_cleave",
+      "fxLabel": "霸王破甲",
+      "fxIcon": "💥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4047,7 +4344,10 @@
         "bonusVs": {
           "naval": 0.08
         }
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4086,7 +4386,10 @@
         "damage": 1.08,
         "teamGuard": 0.08,
         "teamHit": 0.02
-      }
+      },
+      "fx": "tidal_surge",
+      "fxLabel": "怒濤伏波",
+      "fxIcon": "🌊"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 北宋",
@@ -4128,7 +4431,10 @@
         "commandAttack": 0.03,
         "teamGuard": 0.1,
         "teamHit": 0.03
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4173,7 +4479,10 @@
         "commandAttack": 0.08,
         "teamHit": 0.04,
         "enemyHit": 0.02
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 楚漢",
@@ -4213,7 +4522,10 @@
       "effects": {
         "commandAttack": 0.03,
         "teamHit": 0.09
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 漢朝",
@@ -4255,7 +4567,10 @@
         "commandAttack": 0.02,
         "teamGuard": 0.09,
         "enemyHit": 0.03
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4295,7 +4610,10 @@
       "effects": {
         "commandAttack": 0.05,
         "teamHit": 0.06
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -4337,7 +4655,10 @@
         "commandAttack": 0.06,
         "teamHit": 0.03,
         "teamGuard": 0.03
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 東漢末／三國",
@@ -4377,7 +4698,10 @@
       "effects": {
         "commandAttack": 0.02,
         "enemyHit": 0.04
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -4419,7 +4743,10 @@
         "commandAttack": 0.01,
         "teamHit": 0.05,
         "enemyHit": 0.01
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -4460,7 +4787,10 @@
       "effects": {
         "commandAttack": 0.04,
         "enemyHit": 0.08
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -4503,7 +4833,10 @@
         "commandAttack": 0.06,
         "teamGuard": 0.07,
         "teamHit": 0.02
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -4543,7 +4876,10 @@
       "effects": {
         "commandAttack": 0.04,
         "enemyHit": 0.05
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4584,7 +4920,10 @@
         "commandAttack": 0.02,
         "teamGuard": 0.05,
         "teamHit": 0.05
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4624,7 +4963,10 @@
       "effects": {
         "commandAttack": 0.02,
         "enemyHit": 0.07
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4665,7 +5007,10 @@
       "effects": {
         "commandAttack": 0.05,
         "enemyHit": 0.03
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4706,7 +5051,10 @@
         "commandAttack": 0.01,
         "enemyHit": 0.04,
         "teamHit": 0.02
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -4748,7 +5096,10 @@
         "commandAttack": 0.05,
         "teamHit": 0.04,
         "enemyHit": 0.02
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4789,7 +5140,10 @@
       "effects": {
         "commandAttack": 0.03,
         "teamHit": 0.06
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4830,7 +5184,10 @@
         "commandAttack": 0.02,
         "enemyHit": 0.03,
         "teamGuard": 0.02
-      }
+      },
+      "fx": "shadow_ambush",
+      "fxLabel": "暗影奇襲",
+      "fxIcon": "🌑"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -4871,7 +5228,10 @@
         "commandAttack": 0.02,
         "teamGuard": 0.04,
         "teamHit": 0.04
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -4911,7 +5271,10 @@
       "effects": {
         "damage": 1.24,
         "enemyHit": 0.03
-      }
+      },
+      "fx": "fire_storm",
+      "fxLabel": "烈焰火計",
+      "fxIcon": "🔥"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -4951,7 +5314,10 @@
       "effects": {
         "commandAttack": 0.02,
         "teamHit": 0.05
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 明初",
@@ -4995,7 +5361,10 @@
         "commandAttack": 0.04,
         "teamGuard": 0.08,
         "enemyHit": 0.04
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 春秋",
@@ -5036,7 +5405,10 @@
         "commandAttack": 0.05,
         "teamHit": 0.05,
         "teamGuard": 0.03
-      }
+      },
+      "fx": "bagua_array",
+      "fxLabel": "奇門八陣",
+      "fxIcon": "☯️"
     },
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
@@ -5079,7 +5451,10 @@
         "commandAttack": 0.02,
         "teamGuard": 0.08,
         "teamHit": 0.02
-      }
+      },
+      "fx": "aegis_command",
+      "fxLabel": "金剛鐵壁",
+      "fxIcon": "🛡️"
     },
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",

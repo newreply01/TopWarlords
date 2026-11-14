@@ -325,7 +325,7 @@ function resolveBattle(deckA, deckB, opts) {
     return base - (((tgt.stealth + m.stealthAdd) * sc) / 100) * w - S[att.side].hitPen + (extra || 0) + (att.formationHit || 0);
   }
 
-  function applySkillEffects(unit, lines) {
+  function applySkillEffects(unit, lines, target = null) {
     const effects = unit.skill?.effects || {};
     unit.skillGuard = Math.max(unit.skillGuard, effects.guard || 0);
     const hpBefore = unit.hp;
@@ -334,9 +334,16 @@ function resolveBattle(deckA, deckB, opts) {
     S[unit.side].skillHit = Math.max(S[unit.side].skillHit || 0, effects.teamHit || 0);
     S[other(unit.side)].skillHitPen = Math.max(S[other(unit.side)].skillHitPen || 0, effects.enemyHit || 0);
     if (effects.commandAttack) S[unit.side].atkAll = (S[unit.side].atkAll || 1) * (1 + effects.commandAttack);
+    const resolvedFx = unit.skill?.fx
+      ? { fx: unit.skill.fx, fxLabel: unit.skill.fxLabel || null, fxIcon: unit.skill.fxIcon || '⚡' }
+      : (typeof resolveSkillFx === 'function'
+          ? resolveSkillFx(unit.id, unit.cat, unit.skill, effects, unit.traits)
+          : { fx: null, fxLabel: null, fxIcon: '⚡' });
     lines.push({
-      side: unit.side, kind: 'info', auid: unit.uid, brevity: unit.skill.name,
+      side: unit.side, kind: 'info', auid: unit.uid, tuid: target ? target.uid : undefined,
+      brevity: unit.skill.name,
       skillActivation: true, skillEffects: effects, hpRestored: unit.hp - hpBefore,
+      skillFx: resolvedFx.fx, skillFxLabel: resolvedFx.fxLabel, skillFxIcon: resolvedFx.fxIcon,
       text: `[${unit.skill.name}] ${unit.name}：${unit.skill.desc}`
     });
   }
@@ -370,7 +377,7 @@ function resolveBattle(deckA, deckB, opts) {
       });
     }
     for (const roll of rolled) {
-      if (roll.skillProc) applySkillEffects(roll.a.att, lines);
+      if (roll.skillProc) applySkillEffects(roll.a.att, lines, roll.a.tgt);
       if (roll.ambushProc) lines.push({
         side: roll.a.att.side, kind: 'info', auid: roll.a.att.uid, tuid: roll.a.tgt.uid,
         brevity: '奇襲突擊', ambushActivation: true,
@@ -385,6 +392,24 @@ function resolveBattle(deckA, deckB, opts) {
       const meta = resolveBrevityAndSfx(at, t, tier, r.skillProc);
       const brv = r.skillProc ? meta.brv : (r.ambushProc ? '奇襲突擊' : meta.brv);
       const matchup = getCombatMatchup(at, t, vOpts.phase, a.trueDmg, r.skillProc, r.skillModifiers.armorPierce);
+      const fxMeta = at.skill?.fx
+        ? { fx: at.skill.fx, fxLabel: at.skill.fxLabel || null, fxIcon: at.skill.fxIcon || '⚡' }
+        : (typeof resolveSkillFx === 'function'
+            ? resolveSkillFx(at.id, at.cat, at.skill, at.skill?.effects, at.traits)
+            : { fx: null, fxLabel: null, fxIcon: '⚡' });
+      let skillTag = null;
+      if (r.skillProc) {
+        const eff = at.skill?.effects || {};
+        if (r.skillModifiers.armorPierce > 0) skillTag = '破甲';
+        else if (eff.woundedTargetDamage) skillTag = '斬殺';
+        else if (eff.missingHpDamage) skillTag = '背水';
+        else if (eff.highCostDamage && t.cost > at.cost) skillTag = '克敵';
+        else if (eff.bonusVs?.[t.cat]) skillTag = '特攻';
+        else if (eff.terrainDamage && ['mountain', 'forest'].includes(terrain)) skillTag = '地形';
+        else if (eff.heal) skillTag = '回春';
+        else if (eff.guard || eff.teamGuard) skillTag = '鐵壁';
+        else if (eff.commandAttack || eff.teamHit || eff.enemyHit) skillTag = '號令';
+      }
 
       if (!r.ok) {
         const missCode = tier === 3 ? '力竭偏差' : '身法規避';
@@ -466,6 +491,12 @@ function resolveBattle(deckA, deckB, opts) {
           auid: at.uid,
           tuid: t.uid,
           brevity: r.skillProc ? at.skill.name : (r.ambushProc ? '奇襲突擊' : killCode),
+          skillTriggered: Boolean(r.skillProc),
+          ambushTriggered: Boolean(r.ambushProc),
+          skillFx: fxMeta.fx,
+          skillFxLabel: fxMeta.fxLabel,
+          skillFxIcon: fxMeta.fxIcon,
+          skillTag: skillTag || null,
           ammoTier: tier,
           sfxOverride: meta.sfxOverride,
           dmg: Math.round(d),
@@ -495,6 +526,12 @@ function resolveBattle(deckA, deckB, opts) {
           formation: at.formation,
           formationTactic: r.tacticProc,
           brevity: r.duelProc ? '一騎單挑' : brv,
+          skillTriggered: Boolean(r.skillProc),
+          ambushTriggered: Boolean(r.ambushProc),
+          skillFx: fxMeta.fx,
+          skillFxLabel: fxMeta.fxLabel,
+          skillFxIcon: fxMeta.fxIcon,
+          skillTag: skillTag || null,
           ammoTier: tier,
           sfxOverride: meta.sfxOverride,
           dmg: Math.round(d),

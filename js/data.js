@@ -578,6 +578,79 @@ function describeSkillEffects(skill, effects, isCommand) {
   return `${skill.phase} ${isCommand ? '開局號令' : '首次命中時'}，每戰一次：${parts.join('；')}。持續效果至戰鬥結束。`;
 }
 
+const SKILL_FX_ARCHETYPES = {
+  fire_storm:      { icon: '🔥', label: '烈焰火計' },
+  thunder_strike:  { icon: '⚡', label: '雷霆天罰' },
+  bagua_array:     { icon: '☯️', label: '奇門八陣' },
+  overlord_cleave: { icon: '💥', label: '霸王破甲' },
+  piercing_volley: { icon: '🏹', label: '神射貫穿' },
+  tidal_surge:     { icon: '🌊', label: '怒濤伏波' },
+  aegis_command:   { icon: '🛡️', label: '金剛鐵壁' },
+  shadow_ambush:   { icon: '🌑', label: '暗影奇襲' }
+};
+
+const UNIT_SKILL_FX = {
+  // 🔥 烈焰火計 (15)
+  ZHOUYU: 'fire_storm', LUXUN: 'fire_storm', HUANGGAI: 'fire_storm', TIANDAN: 'fire_storm',
+  YUYUNWEN: 'fire_storm', AKECHI: 'fire_storm', CHOIMUSEON: 'fire_storm', MATSUNAGA: 'fire_storm',
+  MURAKAMI: 'fire_storm', PANGTONG: 'fire_storm', JEONGJI: 'fire_storm', KUKI: 'fire_storm',
+  YUKIMURA: 'fire_storm', YAMAGATA: 'fire_storm', IINAOMASA: 'fire_storm',
+  // ⚡ 雷霆天罰 (11)
+  HUO: 'thunder_strike', TACHIBANAD: 'thunder_strike', TACHIBANA: 'thunder_strike', YOSHITSUNE: 'thunder_strike',
+  XIAHOUYUAN: 'thunder_strike', CHENQINGZHI: 'thunder_strike', KENSHIN: 'thunder_strike', SHINGEN: 'thunder_strike',
+  GAISUWEN: 'thunder_strike', ZHAOSHE: 'thunder_strike', MACHO: 'thunder_strike',
+  // ☯️ 奇門八陣 (18)
+  SUNWU: 'bagua_array', ZHUGELIANG: 'bagua_array', ZHANGLIANG: 'bagua_array', LIUBOWEN: 'bagua_array',
+  WUQI: 'bagua_array', SUNBIN: 'bagua_array', LEYI: 'bagua_array', CAOCAO: 'bagua_array',
+  SIMAYI: 'bagua_array', XUNYU: 'bagua_array', TOYOTOMI: 'bagua_array', LUSU: 'bagua_array',
+  GUOJIA: 'bagua_array', FAZHENG: 'bagua_array', YAMAMOTO: 'bagua_array', KANBEI: 'bagua_array',
+  HANBEI: 'bagua_array', JIANGWEI: 'bagua_array',
+  // 💥 霸王破甲 (20)
+  LUBU: 'overlord_cleave', XIANGYU: 'overlord_cleave', GUANYU: 'overlord_cleave', ZHANGFEI: 'overlord_cleave',
+  BAIQI: 'overlord_cleave', SUNJIAN: 'overlord_cleave', SUNCE: 'overlord_cleave', XUCHU: 'overlord_cleave',
+  XIAHOU_DUN: 'overlord_cleave', PANGDE: 'overlord_cleave', SHIBATA: 'overlord_cleave', SHIMAZUY: 'overlord_cleave',
+  GYEBAEK: 'overlord_cleave', MAEDATOSHI: 'overlord_cleave', YUEJIN: 'overlord_cleave', XUHUANG: 'overlord_cleave',
+  DINGFENG: 'overlord_cleave', MENGHUO: 'overlord_cleave', SHAMOKE: 'overlord_cleave', YANGYE: 'overlord_cleave',
+  // 🏹 神射貫穿 (20)
+  LIGUANG: 'piercing_volley', YANGYOUJI: 'piercing_volley', HUANGZHONG: 'piercing_volley', JUMONG: 'piercing_volley',
+  NOBUNAGA: 'piercing_volley', YOICHI: 'piercing_volley', SAIKA: 'piercing_volley', LIMU: 'piercing_volley',
+  HANSHIZHONG: 'piercing_volley', HULUGUANG: 'piercing_volley', TAISHICI: 'piercing_volley', ASAKURA_SOT: 'piercing_volley',
+  YANGMANCHUN: 'piercing_volley', HONDA_TADATSUGU: 'piercing_volley', GENGYAN: 'piercing_volley', KUANGZHANG: 'piercing_volley',
+  DATE: 'piercing_volley', GONGSUNDU: 'piercing_volley', ZHANGHE: 'piercing_volley', ZONGZE: 'piercing_volley',
+  // 🌊 怒濤伏波 (11)
+  YISUNSIN: 'tidal_surge', GANNING: 'tidal_surge', MOURI_MOTO: 'tidal_surge', CAOBIN: 'tidal_surge',
+  JANGPOGO: 'tidal_surge', CHOSOKABE: 'tidal_surge', TOUDO: 'tidal_surge', WAKIZAKA: 'tidal_surge',
+  EULJI: 'tidal_surge', XIEXUAN: 'tidal_surge', HEQI: 'tidal_surge',
+  // 🛡️ 金剛鐵壁 (20)
+  WANGJIAN: 'aegis_command', YUEFEI: 'aegis_command', LIANPO: 'aegis_command', MENGTIAN: 'aegis_command',
+  CHOIYOUNG: 'aegis_command', CAOREN: 'aegis_command', HOJO_UJIYASU: 'aegis_command', HONDA: 'aegis_command',
+  DIANWEI: 'aegis_command', YUJIN: 'aegis_command', ZHOUTAI: 'aegis_command', KATOKIYOMASA: 'aegis_command',
+  ZHOUYAFU: 'aegis_command', TANDAOJI: 'aegis_command', TORII: 'aegis_command', TOKUGAWA: 'aegis_command',
+  WEI: 'aegis_command', ZHAOYUN: 'aegis_command', KIMYUSHIN: 'aegis_command', LINGTONG: 'aegis_command',
+  // 🌑 暗影奇襲 (10)
+  DENGAI: 'shadow_ambush', ZHANGLIAO: 'shadow_ambush', HATTORI: 'shadow_ambush', JIAXU: 'shadow_ambush',
+  HANXIN: 'shadow_ambush', LUMENG: 'shadow_ambush', WEIYAN: 'shadow_ambush', FENGYI: 'shadow_ambush',
+  SANADAMASA: 'shadow_ambush', SHIMAZU_YOSHIHISA: 'shadow_ambush'
+};
+
+function resolveSkillFx(id, cat, skill, effects, traits) {
+  let fx = UNIT_SKILL_FX[id];
+  if (!fx || !SKILL_FX_ARCHETYPES[fx]) {
+    const labelText = `${skill?.name || ''} ${skill?.desc || ''}`;
+    if (/[火焚焰砲霹靂爆焙]/.test(labelText)) fx = 'fire_storm';
+    else if (/[雷電風]/.test(labelText)) fx = 'thunder_strike';
+    else if (/[水江海流船潮]/.test(labelText)) fx = 'tidal_surge';
+    else if ((effects && (effects.heal || effects.guard || effects.teamGuard)) || (traits || []).includes('APS')) fx = 'aegis_command';
+    else if ((traits || []).includes('SUB') || (traits || []).includes('AMBUSH')) fx = 'shadow_ambush';
+    else if (cat === 'support') fx = 'bagua_array';
+    else if (cat === 'air_defense') fx = 'piercing_volley';
+    else if (cat === 'naval') fx = 'tidal_surge';
+    else fx = 'overlord_cleave';
+  }
+  const meta = SKILL_FX_ARCHETYPES[fx];
+  return { fx, fxLabel: meta.label, fxIcon: meta.icon };
+}
+
 const TACTICAL_ROLE_OVERRIDES = {
   ZHANGLIAO: ['AMBUSH'],
   EULJI: ['AMBUSH']
@@ -636,6 +709,7 @@ const UNITS = RAW_UNITS.map(r => {
   };
   const skill = UNIT_SKILLS[id] || { name: tag.split('·')[0] || '名將絕技', phase: 'P3', desc: desc };
   const effects = UNIT_SKILL_EFFECTS[id];
+  const skillFx = resolveSkillFx(id, cat, skill, effects, traits);
   return {
     id, name, cat, cost, v, tag, desc,
     traits: [...new Set([...(traits || []), ...(TACTICAL_ROLE_OVERRIDES[id] || [])])],
@@ -645,6 +719,9 @@ const UNITS = RAW_UNITS.map(r => {
     hp: hp * 2, atk, def,
     skill: Object.assign({}, skill, {
       effects: effects || null,
+      fx: skillFx.fx,
+      fxLabel: skillFx.fxLabel,
+      fxIcon: skillFx.fxIcon,
       desc: effects ? describeSkillEffects(skill, effects, (roleFlags || []).includes('STRATEGIST') && skill.phase === 'P1') : skill.desc
     }),
     flag: meta.flag,
@@ -892,6 +969,9 @@ if (typeof window !== 'undefined') {
   window.CAT_HINT = CAT_HINT;
   window.UNITS = UNITS;
   window.UNIT_SKILLS = UNIT_SKILLS;
+  window.SKILL_FX_ARCHETYPES = SKILL_FX_ARCHETYPES;
+  window.UNIT_SKILL_FX = UNIT_SKILL_FX;
+  window.resolveSkillFx = resolveSkillFx;
   window.TACTICAL_ROLE_OVERRIDES = TACTICAL_ROLE_OVERRIDES;
   window.HISTORICAL_AUDIT = HISTORICAL_AUDIT;
   window.UNIT_MAP = UNIT_MAP;
@@ -906,6 +986,7 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     BUDGET, CATS, TRAITS, CAT_HINT, UNITS, UNIT_MAP, SYNERGIES, TEMPLATES, TACTICAL_ROLE_OVERRIDES, HISTORICAL_AUDIT,
+    SKILL_FX_ARCHETYPES, UNIT_SKILL_FX, resolveSkillFx,
     getDeckSynergies, getUnitSynergyHints, getUnitRealismBadges,
     getUnitMasteryBadge, recordUnitMasteryFromBattle
   };

@@ -112,6 +112,9 @@ try:
             if (units.some(u => !u.skill || !u.skill.name || !u.skill.desc)) {
                 errs.push('存在缺少專屬戰法 (skill) 之武將');
             }
+            if (units.some(u => !u.skill?.fx || !SKILL_FX_ARCHETYPES?.[u.skill.fx] || !UNIT_SKILL_FX?.[u.id])) {
+                errs.push('存在缺少專屬戰法 3D 特效映射 (skill.fx) 之武將');
+            }
             const effectFields = new Set(['damage', 'hit', 'armorPierce', 'missingHpDamage', 'woundedTargetDamage', 'highCostDamage', 'terrainDamage', 'bonusVs', 'heal', 'guard', 'teamGuard', 'teamHit', 'enemyHit', 'commandAttack']);
             for (const unit of units) {
                 const effects = unit.skill?.effects;

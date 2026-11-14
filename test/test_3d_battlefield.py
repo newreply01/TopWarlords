@@ -380,6 +380,7 @@ try:
         assert all(unit["nameLabelVisible"] for unit in visual['state']['battalions']), "Result hid commander identity"
         assert visual['state']['peakConcurrentAttackers'] >= 4, "Armies still attack one commander at a time"
         assert visual['state']['completedVolleys'] > 0
+        assert visual['state']['skillVfxPlayed'] > 0, f"Warlord skill VFX did not trigger in 3D battle: {visual['state']}"
         assert visual['misses'] and all(visual['misses']), "Missed attacks did not display MISS at impact"
         assert natural.locator('#battleRecentEvents > div').count() <= 2, "Compact HUD turned into another large report"
         assert visual['spatialCues'] and all(cue['distance'] > 0 and -1 <= cue['pan'] <= 1 for cue in visual['spatialCues']), \

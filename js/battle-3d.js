@@ -701,61 +701,6 @@ const Battle3DEngine = (function () {
 
   function buildCampFortifications() {
     campFortificationsGroup = new THREE.Group();
-    const stakeGeo = mergeStaticGeos([
-      { geo: new THREE.CylinderGeometry(0.042, 0.052, 1.18, 5), pos: [-0.46, 0.59, 0] },
-      { geo: new THREE.ConeGeometry(0.052, 0.24, 5), pos: [-0.46, 1.30, 0] },
-      { geo: new THREE.CylinderGeometry(0.044, 0.054, 1.28, 5), pos: [-0.23, 0.64, 0.02] },
-      { geo: new THREE.ConeGeometry(0.054, 0.24, 5), pos: [-0.23, 1.40, 0.02] },
-      { geo: new THREE.CylinderGeometry(0.045, 0.055, 1.22, 5), pos: [0.0, 0.61, -0.01] },
-      { geo: new THREE.ConeGeometry(0.055, 0.24, 5), pos: [0.0, 1.34, -0.01] },
-      { geo: new THREE.CylinderGeometry(0.044, 0.054, 1.32, 5), pos: [0.23, 0.66, 0.01] },
-      { geo: new THREE.ConeGeometry(0.054, 0.24, 5), pos: [0.23, 1.44, 0.01] },
-      { geo: new THREE.CylinderGeometry(0.042, 0.052, 1.20, 5), pos: [0.46, 0.60, 0] },
-      { geo: new THREE.ConeGeometry(0.052, 0.24, 5), pos: [0.46, 1.32, 0] },
-      { geo: new THREE.BoxGeometry(1.18, 0.075, 0.075), pos: [0, 0.44, 0] },
-      { geo: new THREE.BoxGeometry(1.18, 0.075, 0.075), pos: [0, 0.92, 0] }
-    ]);
-    const palisadeSpots = [];
-    for (const sideSign of [-1, 1]) {
-      // 北翼山腰防禦木柵防線（取代空曠積木區，與營圍相連成一氣）
-      for (let k = 0; k < 8; k++) {
-        const t = k / 7;
-        palisadeSpots.push({
-          x: sideSign * (8.4 + t * 7.6),
-          z: -7.9 + t * 0.85,
-          rotY: (sideSign < 0 ? 0.12 : -0.12) + ((k % 2) * 0.03 - 0.015),
-          scale: 0.95 + (k % 3) * 0.05
-        });
-      }
-      // 東西後方連營圍柵（退至營帳外側 x=±16.2，中軍大道 z=0 留出營門）
-      for (const zPos of [-6.5, -5.4, -4.3, -3.2, -2.0, 2.0, 3.2, 4.3, 5.4, 6.5]) {
-        palisadeSpots.push({
-          x: sideSign * 16.2,
-          z: zPos,
-          rotY: Math.PI / 2 + (Math.sin(zPos) * 0.04),
-          scale: 0.96 + (Math.abs(Math.round(zPos)) % 2) * 0.06
-        });
-      }
-      // 南側本陣外緣拒柵
-      for (let k = 0; k < 5; k++) {
-        const t = k / 4;
-        palisadeSpots.push({
-          x: sideSign * (15.6 - t * 5.0),
-          z: 7.0 + t * 0.9,
-          rotY: sideSign < 0 ? -0.18 : 0.18,
-          scale: 0.94 + (k % 2) * 0.05
-        });
-      }
-    }
-    const palisadeMesh = new THREE.InstancedMesh(
-      stakeGeo,
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, metalness: 0.05 }),
-      palisadeSpots.length
-    );
-    palisadeMesh.receiveShadow = true;
-    palisadeMesh.frustumCulled = false;
-    palisadeMesh.userData.palisadeSpots = palisadeSpots;
-    campFortificationsGroup.add(palisadeMesh);
 
     const poleGeo = mergeStaticGeos([
       { geo: new THREE.CylinderGeometry(0.020, 0.028, 2.55, 5), pos: [0, 1.275, 0] },
@@ -815,23 +760,7 @@ const Battle3DEngine = (function () {
     if (!campFortificationsGroup) return;
     const obj = new THREE.Object3D();
     const mountain = currentBattleTerrain === 'mountain';
-    const [palisadeMesh, campPoles, campPennants] = campFortificationsGroup.children;
-
-    if (palisadeMesh && palisadeMesh.userData.palisadeSpots) {
-      const woodPalette = [0x4c3520, 0x3f2b19, 0x573e26];
-      palisadeMesh.userData.palisadeSpots.forEach((spot, i) => {
-        const px = mountain ? spot.x * 0.85 : spot.x;
-        const pz = mountain ? spot.z * 0.62 : spot.z;
-        obj.position.set(px, getBattleTerrainHeight(px, pz), pz);
-        obj.rotation.set(0, spot.rotY, 0);
-        obj.scale.setScalar(mountain ? spot.scale * 0.88 : spot.scale);
-        obj.updateMatrix();
-        palisadeMesh.setMatrixAt(i, obj.matrix);
-        palisadeMesh.setColorAt(i, new THREE.Color(woodPalette[i % woodPalette.length]).convertSRGBToLinear());
-      });
-      palisadeMesh.instanceMatrix.needsUpdate = true;
-      if (palisadeMesh.instanceColor) palisadeMesh.instanceColor.needsUpdate = true;
-    }
+    const [campPoles, campPennants] = campFortificationsGroup.children;
 
     if (campPoles && campPennants && campPoles.userData.campFlags) {
       const sideAPalette = [0x1e4b85, 0x265c9e, 0x183c6b];
@@ -1456,14 +1385,14 @@ const Battle3DEngine = (function () {
       });
     });
 
-    // 南北山崖巨石群
+    // 南北山崖深色岩群
     const rockSpots = [
-      [-17, -12.0, 2.6, 'rock_a'], [-12, -13.2, 3.1, 'rock_b'], [12, -13.0, 2.8, 'rock_a'], [17, -11.8, 3.2, 'rock_b'],
-      [-17, 12.0, 2.8, 'rock_b'], [-12, 13.2, 2.5, 'rock_a'], [12, 13.0, 3.0, 'rock_b'], [17, 11.8, 2.7, 'rock_a']
+      [-18, -13.8, 2.4, 'rock_a'], [-13, -14.8, 2.8, 'rock_b'], [13, -14.6, 2.6, 'rock_a'], [18, -13.6, 2.9, 'rock_b'],
+      [-18, 13.8, 2.5, 'rock_b'], [-13, 14.8, 2.3, 'rock_a'], [13, 14.6, 2.7, 'rock_b'], [18, 13.6, 2.5, 'rock_a']
     ];
     rockSpots.forEach(([rx, rz, rh, rkey], i) => {
       const rk = spawnModelInstance(rkey, {
-        targetHeight: rh * 0.25, castShadow: true, tintHex: 0x7d7868, tintStrength: 0.85
+        targetHeight: rh * 0.24, castShadow: true, tintHex: 0x3e352c, tintStrength: 0.92
       });
       if (rk) {
         rk.group.position.set(rx, 0.15, rz);
@@ -2207,7 +2136,7 @@ const Battle3DEngine = (function () {
       square: [[1, -3.8], [1, 3.8], [5, -3.8], [3, 0], [5, 3.8]],
       staggered: [[2, -5.4], [4, -2.7], [6, 0], [8, 2.7], [10, 5.4]],
       wings: [[0, -6.2], [2, 0], [6, -3.2], [0, 6.2], [6, 3.2]],
-      column: [[3, 0], [0, 0], [9, 0], [6, 0], [12, 0]],
+      column: [[2.4, 0], [0, 0], [6.4, 0], [4.4, 0], [8.4, 0]],
       cone: [[2, -2.5], [0, 0], [5, 2.5], [3, 5], [7, -5]]
     };
     const index = ['air', 'armor', 'air_defense', 'naval', 'support'].indexOf(token.cat);
@@ -3409,9 +3338,9 @@ const Battle3DEngine = (function () {
 
   function resetCamera() {
     camTheta = cameraView === 'cinematic' ? -0.16 : 0;
-    camPhi = cameraView === 'cinematic' ? 1.17 : 0.78;
+    camPhi = cameraView === 'cinematic' ? 1.07 : 0.78;
     camRadius = (container && container.clientWidth < 720) ? 21 : cameraView === 'cinematic' ? 17.2 : 24.5;
-    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 32);
+    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 21.5);
     camFocusOffset.set(0, 0, 0);
     camFocusTarget.set(0, 0, 0);
     camZoomOffset = 0;

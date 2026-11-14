@@ -118,7 +118,7 @@ try:
         print("[TEST 3a] Models, troops and name labels ready")
         assert terrain_state["reserveSoldiers"] == 0
         assert terrain_state["reserveFlags"] == 0
-        assert terrain_state["campFortifications"] == 3
+        assert terrain_state["campFortifications"] == 2
         assert terrain_state["campBannerCount"] == (14 if terrain_state["lowPowerDevice"] else 24)
         assert terrain_state['battleMotionActive'], 'All battalions must keep fighting between resolved volleys'
         page.evaluate("""() => {

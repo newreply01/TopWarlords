@@ -4422,6 +4422,8 @@ async function showBattle(res, opts = {}) {
   updateFieldStrength();
   $('#fieldPhase').textContent = '兩軍列陣';
   $('#battleRecentEvents').replaceChildren();
+  const skillTickerInit = $('#battleSkillTicker');
+  if (skillTickerInit) { skillTickerInit.hidden = true; skillTickerInit.replaceChildren(); }
   $('#battleLog').innerHTML = '';
   $('#phaseTitle').textContent = '戰 場 就 緒';
   const initTimer = $('#camTimer');
@@ -4547,10 +4549,26 @@ async function showBattle(res, opts = {}) {
           updateFieldStrength();
         }
         playFx(ln);
-        if (ln.kind === 'info' && !ln.skillActivation) return;
-        const event = document.createElement('div');
+        if (ln.kind === 'info' && !ln.skillActivation && !ln.ambushActivation) return;
         const attacker = UNIT_MAP[ln.auid?.split('-')[0]];
         const target = UNIT_MAP[ln.tuid?.split('-')[0]];
+        if (ln.skillActivation || ln.ambushActivation) {
+          const ticker = $('#battleSkillTicker');
+          if (ticker) {
+            const rawTxt = String(ln.text || '');
+            const colonIdx = rawTxt.indexOf('：');
+            const descTxt = colonIdx >= 0 ? rawTxt.slice(colonIdx + 1).trim() : rawTxt;
+            ticker.className = `battle-skill-ticker side-${ln.side === 'A' ? 'a' : 'b'}`;
+            ticker.innerHTML = `<span class="skill-tag">${ln.side === 'A' ? '我軍' : '敵軍'} · ${esc(attacker?.name || '')} ⚡ ${esc(ln.brevity || '')}</span><span class="skill-desc">${esc(descTxt)}</span>`;
+            ticker.hidden = false;
+            clearTimeout(ticker._hideTimer);
+            ticker._hideTimer = setTimeout(() => {
+              if (token === playToken) ticker.hidden = true;
+            }, 3500);
+          }
+        }
+        if (ln.kind === 'info' && !ln.skillActivation) return;
+        const event = document.createElement('div');
         event.textContent = ln.skillActivation ? `${attacker?.name || ''} · ${ln.brevity}`
           : `${attacker?.name || ''} → ${target?.name || ''} · ${ln.kind === 'miss' ? 'MISS' : ln.kind === 'block' ? '格擋' : ['kill', 'capture'].includes(ln.kind) ? '擊破' : `−${ln.dmg || 0}`}`;
         event.title = ln.text;

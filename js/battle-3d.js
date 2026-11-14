@@ -2330,11 +2330,19 @@ const Battle3DEngine = (function () {
     const tToken = ln.tuid ? unitsMap.get(ln.tuid) : null;
     if (!aToken && !tToken) return;
 
-    // 1. 高費名將 ($4~$5) 戰法發動或斬將時觸發光榮風格橫幅 Cut-in (節流防刷屏)
+    // 1. 戰法發動時於部隊上方顯示 3D 浮動技能字，並觸發光榮風格橫幅 Cut-in（帶入技能名稱與說明）
     const nowMs = combatNow();
-    if (!ln.finale && aToken && ln.skillActivation && nowMs - lastCutinAt > 6000) {
-      lastCutinAt = nowMs;
-      triggerWarlordCutin(aToken, ln.kind === 'kill');
+    if (!ln.finale && aToken && (ln.skillActivation || ln.ambushActivation)) {
+      spawnFloatingDamagePopup(
+        aToken.mesh.position,
+        `⚡ ${ln.brevity || '戰法發動'}`,
+        aToken.side === 'A' ? '#38bdf8' : '#fbbf24',
+        true
+      );
+      if (nowMs - lastCutinAt > 1800) {
+        lastCutinAt = nowMs;
+        triggerWarlordCutin(aToken, ln.kind === 'kill', ln);
+      }
     }
 
     // 2. 攝影機微聚焦於交鋒熱區
@@ -2950,7 +2958,7 @@ const Battle3DEngine = (function () {
     const div = document.createElement('div');
     div.id = 'warlordCutinBanner';
     div.style.cssText = [
-      'position:absolute;top:14px;left:50%;transform:translateX(-50%) skewX(-12deg) scale(0.9);',
+      'position:absolute;top:14px;left:50%;transform:translateX(-50%) skewX(-12deg) scale(0.9);max-width:min(560px, calc(100vw - 32px));box-sizing:border-box;',
       'z-index:30;display:flex;align-items:center;gap:14px;padding:8px 34px 8px 16px;',
       'background:linear-gradient(100deg, rgba(15,23,42,0.94) 0%, rgba(30,24,18,0.92) 72%, rgba(217,119,6,0.28) 100%);',
       'border:1.5px solid #fbbf24;border-left:5px solid #fbbf24;border-radius:3px;',
@@ -2969,28 +2977,38 @@ const Battle3DEngine = (function () {
     setTimeout(() => { vig.style.opacity = '0'; }, 180);
   }
 
-  function triggerWarlordCutin(token, isKill = false) {
+  function triggerWarlordCutin(token, isKill = false, ln = null) {
     const el = container ? container.querySelector('#warlordCutinBanner') : null;
     if (!el) return;
     const meta = CAT_META[token.cat] || CAT_META.armor;
-    const actionLabel = isKill ? '一騎討・陣斬敵將！' : `${token.wep || meta.label}・無雙奧義！`;
+    const skillName = ln?.brevity || '';
+    const rawText = String(ln?.text || '');
+    const colonIdx = rawText.indexOf('：');
+    const skillDesc = colonIdx >= 0 ? rawText.slice(colonIdx + 1).trim() : '';
+    const actionLabel = isKill
+      ? '一騎討・陣斬敵將！'
+      : (skillName ? `⚡ ${skillName}` : `${token.wep || meta.label}・無雙奧義！`);
+    const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light';
     const borderCol = token.side === 'A' ? '#38bdf8' : '#f87171';
     const accentGlow = token.side === 'A' ? 'rgba(56,189,248,0.32)' : 'rgba(239,68,68,0.32)';
 
-    el.style.borderColor = '#fbbf24';
+    el.style.borderColor = isLightTheme ? '#f59e0b' : '#fbbf24';
     el.style.borderLeftColor = borderCol;
-    el.style.background = `linear-gradient(100deg, rgba(10,16,28,0.95) 0%, rgba(28,20,16,0.92) 68%, ${accentGlow} 100%)`;
+    el.style.background = isLightTheme
+      ? `linear-gradient(100deg, rgba(15,23,42,0.99) 0%, rgba(69,26,3,0.99) 68%, ${accentGlow} 100%)`
+      : `linear-gradient(100deg, rgba(20,15,11,0.96) 0%, rgba(42,33,22,0.94) 68%, ${accentGlow} 100%)`;
     el.innerHTML = `
       <img src="${PORTRAIT_DIR}${token.id}.jpg?v=${ASSET_VER}"
-           style="width:68px;height:68px;border-radius:50%;object-fit:cover;object-position:center 15%;border:3px solid #fbbf24;box-shadow:0 0 14px ${accentGlow};transform:skewX(12deg);flex-shrink:0;"
+           style="width:62px;height:62px;border-radius:50%;object-fit:cover;object-position:center 15%;border:3px solid #fbbf24;box-shadow:0 0 14px ${accentGlow};transform:skewX(12deg);flex-shrink:0;"
            onerror="this.style.display='none'">
-      <div style="line-height:1.25;transform:skewX(12deg);">
-        <div style="font-size:11px;color:#fbbf24;font-weight:900;letter-spacing:2px;text-shadow:0 1px 4px #000;">
-          ${token.side === 'A' ? '【我軍主將震威】' : '【敵軍猛將強襲】'} · ${meta.label}
+      <div style="line-height:1.25;transform:skewX(12deg);min-width:0;">
+        <div style="font-size:11px;color:#fbbf24;font-weight:900;letter-spacing:1.5px;text-shadow:0 1px 4px #000;">
+          ${token.side === 'A' ? '【我軍戰法發動】' : '【敵軍戰法發動】'} · ${meta.label}
         </div>
-        <div style="font-size:21px;font-weight:900;font-family:'Noto Serif TC',serif;color:#fff7e6;margin-top:2px;text-shadow:0 2px 6px #000;">
-          ${token.name} <span style="font-size:14px;color:${borderCol};font-weight:800;margin-left:8px;">${actionLabel}</span>
+        <div style="font-size:19px;font-weight:900;font-family:'Noto Serif TC',serif;color:#fff7e6;margin-top:2px;text-shadow:0 2px 6px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          ${token.name} <span style="font-size:14px;color:${borderCol};font-weight:800;margin-left:6px;">${actionLabel}</span>
         </div>
+        ${skillDesc ? `<div style="font-size:12px;color:#fde68a;font-weight:600;margin-top:3px;text-shadow:0 1px 3px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${skillDesc}</div>` : ''}
       </div>
     `;
     el.style.opacity = '1';
@@ -3001,7 +3019,7 @@ const Battle3DEngine = (function () {
     cutinTimeout = setTimeout(() => {
       el.style.opacity = '0';
       el.style.transform = 'translateX(-50%) skewX(-12deg) scale(0.9)';
-    }, 1250);
+    }, 2200);
   }
 
   /* ----------------------------------------------------

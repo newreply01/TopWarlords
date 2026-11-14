@@ -99,6 +99,7 @@ const Battle3DEngine = (function () {
   let riverTexRef = null;
   let bannerTexCache = new Map();
   let baguaTexCache = new Map();
+  let vfxTexCache = new Map();
   let hitStopUntil = 0;
   let shakePower = 0;
   const camShakeOffset = new THREE.Vector3(0, 0, 0);
@@ -2457,10 +2458,15 @@ const Battle3DEngine = (function () {
         } else if (ln.kind === 'block') {
           performShieldBlockDome(tToken);
           spawnFloatingDamagePopup(tToken.mesh.position, '🛡️ 鐵壁格擋', '#fbbf24', false);
+          if (ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation) {
+            performWarlordSkillVfx(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, true);
+          }
         } else if (ln.dmg && ln.dmg > 0) {
           if (!ln.duel) triggerSquadAnim(tToken, 'hit', 1.2);
-          const isUltimateFx = Boolean(ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation || ln.kind === 'kill');
-          performWarlordSkillVfx(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, isUltimateFx);
+          const isSkillOrAmbush = Boolean(ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation);
+          if (isSkillOrAmbush) {
+            performWarlordSkillVfx(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, true);
+          }
           if (ln.skillTriggered && !ln.finale) {
             const tagSuffix = ln.skillTag ? `・${ln.skillTag}` : '';
             spawnFloatingDamagePopup(
@@ -2692,25 +2698,21 @@ const Battle3DEngine = (function () {
     const start = token.mesh.position.clone().add(new THREE.Vector3(0, 1.5, 0));
     const end = target.mesh.position.clone().add(new THREE.Vector3(0, 1.0, 0));
     const boltGroup = new THREE.Group();
-    const core = new THREE.Mesh(
-      new THREE.SphereGeometry(0.22, 10, 8),
-      new THREE.MeshBasicMaterial({ color: token.side === 'A' ? 0x67e8f9 : 0xfb923c })
-    );
-    const halo = new THREE.Mesh(
-      new THREE.SphereGeometry(0.38, 10, 8),
-      new THREE.MeshBasicMaterial({
-        color: token.side === 'A' ? 0x38bdf8 : 0xef4444,
-        transparent: true,
-        opacity: 0.42,
-        depthWrite: false
-      })
-    );
-    boltGroup.add(core, halo);
+    const isFire = token.skillFx === 'fire_storm' || token.side === 'B';
+    const boltSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: getSkillVfxTexture(isFire ? 'flame_tongue' : 'talisman_scroll'),
+      transparent: true,
+      opacity: 0.94,
+      depthWrite: false,
+      fog: false
+    }));
+    boltSprite.scale.set(isFire ? 0.92 : 0.62, 1.15, 1);
+    boltGroup.add(boltSprite);
     boltGroup.position.copy(start);
     scene.add(boltGroup);
     projectiles.push({
       mesh: boltGroup,
-      disposableChildren: [core, halo],
+      disposableChildren: [boltSprite],
       start,
       end,
       startedAt: combatNow(),
@@ -2719,7 +2721,7 @@ const Battle3DEngine = (function () {
       miss: false,
       isGLB: false,
       isComposite: true,
-      impactColor: token.side === 'A' ? 0x67e8f9 : 0xf97316,
+      impactColor: isFire ? 0xf97316 : 0x38bdf8,
       impactCount: 14,
       triggerShockwave: true
     });
@@ -2789,37 +2791,67 @@ const Battle3DEngine = (function () {
     }
   }
 
-  /* 運籌帷幄：軍師陣法八卦印、火計焦土或轟雷戰法 */
+  /* 運籌帷幄：軍師手繪太極八卦陣、火蓮火舌或金篆兵符 */
   function performStrategistFormation(aToken, tToken, logText) {
     triggerSquadAnim(aToken, 'attack', 1.25);
     const isFire = logText.includes('火') || logText.includes('砲') || logText.includes('焚') || logText.includes('焰');
     const isStorm = logText.includes('雷') || logText.includes('風') || logText.includes('天');
     const tgtPos = tToken.mesh.position.clone();
+    const now = combatNow();
 
-    // 地面旋轉八卦金陣特效
-    const ringGeo = new THREE.PlaneGeometry(2.6, 2.6);
+    // 地面手繪太極八卦陣特效
+    const ringGeo = new THREE.PlaneGeometry(3.4, 3.4);
     const ringMat = new THREE.MeshBasicMaterial({
-      map: getBaguaTexture(isFire ? '#f97316' : '#fbbf24'),
+      map: getSkillVfxTexture(isFire ? 'fire_lotus' : isStorm ? 'thunder_seal' : 'bagua_seal'),
       transparent: true,
-      opacity: 0.88,
+      opacity: 0.94,
       depthWrite: false,
+      fog: false,
       side: THREE.DoubleSide
     });
     const baguaMesh = new THREE.Mesh(ringGeo, ringMat);
     baguaMesh.rotation.x = -Math.PI / 2;
-    baguaMesh.position.set(tgtPos.x, tgtPos.y + 0.08, tgtPos.z);
+    baguaMesh.position.set(tgtPos.x, tgtPos.y + 0.09, tgtPos.z);
     scene.add(baguaMesh);
     shockwaves.push({
       mesh: baguaMesh,
-      startedAt: combatNow(),
-      duration: 820,
-      startScale: 0.45,
-      endScale: 1.28,
-      opacity: 0.88,
+      startedAt: now,
+      duration: 840,
+      startScale: 0.55,
+      endScale: 1.25,
+      opacity: 0.94,
       spinRate: 1.8
     });
 
-    spawnWarSmoke(tgtPos, 2, isFire ? 0x3b2618 : 0x4b453d, 2.1, 0.42);
+    // 2 道上升之手繪兵符或火舌 Sprite（絕不用幾何光柱）
+    const spriteKey = isFire ? 'flame_tongue' : 'talisman_scroll';
+    for (let k = 0; k < 2; k++) {
+      if (particleSystems.length >= 210) break;
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: getSkillVfxTexture(spriteKey),
+        transparent: true,
+        opacity: 0.92,
+        depthWrite: false,
+        fog: false
+      }));
+      sp.scale.set(isFire ? 1.55 : 0.78, isFire ? 1.85 : 1.5, 1);
+      sp.position.set(tgtPos.x + (k === 0 ? -0.65 : 0.65), tgtPos.y + 0.95, tgtPos.z + (k === 0 ? 0.35 : -0.35));
+      sp.renderOrder = 25;
+      scene.add(sp);
+      particleSystems.push({
+        mesh: sp,
+        vx: 0,
+        vy: 0.016,
+        vz: 0,
+        startedAt: now,
+        duration: 560,
+        opacity: 0.92,
+        gravity: 0,
+        fadeInOut: true
+      });
+    }
+
+    spawnWarSmoke(tgtPos, 2, isFire ? 0x3b2618 : 0x4b453d, 2.0, 0.38);
     spawnShockwaveRing(tgtPos, isFire ? 0xf97316 : (isStorm ? 0x38bdf8 : 0xfbbf24), 2.8, 480);
     playFieldSound(isFire ? 'fire_attack' : 'strategy_gong', aToken, 0.72);
 
@@ -2829,59 +2861,639 @@ const Battle3DEngine = (function () {
       triggerCameraShake(0.32);
       triggerHitStop(70);
     } else {
-      // 天雷光柱驟降
-      const beamGeo = new THREE.CylinderGeometry(0.14, 0.42, 7.5, 8);
-      const beamMat = new THREE.MeshBasicMaterial({
-        color: isStorm ? 0x7dd3fc : 0xfef08a,
-        transparent: true,
-        opacity: 0.85,
-        depthWrite: false
-      });
-      const beam = new THREE.Mesh(beamGeo, beamMat);
-      beam.position.set(tgtPos.x, tgtPos.y + 3.6, tgtPos.z);
-      scene.add(beam);
-      particleSystems.push({
-        mesh: beam,
-        vx: 0, vy: 0, vz: 0,
-        startedAt: combatNow(),
-        duration: 280,
-        opacity: 0.85,
-        gravity: 0
-      });
       spawnSparkBurst(tgtPos.clone().add(new THREE.Vector3(0, 0.85, 0)), 14, isStorm ? 0x38bdf8 : 0xfde047);
-      triggerCameraShake(0.26);
+      triggerCameraShake(0.22);
     }
   }
 
   function performShieldBlockDome(tToken) {
     triggerSquadAnim(tToken, 'hit', 1.1);
-    const center = tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.55, 0));
+    const center = tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.75, 0));
     spawnSparkBurst(center, 12, 0xfbbf24);
-    const domeGeo = new THREE.SphereGeometry(0.92, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.55);
-    const domeMat = new THREE.MeshBasicMaterial({
-      color: 0xfbbf24,
-      transparent: true,
-      opacity: 0.45,
-      wireframe: true,
-      depthWrite: false
-    });
-    const dome = new THREE.Mesh(domeGeo, domeMat);
-    dome.position.set(tToken.mesh.position.x, tToken.mesh.position.y + 0.05, tToken.mesh.position.z);
-    scene.add(dome);
-    particleSystems.push({
-      mesh: dome,
-      vx: 0, vy: 0, vz: 0,
-      startedAt: combatNow(),
-      duration: 360,
-      opacity: 0.45,
-      gravity: 0,
-      scaleGrowth: 0.015
-    });
+    spawnShockwaveRing(tToken.mesh.position, 0xf59e0b, 2.1, 380);
+    if (particleSystems.length < 210) {
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: getSkillVfxTexture('bronze_shield'),
+        transparent: true,
+        opacity: 0.96,
+        depthWrite: false,
+        fog: false
+      }));
+      sp.scale.set(1.55, 1.7, 1);
+      sp.position.set(tToken.mesh.position.x, tToken.mesh.position.y + 1.05, tToken.mesh.position.z);
+      sp.renderOrder = 26;
+      scene.add(sp);
+      particleSystems.push({
+        mesh: sp,
+        vx: 0, vy: 0.008, vz: 0,
+        startedAt: combatNow(),
+        duration: 420,
+        opacity: 0.96,
+        gravity: 0,
+        fadeInOut: true
+      });
+    }
     applyImpactReaction(tToken, 0.08);
   }
 
-  /* 名將專屬戰法 3D 視覺特效（八大戰法特效家族全數映射 125 位武將） */
-  function performWarlordSkillVfx(aToken, tToken, fxKey, ln = null, isUltimate = false) {
+  const VFX_PALETTES = {
+    fire_storm:      { primary: '#f97316', accent: '#fde047', dark: '#7c2d12', border: '#ef4444' },
+    thunder_strike:  { primary: '#38bdf8', accent: '#e0f2fe', dark: '#0c4a6e', border: '#0284c7' },
+    bagua_array:     { primary: '#f59e0b', accent: '#fef3c7', dark: '#78350f', border: '#d97706' },
+    overlord_cleave: { primary: '#e11d48', accent: '#fbbf24', dark: '#4c0519', border: '#f43f5e' },
+    piercing_volley: { primary: '#fbbf24', accent: '#fef08a', dark: '#713f12', border: '#d97706' },
+    tidal_surge:     { primary: '#06b6d4', accent: '#ecfeff', dark: '#083344', border: '#0284c7' },
+    aegis_command:   { primary: '#10b981', accent: '#fef3c7', dark: '#064e3b', border: '#d97706' },
+    shadow_ambush:   { primary: '#a855f7', accent: '#f3e8ff', dark: '#3b0764', border: '#9333ea' }
+  };
+
+  function getSkillVfxTexture(kind) {
+    if (vfxTexCache.has(kind)) return vfxTexCache.get(kind);
+    const isTall = kind === 'talisman_scroll' || kind === 'meteor_fireball' || kind === 'dragon_arrow';
+    const c = document.createElement('canvas');
+    c.width = isTall ? 256 : 512;
+    c.height = 512;
+    const ctx = c.getContext('2d');
+    const W = c.width;
+    const H = c.height;
+    const cx = W / 2;
+    const cy = H / 2;
+
+    if (kind === 'bagua_seal') {
+      const bg = ctx.createRadialGradient(cx, cy, 40, cx, cy, 248);
+      bg.addColorStop(0, 'rgba(15, 12, 8, 0.72)');
+      bg.addColorStop(0.76, 'rgba(38, 24, 10, 0.58)');
+      bg.addColorStop(1, 'rgba(15, 12, 8, 0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      [234, 212, 146, 84].forEach((r, idx) => {
+        ctx.strokeStyle = idx % 2 === 0 ? '#fbbf24' : '#d97706';
+        ctx.lineWidth = idx === 0 ? 7 : 4;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      for (let i = 0; i < 24; i++) {
+        const a = (i * Math.PI) / 12;
+        ctx.strokeStyle = i % 3 === 0 ? '#fde68a' : 'rgba(251, 191, 36, 0.65)';
+        ctx.lineWidth = i % 3 === 0 ? 4 : 2;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(a) * 212, cy + Math.sin(a) * 212);
+        ctx.lineTo(cx + Math.cos(a) * 234, cy + Math.sin(a) * 234);
+        ctx.stroke();
+      }
+      const trigrams = ['☰', '☱', '☲', '☳', '☴', '☵', '☶', '☷'];
+      const gates = ['開', '休', '生', '傷', '杜', '景', '死', '驚'];
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4 - Math.PI / 2;
+        ctx.save();
+        ctx.translate(cx + Math.cos(a) * 180, cy + Math.sin(a) * 180);
+        ctx.rotate(a + Math.PI / 2);
+        ctx.fillStyle = '#fef3c7';
+        ctx.font = 'bold 34px "Noto Serif TC", serif';
+        ctx.fillText(trigrams[i], 0, 0);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(cx + Math.cos(a) * 116, cy + Math.sin(a) * 116);
+        ctx.fillStyle = 'rgba(28, 19, 10, 0.92)';
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, 22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fde047';
+        ctx.font = '900 24px "Noto Serif TC", serif';
+        ctx.fillText(gates[i], 0, 1);
+        ctx.restore();
+      }
+      // 陰陽雙魚太極圖
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.beginPath();
+      ctx.arc(0, 0, 74, -Math.PI / 2, Math.PI / 2);
+      ctx.arc(0, 37, 37, Math.PI / 2, -Math.PI / 2, true);
+      ctx.arc(0, -37, 37, Math.PI / 2, -Math.PI / 2, false);
+      ctx.fillStyle = '#fef3c7';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, 0, 74, Math.PI / 2, -Math.PI / 2);
+      ctx.arc(0, -37, 37, -Math.PI / 2, Math.PI / 2, true);
+      ctx.arc(0, 37, 37, -Math.PI / 2, Math.PI / 2, false);
+      ctx.fillStyle = '#1c1917';
+      ctx.fill();
+      ctx.fillStyle = '#1c1917';
+      ctx.beginPath(); ctx.arc(0, -37, 11, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fef3c7';
+      ctx.beginPath(); ctx.arc(0, 37, 11, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    } else if (kind === 'talisman_scroll') {
+      ctx.fillStyle = 'rgba(24, 15, 6, 0.92)';
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(cx, 18);
+      ctx.lineTo(W - 26, 68);
+      ctx.lineTo(W - 26, H - 52);
+      ctx.lineTo(cx, H - 16);
+      ctx.lineTo(26, H - 52);
+      ctx.lineTo(26, 68);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = '#fde68a';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(42, 82, W - 84, H - 154);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fde047';
+      ctx.font = '900 54px "Noto Serif TC", serif';
+      ['奇', '門', '八', '陣', '敕'].forEach((ch, idx) => {
+        ctx.fillText(ch, cx, 146 + idx * 72);
+      });
+    } else if (kind === 'fire_lotus') {
+      const bg = ctx.createRadialGradient(cx, cy, 30, cx, cy, 246);
+      bg.addColorStop(0, 'rgba(124, 45, 18, 0.85)');
+      bg.addColorStop(0.65, 'rgba(69, 10, 10, 0.65)');
+      bg.addColorStop(1, 'rgba(20, 5, 5, 0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      for (let i = 0; i < 12; i++) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate((i * Math.PI) / 6);
+        const grad = ctx.createLinearGradient(0, 40, 0, 236);
+        grad.addColorStop(0, '#fef08a');
+        grad.addColorStop(0.45, '#f97316');
+        grad.addColorStop(1, 'rgba(220, 38, 38, 0.1)');
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#7f1d1d';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, 38);
+        ctx.quadraticCurveTo(44, 130, 0, 238);
+        ctx.quadraticCurveTo(-44, 130, 0, 38);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.arc(cx, cy, 128, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, 62, 0, Math.PI * 2); ctx.stroke();
+    } else if (kind === 'flame_tongue') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx, H - 24);
+      ctx.bezierCurveTo(60, H - 80, 74, 210, 188, 120);
+      ctx.quadraticCurveTo(212, 190, 250, 26);
+      ctx.quadraticCurveTo(318, 175, 344, 110);
+      ctx.bezierCurveTo(445, 220, 442, H - 78, cx, H - 24);
+      ctx.closePath();
+      const g1 = ctx.createLinearGradient(0, 24, 0, H - 24);
+      g1.addColorStop(0, '#facc15');
+      g1.addColorStop(0.42, '#ea580c');
+      g1.addColorStop(0.85, '#b91c1c');
+      g1.addColorStop(1, 'rgba(69, 10, 10, 0)');
+      ctx.fillStyle = g1;
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = 'rgba(42, 10, 10, 0.85)';
+      ctx.stroke();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx, H - 38);
+      ctx.bezierCurveTo(150, H - 90, 175, 260, cx, 132);
+      ctx.bezierCurveTo(335, 260, 362, H - 90, cx, H - 38);
+      ctx.fillStyle = '#fef08a';
+      ctx.fill();
+      ctx.restore();
+    } else if (kind === 'meteor_fireball') {
+      const tail = ctx.createLinearGradient(cx, 24, cx, H - 40);
+      tail.addColorStop(0, 'rgba(127, 29, 29, 0)');
+      tail.addColorStop(0.45, 'rgba(234, 88, 12, 0.72)');
+      tail.addColorStop(0.85, '#fbbf24');
+      tail.addColorStop(1, '#ffffff');
+      ctx.fillStyle = tail;
+      ctx.beginPath();
+      ctx.moveTo(cx, 20);
+      ctx.quadraticCurveTo(cx + 88, 280, cx + 64, H - 88);
+      ctx.arc(cx, H - 92, 64, 0, Math.PI);
+      ctx.quadraticCurveTo(cx - 88, 280, cx, 20);
+      ctx.fill();
+      ctx.fillStyle = '#fef9c3';
+      ctx.beginPath();
+      ctx.arc(cx, H - 94, 34, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (kind === 'lightning_bolt') {
+      const pts = [
+        [244, 14], [286, 98], [218, 176], [292, 248],
+        [204, 336], [278, 412], [238, 496]
+      ];
+      const forks = [
+        [[218, 176], [122, 248], [86, 314]],
+        [[292, 248], [392, 324], [428, 396]],
+        [[204, 336], [134, 416]]
+      ];
+      const strokePath = (coords, width, color) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        coords.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
+        ctx.stroke();
+      };
+      strokePath(pts, 56, 'rgba(12, 74, 110, 0.75)');
+      forks.forEach(f => strokePath(f, 34, 'rgba(12, 74, 110, 0.7)'));
+      strokePath(pts, 32, '#0284c7');
+      forks.forEach(f => strokePath(f, 18, '#0284c7'));
+      strokePath(pts, 18, '#38bdf8');
+      forks.forEach(f => strokePath(f, 9, '#7dd3fc'));
+      strokePath(pts, 7, '#ffffff');
+      forks.forEach(f => strokePath(f, 3.5, '#ffffff'));
+    } else if (kind === 'thunder_seal') {
+      const bg = ctx.createRadialGradient(cx, cy, 30, cx, cy, 246);
+      bg.addColorStop(0, 'rgba(12, 74, 110, 0.85)');
+      bg.addColorStop(0.7, 'rgba(15, 23, 42, 0.72)');
+      bg.addColorStop(1, 'rgba(15, 23, 42, 0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      [230, 194, 118].forEach((r, idx) => {
+        ctx.strokeStyle = idx === 1 ? '#e0f2fe' : '#38bdf8';
+        ctx.lineWidth = idx === 0 ? 7 : 4;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+      });
+      ctx.strokeStyle = '#bae6fd';
+      ctx.lineWidth = 6;
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        const r1 = 68, r2 = 152, r3 = 224;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+        ctx.lineTo(cx + Math.cos(a + 0.14) * r2, cy + Math.sin(a + 0.14) * r2);
+        ctx.lineTo(cx + Math.cos(a - 0.04) * r3, cy + Math.sin(a - 0.04) * r3);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(cx + 22, cy - 72); ctx.lineTo(cx - 32, cy + 8); ctx.lineTo(cx + 8, cy + 8);
+      ctx.lineTo(cx - 22, cy + 76); ctx.lineTo(cx + 38, cy - 10); ctx.lineTo(cx - 2, cy - 10);
+      ctx.closePath(); ctx.fill();
+    } else if (kind === 'crescent_wave') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy + 44, 212, Math.PI * 1.12, Math.PI * 1.88, false);
+      ctx.arc(cx, cy + 126, 206, Math.PI * 1.82, Math.PI * 1.18, true);
+      ctx.closePath();
+      const grad = ctx.createRadialGradient(cx, cy, 80, cx, cy, 240);
+      grad.addColorStop(0, '#9f1239');
+      grad.addColorStop(0.55, '#e11d48');
+      grad.addColorStop(0.85, '#fbbf24');
+      grad.addColorStop(1, '#ffffff');
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = 'rgba(24, 6, 12, 0.88)';
+      ctx.stroke();
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.strokeStyle = '#fffbeb';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(cx, cy + 44, 206, Math.PI * 1.18, Math.PI * 1.82, false);
+      ctx.stroke();
+      ctx.restore();
+    } else if (kind === 'earth_fissure') {
+      const bg = ctx.createRadialGradient(cx, cy, 20, cx, cy, 244);
+      bg.addColorStop(0, 'rgba(28, 25, 23, 0.82)');
+      bg.addColorStop(0.75, 'rgba(28, 25, 23, 0.45)');
+      bg.addColorStop(1, 'rgba(28, 25, 23, 0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      for (let i = 0; i < 9; i++) {
+        const a = (i * Math.PI * 2) / 9 + 0.15;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(a);
+        ctx.beginPath();
+        ctx.moveTo(14, -7);
+        ctx.lineTo(108, -14);
+        ctx.lineTo(175, 5);
+        ctx.lineTo(234, 0);
+        ctx.lineTo(165, 18);
+        ctx.lineTo(96, 8);
+        ctx.lineTo(14, 12);
+        ctx.closePath();
+        ctx.fillStyle = '#0c0a09';
+        ctx.fill();
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.arc(cx, cy, 74, 0, Math.PI * 2); ctx.stroke();
+    } else if (kind === 'dragon_arrow') {
+      const glow = ctx.createLinearGradient(cx, 12, cx, H - 18);
+      glow.addColorStop(0, '#fef08a');
+      glow.addColorStop(0.5, 'rgba(245, 158, 11, 0.72)');
+      glow.addColorStop(1, 'rgba(217, 119, 6, 0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(cx - 28, 60, 56, H - 80);
+      // 鋒利黃金大箭鏃
+      ctx.fillStyle = '#fffbeb';
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(cx, 14);
+      ctx.lineTo(cx + 58, 134);
+      ctx.lineTo(cx + 16, 112);
+      ctx.lineTo(cx + 14, H - 70);
+      ctx.lineTo(cx - 14, H - 70);
+      ctx.lineTo(cx - 16, 112);
+      ctx.lineTo(cx - 58, 134);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // 纏繞金龍風環與尾羽
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 7;
+      for (let k = 0; k < 4; k++) {
+        ctx.beginPath();
+        ctx.ellipse(cx, 180 + k * 70, 56 - k * 6, 16, 0.25 * (k % 2 ? 1 : -1), 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.moveTo(cx - 12, H - 108); ctx.lineTo(cx - 46, H - 24); ctx.lineTo(cx - 10, H - 48);
+      ctx.lineTo(cx + 10, H - 48); ctx.lineTo(cx + 46, H - 24); ctx.lineTo(cx + 12, H - 108);
+      ctx.closePath(); ctx.fill();
+    } else if (kind === 'bullseye_seal') {
+      const bg = ctx.createRadialGradient(cx, cy, 24, cx, cy, 244);
+      bg.addColorStop(0, 'rgba(69, 26, 3, 0.84)');
+      bg.addColorStop(0.76, 'rgba(69, 26, 3, 0.45)');
+      bg.addColorStop(1, 'rgba(69, 26, 3, 0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      [226, 160, 88].forEach((r, idx) => {
+        ctx.strokeStyle = idx === 1 ? '#fde047' : '#f59e0b';
+        ctx.lineWidth = idx === 0 ? 8 : 5;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+      });
+      for (let i = 0; i < 4; i++) {
+        const a = (i * Math.PI) / 2;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(a);
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.moveTo(106, 0); ctx.lineTo(192, -16); ctx.lineTo(176, 0); ctx.lineTo(192, 16);
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+    } else if (kind === 'great_wave') {
+      ctx.save();
+      const grad = ctx.createLinearGradient(0, 60, 0, H - 20);
+      grad.addColorStop(0, '#38bdf8');
+      grad.addColorStop(0.45, '#0284c7');
+      grad.addColorStop(1, 'rgba(12, 74, 110, 0.08)');
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(32, H - 24);
+      ctx.bezierCurveTo(60, 140, 190, 48, 332, 92);
+      ctx.bezierCurveTo(230, 134, 248, 224, 386, 206);
+      ctx.bezierCurveTo(458, 248, 474, 390, 466, H - 24);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // 浮世繪浪花爪
+      ctx.fillStyle = '#f8fafc';
+      for (let k = 0; k < 6; k++) {
+        const ang = -0.35 + k * 0.24;
+        const px = 290 + Math.cos(ang) * 95;
+        const py = 112 + Math.sin(ang) * 78;
+        ctx.beginPath(); ctx.arc(px, py, 20 - k * 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.strokeStyle = '#bae6fd';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(76, 380); ctx.quadraticCurveTo(180, 190, 310, 250); ctx.stroke();
+      ctx.restore();
+    } else if (kind === 'whirlpool_seal') {
+      const bg = ctx.createRadialGradient(cx, cy, 18, cx, cy, 244);
+      bg.addColorStop(0, 'rgba(8, 51, 68, 0.92)');
+      bg.addColorStop(0.75, 'rgba(2, 132, 199, 0.42)');
+      bg.addColorStop(1, 'rgba(2, 132, 199, 0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      for (let arm = 0; arm < 5; arm++) {
+        ctx.strokeStyle = arm % 2 === 0 ? '#38bdf8' : '#e0f2fe';
+        ctx.lineWidth = arm % 2 === 0 ? 12 : 6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        const base = (arm * Math.PI * 2) / 5;
+        for (let t = 0; t <= 40; t++) {
+          const r = 24 + t * 5.2;
+          const a = base + t * 0.14;
+          const px = cx + Math.cos(a) * r;
+          const py = cy + Math.sin(a) * r;
+          if (t === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+    } else if (kind === 'bronze_shield') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx, 28);
+      ctx.lineTo(W - 58, 92);
+      ctx.lineTo(W - 44, 304);
+      ctx.lineTo(cx, H - 28);
+      ctx.lineTo(44, 304);
+      ctx.lineTo(58, 92);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 28, 0, H - 28);
+      grad.addColorStop(0, '#92400e');
+      grad.addColorStop(0.5, '#451a03');
+      grad.addColorStop(1, '#1c1917');
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.lineWidth = 14;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.stroke();
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#34d399';
+      ctx.beginPath(); ctx.arc(cx, cy - 8, 128, 0, Math.PI * 2); ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#fde68a';
+      ctx.font = '900 132px "Noto Serif TC", serif';
+      ctx.fillText('禦', cx, cy + 4);
+      ctx.restore();
+    } else if (kind === 'aegis_seal') {
+      const bg = ctx.createRadialGradient(cx, cy, 24, cx, cy, 244);
+      bg.addColorStop(0, 'rgba(6, 78, 59, 0.85)');
+      bg.addColorStop(0.75, 'rgba(20, 83, 45, 0.45)');
+      bg.addColorStop(1, 'rgba(6, 78, 59, 0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      [228, 182, 108].forEach((r, idx) => {
+        ctx.strokeStyle = idx === 1 ? '#fbbf24' : '#34d399';
+        ctx.lineWidth = idx === 0 ? 8 : 5;
+        ctx.beginPath();
+        for (let k = 0; k <= 8; k++) {
+          const a = (k * Math.PI) / 4;
+          const px = cx + Math.cos(a) * r;
+          const py = cy + Math.sin(a) * r;
+          if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      });
+    } else if (kind === 'shadow_cross') {
+      const drawBlade = (angle) => {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(angle);
+        const grad = ctx.createLinearGradient(-230, 0, 230, 0);
+        grad.addColorStop(0, 'rgba(88, 28, 135, 0)');
+        grad.addColorStop(0.2, '#7e22ce');
+        grad.addColorStop(0.5, '#f5d0fe');
+        grad.addColorStop(0.8, '#7e22ce');
+        grad.addColorStop(1, 'rgba(88, 28, 135, 0)');
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = 'rgba(15, 7, 32, 0.92)';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(-234, 0);
+        ctx.quadraticCurveTo(0, -46, 234, 0);
+        ctx.quadraticCurveTo(0, 46, -234, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(-185, 0); ctx.quadraticCurveTo(0, -14, 185, 0);
+        ctx.quadraticCurveTo(0, 14, -185, 0);
+        ctx.fill();
+        ctx.restore();
+      };
+      drawBlade(0.72);
+      drawBlade(-0.72);
+    } else {
+      // shuriken_seal
+      const bg = ctx.createRadialGradient(cx, cy, 20, cx, cy, 244);
+      bg.addColorStop(0, 'rgba(59, 7, 100, 0.86)');
+      bg.addColorStop(0.75, 'rgba(15, 7, 32, 0.56)');
+      bg.addColorStop(1, 'rgba(15, 7, 32, 0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.arc(cx, cy, 210, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#1e1b4b';
+      ctx.strokeStyle = '#e9d5ff';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        const a = (i * Math.PI) / 2;
+        const tipX = cx + Math.cos(a) * 218;
+        const tipY = cy + Math.sin(a) * 218;
+        const midX = cx + Math.cos(a + Math.PI / 4) * 58;
+        const midY = cy + Math.sin(a + Math.PI / 4) * 58;
+        if (i === 0) ctx.moveTo(tipX, tipY); else ctx.lineTo(tipX, tipY);
+        ctx.lineTo(midX, midY);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath(); ctx.arc(cx, cy, 24, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(c);
+    vfxTexCache.set(kind, tex);
+    return tex;
+  }
+
+  function spawnSkillScrollBanner(worldPos, aToken, ln, fxKey) {
+    if (!scene || battleSettled || particleSystems.length >= 210) return;
+    const pal = VFX_PALETTES[fxKey] || VFX_PALETTES.overlord_cleave;
+    const warlordName = aToken?.name || '名將';
+    const rawTitle = ln?.brevity || aToken?.skillFxLabel || '無雙戰法';
+    const fxIcon = ln?.skillFxIcon || aToken?.skillFxIcon || '⚡';
+    const tagStr = ln?.skillTag ? ` · ${ln.skillTag}` : '';
+    const side = aToken?.side === 'A' ? 'A' : 'B';
+    const cacheKey = `banner|${side}|${warlordName}|${rawTitle}|${tagStr}|${fxKey}`;
+
+    let tex = vfxTexCache.get(cacheKey);
+    if (!tex) {
+      const c = document.createElement('canvas');
+      c.width = 512;
+      c.height = 136;
+      const ctx = c.getContext('2d');
+
+      const bg = ctx.createLinearGradient(0, 0, 512, 0);
+      bg.addColorStop(0, 'rgba(15, 23, 42, 0.0)');
+      bg.addColorStop(0.08, 'rgba(14, 10, 8, 0.99)');
+      bg.addColorStop(0.5, side === 'A' ? 'rgba(15, 23, 42, 0.99)' : 'rgba(54, 15, 15, 0.99)');
+      bg.addColorStop(0.92, 'rgba(14, 10, 8, 0.99)');
+      bg.addColorStop(1, 'rgba(15, 23, 42, 0.0)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(16, 12, 480, 112);
+
+      ctx.strokeStyle = pal.border;
+      ctx.lineWidth = 5;
+      ctx.strokeRect(28, 16, 456, 104);
+      ctx.strokeStyle = pal.accent;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(35, 22, 442, 92);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = pal.accent;
+      ctx.font = '800 20px "Noto Sans TC", sans-serif';
+      ctx.fillText(`${side === 'A' ? '▲ 我軍戰法' : '▼ 敵軍戰法'}${tagStr}`, 256, 49);
+
+      ctx.fillStyle = '#fffbeb';
+      ctx.font = '900 32px "Noto Serif TC", "Noto Sans TC", serif';
+      ctx.shadowColor = '#000000';
+      ctx.shadowBlur = 8;
+      ctx.fillText(`${fxIcon} ${warlordName}【${rawTitle}】`, 256, 93);
+
+      tex = new THREE.CanvasTexture(c);
+      vfxTexCache.set(cacheKey, tex);
+    }
+
+    const mat = new THREE.SpriteMaterial({
+      map: tex,
+      transparent: true,
+      opacity: 1,
+      depthTest: false,
+      depthWrite: false,
+      fog: false
+    });
+    const sp = new THREE.Sprite(mat);
+    sp.scale.set(3.6, 0.96, 1);
+    sp.position.set(worldPos.x, worldPos.y + 3.35, worldPos.z);
+    sp.renderOrder = 32;
+    scene.add(sp);
+    particleSystems.push({
+      mesh: sp,
+      vx: 0,
+      vy: 0.004,
+      vz: 0,
+      startedAt: combatNow(),
+      duration: 1450,
+      opacity: 1.0,
+      gravity: 0,
+      fadeInOut: true
+    });
+  }
+
+  /* 名將專屬戰法 3D 視覺特效（八大戰法手繪 Canvas2D 陣圖與演武大招） */
+  function performWarlordSkillVfx(aToken, tToken, fxKey, ln = null, isUltimate = true) {
     if (!scene || battleSettled) return;
     const targetToken = tToken || aToken;
     if (!targetToken) return;
@@ -2889,216 +3501,253 @@ const Battle3DEngine = (function () {
     const anchor = targetToken.mesh.position.clone();
     const casterAnchor = aToken ? aToken.mesh.position.clone() : anchor.clone();
     const groundY = getBattleTerrainHeight(anchor.x, anchor.z);
-    const mult = isUltimate ? 1.65 : 1.05;
-    const durMult = isUltimate ? 1.45 : 1.0;
     const now = combatNow();
     skillVfxPlayed++;
 
-    function addVfxMesh(geo, mat, pos, opts = {}) {
-      if (particleSystems.length >= 210) {
-        geo.dispose();
-        mat.dispose();
-        return;
-      }
+    function addTexPlane(texKey, width, height, pos, opts = {}) {
+      if (particleSystems.length >= 210) return null;
+      const geo = new THREE.PlaneGeometry(width, height);
+      const mat = new THREE.MeshBasicMaterial({
+        map: getSkillVfxTexture(texKey),
+        transparent: true,
+        opacity: opts.opacity ?? 0.96,
+        depthWrite: false,
+        depthTest: opts.depthTest !== undefined ? opts.depthTest : true,
+        fog: false,
+        side: THREE.DoubleSide
+      });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.copy(pos);
-      mesh.renderOrder = 24;
-      if (opts.lookAt) mesh.lookAt(opts.lookAt);
-      if (opts.rotateX !== undefined) mesh.rotateX(opts.rotateX);
-      if (opts.rotateY !== undefined) mesh.rotateY(opts.rotateY);
-      if (opts.rotateZ !== undefined) mesh.rotateZ(opts.rotateZ);
+      mesh.renderOrder = opts.renderOrder || 24;
+      if (opts.alignDir) {
+        mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), opts.alignDir.clone().normalize());
+        if (opts.rollY) mesh.rotateY(opts.rollY);
+      } else {
+        if (opts.rotateX !== undefined) mesh.rotateX(opts.rotateX);
+        if (opts.rotateY !== undefined) mesh.rotateY(opts.rotateY);
+        if (opts.rotateZ !== undefined) mesh.rotateZ(opts.rotateZ);
+      }
       scene.add(mesh);
       particleSystems.push({
         mesh,
         vx: opts.vx || 0,
         vy: opts.vy || 0,
         vz: opts.vz || 0,
+        spinZ: opts.spinZ || 0,
+        spinY: opts.spinY || 0,
+        orbitCenter: opts.orbitCenter || null,
+        orbitRadius: opts.orbitRadius || 0,
+        orbitAngle: opts.orbitAngle || 0,
+        orbitSpeed: opts.orbitSpeed || 2.4,
+        faceOutward: Boolean(opts.faceOutward),
+        fadeInOut: opts.fadeInOut !== false,
         startedAt: now,
-        duration: Math.round((opts.duration || 680) * durMult),
-        opacity: mat.opacity ?? 0.9,
+        duration: Math.round(opts.duration || 950),
+        opacity: opts.opacity ?? 0.96,
         gravity: opts.gravity || 0,
         scaleGrowth: opts.scaleGrowth || 0
       });
+      return mesh;
     }
 
-    function addBaguaRing(pos, colorHex, size, duration, spin = 2.2) {
-      if (shockwaves.length >= 24) return;
-      const ringGeo = new THREE.PlaneGeometry(size, size);
-      const ringMat = new THREE.MeshBasicMaterial({
-        map: getBaguaTexture(colorHex),
+    function addTexSprite(texKey, width, height, pos, opts = {}) {
+      if (particleSystems.length >= 210) return null;
+      const mat = new THREE.SpriteMaterial({
+        map: getSkillVfxTexture(texKey),
         transparent: true,
-        opacity: isUltimate ? 0.96 : 0.82,
+        opacity: opts.opacity ?? 0.96,
         depthWrite: false,
-        side: THREE.DoubleSide
+        depthTest: opts.depthTest !== undefined ? opts.depthTest : true,
+        fog: false
       });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.rotation.x = -Math.PI / 2;
-      ring.position.set(pos.x, getBattleTerrainHeight(pos.x, pos.z) + 0.11, pos.z);
-      ring.renderOrder = 22;
-      scene.add(ring);
-      shockwaves.push({
-        mesh: ring,
+      const sp = new THREE.Sprite(mat);
+      sp.scale.set(width, height, 1);
+      sp.position.copy(pos);
+      sp.renderOrder = opts.renderOrder || 26;
+      scene.add(sp);
+      particleSystems.push({
+        mesh: sp,
+        vx: opts.vx || 0,
+        vy: opts.vy || 0,
+        vz: opts.vz || 0,
+        spinZ: opts.spinZ || 0,
+        fadeInOut: opts.fadeInOut !== false,
         startedAt: now,
-        duration: Math.round(duration * durMult),
-        startScale: 0.45,
-        endScale: 1.45 * (isUltimate ? 1.25 : 1.0),
-        opacity: isUltimate ? 0.96 : 0.78,
-        spinRate: spin
+        duration: Math.round(opts.duration || 900),
+        opacity: opts.opacity ?? 0.96,
+        gravity: opts.gravity || 0,
+        scaleGrowth: opts.scaleGrowth || 0
       });
+      return sp;
     }
 
     const commandCenter = new THREE.Vector3(aToken?.side === 'A' ? 2.2 : -2.2, getBattleTerrainHeight(0, 0), 0);
+    const fxPos = !tToken ? (key === 'bagua_array' ? casterAnchor : commandCenter) : anchor;
+    const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
+
+    // 於對應部隊頭頂升起高反差「【戰法名號卷軸】」讓玩家一目了然
+    spawnSkillScrollBanner(new THREE.Vector3(fxPos.x, fxY, fxPos.z), aToken, ln, key);
 
     if (key === 'fire_storm') {
-      const fxPos = !tToken ? commandCenter : anchor;
-      const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
-      addVfxMesh(
-        new THREE.CylinderGeometry(0.28 * mult, 1.05 * mult, 4.4 * mult, 12, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0xea580c, transparent: true, opacity: 0.92, depthWrite: false, side: THREE.DoubleSide }),
-        new THREE.Vector3(fxPos.x, fxY + 2.0 * mult, fxPos.z),
-        { vy: 0.032, duration: 720, scaleGrowth: 0.018 }
-      );
-      addVfxMesh(
-        new THREE.CylinderGeometry(0.65 * mult, 1.45 * mult, 3.2 * mult, 12, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0xdc2626, transparent: true, opacity: 0.68, depthWrite: false, side: THREE.DoubleSide }),
-        new THREE.Vector3(fxPos.x, fxY + 1.4 * mult, fxPos.z),
-        { vy: 0.024, duration: 800, scaleGrowth: 0.022 }
-      );
-      addVfxMesh(
-        new THREE.TorusGeometry(0.95 * mult, 0.16 * mult, 8, 22),
-        new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.9, depthWrite: false }),
-        new THREE.Vector3(fxPos.x, fxY + 0.45, fxPos.z),
-        { rotateX: Math.PI / 2, vy: 0.055, duration: 680, scaleGrowth: 0.032 }
-      );
-      if (isUltimate) {
-        spawnBattleScar(fxPos, 1.75, true);
-        spawnWarSmoke(fxPos, 2, 0x3b2114, 2.2 * mult, 0.46);
-        playFieldSound('fire_attack', targetToken, 0.65);
+      // 紅蓮火陣 + 高聳烈焰火柱 + 天降赤壁火流星 + 環繞炎舌
+      addTexPlane('fire_lotus', 5.8, 5.8, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
+        rotateX: -Math.PI / 2, spinZ: 1.5, duration: 1080, scaleGrowth: 0.012, renderOrder: 22
+      });
+      addTexSprite('flame_tongue', 3.4, 4.2, new THREE.Vector3(fxPos.x, fxY + 2.1, fxPos.z), {
+        vy: 0.018, scaleGrowth: 0.02, duration: 960, depthTest: false, renderOrder: 28
+      });
+      for (let i = 0; i < 3; i++) {
+        const ang = (i * Math.PI * 2) / 3 + 0.4;
+        const ox = Math.cos(ang) * 0.9;
+        const oz = Math.sin(ang) * 0.9;
+        const meteorDir = new THREE.Vector3(-0.35, -1.0, 0.12).normalize();
+        addTexPlane('meteor_fireball', 1.4, 2.9, new THREE.Vector3(fxPos.x + ox + 1.4, fxY + 5.2 + i * 0.7, fxPos.z + oz - 0.5), {
+          alignDir: meteorDir, rollY: i * 1.05, vx: -0.055, vy: -0.17, vz: 0.02, duration: 540
+        });
+        addTexSprite('flame_tongue', 2.4, 2.9, new THREE.Vector3(fxPos.x + ox, fxY + 1.4, fxPos.z + oz), {
+          vy: 0.022, scaleGrowth: 0.024, duration: 920
+        });
       }
-      spawnShockwaveRing(fxPos, 0xea580c, 3.4 * mult, 740);
-      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), isUltimate ? 26 : 16, 0xf97316);
+      spawnBattleScar(fxPos, 1.8, true);
+      spawnWarSmoke(fxPos, 2, 0x3b2114, 2.3, 0.45);
+      spawnShockwaveRing(fxPos, 0xea580c, 3.6, 760);
+      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.0, 0)), 24, 0xf97316);
+      playFieldSound('fire_attack', targetToken, 0.65);
     } else if (key === 'thunder_strike') {
-      const fxPos = !tToken ? commandCenter : anchor;
-      const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
-      addVfxMesh(
-        new THREE.CylinderGeometry(0.16 * mult, 0.34 * mult, 9.5, 8),
-        new THREE.MeshBasicMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.98, depthWrite: false }),
-        new THREE.Vector3(fxPos.x, fxY + 4.7, fxPos.z),
-        { duration: 520, scaleGrowth: 0.012 }
-      );
-      addVfxMesh(
-        new THREE.CylinderGeometry(0.42 * mult, 0.85 * mult, 9.2, 8),
-        new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.72, depthWrite: false }),
-        new THREE.Vector3(fxPos.x, fxY + 4.6, fxPos.z),
-        { duration: 600, scaleGrowth: 0.02 }
-      );
+      // 地面雷紋法印 + 三道交錯九天分叉天雷
+      addTexPlane('thunder_seal', 5.2, 5.2, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
+        rotateX: -Math.PI / 2, spinZ: -2.1, duration: 980, scaleGrowth: 0.01, renderOrder: 22
+      });
+      addTexPlane('lightning_bolt', 3.4, 6.8, new THREE.Vector3(fxPos.x, fxY + 3.45, fxPos.z), {
+        rotateY: 0.35, duration: 640, renderOrder: 27
+      });
+      addTexPlane('lightning_bolt', 3.4, 6.8, new THREE.Vector3(fxPos.x, fxY + 3.45, fxPos.z), {
+        rotateY: 0.35 + Math.PI / 2, duration: 640, renderOrder: 27
+      });
+      addTexPlane('lightning_bolt', 2.4, 5.6, new THREE.Vector3(fxPos.x + 0.85, fxY + 2.85, fxPos.z - 0.65), {
+        rotateY: -0.45, rotateZ: 0.16, duration: 580, renderOrder: 27
+      });
+      spawnShockwaveRing(fxPos, 0x0284c7, 3.5, 720);
+      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), 24, 0x38bdf8);
       if (isUltimate) {
-        addVfxMesh(
-          new THREE.CylinderGeometry(0.12 * mult, 0.24 * mult, 8.2, 6),
-          new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9, depthWrite: false }),
-          new THREE.Vector3(fxPos.x + 0.6, fxY + 4.0, fxPos.z - 0.5),
-          { rotateZ: 0.24, duration: 540 }
-        );
-        triggerCameraShake(0.28);
-        triggerHitStop(50);
+        triggerCameraShake(0.26);
+        triggerHitStop(45);
       }
-      spawnShockwaveRing(fxPos, 0x0284c7, 3.3 * mult, 700);
-      spawnShockwaveRing(fxPos, 0x38bdf8, 2.2 * mult, 520);
-      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), isUltimate ? 26 : 16, 0x38bdf8);
     } else if (key === 'bagua_array') {
-      const fxPos = !tToken ? new THREE.Vector3(aToken?.side === 'A' ? -1.4 : 1.4, getBattleTerrainHeight(0, 0), 0) : anchor;
-      const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
-      addBaguaRing(fxPos, '#d97706', 3.4 * mult, 860, 2.2);
+      // 巨型太極八卦陣圖 + 六道盤旋金篆奇門兵符
+      const castGround = getBattleTerrainHeight(casterAnchor.x, casterAnchor.z);
+      addTexPlane('bagua_seal', 6.2, 6.2, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
+        rotateX: -Math.PI / 2, spinZ: 1.45, duration: 1220, scaleGrowth: 0.008, renderOrder: 22
+      });
       if (aToken && (!tToken || aToken !== targetToken)) {
-        addBaguaRing(casterAnchor, '#0284c7', 3.2, 780, -2.0);
+        addTexPlane('bagua_seal', 4.6, 4.6, new THREE.Vector3(casterAnchor.x, castGround + 0.11, casterAnchor.z), {
+          rotateX: -Math.PI / 2, spinZ: -1.45, duration: 1080, renderOrder: 22
+        });
       }
-      addVfxMesh(
-        new THREE.CylinderGeometry(0.95 * mult, 1.25 * mult, 4.2 * mult, 16, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide }),
-        new THREE.Vector3(fxPos.x, fxY + 2.0 * mult, fxPos.z),
-        { vy: 0.015, duration: 720 }
-      );
-      spawnShockwaveRing(fxPos, 0xd97706, 3.2 * mult, 700);
-      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), isUltimate ? 22 : 14, 0xfbbf24);
+      for (let i = 0; i < 6; i++) {
+        const ang = (i * Math.PI * 2) / 6;
+        addTexPlane('talisman_scroll', 1.05, 2.05, new THREE.Vector3(fxPos.x, fxY + 1.55, fxPos.z), {
+          orbitCenter: fxPos, orbitRadius: 2.25, orbitAngle: ang, orbitSpeed: 2.3,
+          faceOutward: true, vy: 0.009, duration: 1120, renderOrder: 27
+        });
+      }
+      spawnShockwaveRing(fxPos, 0xd97706, 3.4, 740);
+      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.0, 0)), 20, 0xfbbf24);
     } else if (key === 'piercing_volley') {
-      const start = casterAnchor.clone().add(new THREE.Vector3(0, 1.1, 0));
-      const end = anchor.clone().add(new THREE.Vector3(0, 1.0, 0));
-      const dist = Math.max(2.4, start.distanceTo(end));
-      const mid = start.clone().lerp(end, 0.5);
-      addVfxMesh(
-        new THREE.CylinderGeometry(0.11 * mult, 0.22 * mult, dist, 8),
-        new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.94, depthWrite: false }),
-        mid,
-        { lookAt: end, rotateX: Math.PI / 2, duration: 540 }
-      );
-      addVfxMesh(
-        new THREE.TorusGeometry(0.65 * mult, 0.1 * mult, 8, 20),
-        new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.9, depthWrite: false }),
-        end,
-        { lookAt: start, duration: 560, scaleGrowth: 0.036 }
-      );
-      spawnShockwaveRing(anchor, 0xf59e0b, 2.8 * mult, 600);
-      spawnSparkBurst(end, isUltimate ? 24 : 14, 0xfbbf24);
+      // 破甲準星印 + 立體鎖定準星 + 三支金龍穿雲巨箭自斜空貫穿陣地
+      const start = casterAnchor.clone().add(new THREE.Vector3(0, 1.35, 0));
+      const end = anchor.clone().add(new THREE.Vector3(0, 0.75, 0));
+      const travel = new THREE.Vector3().subVectors(end, start);
+      const dist = travel.length();
+      const horizontalDir = dist > 0.2 ? new THREE.Vector3(travel.x, 0, travel.z).normalize() : new THREE.Vector3(aToken?.side === 'A' ? 1 : -1, 0, 0);
+      addTexPlane('bullseye_seal', 5.2, 5.2, new THREE.Vector3(anchor.x, groundY + 0.12, anchor.z), {
+        rotateX: -Math.PI / 2, spinZ: -2.4, duration: 960, renderOrder: 22
+      });
+      addTexSprite('bullseye_seal', 3.0, 3.0, end.clone().add(new THREE.Vector3(0, 0.35, 0)), {
+        spinZ: 2.5, duration: 840, depthTest: false, renderOrder: 27
+      });
+      const plungeDir = horizontalDir.clone().multiplyScalar(0.75).add(new THREE.Vector3(0, 0.66, 0)).normalize();
+      for (let i = 0; i < 3; i++) {
+        const oz = (i - 1) * 0.85;
+        const arrowPos = end.clone().add(new THREE.Vector3(-plungeDir.x * 1.4, 2.2, oz));
+        addTexPlane('dragon_arrow', 1.65, 4.4, arrowPos, {
+          alignDir: plungeDir.clone().negate(), rollY: 0,
+          vx: -plungeDir.x * 0.08, vy: -plungeDir.y * 0.08, vz: 0, duration: 680, renderOrder: 28
+        });
+        addTexPlane('dragon_arrow', 1.65, 4.4, arrowPos, {
+          alignDir: plungeDir.clone().negate(), rollY: Math.PI / 2,
+          vx: -plungeDir.x * 0.08, vy: -plungeDir.y * 0.08, vz: 0, duration: 680, renderOrder: 28
+        });
+      }
+      spawnShockwaveRing(anchor, 0xf59e0b, 3.0, 640);
+      spawnSparkBurst(end, 22, 0xfbbf24);
     } else if (key === 'tidal_surge') {
-      const fxPos = !tToken ? commandCenter : anchor;
-      const fxY = getBattleTerrainHeight(fxPos.x, fxPos.z);
-      addBaguaRing(fxPos, '#0891b2', 3.2 * mult, 780, 2.8);
-      addVfxMesh(
-        new THREE.TorusGeometry(0.95 * mult, 0.22 * mult, 10, 24),
-        new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.9, depthWrite: false }),
-        new THREE.Vector3(fxPos.x, fxY + 0.45, fxPos.z),
-        { rotateX: Math.PI / 2, vy: 0.05, duration: 660, scaleGrowth: 0.032 }
-      );
-      addVfxMesh(
-        new THREE.CylinderGeometry(1.1 * mult, 0.55 * mult, 2.8 * mult, 14, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.54, depthWrite: false, side: THREE.DoubleSide }),
-        new THREE.Vector3(fxPos.x, fxY + 1.3 * mult, fxPos.z),
-        { vy: 0.028, duration: 640, scaleGrowth: 0.02 }
-      );
-      spawnShockwaveRing(fxPos, 0x0891b2, 3.4 * mult, 700);
-      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.0, 0)), isUltimate ? 24 : 14, 0x22d3ee);
+      // 鳴梁漩渦陣 + 四面高聳浮世繪怒濤捲浪湧拍
+      addTexPlane('whirlpool_seal', 5.6, 5.6, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
+        rotateX: -Math.PI / 2, spinZ: -3.1, duration: 1080, scaleGrowth: 0.01, renderOrder: 22
+      });
+      for (let i = 0; i < 4; i++) {
+        const ang = (i * Math.PI) / 2 + 0.35;
+        const r = 1.8;
+        addTexPlane('great_wave', 3.2, 3.0, new THREE.Vector3(fxPos.x + Math.cos(ang) * r, fxY + 1.45, fxPos.z + Math.sin(ang) * r), {
+          rotateY: -ang + Math.PI / 2,
+          vx: -Math.cos(ang) * 0.014, vy: 0.014, vz: -Math.sin(ang) * 0.014,
+          scaleGrowth: 0.022, duration: 920, renderOrder: 26
+        });
+      }
+      spawnShockwaveRing(fxPos, 0x0891b2, 3.5, 720);
+      spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.0, 0)), 22, 0x22d3ee);
     } else if (key === 'aegis_command') {
-      const shieldTarget = (isUltimate && aToken) ? aToken : targetToken;
+      // 八角不動如山盾陣 + 四面大型環繞金剛獸面盾
+      const shieldTarget = tToken ? aToken || targetToken : targetToken;
       const shPos = shieldTarget.mesh.position.clone();
       const shGround = getBattleTerrainHeight(shPos.x, shPos.z);
-      addVfxMesh(
-        new THREE.SphereGeometry(1.45 * mult, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.58),
-        new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.78, wireframe: true, depthWrite: false }),
-        new THREE.Vector3(shPos.x, shGround + 0.08, shPos.z),
-        { duration: 780, scaleGrowth: 0.02 }
-      );
-      addVfxMesh(
-        new THREE.CylinderGeometry(1.05 * mult, 1.15 * mult, 2.8 * mult, 14, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0x059669, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide }),
-        new THREE.Vector3(shPos.x, shGround + 1.4 * mult, shPos.z),
-        { vy: 0.018, duration: 720 }
-      );
-      spawnShockwaveRing(shPos, 0x059669, 3.0 * mult, 700);
-      spawnSparkBurst(shPos.clone().add(new THREE.Vector3(0, 1.0, 0)), isUltimate ? 22 : 14, 0x10b981);
+      addTexPlane('aegis_seal', 5.2, 5.2, new THREE.Vector3(shPos.x, shGround + 0.12, shPos.z), {
+        rotateX: -Math.PI / 2, spinZ: 0.9, duration: 1140, scaleGrowth: 0.006, renderOrder: 22
+      });
+      for (let i = 0; i < 4; i++) {
+        const ang = (i * Math.PI) / 2;
+        addTexPlane('bronze_shield', 1.65, 1.85, new THREE.Vector3(shPos.x, shGround + 1.35, shPos.z), {
+          orbitCenter: shPos, orbitRadius: 2.05, orbitAngle: ang, orbitSpeed: 2.35,
+          faceOutward: true, duration: 1140, renderOrder: 27
+        });
+      }
+      spawnShockwaveRing(shPos, 0x059669, 3.2, 700);
+      spawnSparkBurst(shPos.clone().add(new THREE.Vector3(0, 1.0, 0)), 20, 0x10b981);
     } else if (key === 'shadow_ambush') {
-      const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.05, 0));
-      spawnSlashArc(hitPos, aToken?.side || 'A', 0x9333ea, 1.75 * mult, true);
-      addVfxMesh(
-        new THREE.ConeGeometry(0.68 * mult, 3.0 * mult, 6),
-        new THREE.MeshBasicMaterial({ color: 0x7e22ce, transparent: true, opacity: 0.82, wireframe: true, depthWrite: false }),
-        new THREE.Vector3(anchor.x, groundY + 1.45 * mult, anchor.z),
-        { vy: 0.028, duration: 640, scaleGrowth: 0.018 }
-      );
-      spawnShockwaveRing(anchor, 0x7e22ce, 3.1 * mult, 640);
-      spawnSparkBurst(hitPos, isUltimate ? 24 : 14, 0xa855f7);
+      // 暗影風魔陣 + 巨大十字寒芒斬 + 高速旋轉手裏劍
+      const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.2, 0));
+      addTexPlane('shuriken_seal', 5.2, 5.2, new THREE.Vector3(anchor.x, groundY + 0.12, anchor.z), {
+        rotateX: -Math.PI / 2, spinZ: -4.2, duration: 920, scaleGrowth: 0.01, renderOrder: 22
+      });
+      addTexSprite('shadow_cross', 4.2, 4.2, hitPos, {
+        scaleGrowth: 0.028, duration: 740, depthTest: false, renderOrder: 28
+      });
+      addTexSprite('shuriken_seal', 2.6, 2.6, hitPos.clone().add(new THREE.Vector3(0, 0.3, 0)), {
+        spinZ: 9.5, duration: 760, depthTest: false, renderOrder: 29
+      });
+      spawnSlashArc(hitPos, aToken?.side || 'A', 0xa855f7, 2.1, true);
+      spawnShockwaveRing(anchor, 0x7e22ce, 3.2, 660);
+      spawnSparkBurst(hitPos, 22, 0xc084fc);
     } else {
-      // overlord_cleave（💥 霸王破甲）
-      const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.05, 0));
-      spawnSlashArc(hitPos, aToken?.side || 'A', isUltimate ? 0xe11d48 : 0xd97706, 1.85 * mult, true);
-      addVfxMesh(
-        new THREE.TorusGeometry(0.88 * mult, 0.16 * mult, 8, 20),
-        new THREE.MeshBasicMaterial({ color: isUltimate ? 0xe11d48 : 0xd97706, transparent: true, opacity: 0.9, depthWrite: false }),
-        new THREE.Vector3(anchor.x, groundY + 0.55, anchor.z),
-        { rotateX: Math.PI / 2, vy: 0.032, duration: 600, scaleGrowth: 0.03 }
-      );
-      spawnShockwaveRing(anchor, isUltimate ? 0xe11d48 : 0xd97706, 3.2 * mult, 660);
-      spawnSparkBurst(hitPos, isUltimate ? 24 : 16, isUltimate ? 0xf43f5e : 0xf59e0b);
-      if (isUltimate) triggerCameraShake(0.28);
+      // overlord_cleave（霸王無雙：裂地破陣紋 + 立體旋轉月牙刀芒 + 雙重斬擊弧線）
+      const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.15, 0));
+      addTexPlane('earth_fissure', 5.6, 5.6, new THREE.Vector3(anchor.x, groundY + 0.11, anchor.z), {
+        rotateX: -Math.PI / 2, spinZ: 0.25, duration: 980, scaleGrowth: 0.012, renderOrder: 22
+      });
+      addTexSprite('crescent_wave', 4.2, 4.2, hitPos.clone().add(new THREE.Vector3(0, 0.5, 0)), {
+        spinZ: -4.5, scaleGrowth: 0.022, duration: 720, depthTest: false, renderOrder: 28
+      });
+      addTexPlane('crescent_wave', 4.4, 4.4, new THREE.Vector3(anchor.x, groundY + 0.85, anchor.z), {
+        rotateX: -Math.PI / 2 + 0.22, spinZ: 6.8, scaleGrowth: 0.024, duration: 680, renderOrder: 27
+      });
+      addTexPlane('crescent_wave', 3.8, 3.8, new THREE.Vector3(anchor.x, groundY + 1.25, anchor.z), {
+        rotateY: aToken?.side === 'A' ? 0.5 : -0.5, rotateX: 0.42, spinZ: -5.4, scaleGrowth: 0.022, duration: 680, renderOrder: 27
+      });
+      spawnSlashArc(hitPos, aToken?.side || 'A', 0xe11d48, 2.2, true);
+      spawnShockwaveRing(anchor, 0xe11d48, 3.4, 680);
+      spawnSparkBurst(hitPos, 24, 0xfbbf24);
+      if (isUltimate) triggerCameraShake(0.25);
     }
   }
 
@@ -4082,7 +4731,7 @@ const Battle3DEngine = (function () {
           }
           scene.remove(p.mesh);
           if (p.isComposite && p.disposableChildren) {
-            p.disposableChildren.forEach(ch => { ch.geometry.dispose(); ch.material.dispose(); });
+            p.disposableChildren.forEach(ch => { ch.geometry?.dispose?.(); ch.material?.dispose?.(); });
           } else if (!p.isGLB) {
             p.mesh.geometry.dispose();
             p.mesh.material.dispose();
@@ -4145,14 +4794,31 @@ const Battle3DEngine = (function () {
           }
           pAttr.needsUpdate = true;
         } else {
-          pt.mesh.position.x += pt.vx * steps;
-          pt.mesh.position.y += pt.vy * steps;
-          pt.mesh.position.z += pt.vz * steps;
-          pt.vy -= (pt.gravity || 0) * steps;
+          if (pt.orbitCenter) {
+            pt.orbitAngle = (pt.orbitAngle || 0) + (pt.orbitSpeed || 2.6) * dt;
+            pt.mesh.position.x = pt.orbitCenter.x + Math.cos(pt.orbitAngle) * pt.orbitRadius;
+            pt.mesh.position.z = pt.orbitCenter.z + Math.sin(pt.orbitAngle) * pt.orbitRadius;
+            pt.mesh.position.y += pt.vy * steps;
+            if (pt.faceOutward) pt.mesh.rotation.y = -pt.orbitAngle + Math.PI / 2;
+          } else {
+            pt.mesh.position.x += pt.vx * steps;
+            pt.mesh.position.y += pt.vy * steps;
+            pt.mesh.position.z += pt.vz * steps;
+            pt.vy -= (pt.gravity || 0) * steps;
+          }
+          if (pt.spinZ) {
+            if (pt.mesh.isSprite && pt.mesh.material) pt.mesh.material.rotation += pt.spinZ * dt;
+            else pt.mesh.rotation.z += pt.spinZ * dt;
+          }
+          if (pt.spinY && !pt.faceOutward) pt.mesh.rotation.y += pt.spinY * dt;
           if (pt.scaleGrowth) pt.mesh.scale.addScalar(pt.scaleGrowth * steps);
         }
-        const remaining = Math.max(0, 1 - (now - pt.startedAt) / pt.duration);
-        if (pt.mesh.material) pt.mesh.material.opacity = remaining * pt.opacity;
+        const progress = Math.min(1, Math.max(0, (now - pt.startedAt) / pt.duration));
+        const remaining = 1 - progress;
+        const fade = pt.fadeInOut
+          ? (progress < 0.04 ? progress / 0.04 : (progress < 0.68 ? 1.0 : Math.max(0, (1 - progress) / 0.32)))
+          : remaining;
+        if (pt.mesh.material) pt.mesh.material.opacity = fade * pt.opacity;
         if (remaining === 0) {
           scene.remove(pt.mesh);
           if (!pt.mesh.isSprite) pt.mesh.geometry.dispose();
@@ -4244,7 +4910,7 @@ const Battle3DEngine = (function () {
         p.mesh.geometry.dispose();
         p.mesh.material.dispose();
       } else if (p.isComposite && p.disposableChildren) {
-        p.disposableChildren.forEach(ch => { ch.geometry.dispose(); ch.material.dispose(); });
+        p.disposableChildren.forEach(ch => { ch.geometry?.dispose?.(); ch.material?.dispose?.(); });
       } else if (!p.isGLB) {
         p.mesh.geometry.dispose();
         p.mesh.material.dispose();

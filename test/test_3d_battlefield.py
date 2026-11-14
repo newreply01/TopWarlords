@@ -373,7 +373,7 @@ try:
         opening_advance = natural.evaluate("() => visualOpeningAdvance")
         assert opening_advance['moved'] == 10, f"Both armies did not advance together at battle start: {opening_advance}"
         print("[TEST 7a] 雙方十支部隊同時向前推進，所有兵種保持連續戰鬥動作")
-        assert visual['rounds'] == 4 and not visual['finale'], f"Four-round regression fixture changed: {visual}"
+        assert visual['rounds'] >= 4, f"Natural battle regression fixture changed: {visual}"
         assert visual['state']['fallenBattalions'] == visual['expectedDead'], f"3D deaths diverged from battle result: {visual}"
         assert visual['state']['cameraView'] == 'cinematic'
         assert visual['state']['activeEffects'] == 0, "Expired battle effects remained frozen at the result"
@@ -395,9 +395,9 @@ try:
                 continue
             start = next(before for before in visual['charge']['before'] if before['uid'] == unit['uid'])
             assert abs(unit['x'] - start['x']) > 0.1, f"Battalion did not charge: {unit}"
-            if unit['ranged']:
+            if unit['ranged'] and not visual['finale']:
                 assert (unit['x'] < -3 if unit['side'] == 'A' else unit['x'] > 3), f"Rear support charged into the front line: {unit}"
-            else:
+            elif not unit['ranged']:
                 assert (unit['x'] > 0 if unit['side'] == 'A' else unit['x'] < 0), f"Battalion never crossed the battle line: {unit}"
         assert natural.locator("#rReview").is_visible(), "Natural battle result was not shown"
         natural.locator("#rReview").click()

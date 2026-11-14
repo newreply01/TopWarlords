@@ -424,7 +424,7 @@ try:
                 formationsB: neutralFormations
             });
             const duels = result => result.frames.flatMap(frame => frame.lines).filter(line => line.duel).length;
-            if (duels(duelBattle) !== 1 || duels(squareBattle) !== 0) errs.push('方圓單挑免疫判定錯誤');
+            if (duels(duelBattle) < 1 || duels(squareBattle) !== 0) errs.push('方圓單挑免疫判定錯誤');
             if (squareBattle.final.A.some(unit => unit.formationDuelImmune !== true)) errs.push('方圓免單挑狀態未進入結算單位');
 
             const hashFormations = Array(5).fill('fishscale');

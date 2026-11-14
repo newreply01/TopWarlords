@@ -642,7 +642,7 @@ const UNITS = RAW_UNITS.map(r => {
     roleFlags,
     historicalAudit: HISTORICAL_AUDIT[id] || { status: 'unverified', note: '', sources: [] },
     st, ew,
-    hp, atk, def,
+    hp: hp * 2, atk, def,
     skill: Object.assign({}, skill, {
       effects: effects || null,
       desc: effects ? describeSkillEffects(skill, effects, (roleFlags || []).includes('STRATEGIST') && skill.phase === 'P1') : skill.desc

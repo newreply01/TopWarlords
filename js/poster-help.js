@@ -86,6 +86,11 @@
     const toast = ctx.toast || (() => {});
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const appVer = (() => {
+      const src = document.querySelector('script[src*="poster-help.js"]')?.getAttribute('src') || '';
+      const m = src.match(/[?&]v=([^&]+)/);
+      return m ? m[1] : '7.11.23';
+    })();
 
     $('#helpCard').innerHTML = `
   <div class="help-header-bar">
@@ -97,6 +102,7 @@
         <span class="tab-icon">📱</span> 手機 APP 安裝指南 <span class="tab-badge">推薦</span>
       </button>
     </div>
+    <span class="help-ver-pill" id="helpVersionPill" title="目前載入之應用程式版本" style="font-family:var(--mono);font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:rgba(56,189,248,0.14);border:1px solid rgba(56,189,248,0.38);color:var(--cyan);margin-left:auto;margin-right:8px;white-space:nowrap;">版本 v${appVer}</span>
     <button class="btn ghost sm x help-close-btn" id="helpClose" title="關閉手冊">關閉 ✕</button>
   </div>
 

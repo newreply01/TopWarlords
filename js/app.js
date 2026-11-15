@@ -1352,15 +1352,15 @@ function renderMatrix() {
               </div>
               ${topBadgesHtml ? `<div class="m-top-badges">${topBadgesHtml}</div>` : ''}
               <div class="m-actions">
-                <button class="m-info-btn" data-info-id="${u.id}" title="查看名將傳記與實戰數值">ℹ</button>
+                <button type="button" class="m-info-btn" data-info-id="${u.id}" title="查看 ${esc(u.name)} 詳細情報（傳記、數值、特長與羈絆）" aria-label="查看 ${esc(u.name)} 詳細情報">ℹ</button>
               </div>
             </div>
             <div class="m-skill-row">
-              <button type="button" class="m-skill" data-info-id="${u.id}" aria-label="${esc(u.name)}：${phase ? phase + ' ' : ''}${esc(u.skill?.name || '未配置戰法')}，查看詳情">
+              <button type="button" class="m-skill" data-info-id="${u.id}" title="點擊查看詳細情報" aria-label="${esc(u.name)}：${phase ? phase + ' ' : ''}${esc(u.skill?.name || '未配置戰法')}，查看詳情">
                 <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
               </button>
-              ${phase ? `<span class="m-skill-phase phase-${phase.toLowerCase()}" title="${esc(PHASE_TIPS[phase] || '')}">${esc(phase)}</span>` : ''}
-              ${hasAp ? `<span class="m-ap-chip" title="專屬戰法附帶破甲效果">破甲</span>` : ''}
+              ${phase ? `<span class="m-skill-phase phase-${phase.toLowerCase()}" data-info-id="${u.id}" title="${esc(PHASE_TIPS[phase] || '')}（點擊查看詳情）">${esc(phase)}</span>` : ''}
+              ${hasAp ? `<span class="m-ap-chip" data-info-id="${u.id}" title="專屬戰法附帶破甲效果（點擊查看詳情）">破甲</span>` : ''}
             </div>
             <div class="m-bot">
               <div class="m-stats" aria-label="基本數值">

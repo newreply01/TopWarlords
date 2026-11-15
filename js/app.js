@@ -128,6 +128,13 @@ const state = {
   pvpOpponentDoc: 'defense',
   pvpOpponentFormations: null,
   pvpOpponentTerrain: null,
+  pvpMyRevealed: false,
+  pvpMySalt: null,
+  pvpMyCommitHash: null,
+  pvpOpponentCommitHash: null,
+  pvpCombatSyncSentRound: 0,
+  pvpPendingPackets: [],
+  pvpPendingSeriesEnd: null,
   pvpAfkStreak: 0
 };
 let playToken = 0, speed = Number(LS.get('wl15_speed', 1)) || 1, skip = false, paused = false, currentActiveModal = null, lastBattleRes = null;
@@ -302,7 +309,7 @@ function autoFillAndSubmitPvpDeck() {
 }
 
 function handlePlayerForfeit(loserSide, reason = '超時未行動') {
-  if (!state.isOnlinePvp) return;
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
   const isHost = OnlinePvPEngine.isHostUser();
   const mySide = isHost ? 'A' : 'B';
   const iAmLoser = (loserSide === mySide);
@@ -1000,7 +1007,7 @@ function renderMissionBar() {
       const fullListText = list.map(id => UNIT_MAP[id]?.name || id).join('、');
 
       if (list.length <= 2) {
-        return `<span style="${colorStyle};padding:1px 6px;border-radius:4px;font-size:11px;margin-left:5px;font-weight:700" title="全系列賽永久封鎖：${esc(fullListText)}">${prefix}：${esc(fullListText)}</span>`;
+        return `<span class="ban-capsule" style="${colorStyle};padding:1px 6px;border-radius:4px;font-size:11px;margin-left:5px;font-weight:700" title="全系列賽永久封鎖：${esc(fullListText)}">${prefix}：${esc(fullListText)}</span>`;
       }
       return `<span class="ban-capsule" style="${colorStyle};padding:1px 6px;border-radius:4px;font-size:11px;margin-left:5px;font-weight:700;cursor:pointer" title="全系列賽永久封鎖 (${list.length}件)：${esc(fullListText)}" data-ban-desc="${prefix} (${list.length}件)：${esc(fullListText)}">${prefix} ${list.length} 件 ⓘ</span>`;
     };
@@ -1058,7 +1065,7 @@ function renderMissionBar() {
           <button class="btn ghost sm" id="btnExitPvp" style="color:var(--red);border-color:rgba(255,93,110,.3)" title="退出當前線上對戰房間">退出連線 ✕</button>
         </div>`;
     } else {
-      const bansHtml = (banAHtml || banBHtml) ? `<div class="mission-item" style="gap:4px">${banAHtml}${banBHtml}</div>` : '';
+      const bansHtml = (banAHtml || banBHtml) ? `<div class="mission-item bo3-bans-wrap" style="gap:4px">${banAHtml}${banBHtml}</div>` : '';
       const seriesRuleLabel = ` (${isFree ? '自由調撥' : '開戰鎖定'})`;
       const scoreBadge = `<span style="font-family:var(--head);font-weight:800;letter-spacing:.05em;color:var(--amber);margin-left:2px">${b.winsA} : ${b.winsB}</span>`;
       h = `<span class="mission-tag bo3-mission-tag" style="background:rgba(255,179,64,.16);color:var(--amber);border-color:rgba(255,179,64,.4);font-weight:700;display:inline-flex;align-items:center;gap:4px">⚔️ BO${maxG}·${isFree ? '自由' : '鎖定'} <span style="opacity:0.4">▪</span> ${b.round}/${maxG}局 <span style="opacity:0.4">▪</span> ${scoreBadge}</span>
@@ -2867,10 +2874,7 @@ $('#missionBar').addEventListener('click', e => {
   }
   if (e.target.closest('#btnExitPvp')) {
     OnlinePvPEngine.closeConnection();
-    state.isOnlinePvp = false;
-    state.pvpMyReady = false;
-    state.pvpOpponentReady = false;
-    state.pvpOpponentDeck = null;
+    resetOnlinePvpSessionState(null, { keepSettings: true, activate: false });
     initBo3Series();
     renderAll();
     toast('已安全退出線上雙人對戰房間，回到常規模式。');
@@ -6070,7 +6074,7 @@ function handleLadderMatchEnd(res) {
 }
 
 /* ---------- BO3 系列賽輪次推進 ---------- */
-function handleBo3RoundEnd(res) {
+function handleBo3RoundEnd(res, opts = {}) {
   if (!res || res._bo3Handled) return;
   res._bo3Handled = true;
   if (state.bo3 && state.bo3.finished) return;
@@ -6097,11 +6101,23 @@ function handleBo3RoundEnd(res) {
     const isSeriesWon = state.isOnlinePvp ? (isHost ? bo3.winsA >= winsNeeded : bo3.winsB >= winsNeeded) : (bo3.winsA >= winsNeeded);
     bo3.finished = true;
     bo3.winner = isSeriesWon ? (state.isOnlinePvp ? (isHost ? 'A' : 'B') : 'A') : (state.isOnlinePvp ? (isHost ? 'B' : 'A') : 'B');
+    PvPTimerManager.stop();
+    if (state.isOnlinePvp && !opts.silent) {
+      OnlinePvPEngine.sendPacket('SERIES_END', {
+        winsA: bo3.winsA,
+        winsB: bo3.winsB,
+        winner: bo3.winner,
+        maxGames: bo3.maxGames || 5,
+        round: bo3.round,
+        history: bo3.history.slice()
+      });
+    }
+    state.pvpPendingSeriesEnd = null;
     showBo3SeriesResult(isSeriesWon);
     return;
   }
 
-  // 尚未結束，準備進入下一局 (至多第 5 局)
+  // 尚未結束，準備進入下一局
   const nextRound = bo3.round + 1;
   const nextEvent = pick(EVENTS.filter(e => e.id !== res.ev.id));
   bo3.nextEvent = nextEvent;
@@ -6112,7 +6128,21 @@ function handleBo3RoundEnd(res) {
     state.pvpMyReady = false;
     state.pvpOpponentReady = false;
     state.pvpOpponentDeck = null;
-    state.pvpOpponentDoc = null;
+    state.pvpOpponentDoc = 'defense';
+    state.pvpOpponentFormations = null;
+    state.pvpOpponentTerrain = null;
+    state.pvpMyRevealed = false;
+    state.pvpMySalt = null;
+    state.pvpMyCommitHash = null;
+    state.pvpOpponentCommitHash = null;
+    state.pvpCombatSyncSentRound = 0;
+    flushPendingPvpPacketsForRound(nextRound);
+    if (state.pvpPendingSeriesEnd) {
+      const pendingEnd = state.pvpPendingSeriesEnd;
+      state.pvpPendingSeriesEnd = null;
+      applyOnlinePvpSeriesEnd(pendingEnd);
+      return;
+    }
   }
 
   if (draw) {
@@ -6120,6 +6150,12 @@ function handleBo3RoundEnd(res) {
       bo3NextText: `進入第 ${nextRound} 局（平局重賽）`,
       bo3Callback: () => {
         closeBattle();
+        if (state.isOnlinePvp && state.pvpPendingSeriesEnd) {
+          const pendingEnd = state.pvpPendingSeriesEnd;
+          state.pvpPendingSeriesEnd = null;
+          applyOnlinePvpSeriesEnd(pendingEnd);
+          return;
+        }
         renderAll();
         toast(`⚖️ 本局戰平！雙方戰略積分相同，第 ${nextRound} 局直接交火！`);
       }
@@ -6134,6 +6170,12 @@ function handleBo3RoundEnd(res) {
         bo3NextText: `進入第 ${nextRound} 局（等待對手反制）`,
         bo3Callback: () => {
           closeBattle();
+          if (state.isOnlinePvp && state.pvpPendingSeriesEnd) {
+            const pendingEnd = state.pvpPendingSeriesEnd;
+            state.pvpPendingSeriesEnd = null;
+            applyOnlinePvpSeriesEnd(pendingEnd);
+            return;
+          }
           renderAll();
           toast(state.bo3.bannedByB 
             ? `⚠️ 對手已禁用了你的【${UNIT_MAP[state.bo3.bannedByB]?.name || '主力裝備'}】！請調整陣容出擊。`
@@ -6444,12 +6486,16 @@ $('#bo3CounterConfirm').onclick = () => {
 
   if (state.isOnlinePvp) {
     // 線上真人對抗：發送 BAN_COMMIT 給對手，附帶全系列賽累計禁用清單與本次禁用陣列
-    OnlinePvPEngine.sendPacket('BAN_COMMIT', { 
+    OnlinePvPEngine.sendPacket('BAN_COMMIT', {
+      round: bo3.round,
       bannedUnitIds: bansToApply,
       bannedUnitId: bansToApply[0],
       bannedList: bo3.bannedListA.slice()
     });
     state.pvpMyReady = false;
+    state.pvpMyRevealed = false;
+    state.pvpMySalt = null;
+    state.pvpMyCommitHash = null;
     renderAll();
     const refitSec = (state.bo3.marketMode === 'free') ? 60 : 45;
     startPvpDeploymentTimer(refitSec);
@@ -6547,10 +6593,7 @@ function showBo3SeriesResult(isPlayerWon) {
     closeBattle();
     if (state.isOnlinePvp) {
       OnlinePvPEngine.closeConnection();
-      state.isOnlinePvp = false;
-      state.pvpMyReady = false;
-      state.pvpOpponentReady = false;
-      state.pvpOpponentDeck = null;
+      resetOnlinePvpSessionState(null, { keepSettings: true, activate: false });
       initBo3Series();
       renderAll();
       toast('已結束線上雙人對戰，回到常規模式。');
@@ -6565,7 +6608,7 @@ function showBo3SeriesResult(isPlayerWon) {
       closeBattle();
       if (state.isOnlinePvp) {
         OnlinePvPEngine.closeConnection();
-        state.isOnlinePvp = false;
+        resetOnlinePvpSessionState(null, { keepSettings: true, activate: false });
       }
       state.bo3.active = false;
       setMode('quick');
@@ -7720,33 +7763,132 @@ async function handleOnlinePvpSubmit() {
   }
 }
 
+function resetOnlinePvpSessionState(opp = null, opts = {}) {
+  const activate = (opts.activate !== false);
+  state.isOnlinePvp = activate;
+  state.pvpMyReady = false;
+  state.pvpOpponentReady = false;
+  state.pvpOpponentDeck = null;
+  state.pvpOpponentDoc = 'defense';
+  state.pvpOpponentFormations = null;
+  state.pvpOpponentTerrain = null;
+  state.pvpMyRevealed = false;
+  state.pvpMySalt = null;
+  state.pvpMyCommitHash = null;
+  state.pvpOpponentCommitHash = null;
+  state.pvpCombatSyncSentRound = 0;
+  state.pvpPendingPackets = [];
+  state.pvpPendingSeriesEnd = null;
+  PvPTimerManager.stop();
+  PvPTimerManager.resetStreak();
+
+  if (activate) {
+    if (!state.bo3) initBo3Series(opts.keepSettings !== false);
+    const b = state.bo3;
+    b.active = true;
+    b.finished = false;
+    b.winner = null;
+    b.round = Number(opts.round) || 1;
+    b.winsA = Number(opts.winsA) || 0;
+    b.winsB = Number(opts.winsB) || 0;
+    b.history = [];
+    b.bannedByA = null;
+    b.bannedByB = null;
+    b.bannedListA = [];
+    b.bannedListB = [];
+    b.candidateBan = null;
+    b.candidateBans = [];
+    b.locked = false;
+    b.nextEvent = null;
+    if ([3, 5, 7].includes(Number(opts.maxGames))) b.maxGames = Number(opts.maxGames);
+    if (opts.marketMode === 'free' || opts.marketMode === 'locked') b.marketMode = opts.marketMode;
+    if (opp) b.rivalName = `${opp.flag} ${opp.name} (${opp.uid})`;
+    state.mode = 'bo3';
+  }
+}
+
 function checkBothReadyAndStartCombat() {
-  if (!state.pvpMyReady || !state.pvpOpponentReady || !state.pvpOpponentDeck || !state.pvpOpponentDeck.length) return;
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  if (!state.pvpMyReady || !state.pvpOpponentReady || !state.pvpOpponentDeck || state.pvpOpponentDeck.length !== 5) return;
 
   if (OnlinePvPEngine.isHostUser()) {
+    const oppBanned = Array.isArray(state.bo3.bannedListA) ? state.bo3.bannedListA : [];
+    const oppErrs = validateDeck(state.pvpOpponentDeck, budgetLimit(), oppBanned);
+    if (oppErrs.length > 0) {
+      const round = Number(state.bo3.round || 1);
+      state.pvpOpponentReady = false;
+      state.pvpOpponentDeck = null;
+      state.pvpOpponentDoc = 'defense';
+      state.pvpOpponentFormations = null;
+      state.pvpOpponentTerrain = null;
+      state.pvpOpponentCommitHash = null;
+      renderCommandDeck();
+      renderMissionBar();
+      OnlinePvPEngine.sendPacket('DECK_UNREADY', { round, reason: oppErrs[0] });
+      toast(`⚠️ 對手陣容不符合規則（${oppErrs[0]}），已退回要求對手重新調配！`);
+      return;
+    }
+
+    const myErrs = validateDeck(state.deck, budgetLimit(), currentBanned());
+    if (myErrs.length > 0) {
+      const round = Number(state.bo3.round || 1);
+      state.pvpMyReady = false;
+      state.pvpMyRevealed = false;
+      state.pvpMySalt = null;
+      state.pvpMyCommitHash = null;
+      renderAll();
+      OnlinePvPEngine.sendPacket('DECK_UNREADY', { round, reason: myErrs[0] });
+      toast(`⚠️ 你的陣容不符合規則（${myErrs[0]}），請重新挑選！`);
+      return;
+    }
+
+    const currentRound = Number(state.bo3.round || 1);
+    if (state.pvpCombatSyncSentRound === currentRound) return;
+    state.pvpCombatSyncSentRound = currentRound;
+
     // 房主生成同一個公平隨機種子與動態戰場事件 (優先使用下局預告事件)
     const seed = (Math.random() * 4294967296) >>> 0;
     const event = state.bo3.nextEvent || pick(EVENTS.filter(e => !state.event || e.id !== state.event.id));
     state.bo3.nextEvent = null;
-    // 同時在 COMBAT_SYNC 攜帶備援卡組資訊，徹底杜絕網路延遲競爭
-    OnlinePvPEngine.sendPacket('COMBAT_SYNC', {
+    const hostLoadout = getOnlinePvpLoadout();
+    const syncPayload = {
+      round: currentRound,
+      maxGames: state.bo3.maxGames || 5,
+      marketMode: state.bo3.marketMode || 'locked',
+      winsA: state.bo3.winsA || 0,
+      winsB: state.bo3.winsB || 0,
+      bannedListA: (state.bo3.bannedListA || []).slice(),
+      bannedListB: (state.bo3.bannedListB || []).slice(),
       seed,
       event,
       deck: state.deck.slice(),
       doctrine: state.doctrine,
-      formations: normalizeFormations(state.formations),
-      terrain: normalizeTerrain(state.terrain),
+      formations: hostLoadout.formations,
+      terrain: hostLoadout.terrain,
+      guestDeck: state.pvpOpponentDeck.slice(),
+      guestDoctrine: state.pvpOpponentDoc || 'defense',
+      guestFormations: normalizeFormations(state.pvpOpponentFormations),
       salt: state.pvpMySalt,
       commitHash: state.pvpMyCommitHash
-    });
-    startOnlinePvpBattle(seed, event);
+    };
+    // 同時在 COMBAT_SYNC 攜帶完整雙方陣容與賽況，徹底杜絕網路延遲與兩端狀態分歧
+    OnlinePvPEngine.sendPacket('COMBAT_SYNC', syncPayload);
+    startOnlinePvpBattle(seed, event, syncPayload);
   }
 }
 
-function startOnlinePvpBattle(seed, event) {
-  if (!state.pvpOpponentDeck) {
+function startOnlinePvpBattle(seed, event, syncPayload = null) {
+  const isHost = OnlinePvPEngine.isHostUser();
+  const hasSyncHostDeck = (!isHost && syncPayload && Array.isArray(syncPayload.deck) && syncPayload.deck.length === 5);
+  if (!state.pvpOpponentDeck && !hasSyncHostDeck) {
     toast('⚠️ 戰術資料同步中，請稍候...');
     return;
+  }
+  if (hasSyncHostDeck) {
+    state.pvpOpponentDeck = syncPayload.deck.slice();
+    state.pvpOpponentDoc = syncPayload.doctrine || 'defense';
+    if (Array.isArray(syncPayload.formations)) state.pvpOpponentFormations = normalizeFormations(syncPayload.formations);
+    if (syncPayload.terrain) state.pvpOpponentTerrain = normalizeTerrain(syncPayload.terrain);
   }
   $('#onlinePvpModal').hidden = true;
   $('#resultModal').hidden = true;
@@ -7755,19 +7897,24 @@ function startOnlinePvpBattle(seed, event) {
   currentActiveModal = null;
   state.event = event;
 
-  const isHost = OnlinePvPEngine.isHostUser();
   // 核心對稱保證：房主固定在左 (Side A), 挑戰者固定在右 (Side B)
-  const hostDeck = (isHost ? state.deck : state.pvpOpponentDeck).slice();
-  const guestDeck = (isHost ? state.pvpOpponentDeck : state.deck).slice();
-  const hostDoc = isHost ? state.doctrine : (state.pvpOpponentDoc || 'defense');
-  const guestDoc = isHost ? (state.pvpOpponentDoc || 'defense') : state.doctrine;
-  const hostFormations = isHost ? normalizeFormations(state.formations) : normalizeFormations(state.pvpOpponentFormations);
-  const guestFormations = isHost ? normalizeFormations(state.pvpOpponentFormations) : normalizeFormations(state.formations);
-  const battleTerrain = isHost ? normalizeTerrain(state.terrain) : normalizeTerrain(state.pvpOpponentTerrain);
+  const hostDeck = (isHost ? state.deck : (hasSyncHostDeck ? syncPayload.deck : state.pvpOpponentDeck)).slice();
+  const guestDeck = (isHost ? state.pvpOpponentDeck : (syncPayload && Array.isArray(syncPayload.guestDeck) && syncPayload.guestDeck.length === 5 ? syncPayload.guestDeck : state.deck)).slice();
+  const hostDoc = isHost ? state.doctrine : ((syncPayload && syncPayload.doctrine) || state.pvpOpponentDoc || 'defense');
+  const guestDoc = isHost ? (state.pvpOpponentDoc || 'defense') : ((syncPayload && syncPayload.guestDoctrine) || state.doctrine);
+  const hostFormations = isHost
+    ? normalizeFormations(state.formations)
+    : normalizeFormations((syncPayload && Array.isArray(syncPayload.formations)) ? syncPayload.formations : state.pvpOpponentFormations);
+  const guestFormations = isHost
+    ? normalizeFormations(state.pvpOpponentFormations)
+    : normalizeFormations((syncPayload && Array.isArray(syncPayload.guestFormations)) ? syncPayload.guestFormations : state.formations);
+  const battleTerrain = isHost
+    ? normalizeTerrain(state.terrain)
+    : normalizeTerrain((syncPayload && syncPayload.terrain) || state.pvpOpponentTerrain || state.terrain);
 
   const opp = OnlinePvPEngine.getOpponent();
-  state.enemy = state.pvpOpponentDeck.slice();
-  state.enemyDoc = state.pvpOpponentDoc || 'defense';
+  state.enemy = (isHost ? guestDeck : hostDeck).slice();
+  state.enemyDoc = isHost ? guestDoc : hostDoc;
   if (opp) {
     const oppCleanName = (opp.name && opp.name !== '我方聯合戰術作戰群') ? opp.name : (isHost ? '挑戰突擊隊' : '本部特遣隊');
     state.enemyName = `${opp.flag || '🌐'} ${oppCleanName}`;
@@ -7789,24 +7936,14 @@ function startOnlinePvpBattle(seed, event) {
 
 OnlinePvPEngine.on('game_session_started', payload => {
   const opp = OnlinePvPEngine.getOpponent();
-  state.isOnlinePvp = true;
-  state.pvpMyReady = false;
-  state.pvpOpponentReady = false;
-  state.pvpOpponentDeck = null;
-  state.pvpOpponentFormations = null;
-  state.pvpOpponentTerrain = null;
-  state.bo3.active = true;
-  state.bo3.round = payload.round || 1;
-  state.bo3.winsA = payload.winsA || 0;
-  state.bo3.winsB = payload.winsB || 0;
-  if (payload.maxGames) state.bo3.maxGames = payload.maxGames;
-  if (payload.marketMode) state.bo3.marketMode = payload.marketMode;
-  state.bo3.bannedByA = null;
-  state.bo3.bannedByB = null;
-  state.bo3.bannedListA = [];
-  state.bo3.bannedListB = [];
-  if (opp) state.bo3.rivalName = `${opp.flag} ${opp.name} (${opp.uid})`;
-  state.mode = 'bo3';
+  resetOnlinePvpSessionState(opp, {
+    activate: true,
+    round: payload?.round || 1,
+    winsA: payload?.winsA || 0,
+    winsB: payload?.winsB || 0,
+    maxGames: payload?.maxGames,
+    marketMode: payload?.marketMode
+  });
 
   $('#onlinePvpModal').hidden = true;
   currentActiveModal = null;
@@ -7827,7 +7964,38 @@ OnlinePvPEngine.on('room_settings_updated', payload => {
   }
 });
 
-OnlinePvPEngine.on('opponent_deck_committed', payload => {
+function queuePendingPvpPacket(type, round, payload) {
+  if (!Array.isArray(state.pvpPendingPackets)) state.pvpPendingPackets = [];
+  state.pvpPendingPackets.push({ type, round: Number(round), payload });
+}
+
+function flushPendingPvpPacketsForRound(targetRound) {
+  if (!Array.isArray(state.pvpPendingPackets) || !state.pvpPendingPackets.length) return;
+  const due = [];
+  const remaining = [];
+  state.pvpPendingPackets.forEach(entry => {
+    if (entry.round <= targetRound) due.push(entry);
+    else remaining.push(entry);
+  });
+  state.pvpPendingPackets = remaining;
+  due.forEach(entry => {
+    if (entry.type === 'opponent_ban_committed') handleOpponentBanCommittedPacket(entry.payload, true);
+    else if (entry.type === 'opponent_deck_committed') handleOpponentDeckCommittedPacket(entry.payload, true);
+    else if (entry.type === 'opponent_deck_ready') handleOpponentDeckReadyPacket(entry.payload, true);
+    else if (entry.type === 'combat_start_sync') handleCombatStartSyncPacket(entry.payload, true);
+  });
+}
+
+function handleOpponentDeckCommittedPacket(payload, fromQueue = false) {
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  const curRound = Number(state.bo3.round || 1);
+  const pktRound = Number((payload && payload.round) || curRound);
+  if (pktRound > curRound) {
+    if (!fromQueue) queuePendingPvpPacket('opponent_deck_committed', pktRound, payload);
+    return;
+  }
+  if (pktRound < curRound) return;
+
   state.pvpOpponentCommitHash = payload && payload.commitHash ? payload.commitHash : null;
   state.pvpOpponentReady = true;
 
@@ -7843,9 +8011,18 @@ OnlinePvPEngine.on('opponent_deck_committed', payload => {
   } else {
     toast(`⚡ 對手已加密鎖定陣容！等待你完成陣容配置並鎖定！`);
   }
-});
+}
 
-OnlinePvPEngine.on('opponent_deck_ready', payload => {
+function handleOpponentDeckReadyPacket(payload, fromQueue = false) {
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  const curRound = Number(state.bo3.round || 1);
+  const pktRound = Number((payload && payload.round) || curRound);
+  if (pktRound > curRound) {
+    if (!fromQueue) queuePendingPvpPacket('opponent_deck_ready', pktRound, payload);
+    return;
+  }
+  if (pktRound < curRound) return;
+
   if (state.pvpOpponentCommitHash && payload.salt) {
     if (String(state.pvpOpponentCommitHash).startsWith('sha256:') && typeof OnlinePvPEngine.computeCommitHashAsync === 'function') {
       OnlinePvPEngine.computeCommitHashAsync(payload.deck, payload.doctrine, payload.salt, payload.formations, payload.terrain).then(verifyHash => {
@@ -7860,7 +8037,26 @@ OnlinePvPEngine.on('opponent_deck_ready', payload => {
       }
     }
   }
-  state.pvpOpponentDeck = payload.deck;
+
+  const oppBanned = Array.isArray(state.bo3.bannedListA) ? state.bo3.bannedListA : [];
+  const oppErrs = (!Array.isArray(payload.deck) || payload.deck.length !== 5)
+    ? ['陣容未滿 5 槽']
+    : validateDeck(payload.deck, budgetLimit(), oppBanned);
+  if (oppErrs.length > 0) {
+    state.pvpOpponentReady = false;
+    state.pvpOpponentDeck = null;
+    state.pvpOpponentDoc = 'defense';
+    state.pvpOpponentFormations = null;
+    state.pvpOpponentTerrain = null;
+    state.pvpOpponentCommitHash = null;
+    renderCommandDeck();
+    renderMissionBar();
+    OnlinePvPEngine.sendPacket('DECK_UNREADY', { round: curRound, reason: oppErrs[0] });
+    toast(`⚠️ 對手陣容違反禁用或預算規則（${oppErrs[0]}），已要求對手重新調配！`);
+    return;
+  }
+
+  state.pvpOpponentDeck = payload.deck.slice();
   state.pvpOpponentDoc = payload.doctrine || 'defense';
   state.pvpOpponentFormations = normalizeFormations(payload.formations);
   state.pvpOpponentTerrain = normalizeTerrain(payload.terrain);
@@ -7883,22 +8079,49 @@ OnlinePvPEngine.on('opponent_deck_ready', payload => {
   } else {
     toast(`⚡ 對手已就緒！等待你完成陣容配置並鎖定！`);
   }
-});
+}
 
-OnlinePvPEngine.on('combat_start_sync', payload => {
+function handleCombatStartSyncPacket(payload, fromQueue = false) {
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  const curRound = Number(state.bo3.round || 1);
+  const pktRound = Number((payload && payload.round) || curRound);
+  if (pktRound > curRound) {
+    if (!fromQueue) queuePendingPvpPacket('combat_start_sync', pktRound, payload);
+    return;
+  }
+  if (pktRound < curRound) return;
+
+  if (!OnlinePvPEngine.isHostUser()) {
+    if ([3, 5, 7].includes(Number(payload.maxGames))) state.bo3.maxGames = Number(payload.maxGames);
+    if (payload.marketMode === 'free' || payload.marketMode === 'locked') state.bo3.marketMode = payload.marketMode;
+    if (typeof payload.winsA === 'number') state.bo3.winsA = payload.winsA;
+    if (typeof payload.winsB === 'number') state.bo3.winsB = payload.winsB;
+    if (Array.isArray(payload.bannedListA)) state.bo3.bannedListB = payload.bannedListA.slice();
+    if (Array.isArray(payload.bannedListB)) state.bo3.bannedListA = payload.bannedListB.slice();
+  }
+
   if (payload.deck && (!state.pvpOpponentDeck || !state.pvpOpponentDeck.length)) {
-    state.pvpOpponentDeck = payload.deck;
+    state.pvpOpponentDeck = payload.deck.slice();
     state.pvpOpponentDoc = payload.doctrine || 'defense';
     state.pvpOpponentReady = true;
   }
   if (Array.isArray(payload.formations)) state.pvpOpponentFormations = normalizeFormations(payload.formations);
   if (payload.terrain) state.pvpOpponentTerrain = normalizeTerrain(payload.terrain);
-  startOnlinePvpBattle(payload.seed, payload.event);
-});
+  startOnlinePvpBattle(payload.seed, payload.event, payload);
+}
 
-OnlinePvPEngine.on('opponent_ban_committed', payload => {
-  const bannedIds = Array.isArray(payload.bannedUnitIds) 
-    ? payload.bannedUnitIds 
+function handleOpponentBanCommittedPacket(payload, fromQueue = false) {
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  const curRound = Number(state.bo3.round || 1);
+  const pktRound = Number((payload && payload.round) || curRound);
+  if (pktRound > curRound) {
+    if (!fromQueue) queuePendingPvpPacket('opponent_ban_committed', pktRound, payload);
+    return;
+  }
+  if (pktRound < curRound) return;
+
+  const bannedIds = Array.isArray(payload.bannedUnitIds)
+    ? payload.bannedUnitIds
     : (payload.bannedUnitId ? [payload.bannedUnitId] : []);
   if (!state.bo3.bannedListB) state.bo3.bannedListB = [];
   if (payload.bannedList && Array.isArray(payload.bannedList)) {
@@ -7911,8 +8134,8 @@ OnlinePvPEngine.on('opponent_ban_committed', payload => {
   state.bo3.bannedByB = bannedIds[bannedIds.length - 1] || payload.bannedUnitId;
   const names = bannedIds.map(id => UNIT_MAP[id]?.name || id).join('、');
   toast(`⚠️ 對手啟動戰術反制！永久禁用了你的【${names}】（累計被禁用 ${state.bo3.bannedListB.length} 件）！`);
-  
-  // 檢查所有卡槽：若當前卡槽中正好有任何被累計禁用的單位，強制卸下並解鎖提交
+
+  // 檢查所有卡槽：若當前卡槽中正好有任何被累計禁用的單位，強制卸下並通知對手取消就緒
   const allBanned = currentBanned();
   let unmounted = false;
   state.deck.forEach((id, idx) => {
@@ -7923,31 +8146,101 @@ OnlinePvPEngine.on('opponent_ban_committed', payload => {
     }
   });
   if (unmounted) {
+    const wasReady = state.pvpMyReady;
     state.pvpMyReady = false;
+    state.pvpMyRevealed = false;
+    state.pvpMySalt = null;
+    state.pvpMyCommitHash = null;
+    if (wasReady) {
+      OnlinePvPEngine.sendPacket('DECK_UNREADY', { round: curRound, reason: 'banned_unit_unmounted' });
+    }
   }
-  
+
   const refitSec = (state.bo3.marketMode === 'free') ? 60 : 45;
   startPvpDeploymentTimer(refitSec);
   renderAll();
+}
+
+function applyOnlinePvpSeriesEnd(payload) {
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  const bo3 = state.bo3;
+  const isHost = OnlinePvPEngine.isHostUser();
+  if (payload) {
+    if ([3, 5, 7].includes(Number(payload.maxGames))) bo3.maxGames = Number(payload.maxGames);
+    if (typeof payload.winsA === 'number') bo3.winsA = payload.winsA;
+    if (typeof payload.winsB === 'number') bo3.winsB = payload.winsB;
+    if (Array.isArray(payload.history) && payload.history.length >= bo3.history.length) {
+      bo3.history = payload.history.slice();
+    }
+    if (payload.winner === 'A' || payload.winner === 'B') bo3.winner = payload.winner;
+  }
+  const winsNeeded = getBo3WinsNeeded();
+  const isSeriesWon = bo3.winner
+    ? (isHost ? bo3.winner === 'A' : bo3.winner === 'B')
+    : (isHost ? bo3.winsA >= winsNeeded : bo3.winsB >= winsNeeded);
+  bo3.finished = true;
+  if (!bo3.winner) bo3.winner = isSeriesWon ? (isHost ? 'A' : 'B') : (isHost ? 'B' : 'A');
+
+  PvPTimerManager.stop();
+  closeBattle();
+  if ($('#onlinePvpModal')) $('#onlinePvpModal').hidden = true;
+  if ($('#resultModal')) $('#resultModal').hidden = true;
+  if ($('#bo3CounterModal')) $('#bo3CounterModal').hidden = true;
+  if (currentActiveModal) currentActiveModal.hidden = true;
+  currentActiveModal = null;
+  showBo3SeriesResult(isSeriesWon);
+}
+
+OnlinePvPEngine.on('opponent_deck_committed', payload => handleOpponentDeckCommittedPacket(payload));
+OnlinePvPEngine.on('opponent_deck_ready', payload => handleOpponentDeckReadyPacket(payload));
+OnlinePvPEngine.on('combat_start_sync', payload => handleCombatStartSyncPacket(payload));
+OnlinePvPEngine.on('opponent_ban_committed', payload => handleOpponentBanCommittedPacket(payload));
+
+OnlinePvPEngine.on('opponent_deck_unready', payload => {
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  const curRound = Number(state.bo3.round || 1);
+  if (payload && payload.round && Number(payload.round) !== curRound) return;
+  state.pvpMyReady = false;
+  state.pvpMyRevealed = false;
+  state.pvpMySalt = null;
+  state.pvpMyCommitHash = null;
+  const allBanned = currentBanned();
+  state.deck.forEach((id, idx) => {
+    if (id && allBanned.includes(id)) {
+      state.deck[idx] = null;
+      state.active = idx;
+    }
+  });
+  renderAll();
+  toast('⚠️ 陣容包含被禁用名將或違規項目，已自動退回等待重新挑選並鎖定！');
+});
+
+OnlinePvPEngine.on('series_end_received', payload => {
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  const battleOpen = $('#viewBattle') && !$('#viewBattle').hidden;
+  if (battleOpen) {
+    state.pvpPendingSeriesEnd = payload || {};
+    toast('🏁 對手已完成最終局結算，系列賽即將收斂！');
+    return;
+  }
+  applyOnlinePvpSeriesEnd(payload);
 });
 
 OnlinePvPEngine.on('opponent_left', info => {
   const beforeStart = !!(info && info.beforeStart);
   const modalOpen = $('#onlinePvpModal') && !$('#onlinePvpModal').hidden;
   const wasInMatch = state.isOnlinePvp;
+  const isHost = OnlinePvPEngine.isHostUser();
 
-  state.isOnlinePvp = false;
-  state.pvpMyReady = false;
-  state.pvpOpponentReady = false;
-  state.pvpOpponentDeck = null;
   $('#pvpVersusBox').hidden = true;
   if ($('#pvpVersusRulesBar')) $('#pvpVersusRulesBar').hidden = true;
   if ($('#pvpGuestWaitNotice')) $('#pvpGuestWaitNotice').hidden = true;
   $('#btnPvpStartBattle').hidden = true;
 
   if (!wasInMatch && modalOpen) {
+    resetOnlinePvpSessionState(null, { keepSettings: true, activate: false });
     if ($('#pvpTabsRow')) $('#pvpTabsRow').hidden = false;
-    if (OnlinePvPEngine.isHostUser() && typeof OnlinePvPEngine.reopenWaitingRoom === 'function' && OnlinePvPEngine.reopenWaitingRoom()) {
+    if (isHost && typeof OnlinePvPEngine.reopenWaitingRoom === 'function' && OnlinePvPEngine.reopenWaitingRoom()) {
       const code = OnlinePvPEngine.getCurrentRoomCode();
       switchPvpTab('host');
       if ($('#pvpRoomCodeDisplay') && code) $('#pvpRoomCodeDisplay').textContent = code;
@@ -7955,7 +8248,7 @@ OnlinePvPEngine.on('opponent_left', info => {
       toast('⚠️ 對手已離開房間，原房間已自動重新開放等待配對！');
       return;
     }
-    if (!OnlinePvPEngine.isHostUser()) {
+    if (!isHost) {
       OnlinePvPEngine.closeConnection();
       switchPvpTab('join');
       toast('⚠️ 房主已關閉房間，請選擇其他公開房間或重新加入。');
@@ -7963,8 +8256,28 @@ OnlinePvPEngine.on('opponent_left', info => {
     }
   }
 
-  PvPTimerManager.stop();
+  if (wasInMatch && !beforeStart && state.bo3 && !state.bo3.finished) {
+    const mySide = isHost ? 'A' : 'B';
+    const winsNeeded = getBo3WinsNeeded();
+    if (mySide === 'A') state.bo3.winsA = winsNeeded;
+    else state.bo3.winsB = winsNeeded;
+    state.bo3.finished = true;
+    state.bo3.winner = mySide;
+    closeBattle();
+    if ($('#resultModal')) $('#resultModal').hidden = true;
+    if ($('#bo3CounterModal')) $('#bo3CounterModal').hidden = true;
+    if (currentActiveModal) currentActiveModal.hidden = true;
+    currentActiveModal = null;
+    OnlinePvPEngine.closeConnection();
+    showBo3SeriesResult(true);
+    resetOnlinePvpSessionState(null, { keepSettings: true, activate: false });
+    renderMissionBar();
+    toast('🏆 對手已中途離線，系統判定你直接贏得本次系列賽！');
+    return;
+  }
+
   OnlinePvPEngine.closeConnection();
+  resetOnlinePvpSessionState(null, { keepSettings: true, activate: false });
   renderAll();
   toast(beforeStart ? '⚠️ 對手已離房！' : '⚠️ 對手已斷開連線，本場線上對戰已結束！');
 });
@@ -7984,19 +8297,15 @@ $('#btnPvpStartBattle')?.addEventListener('click', () => {
   const opp = OnlinePvPEngine.getOpponent();
   if (!opp) return;
 
-  // 房主啟動連線遊戲會話
-  state.isOnlinePvp = true;
-  state.pvpMyReady = false;
-  state.pvpOpponentReady = false;
-  state.pvpOpponentDeck = null;
-  state.bo3.rivalName = `${opp.flag} ${opp.name} (${opp.uid})`;
-  state.bo3.active = true;
-  state.bo3.winsA = 0;
-  state.bo3.winsB = 0;
-  state.bo3.round = 1;
-  state.bo3.bannedByA = null;
-  state.bo3.bannedByB = null;
-  state.mode = 'bo3';
+  // 房主啟動連線遊戲會話並全面清除殘留系列賽狀態
+  resetOnlinePvpSessionState(opp, {
+    activate: true,
+    round: 1,
+    winsA: 0,
+    winsB: 0,
+    maxGames: (state.bo3 && state.bo3.maxGames) || 5,
+    marketMode: (state.bo3 && state.bo3.marketMode) || 'locked'
+  });
 
   // 通知挑戰者同步開局
   OnlinePvPEngine.sendPacket('GAME_START_SESSION', {

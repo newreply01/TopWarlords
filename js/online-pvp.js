@@ -252,6 +252,17 @@ const OnlinePvPEngine = (function () {
     opponentReady: false
   };
 
+  function resetPvpState() {
+    pvpState.connected = false;
+    pvpState.round = 1;
+    pvpState.winsA = 0;
+    pvpState.winsB = 0;
+    pvpState.bannedByOpponent = null;
+    pvpState.bannedByMe = null;
+    pvpState.myReady = false;
+    pvpState.opponentReady = false;
+  }
+
   function on(evt, fn) {
     if (!listeners[evt]) listeners[evt] = [];
     listeners[evt].push(fn);
@@ -308,10 +319,7 @@ const OnlinePvPEngine = (function () {
     seenPacketKeys.clear();
     activeGuestSenderId = null;
     claimedSeatCode = null;
-    pvpState.connected = false;
-    pvpState.winsA = 0;
-    pvpState.winsB = 0;
-    pvpState.round = 1;
+    resetPvpState();
 
     const fullPeerId = `${ROOM_PREFIX}${shortCode}`;
 
@@ -472,10 +480,7 @@ const OnlinePvPEngine = (function () {
     opponentJoinedEmitted = false;
     seenPacketKeys.clear();
     activeGuestSenderId = null;
-    pvpState.connected = false;
-    pvpState.winsA = 0;
-    pvpState.winsB = 0;
-    pvpState.round = 1;
+    resetPvpState();
     opponentInfo = null;
 
     const fullPeerId = `${ROOM_PREFIX}${cleanCode}`;
@@ -704,6 +709,13 @@ const OnlinePvPEngine = (function () {
 
       case 'GAME_START_SESSION':
         roomHasStarted = true;
+        pvpState.round = (data.payload && data.payload.round) || 1;
+        pvpState.winsA = (data.payload && data.payload.winsA) || 0;
+        pvpState.winsB = (data.payload && data.payload.winsB) || 0;
+        pvpState.bannedByOpponent = null;
+        pvpState.bannedByMe = null;
+        pvpState.myReady = false;
+        pvpState.opponentReady = false;
         emit('game_session_started', data.payload);
         break;
 
@@ -715,6 +727,11 @@ const OnlinePvPEngine = (function () {
         emit('opponent_deck_ready', data.payload);
         break;
 
+      case 'DECK_UNREADY':
+        pvpState.opponentReady = false;
+        emit('opponent_deck_unready', data.payload);
+        break;
+
       case 'BAN_COMMIT':
         pvpState.bannedByOpponent = data.payload.bannedUnitId;
         emit('opponent_ban_committed', data.payload);
@@ -722,6 +739,10 @@ const OnlinePvPEngine = (function () {
 
       case 'COMBAT_SYNC':
         emit('combat_start_sync', data.payload);
+        break;
+
+      case 'SERIES_END':
+        emit('series_end_received', data.payload);
         break;
 
       case 'EMOTE':
@@ -737,6 +758,18 @@ const OnlinePvPEngine = (function () {
         break;
     }
   }
+
+  const CRITICAL_SYNC_PACKETS = new Set([
+    'HANDSHAKE',
+    'GAME_START_SESSION',
+    'DECK_COMMIT',
+    'DECK_SUBMIT',
+    'DECK_UNREADY',
+    'BAN_COMMIT',
+    'COMBAT_SYNC',
+    'PLAYER_FORFEIT',
+    'SERIES_END'
+  ]);
 
   /* 發送封包 */
   function sendPacket(type, payload) {
@@ -756,7 +789,7 @@ const OnlinePvPEngine = (function () {
         sentOverP2P = false;
       }
     }
-    const criticalPacket = (type === 'HANDSHAKE' || type === 'GAME_START_SESSION');
+    const criticalPacket = CRITICAL_SYNC_PACKETS.has(type);
     if (useFirebaseRelay && fbRoomRef && (!sentOverP2P || criticalPacket)) {
       fbRoomRef.child('messages').push({ sender: senderId, packet, ts: Date.now() }).catch(() => { });
     }
@@ -878,16 +911,18 @@ const OnlinePvPEngine = (function () {
   function closeConnection() {
     pendingJoinResolve = null;
     pendingJoinReject = null;
-    if (!isHost && !roomHasStarted) {
+    if (!isHost) {
       if (useFirebaseRelay && fbRoomRef) {
         try {
           fbRoomRef.child('messages').push({ sender: senderId, type: '__GUEST_LEAVE__', ts: Date.now() }).catch(() => { });
         } catch (_) { }
       }
-      if (claimedSeatCode) {
+      if (!roomHasStarted && claimedSeatCode) {
         const codeToRelease = claimedSeatCode;
         claimedSeatCode = null;
         releaseRoomSeat(codeToRelease);
+      } else {
+        claimedSeatCode = null;
       }
     } else {
       claimedSeatCode = null;
@@ -906,7 +941,7 @@ const OnlinePvPEngine = (function () {
       } catch (_) { }
       setTimeout(() => {
         try { leavingRef.remove(); } catch (_) { }
-      }, 250);
+      }, 600);
     } else {
       cleanupFirebaseRelay();
     }
@@ -921,7 +956,7 @@ const OnlinePvPEngine = (function () {
     currentRoomId = '';
     activeGuestSenderId = null;
     roomHasStarted = false;
-    pvpState.connected = false;
+    resetPvpState();
     opponentInfo = null;
     opponentJoinedEmitted = false;
     seenPacketKeys.clear();

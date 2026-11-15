@@ -4,6 +4,17 @@
 
 ---
 
+## [7.11.47] - 2026-11-15
+### Fixed (線上 PvP 殘留禁用修復、回合同步圍欄與系列賽收斂 + 第二列橫幅防重疊)
+- **開局完整重置線上系列賽狀態 (`js/app.js`, `js/online-pvp.js`)**：
+  - 抽出 `resetOnlinePvpSessionState()` 於開戰 (`#btnPvpStartBattle` / `game_session_started`) 與退出時清空 `bannedListA`、`bannedListB`、`bannedByA`、`bannedByB`、`candidateBan`、`candidateBans`、`finished`、`history` 及殘留同步欄位，並於 `OnlinePvPEngine` 新增 `resetPvpState()` 徹底清除上一場的 `bannedByOpponent` / `winsA` / `winsB` / `round`。
+- **消除線上 PvP 雙方結算不同步／提前開打／禁將殘留問題 (`js/app.js`, `js/online-pvp.js`)**：
+  - `CRITICAL_SYNC_PACKETS` 全面鏡像 `DECK_COMMIT`、`DECK_SUBMIT`、`DECK_UNREADY`、`BAN_COMMIT`、`COMBAT_SYNC`、`PLAYER_FORFEIT`、`SERIES_END` 至 Firebase Relay 通道。
+  - 新增回合圍欄 (`pvpPendingPackets` 與 `flushPendingPvpPacketsForRound`)、對手卡組雙重禁用檢查 (`DECK_UNREADY`)、`checkBothReadyAndStartCombat()` 防重送與完整 `COMBAT_SYNC`（保留雙方陣形 `formations` 與地形 `terrain` 同步）。
+  - 新增 `SERIES_END` 終局同步封包、`__GUEST_LEAVE__` 開戰後斷線通報及 `opponent_left` 中途離線自動完賽收斂，避免出現一方已結束、另一方仍停留在最後一局等待的情況。
+- **第二列戰備橫幅防重疊保護 (`js/app.js`, `style.css`)**：
+  - 補齊單機 BO3/BO5 `.bo3-bans-wrap` 與 `.ban-capsule` 截斷省略號與壓縮規則，防止多名禁用名將橫幅溢出遮擋右側戰陣與計時工具欄。
+
 ## [7.11.39] - 2026-11-15
 ### Refactored & Rebalanced (跨軍種定位梳理、引擎機制修正與 $15 天梯／範本重平衡)
 - **五大兵團名將調動與替補 (`js/data.js`, `assets/warlords/`)**：

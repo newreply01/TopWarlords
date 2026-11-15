@@ -26047,9 +26047,33 @@ select:focus-visible,
   min-width: 0 !important;
 }
 
-#missionContent:has(.pvp-score-box) {
+#missionContent:has(.pvp-score-box),
+#missionContent:has(.bo3-mission-tag) {
   overflow: hidden !important;
   gap: 6px !important;
+}
+
+#missionContent:has(.bo3-bans-wrap) {
+  flex: 1 1 auto !important;
+}
+
+.bo3-bans-wrap {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.bo3-bans-wrap .ban-capsule {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: 0 !important;
 }
 
 #missionBar>#formationDropdown {
@@ -26069,7 +26093,8 @@ select:focus-visible,
 @media (min-width: 769px) {
   .mission-content:has(.daily-mission-item) .weather-pill,
   .mission-content:has(.sandbox-mission-item) .weather-pill,
-  #missionContent:has(.pvp-score-box) .weather-pill {
+  #missionContent:has(.pvp-score-box) .weather-pill,
+  #missionContent:has(.bo3-bans-wrap) .weather-pill {
     width: auto !important;
     min-width: 0 !important;
     max-width: 108px !important;
@@ -26214,6 +26239,10 @@ select:focus-visible,
   #missionContent:has(.pvp-score-box) .weather-pill {
     max-width: 86px !important;
     padding: 0 6px !important;
+  }
+
+  .bo3-bans-wrap .ban-capsule {
+    max-width: 170px;
   }
 }
 

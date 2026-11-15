@@ -228,7 +228,7 @@ try:
             if (unitMap.CAOCAO && (unitMap.CAOCAO.cost !== 4 || unitMap.CAOCAO.cat !== 'support')) {
                 errs.push('曹操定位錯誤');
             }
-            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 2 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
+            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 1 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
                 errs.push('夏侯惇定位錯誤');
             }
             if (unitMap.IINAOMASA && (unitMap.IINAOMASA.cost !== 2 || unitMap.IINAOMASA.cat !== 'armor')) {

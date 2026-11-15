@@ -1591,7 +1591,7 @@
     "id": "XIAHOU_DUN",
     "name": "夏侯惇",
     "cat": "armor",
-    "cost": 2,
+    "cost": 1,
     "v": "F",
     "tag": "魏之元勳·親冒矢石",
     "desc": "曹魏重要將領與宗室重臣，長期參與曹操征戰並任前線統帥，以忠勇和治軍著稱。",
@@ -1609,9 +1609,9 @@
     },
     "st": 10,
     "ew": 14,
-    "hp": 472,
-    "atk": 86,
-    "def": 0.24,
+    "hp": 388,
+    "atk": 72,
+    "def": 0.23,
     "skill": {
       "name": "拔矢啖睛",
       "phase": "P3",
@@ -1766,32 +1766,37 @@
     "id": "XUCHU",
     "name": "許褚",
     "cat": "armor",
-    "cost": 1,
+    "cost": 2,
     "v": "B",
     "tag": "虎癡勇悍·倒拖雙牛",
-    "desc": "曹魏宿衛名將，勇冠三軍倒拖雙牛，潼關之戰保護曹操渡河身中重箭不退。",
+    "desc": "曹魏武衛虎侯，勇冠三軍倒拖雙牛，潼關之戰護衛曹操渡河、渭南平馬超威震敵膽。",
     "traits": [
-      "HEAVY",
-      "TRUE_AT"
+      "APS",
+      "HEAVY"
     ],
-    "roleFlags": [],
+    "roleFlags": [
+      "STAMINA_DEEP",
+      "HEAVY_AP"
+    ],
     "historicalAudit": {
       "status": "unverified",
       "note": "",
       "sources": []
     },
     "st": 8,
-    "ew": 10,
-    "hp": 384,
-    "atk": 72,
-    "def": 0.23,
+    "ew": 12,
+    "hp": 476,
+    "atk": 88,
+    "def": 0.25,
     "skill": {
       "name": "裸衣虎癡",
       "phase": "P3",
-      "desc": "P3 首次命中時，每戰一次：本次傷害 ×1.14；自身後續受傷減少 12%。持續效果至戰鬥結束。",
+      "desc": "P3 首次命中時，每戰一次：本次傷害 ×1.2；本次忽略 40% 護甲（真實傷害不重複加成）；自身後續受傷減少 16%；全軍後續受傷減少 6%（同類取最高）。持續效果至戰鬥結束。",
       "effects": {
-        "damage": 1.14,
-        "guard": 0.12
+        "damage": 1.2,
+        "guard": 0.16,
+        "teamGuard": 0.06,
+        "armorPierce": 0.4
       },
       "fx": "overlord_cleave",
       "fxLabel": "霸王破甲",

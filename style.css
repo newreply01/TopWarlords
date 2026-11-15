@@ -29673,3 +29673,47 @@ html:not([data-theme="light"]) .formation-slot-row {
   overscroll-behavior: contain;
   padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
 }
+
+/* =====================================================
+   3D 戰場畫布與下方戰情列分離佈局 (v7.11.52)
+   讓 .battle-3d-canvas-container 佔據 .battle-field-hud 上方空間，不再被下方戰報覆蓋底緣
+   ===================================================== */
+#battle3DWrapper.battle-3d-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+#battle3DWrapper .battle-3d-canvas-container {
+  position: relative;
+  inset: auto;
+  flex: 1 1 0;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#battle3DWrapper .battle-field-hud {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 6px 10px 8px;
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.94);
+  border-top: 1px solid rgba(212, 168, 83, 0.3);
+  z-index: 20;
+}
+
+[data-theme="light"] #battle3DWrapper .battle-field-hud {
+  background: rgba(248, 250, 252, 0.96);
+  border-top-color: rgba(146, 100, 36, 0.25);
+}
+
+@media (max-width: 520px) {
+  #battle3DWrapper .battle-field-hud {
+    padding: 4px 6px 6px;
+  }
+}

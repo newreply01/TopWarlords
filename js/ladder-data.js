@@ -103,7 +103,7 @@ const LADDER_PRESETS = [
     "rp": 54000,
     "doc": "deception",
     "deck": [
-      "DENGAI",
+      "GAOCHANGGONG",
       "ZHOUTAI",
       "GENGYAN",
       "WEIYAN",
@@ -118,7 +118,7 @@ const LADDER_PRESETS = [
     "rp": 53350,
     "doc": "deception",
     "deck": [
-      "DENGAI",
+      "GAOCHANGGONG",
       "DIANWEI",
       "LIGUANG",
       "YUEJIN",
@@ -238,7 +238,7 @@ const LADDER_PRESETS = [
     "rp": 48605,
     "doc": "strike",
     "deck": [
-      "DENGAI",
+      "GAOCHANGGONG",
       "DIANWEI",
       "FENGYI",
       "LUMENG",
@@ -328,7 +328,7 @@ const LADDER_PRESETS = [
     "rp": 45537,
     "doc": "deception",
     "deck": [
-      "DENGAI",
+      "GAOCHANGGONG",
       "DIANWEI",
       "ZONGZE",
       "YUYUNWEN",
@@ -343,7 +343,7 @@ const LADDER_PRESETS = [
     "rp": 44980,
     "doc": "deception",
     "deck": [
-      "LINGTONG",
+      "WANGSHUANG",
       "DIANWEI",
       "ZHANGHE",
       "MENGHUO",
@@ -358,7 +358,7 @@ const LADDER_PRESETS = [
     "rp": 44412,
     "doc": "strike",
     "deck": [
-      "DENGAI",
+      "GAOCHANGGONG",
       "DIANWEI",
       "ZHANGHE",
       "YUYUNWEN",
@@ -376,7 +376,7 @@ const LADDER_PRESETS = [
       "KIMYUSHIN",
       "YUJIN",
       "GWONYUL",
-      "DINGFENG",
+      "JIANGWEI",
       "XUNYU"
     ],
     "title": "伏波龍骨水陸破暗"
@@ -583,7 +583,7 @@ const LADDER_PRESETS = [
     "rp": 35385,
     "doc": "deception",
     "deck": [
-      "GONGSUNDU",
+      "MADAI",
       "CAOREN",
       "LIGUANG",
       "MENGHUO",
@@ -763,7 +763,7 @@ const LADDER_PRESETS = [
     "rp": 28905,
     "doc": "defense",
     "deck": [
-      "GONGSUNDU",
+      "MADAI",
       "XUCHU",
       "ZHOUYAFU",
       "YUYUNWEN",
@@ -823,7 +823,7 @@ const LADDER_PRESETS = [
     "rp": 26489,
     "doc": "strike",
     "deck": [
-      "DENGAI",
+      "GAOCHANGGONG",
       "DIANWEI",
       "KUANGZHANG",
       "CHOSOKABE",
@@ -853,7 +853,7 @@ const LADDER_PRESETS = [
     "rp": 25453,
     "doc": "defense",
     "deck": [
-      "LINGTONG",
+      "WANGSHUANG",
       "YANGYE",
       "KUANGZHANG",
       "JANGPOGO",
@@ -898,7 +898,7 @@ const LADDER_PRESETS = [
     "rp": 23519,
     "doc": "deception",
     "deck": [
-      "GONGSUNDU",
+      "MADAI",
       "XUCHU",
       "ZONGZE",
       "YUYUNWEN",
@@ -916,7 +916,7 @@ const LADDER_PRESETS = [
       "EULJI",
       "CHOIYOUNG",
       "FENGYI",
-      "DINGFENG",
+      "JIANGWEI",
       "SANADAMASA"
     ],
     "title": "伏波龍骨水陸破暗"
@@ -988,7 +988,7 @@ const LADDER_PRESETS = [
     "rp": 19690,
     "doc": "defense",
     "deck": [
-      "GONGSUNDU",
+      "MADAI",
       "DIANWEI",
       "ZHOUYAFU",
       "WEIYAN",
@@ -1003,7 +1003,7 @@ const LADDER_PRESETS = [
     "rp": 19098,
     "doc": "strike",
     "deck": [
-      "LINGTONG",
+      "WANGSHUANG",
       "ZHANGFEI",
       "FENGYI",
       "XIEXUAN",
@@ -1141,7 +1141,7 @@ const LADDER_PRESETS = [
       "GAISUWEN",
       "SHIBATA",
       "MATSUNAGA",
-      "DINGFENG",
+      "JIANGWEI",
       "SUNWU"
     ],
     "title": "伏波龍骨水陸破暗"
@@ -1183,7 +1183,7 @@ const LADDER_PRESETS = [
     "rp": 11397,
     "doc": "defense",
     "deck": [
-      "DENGAI",
+      "GAOCHANGGONG",
       "DIANWEI",
       "ZHANGHE",
       "WEIYAN",
@@ -1243,7 +1243,7 @@ const LADDER_PRESETS = [
     "rp": 8890,
     "doc": "defense",
     "deck": [
-      "GONGSUNDU",
+      "MADAI",
       "XUCHU",
       "ZHANGHE",
       "YUYUNWEN",
@@ -1378,7 +1378,7 @@ const LADDER_PRESETS = [
     "rp": 3767,
     "doc": "strike",
     "deck": [
-      "LINGTONG",
+      "WANGSHUANG",
       "WANGJIAN",
       "ZONGZE",
       "YUEJIN",
@@ -1408,10 +1408,10 @@ const LADDER_PRESETS = [
     "rp": 2578,
     "doc": "deception",
     "deck": [
-      "GONGSUNDU",
+      "MADAI",
       "DIANWEI",
       "GENGYAN",
-      "DINGFENG",
+      "JIANGWEI",
       "FAZHENG"
     ],
     "title": "步騎火砲協同合圍"
@@ -1453,7 +1453,7 @@ const LADDER_PRESETS = [
     "rp": 698,
     "doc": "deception",
     "deck": [
-      "GONGSUNDU",
+      "MADAI",
       "DIANWEI",
       "ZHANGHE",
       "XIEXUAN",

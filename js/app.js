@@ -50,7 +50,7 @@ const SEED_GHOSTS = [
   { id: 'g_falcon', callsign: '冠軍侯・驃騎營', title: '驃騎將軍', rating: 1420, wins: 58, losses: 19, deck: ['HUO','ZHOUTAI','GENGYAN','GANNING','LIUBOWEN'], doctrine: 'strike', motto: '疾如風千里奔襲，閃擊直取中軍帥帳！', isUser: false },
   { id: 'g_iron', callsign: '武安君・鐵壁陣', title: '鎮國大將軍', rating: 1310, wins: 41, losses: 22, deck: ['DATE','BAIQI','ZONGZE','YUEJIN','SIMAYI'], doctrine: 'defense', motto: '不動如山大盾重甲，長平鐵壁固若金湯。', isUser: false },
   { id: 'g_shadow', callsign: '臥龍崗・八陣圖', title: '軍師祭酒', rating: 1490, wins: 64, losses: 14, deck: ['ZHAOYUN','LIANPO','HUANGZHONG','CAOBIN','ZHUGELIANG'], doctrine: 'deception', motto: '奇門八陣迷霧困敵，未戰而廟算先勝。', isUser: false },
-  { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['GONGSUNDU','KATOKIYOMASA','ASAKURA_SOT','YISUNSIN','PANGTONG'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
+  { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['MADAI','KATOKIYOMASA','ASAKURA_SOT','YISUNSIN','PANGTONG'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
   { id: 'g_viper', callsign: '毘沙門天・車懸陣', title: '越後守護', rating: 1610, wins: 88, losses: 21, deck: ['KENSHIN','ZHANGFEI','TORII','MENGHUO','GUOJIA'], doctrine: 'strike', motto: '車懸輪番急襲破陣，白刃一騎討斬將奪旗。', isUser: false },
   { id: 'g_aegis', callsign: '大司馬・漢軍鐵騎', title: '大將軍大司馬', rating: 1720, wins: 104, losses: 25, deck: ['WEI','LIANPO','LIGUANG','TIANDAN','ZHUGELIANG'], doctrine: 'strike', motto: '武剛車陣奇兵破虜，神射強弩萬箭齊發。', isUser: false }
 ];
@@ -1236,7 +1236,7 @@ function getCandidateNewSynergies(u, targetSlot, currentDeck, currentSynIds, nee
       });
     }
   }
-  if (needsFourYiHint && (u.id === 'MENGHUO' || u.id === 'SHAMOKE')) {
+  if (needsFourYiHint && u.id === 'MENGHUO') {
     out.push({ id: 'fourYi', label: '四夷', title: '領軍解鎖「四夷」陣形（山岳／森林攻防 +50%）' });
   }
   return out;
@@ -1247,7 +1247,7 @@ function getCardTacticalTags(u) {
   const tags = [];
   const flags = u.roleFlags || [];
   if (u.skill?.effects?.armorPierce) tags.push({ cls: 'tag-ap', text: '破甲', title: '專屬戰法附帶破甲無視部分護甲' });
-  if (u.id === 'MENGHUO' || u.id === 'SHAMOKE') tags.push({ cls: 'tag-fy', text: '四夷', title: '可解鎖四夷特殊陣形' });
+  if (u.id === 'MENGHUO') tags.push({ cls: 'tag-fy', text: '四夷', title: '可解鎖四夷特殊陣形' });
   if (flags.includes('PASSIVE_VOLLEY')) tags.push({ cls: 'tag-stealth', text: '隱伏', title: '隱蔽伏弩，階段一不易被優先鎖定' });
   if (flags.includes('FORMATION_SHIELD')) tags.push({ cls: 'tag-shield', text: '護軍', title: '護軍大陣庇護友軍免受先制斬首' });
   if (flags.includes('STAMINA_DEEP')) tags.push({ cls: 'tag-deep', text: '久戰', title: '百戰老將，持久戰氣力多 1 波' });
@@ -1265,7 +1265,7 @@ function renderMatrix() {
   const activeWeather = getActiveBuildWeather();
   const pickedUnitsAll = (state.deck || []).map(id => (id ? UNIT_MAP[id] : null)).filter(Boolean);
   const currentSynIds = new Set(typeof getDeckSynergies === 'function' ? getDeckSynergies(pickedUnitsAll).map(s => s.id) : []);
-  const hasFourYiLeader = pickedUnitsAll.some(x => x.id === 'MENGHUO' || x.id === 'SHAMOKE');
+  const hasFourYiLeader = pickedUnitsAll.some(x => x.id === 'MENGHUO');
   const needsFourYiHint = !hasFourYiLeader && ((Array.isArray(state.formations) && state.formations.includes('fourYi')) || state.terrain === 'mountain' || state.terrain === 'forest');
   const normFormations = normalizeArmyFormations(state.formations, state.deck);
   const availForms = getEligibleFormations(state.deck);

@@ -187,7 +187,7 @@ const BATTLE_FORMATION_DEFS = [
   { id: 'crane', name: '鶴翼', desc: '展開兩翼包抄，略增命中與攻勢。', attack: 1.05, damageTaken: 1, hit: 0.02, tacticChance: 0.04, tacticDamage: 1.15, layout: 'wings', occupation: true },
   { id: 'longsnake', name: '長蛇', desc: '山地、森林中攻防能力提升 50%。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.02, tacticDamage: 1.15, layout: 'column', terrainMultiplier: 1.5 },
   { id: 'cone', name: '錐行', desc: '高速穿插；戰鬥力較弱且無法發動戰法。', attack: 0.78, damageTaken: 1.05, hit: -0.02, tacticChance: 0, tacticDamage: 1, layout: 'cone', mobility: 1.5 },
-  { id: 'fourYi', name: '四夷', desc: '由孟獲或沙摩柯領軍解鎖；全軍在山岳、森林中攻防提升 50%，容易發動戰法。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.14, tacticDamage: 1.2, layout: 'wedge', terrainMultiplier: 1.5, eligibleUnitIds: ['MENGHUO', 'SHAMOKE'] }
+  { id: 'fourYi', name: '四夷', desc: '由孟獲領軍解鎖；全軍在山岳、森林中攻防提升 50%，容易發動戰法。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.14, tacticDamage: 1.2, layout: 'wedge', terrainMultiplier: 1.5, eligibleUnitIds: ['MENGHUO'] }
 ];
 
 const BATTLE_TERRAINS = [
@@ -202,14 +202,14 @@ function getBattleFormation(id) {
 
 function getRecommendedFormations(deck, terrain = 'plain') {
   const rough = terrain === 'mountain' || terrain === 'forest';
-  const id = rough && (deck || []).some(unit => ['MENGHUO', 'SHAMOKE'].includes(unit)) ? 'fourYi'
+  const id = rough && (deck || []).some(unit => unit === 'MENGHUO') ? 'fourYi'
     : rough ? 'longsnake' : 'fishscale';
   return (deck || []).map(() => id);
 }
 
 function getSmartFormationsForDeck(deck, terrain = 'plain') {
   const rough = terrain === 'mountain' || terrain === 'forest';
-  const hasFourYi = Array.isArray(deck) && deck.some(unit => ['MENGHUO', 'SHAMOKE'].includes(unit));
+  const hasFourYi = Array.isArray(deck) && deck.some(unit => unit === 'MENGHUO');
   const defaults = [
     'spearhead',
     'square',
@@ -219,7 +219,7 @@ function getSmartFormationsForDeck(deck, terrain = 'plain') {
   ];
   return Array.from({ length: 5 }, (_, i) => {
     const unitId = Array.isArray(deck) ? deck[i] : null;
-    if (rough && hasFourYi && (unitId === 'MENGHUO' || unitId === 'SHAMOKE')) return 'fourYi';
+    if (rough && hasFourYi && unitId === 'MENGHUO') return 'fourYi';
     return defaults[i];
   });
 }
@@ -593,8 +593,8 @@ function resolveBattle(deckA, deckB, opts) {
   l1.push({ side: 'N', kind: 'info', text: `全軍謀略值：我方 ${ewA.toFixed(0)} ／ 敵方 ${ewB.toFixed(0)}` });
   if (Math.abs(ewA - ewB) >= 10) {
     advSide = ewA > ewB ? 'A' : 'B';
-    const ratio = clamp(Math.abs(ewA - ewB) / 50, 0, 1);
-    const pen = 0.08 * ratio, boost = 0.05 * ratio;
+    const ratio = clamp(Math.abs(ewA - ewB) / 45, 0, 1);
+    const pen = 0.09 * ratio, boost = 0.07 * ratio;
     S[other(advSide)].hitPen += pen;
     S[advSide].atkAll = (S[advSide].atkAll || 1) * (1 + boost);
     l1.push({ side: advSide, kind: 'info', text: `${advSide === 'A' ? '我方' : '敵方'}運籌決勝取得謀略先機：對手命中率 −${Math.round(pen * 100)}%，己方全軍戰意 +${Math.round(boost * 100)}%。` });
@@ -652,10 +652,11 @@ function resolveBattle(deckA, deckB, opts) {
         const t = pickTop(alive(e, x => x.cat === 'air'));
         if (!t) continue;
         const ammo = getAmmoProfile(u);
+        const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
         u.shots++;
         const f = u.cat === 'air_defense' ? 1 : 0.55;
         const hit = hitP(u, t, 0.82 + (u.traits.includes('AA_LONG') ? 0.08 : 0) + S[s].adHit, 0.55, m.airHit + ammo.hitMod);
-        at.push({ att: u, tgt: t, ammoTier: ammo.tier, hit, dmg: u.atk * 2.5 * f * S[s].atkEarly * ammo.dmgMult });
+        at.push({ att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt, hit, dmg: u.atk * 2.5 * f * S[s].atkEarly * ammo.dmgMult });
       }
     }
     pushFrame(2, '階段二 · 神射箭雨攔截', volley(at, { phase: 2 }));
@@ -691,6 +692,7 @@ function resolveBattle(deckA, deckB, opts) {
         if (!pool.length) continue;
         const ammo = getAmmoProfile(u);
         const tgts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
+        const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
         u.shots++;
         for (const t of tgts) {
           if (!t) continue;
@@ -701,7 +703,7 @@ function resolveBattle(deckA, deckB, opts) {
           if (u.traits.includes('SUB') && !t.traits.includes('SUB')) mult *= 1.3;
           if (tgts.length > 1) mult *= 0.6;
           at.push({
-            att: u, tgt: t, ammoTier: ammo.tier,
+            att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
             hit: hitP(u, t, 0.76 + S[s].navHit, 0.45, ammo.hitMod),
             dmg: u.atk * mult * S[s].navMult * m.navalDmg * S[s].atkEarly * ammo.dmgMult
           });
@@ -786,6 +788,7 @@ function resolveBattle(deckA, deckB, opts) {
           const ammo = getAmmoProfile(u);
           const pool = !u.formationRanged && enemyNaval.length ? enemyNaval : ground;
           const ts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
+          const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
           u.shots++;
           for (const t of ts) {
             if (!t) continue;
@@ -793,7 +796,7 @@ function resolveBattle(deckA, deckB, opts) {
             if (t.traits.includes('SUB') && u.traits.includes('ASW')) nMult *= 1.35;
             if (ts.length > 1) nMult *= 0.65;
             at.push({
-              att: u, tgt: t, ammoTier: ammo.tier,
+              att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
               hit: hitP(u, t, 0.78 + S[s].navHit, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
               dmg: u.atk * nMult * m.navalDmg * ammo.dmgMult
             });
@@ -823,7 +826,7 @@ function resolveBattle(deckA, deckB, opts) {
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.78, 0.35, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
                 trueDmg: isTrueAt,
-                dmg: u.atk * 2.2 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.5 : 1) * ammo.dmgMult
+                dmg: u.atk * 1.95 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.6 : 1) * ammo.dmgMult
               });
             }
           } else if (u.traits.includes('ARTY')) {
@@ -833,7 +836,7 @@ function resolveBattle(deckA, deckB, opts) {
               at.push({
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.78, 0.3, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                dmg: u.atk * 1.65 * (ts.length > 1 ? 0.75 : 1) * S[s].landMult * m.artyDmg * spot * ammo.dmgMult
+                dmg: u.atk * 1.14 * (ts.length > 1 ? 0.75 : 1) * S[s].landMult * m.artyDmg * spot * ammo.dmgMult
               });
             }
           } else {
@@ -842,7 +845,7 @@ function resolveBattle(deckA, deckB, opts) {
               at.push({
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.80, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                dmg: u.atk * 0.85 * S[s].droneMult * spot * ammo.dmgMult
+                dmg: u.atk * (0.92 + Math.max(0, u.ew - 60) * 0.006) * S[s].droneMult * spot * ammo.dmgMult
               });
             }
           }
@@ -853,11 +856,12 @@ function resolveBattle(deckA, deckB, opts) {
             if (t) {
               const ammo = getAmmoProfile(u);
               const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(enemyAir, 2) : [t];
+              const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
               u.shots++;
               for (const airTgt of ts) {
                 if (!airTgt) continue;
                 at.push({
-                  att: u, tgt: airTgt, ammoTier: ammo.tier,
+                  att: u, tgt: airTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
                   hit: hitP(u, airTgt, 0.88 + (u.traits.includes('AA_LONG') ? 0.05 : 0) + S[s].adHit, 0.35, m.airHit + lockBonus + ammo.hitMod, stealthScale),
                   dmg: u.atk * 2.2 * (ts.length > 1 ? 0.75 : 1) * ammo.dmgMult
                 });
@@ -867,13 +871,18 @@ function resolveBattle(deckA, deckB, opts) {
             const t = pickTop(ground);
             if (t) {
               const ammo = getAmmoProfile(u);
+              const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [t];
+              const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
               const abmScale = hasRoleFlag(u, 'FORMATION_SHIELD') ? 0.50 : 0.7;
               u.shots++;
-              at.push({
-                att: u, tgt: t, ammoTier: ammo.tier,
-                hit: clamp(0.72 + lockBonus + ammo.hitMod, 0.08, 0.96),
-                dmg: u.atk * abmScale * ammo.dmgMult
-              });
+              for (const gTgt of ts) {
+                if (!gTgt) continue;
+                at.push({
+                  att: u, tgt: gTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
+                  hit: clamp(0.72 + lockBonus + ammo.hitMod, 0.08, 0.96),
+                  dmg: u.atk * abmScale * (ts.length > 1 ? 0.75 : 1) * ammo.dmgMult
+                });
+              }
             }
           }
         }

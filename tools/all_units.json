@@ -83,7 +83,7 @@
     "id": "ZHANGLIAO",
     "name": "張遼",
     "cat": "air",
-    "cost": 3,
+    "cost": 4,
     "tag": "逍遙津突襲·威震江東",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -113,7 +113,7 @@
     "id": "YUKIMURA",
     "name": "真田幸村",
     "cat": "air",
-    "cost": 4,
+    "cost": 3,
     "tag": "日本第一兵·直衝本陣",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -140,14 +140,14 @@
     "weapon": "霸王槍 + 江東戰旗"
   },
   {
-    "id": "DENGAI",
-    "name": "鄧艾",
+    "id": "GAOCHANGGONG",
+    "name": "高長恭",
     "cat": "air",
     "cost": 3,
-    "tag": "涉險越嶺·陰平天降",
+    "tag": "邙山破圍·蘭陵鐵面",
     "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "登山步稍 + 奇襲輕甲"
+    "origin": "中國 · 北齊",
+    "weapon": "具裝長槊 + 蘭陵鐵面"
   },
   {
     "id": "XIAHOUYUAN",
@@ -160,14 +160,14 @@
     "weapon": "精鋼長矛 + 快馬大黃弓"
   },
   {
-    "id": "GONGSUNDU",
-    "name": "公孫瓚",
+    "id": "MADAI",
+    "name": "馬岱",
     "cat": "air",
     "cost": 1,
-    "tag": "白馬義從·塞外破胡",
+    "tag": "西涼輕騎·北伐斬叛",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "白馬長槊 + 雕花角弓"
+    "weapon": "西涼輕騎長矛 + 隨身連弩"
   },
   {
     "id": "DATE",
@@ -190,14 +190,14 @@
     "weapon": "高句麗環刀 + 輕步快騎"
   },
   {
-    "id": "LINGTONG",
-    "name": "凌統",
+    "id": "WANGSHUANG",
+    "name": "王雙",
     "cat": "air",
     "cost": 1,
-    "tag": "國士先鋒·親率死戰",
+    "tag": "陳倉猛追·萬夫莫當",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "烈火大刀 + 隨身精短劍"
+    "weapon": "六十斤大刀 + 飛擊流星錘"
   },
   {
     "id": "YAMAGATA",
@@ -303,7 +303,7 @@
     "id": "SHIBATA",
     "name": "柴田勝家",
     "cat": "armor",
-    "cost": 3,
+    "cost": 2,
     "tag": "破瓶柴田·萬夫莫當",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -403,7 +403,7 @@
     "id": "XUCHU",
     "name": "許褚",
     "cat": "armor",
-    "cost": 2,
+    "cost": 3,
     "tag": "虎癡勇悍·倒拖雙牛",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -533,7 +533,7 @@
     "id": "YOICHI",
     "name": "那須與一",
     "cat": "air_defense",
-    "cost": 4,
+    "cost": 3,
     "tag": "扇之的·神弓定浪",
     "flag": "🇯🇵",
     "origin": "日本 · 源平",
@@ -603,7 +603,7 @@
     "id": "SAIKA",
     "name": "雜賀孫市",
     "cat": "air_defense",
-    "cost": 3,
+    "cost": 4,
     "tag": "紀伊鐵砲·八咫烏之王",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -843,11 +843,31 @@
     "id": "JIANGWEI",
     "name": "姜維",
     "cat": "naval",
-    "cost": 5,
+    "cost": 3,
     "tag": "天水麒麟·九伐奇謀",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "天水綠沉長槍 + 蜀錦奇兵袍"
+  },
+  {
+    "id": "LIJING",
+    "name": "李靖",
+    "cat": "naval",
+    "cost": 5,
+    "tag": "衛國軍神·夜襲陰山",
+    "flag": "🇨🇳",
+    "origin": "中國 · 唐",
+    "weapon": "唐軍橫刀 + 衛公兵法節杖"
+  },
+  {
+    "id": "DENGAI",
+    "name": "鄧艾",
+    "cat": "naval",
+    "cost": 4,
+    "tag": "涉險越嶺·陰平天降",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "登山步稍 + 奇襲輕甲"
   },
   {
     "id": "MURAKAMI",
@@ -903,7 +923,7 @@
     "id": "HATTORI",
     "name": "服部半藏",
     "cat": "naval",
-    "cost": 4,
+    "cost": 3,
     "tag": "鬼半藏·伊賀忍軍統領",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -923,7 +943,7 @@
     "id": "YUEJIN",
     "name": "樂進",
     "cat": "naval",
-    "cost": 3,
+    "cost": 2,
     "tag": "五子良將·每戰先登",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -938,16 +958,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "南中神木三叉戟 + 獸皮生藤甲"
-  },
-  {
-    "id": "DINGFENG",
-    "name": "丁奉",
-    "cat": "naval",
-    "cost": 3,
-    "tag": "雪中奮短兵·東興破敵",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "雪夜白刃 + 短皮小盾"
   },
   {
     "id": "XUHUANG",
@@ -980,20 +990,10 @@
     "weapon": "築城大銃 + 水軍旗艦"
   },
   {
-    "id": "SHAMOKE",
-    "name": "沙摩柯",
-    "cat": "naval",
-    "cost": 1,
-    "tag": "五溪蠻王·鐵蒺首登",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "鐵蒺藜骨朵 + 蠻夷硬角弓"
-  },
-  {
     "id": "HEQI",
     "name": "賀齊",
     "cat": "naval",
-    "cost": 2,
+    "cost": 1,
     "tag": "艨艟華彩·百越先登",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",

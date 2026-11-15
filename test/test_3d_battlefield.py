@@ -282,7 +282,7 @@ try:
             window.resolveBattle = () => {
                 const result = resolveOriginal(
                     ['LUBU', 'XUCHU', 'HUANGZHONG', 'YUEJIN', 'LIUBOWEN'],
-                    ['GAISUWEN', 'HONDA', 'ZHANGHE', 'DINGFENG', 'HANBEI'],
+                    ['GAISUWEN', 'HONDA', 'ZHANGHE', 'HATTORI', 'HANBEI'],
                     { seed: 11, event: EVENTS.find(event => event.id === 'clear'), docA: 'blitz', docB: 'defense' }
                 );
                 window.visualBattle = result;

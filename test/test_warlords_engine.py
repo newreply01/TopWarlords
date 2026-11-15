@@ -251,7 +251,7 @@ try:
                 'FANLI', 'CHENGYU', 'PANGJUAN', 'NAOIE', 'SESSAI', 'MASASHIGE', 'WENPING', 'QUYI', 'CAOZHEN',
                 'CAOCHUN', 'MENGGONG', 'ZUTI', 'GAOSHUN', 'MANCHONG', 'YUWENTAI', 'GANGCHO', 'SANADA_NOB',
                 'WANGPING', 'MILYU', 'TSUDA_SAN', 'GENGGONG', 'SHIMOTSUMA', 'WANGBA', 'KUKI_MORI', 'MIURA',
-                'BAEJEONG', 'TAKAKAGE', 'CHENGONG', 'GANGGAMCHAN'
+                'BAEJEONG', 'TAKAKAGE', 'CHENGONG', 'GANGGAMCHAN', 'SHAMOKE', 'DINGFENG', 'GONGSUNDU', 'LINGTONG'
             ];
             for (const id of removedIds) {
                 if (unitMap[id]) errs.push('已移除武將仍存在：' + id);
@@ -283,7 +283,7 @@ try:
             if (!battle || !battle.winner) errs.push('戰鬥推演無結果');
             if (!battle.vp || !battle.vp.A || !battle.vp.B) errs.push('VP 結算失敗');
 
-            const skillDeckA = ['DENGAI', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'YAMAMOTO'];
+            const skillDeckA = ['GAOCHANGGONG', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'YAMAMOTO'];
             const skillDeckB = ['XIAHOUYUAN', 'XIANGYU', 'JUMONG', 'GANNING', 'HANBEI'];
             const phaseSkillsTriggered = new Set();
             for (let seed = 0; seed < 48 && phaseSkillsTriggered.size < 3; seed++) {

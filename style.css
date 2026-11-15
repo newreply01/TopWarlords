@@ -82,7 +82,9 @@
 html,
 body {
   height: 100vh;
+  height: 100dvh;
   max-height: 100vh;
+  max-height: 100dvh;
   overflow: hidden;
   display: flex;
   flex-direction: column
@@ -29405,5 +29407,130 @@ html:not([data-theme="light"]) .formation-slot-row {
 
   .sheet-extras-grid.is-dual {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* =====================================================
+   平板橫螢幕自適應修正 (Samsung Tab S7 / S8 Landscape 等 541px~760px 高視窗)
+   解除寫死 calc(100vh - 100px) 與 min-height: 72px，確保 $5~$1 五列武將完整入鏡
+   ===================================================== */
+@media (min-width: 769px) {
+  .matrix-layout {
+    flex: 1 1 0;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+  }
+
+  #matrixBoard .col-category {
+    height: auto !important;
+    min-height: 100% !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 960px) {
+  .topbar {
+    height: auto;
+    min-height: 46px;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 769px) and (max-height: 760px) {
+  .topbar {
+    height: 46px;
+    min-height: 46px;
+    flex-basis: 46px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .mission-bar {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    min-height: 0;
+  }
+
+  .command-deck {
+    height: 58px;
+  }
+
+  .matrix-layout {
+    padding: 4px 12px 60px;
+  }
+
+  #matrixBoard .col-category {
+    padding: 4px 6px;
+    gap: 3px;
+  }
+
+  #matrixBoard .cat-head {
+    padding-bottom: 2px;
+  }
+
+  #matrixBoard .m-card {
+    min-height: 0 !important;
+  }
+
+  #matrixBoard .m-card-main-row {
+    gap: 5px;
+  }
+
+  #matrixBoard .m-card-info-col {
+    padding: 3px 4px 2px 0;
+    gap: 1px;
+  }
+
+  #matrixBoard .m-name {
+    font-size: 13px !important;
+    line-height: 1.15;
+  }
+
+  #matrixBoard .m-skill {
+    min-height: 16px;
+    margin-top: 0;
+    padding: 0 4px;
+    font-size: 11px;
+    line-height: 14px;
+  }
+
+  #matrixBoard .m-bot {
+    padding-top: 1px;
+    margin-top: 0;
+  }
+}
+
+@media (min-width: 769px) and (max-height: 640px) {
+  .topbar {
+    height: 42px;
+    min-height: 42px;
+    flex-basis: 42px;
+  }
+
+  .command-deck {
+    height: 52px;
+  }
+
+  .matrix-layout {
+    padding: 3px 10px 54px;
+  }
+
+  #matrixBoard .col-category {
+    gap: 2px;
+    padding: 3px 5px;
+  }
+
+  #matrixBoard .m-card-info-col {
+    padding: 2px 3px 2px 0;
+    gap: 0.5px;
+  }
+
+  #matrixBoard .m-avatar-cost {
+    top: 2px;
+    left: 2px;
+    font-size: 11px;
+    line-height: 15px;
+    padding: 0 3px;
   }
 }

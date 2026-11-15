@@ -107,7 +107,7 @@ const RAW_UNITS = [
   ["LIMU", "李牧", 'air_defense', 5, 'E', "破胡武安·萬矢連環", "戰國四大名將，以神射弓弩與車陣大破匈奴十餘萬騎，肥之戰與番吾之戰兩挫強秦，戰功卓絕。", 20, 34, ["AA_LONG", "CIWS", "SAT"], ["PASSIVE_VOLLEY"], 264, 136, 0.08],
   ["AKECHI", "明智光秀", 'air_defense', 3, 'E', "鐵砲名手·本能寺雷火", "戰國智勇名將，精通鐵砲連射戰法，曾於浪人時期以一槍百步穿錢名揚天下。", 18, 24, ["SAT", "AA_LONG"], [], 170, 92, 0.04],
   ["SAIKA", "雜賀孫市", 'air_defense', 3, 'F', "紀伊鐵砲·八咫烏之王", "雜賀眾首領鈴木重秀，率鐵砲傭兵重創織田信長大軍，火器游擊戰之宗師。", 20, 18, ["CIWS", "AA_LONG", "TRUE_AT"], ["PASSIVE_VOLLEY"], 170, 94, 0.04],
-  ["YANGMANCHUN", "楊萬春", 'air_defense', 2, 'G', "安市神弓·射退太宗", "高句麗安市城城主，堅守城池數月，據傳於城頭開硬弓射傷敵方先鋒。", 14, 16, ["CIWS", "AA_LONG"], [], 142, 78, 0.06],
+  ["GWONYUL", "權慄", 'air_defense', 2, 'G', "幸州大捷·火車拒敵", "朝鮮王朝中興名將，1593年壬辰倭亂期間於幸州山城運用神機箭火車、弓弩與滾石以少勝多擊退數萬日軍。", 14, 16, ["CIWS", "AA_LONG"], [], 142, 78, 0.06],
   ["HULUGUANG", "斛律光", 'air_defense', 4, 'H', "落雕都督·百步穿石", "北齊軍事支柱，號「落雕都督」，神射天下第一，臨陣射箭無不應弦而倒，生平百戰未嘗一敗。", 16, 24, ["AA_LONG", "CIWS", "TRUE_AT"], [], 210, 112, 0.06],
   ["ZHANGHE", "張郃", 'air_defense', 3, 'A', "巧變良將·街亭斷汲", "曹魏五子良將之一，善辨地形與軍勢；街亭之戰截斷馬謖軍水源取勝，後於木門追擊蜀軍時中伏身亡。", 22, 22, ["AA_LONG", "CIWS"], ["PASSIVE_VOLLEY"], 174, 94, 0.06],
   ["ZHOUYAFU", "周亞夫", 'air_defense', 4, 'C', "細柳嚴軍·強弩堅陣", "西漢名將條侯，細柳營號令嚴整「軍中聞將軍令不聞天子之詔」，平定七國之亂箭陣固若金湯。", 16, 30, ["AA_LONG", "CIWS", "EW"], ["FORMATION_SHIELD"], 214, 110, 0.08],
@@ -233,7 +233,7 @@ HUO: { flag: '🇨🇳', origin: '中國 · 西漢', weapon: '漢軍玄甲鐵騎
   LIMU: { flag: '🇨🇳', origin: '中國 · 戰國', weapon: '趙國鐵角硬弓 + 破甲箭陣', sfx: 'arrow_volley', img: 'assets/warlords/LIMU.jpg?v=7.11.1' },
   AKECHI: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '名銃備前鐵砲 + 桔梗紋旗', sfx: 'arrow_volley', img: 'assets/warlords/AKECHI.jpg?v=7.11.1' },
   SAIKA: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '三連發火繩銃 + 八咫烏標記', sfx: 'arrow_volley', img: 'assets/warlords/SAIKA.jpg?v=7.11.1' },
-  YANGMANCHUN: { flag: '🇰🇷', origin: '韓國 · 高句麗', weapon: '高句麗城防硬角弓 + 火弩', sfx: 'arrow_volley', img: 'assets/warlords/YANGMANCHUN.jpg?v=7.11.1' },
+  GWONYUL: { flag: '🇰🇷', origin: '韓國 · 朝鮮', weapon: '神機箭火車 + 幸州守城角弓', sfx: 'arrow_volley', img: 'assets/warlords/GWONYUL.jpg?v=7.11.33' },
   HULUGUANG: { flag: '🇨🇳', origin: '中國 · 南北朝', weapon: '黑角落雕強弓 + 鐵羽鑿子箭', sfx: 'arrow_volley', img: 'assets/warlords/HULUGUANG.jpg?v=7.11.1' },
   ZHANGHE: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '巧變長弓 + 綠沉槍', sfx: 'arrow_volley', img: 'assets/warlords/ZHANGHE.jpg?v=7.11.1' },
   ZHOUYAFU: { flag: '🇨🇳', origin: '中國 · 西漢', weapon: '漢軍武剛弩 + 精鋼大箭', sfx: 'arrow_volley', img: 'assets/warlords/ZHOUYAFU.jpg?v=7.11.1' },
@@ -370,7 +370,7 @@ const UNIT_SKILLS = {
   TAISHICI: { name: '猿臂貫手', phase: 'P2', desc: '猿臂善射弦無虛發，遠程攔截與近身雙戟格鬥兼備' },
   AKECHI: { name: '本能寺雷火', phase: 'P2', desc: '百步穿錢鐵砲名手，火繩槍齊射附帶火焰灼燒' },
   ASAKURA_SOT: { name: '九頭龍銃陣', phase: 'P2', desc: '越前軍神實戰部署鐵砲，提升遠程攔截穩定度' },
-  YANGMANCHUN: { name: '安市挽弓', phase: 'P2', desc: '安市城頭開硬弓守禦，防守反擊時箭矢威力提升' },
+  GWONYUL: { name: '幸州火車', phase: 'P2', desc: '幸州山城齊射神機箭火車並築壘死守，防守反擊威力與抗傷同步提升' },
   CHOIMUSEON: { name: '火桶神機箭', phase: 'P2', desc: '高麗火藥宗師，發射走火神機箭造成雙目標爆破傷害' },
   YOICHI: { name: '屋島扇之的', phase: 'P2', desc: '屋島狂瀾一箭射落扇靶，低費高精準貫穿狙擊' },
   SAIKA: { name: '八咫烏銃擊', phase: 'P2', desc: '紀伊雜賀眾火銃游擊，強化近衛攔截火網' },
@@ -498,7 +498,7 @@ const UNIT_SKILL_EFFECTS = {
   TAISHICI: { damage: 1.16, guard: 0.06 },
   AKECHI: { damage: 1.24, armorPierce: 0.1 },
   ASAKURA_SOT: { damage: 1.08, hit: 0.12, teamHit: 0.02 },
-  YANGMANCHUN: { damage: 1.06, guard: 0.15 },
+  GWONYUL: { damage: 1.06, guard: 0.15 },
   CHOIMUSEON: { damage: 1.26, armorPierce: 0.15 },
   YOICHI: { damage: 1.04, hit: 0.2, armorPierce: 0.25 },
   SAIKA: { damage: 1.12, bonusVs: { air: 0.14 }, hit: 0.05 },
@@ -615,7 +615,7 @@ const UNIT_SKILL_FX = {
   LIGUANG: 'piercing_volley', YANGYOUJI: 'piercing_volley', HUANGZHONG: 'piercing_volley', JUMONG: 'piercing_volley',
   NOBUNAGA: 'piercing_volley', YOICHI: 'piercing_volley', SAIKA: 'piercing_volley', LIMU: 'piercing_volley',
   HANSHIZHONG: 'piercing_volley', HULUGUANG: 'piercing_volley', TAISHICI: 'piercing_volley', ASAKURA_SOT: 'piercing_volley',
-  YANGMANCHUN: 'piercing_volley', HONDA_TADATSUGU: 'piercing_volley', GENGYAN: 'piercing_volley', KUANGZHANG: 'piercing_volley',
+  GWONYUL: 'piercing_volley', HONDA_TADATSUGU: 'piercing_volley', GENGYAN: 'piercing_volley', KUANGZHANG: 'piercing_volley',
   DATE: 'piercing_volley', GONGSUNDU: 'piercing_volley', ZHANGHE: 'piercing_volley', ZONGZE: 'piercing_volley',
   // 🌊 怒濤伏波 (11)
   YISUNSIN: 'tidal_surge', GANNING: 'tidal_surge', MOURI_MOTO: 'tidal_surge', CAOBIN: 'tidal_surge',
@@ -696,6 +696,11 @@ const HISTORICAL_AUDIT = {
     status: 'needs-review',
     note: '孫武生平與《孫子兵法》作者歸屬存在歷史研究爭議，不將傳統敘事當成已證實履歷。',
     sources: ['https://en.wikipedia.org/wiki/Sun_Tzu']
+  },
+  GWONYUL: {
+    status: 'source-linked',
+    note: '1593 年幸州大捷率朝鮮軍民以神機箭火車、弓弩與巨石重創進犯日軍，正史《朝鮮王朝實錄》記載明確。',
+    sources: ['https://en.wikipedia.org/wiki/Gwon_Yul', 'https://en.wikipedia.org/wiki/Battle_of_Haengju']
   }
 };
 

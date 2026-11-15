@@ -375,7 +375,7 @@ const LADDER_PRESETS = [
     "deck": [
       "KIMYUSHIN",
       "YUJIN",
-      "YANGMANCHUN",
+      "GWONYUL",
       "DINGFENG",
       "XUNYU"
     ],
@@ -1470,7 +1470,7 @@ const LADDER_PRESETS = [
     "deck": [
       "MAEDATOSHI",
       "CAOREN",
-      "YANGMANCHUN",
+      "GWONYUL",
       "HUANGGAI",
       "WUQI"
     ],

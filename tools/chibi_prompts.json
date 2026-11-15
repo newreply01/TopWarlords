@@ -807,14 +807,14 @@
     "tag": "紀伊鐵砲·八咫烏之王"
   },
   {
-    "id": "YANGMANCHUN",
-    "name": "楊萬春",
+    "id": "GWONYUL",
+    "name": "權慄",
     "cat": "air_defense",
-    "cost": 4,
+    "cost": 2,
     "flag": "🇰🇷",
-    "origin": "韓國 · 高句麗",
-    "weapon": "高句麗城防硬角弓 + 火弩",
-    "tag": "安市神弓·射退太宗"
+    "origin": "韓國 · 朝鮮",
+    "weapon": "神機箭火車 + 幸州守城角弓",
+    "tag": "幸州大捷·火車拒敵"
   },
   {
     "id": "HULUGUANG",

@@ -2658,22 +2658,25 @@
     "img": "assets/warlords/SAIKA.jpg?v=7.11.1"
   },
   {
-    "id": "YANGMANCHUN",
-    "name": "楊萬春",
+    "id": "GWONYUL",
+    "name": "權慄",
     "cat": "air_defense",
     "cost": 2,
     "v": "G",
-    "tag": "安市神弓·射退太宗",
-    "desc": "高句麗安市城城主，堅守城池數月，據傳於城頭開硬弓射傷敵方先鋒。",
+    "tag": "幸州大捷·火車拒敵",
+    "desc": "朝鮮王朝中興名將，1593年壬辰倭亂期間於幸州山城運用神機箭火車、弓弩與滾石以少勝多擊退數萬日軍。",
     "traits": [
       "CIWS",
       "AA_LONG"
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "status": "source-linked",
+      "note": "1593 年幸州大捷率朝鮮軍民以神機箭火車、弓弩與巨石重創進犯日軍，正史《朝鮮王朝實錄》記載明確。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Gwon_Yul",
+        "https://en.wikipedia.org/wiki/Battle_of_Haengju"
+      ]
     },
     "st": 14,
     "ew": 16,
@@ -2681,7 +2684,7 @@
     "atk": 78,
     "def": 0.06,
     "skill": {
-      "name": "安市挽弓",
+      "name": "幸州火車",
       "phase": "P2",
       "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.06；自身後續受傷減少 15%。持續效果至戰鬥結束。",
       "effects": {
@@ -2693,10 +2696,10 @@
       "fxIcon": "🏹"
     },
     "flag": "🇰🇷",
-    "origin": "韓國 · 高句麗",
-    "weapon": "高句麗城防硬角弓 + 火弩",
+    "origin": "韓國 · 朝鮮",
+    "weapon": "神機箭火車 + 幸州守城角弓",
     "sfx": "arrow_volley",
-    "img": "assets/warlords/YANGMANCHUN.jpg?v=7.11.1"
+    "img": "assets/warlords/GWONYUL.jpg?v=7.11.33"
   },
   {
     "id": "HULUGUANG",

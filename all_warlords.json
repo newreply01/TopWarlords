@@ -4582,7 +4582,7 @@
     "id": "TOYOTOMI",
     "name": "豐臣秀吉",
     "cat": "support",
-    "cost": 4,
+    "cost": 5,
     "v": "E",
     "tag": "太閤天下·統一大將",
     "desc": "戰國三傑之一，從織田信長麾下崛起，經多場戰事完成日本大部分地區統一；其軍事才能以統帥與調度見長。",
@@ -4591,25 +4591,27 @@
       "SPOT"
     ],
     "roleFlags": [
-      "STRATEGIST"
+      "STRATEGIST",
+      "STAMINA_DEEP"
     ],
     "historicalAudit": {
       "status": "unverified",
       "note": "",
       "sources": []
     },
-    "st": 24,
-    "ew": 73,
-    "hp": 396,
-    "atk": 96,
-    "def": 0.05,
+    "st": 28,
+    "ew": 81,
+    "hp": 460,
+    "atk": 102,
+    "def": 0.06,
     "skill": {
       "name": "太閤號令",
       "phase": "P1",
-      "desc": "P1 開局號令，每戰一次：全軍後續傷害 ×1.05；全軍後續命中 +6 個百分點（同類取最高）。持續效果至戰鬥結束。",
+      "desc": "P1 開局號令，每戰一次：全軍後續受傷減少 4%（同類取最高）；全軍後續傷害 ×1.06；全軍後續命中 +7 個百分點（同類取最高）。持續效果至戰鬥結束。",
       "effects": {
-        "commandAttack": 0.05,
-        "teamHit": 0.06
+        "commandAttack": 0.06,
+        "teamHit": 0.07,
+        "teamGuard": 0.04
       },
       "fx": "bagua_array",
       "fxLabel": "奇門八陣",
@@ -4802,7 +4804,7 @@
     "id": "WUQI",
     "name": "吳起",
     "cat": "support",
-    "cost": 5,
+    "cost": 4,
     "v": "B",
     "tag": "吳子治軍·兼併無敵",
     "desc": "戰國兵法名家，與孫子並稱「孫吳」，治西河大戰七十六全勝六十四，魏武卒所向披靡。",
@@ -4821,17 +4823,17 @@
       "sources": []
     },
     "st": 26,
-    "ew": 80,
-    "hp": 456,
-    "atk": 106,
+    "ew": 77,
+    "hp": 412,
+    "atk": 104,
     "def": 0.06,
     "skill": {
       "name": "吳子魏武卒",
       "phase": "P1",
-      "desc": "P1 開局號令，每戰一次：全軍後續受傷減少 7%（同類取最高）；全軍後續傷害 ×1.06；全軍後續命中 +2 個百分點（同類取最高）。持續效果至戰鬥結束。",
+      "desc": "P1 開局號令，每戰一次：全軍後續受傷減少 5%（同類取最高）；全軍後續傷害 ×1.05；全軍後續命中 +2 個百分點（同類取最高）。持續效果至戰鬥結束。",
       "effects": {
-        "commandAttack": 0.06,
-        "teamGuard": 0.07,
+        "commandAttack": 0.05,
+        "teamGuard": 0.05,
         "teamHit": 0.02
       },
       "fx": "bagua_array",

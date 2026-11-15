@@ -26047,10 +26047,86 @@ select:focus-visible,
 
 #missionBar>#formationDropdown {
   margin-left: 6px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
 }
 
 #missionBar>#missionRightTools {
   margin-left: auto !important;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+}
+
+@media (min-width: 769px) {
+  .mission-content:has(.daily-mission-item) .weather-pill,
+  .mission-content:has(.sandbox-mission-item) .weather-pill {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 108px !important;
+    padding: 0 7px !important;
+  }
+
+  .daily-mission-item,
+  .sandbox-mission-item {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    max-width: 100%;
+    overflow: hidden;
+    gap: 6px !important;
+  }
+
+  .daily-plan-sel {
+    flex: 0 1 182px;
+    min-width: 112px;
+    max-width: 182px;
+    text-overflow: ellipsis;
+  }
+
+  .daily-enemy-badge {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 168px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+
+  .daily-rec-badge {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+
+  #sandEnemy,
+  #sandEvent {
+    flex: 0 1 auto;
+    min-width: 72px !important;
+    max-width: 150px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1360px) {
+  .daily-mission-item .mission-label-text,
+  .sandbox-mission-item .mission-label-text {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1140px) {
+  .daily-enemy-badge {
+    max-width: 108px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 980px) {
+  .daily-enemy-badge {
+    display: none;
+  }
 }
 
 #btnAiDropdown {

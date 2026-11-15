@@ -1089,15 +1089,15 @@ function renderMissionBar() {
 
     h = `${subTabsHtml}
       ${formatWeatherBadge(state.event)}
-      <div class="mission-item">
+      <div class="mission-item daily-mission-item">
         <span class="mission-label-text">關卡：</span>
-        <select class="select sm" id="dailyPlanSel">
+        <select class="select sm daily-plan-sel" id="dailyPlanSel">
           <option value="today" ${state.dailyPlanId === 'today' ? 'selected' : ''}>🌟 今日特選 ($19~$25)</option>
           <option value="random_tier" ${state.dailyPlanId === 'random_tier' ? 'selected' : ''}>🎲 隨機自由對手</option>
           ${groupedOptions}
         </select>
-        <span class="badge badge-no" style="margin-left:6px;font-size:11.5px;font-weight:700" title="當前挑戰敵軍為 $${enemyCost} 預算超標陣容（我方上限 $15）">${esc(state.enemyName || '超標勁旅')} · $${enemyCost}${overCost > 0 ? ` (+$${overCost})` : ''}</span>
-        ${rec ? `<span style="margin-left:6px;font-size:12px" class="${rec.won ? 'badge-ok' : 'badge-no'}">${rec.won ? '✔ 已破局' : '尚未破局'} (${rec.tries}次)</span>` : ''}
+        <span class="badge badge-no daily-enemy-badge" title="當前挑戰敵軍為 $${enemyCost} 預算超標陣容（我方上限 $15）">${esc(state.enemyName || '超標勁旅')} · $${enemyCost}${overCost > 0 ? ` (+$${overCost})` : ''}</span>
+        ${rec ? `<span class="daily-rec-badge ${rec.won ? 'badge-ok' : 'badge-no'}">${rec.won ? '✔ 已破局' : '未破局'} (${rec.tries}次)</span>` : ''}
       </div>`;
   } else if (mode === 'sandbox') {
     const enemySource = state.customSandEnemy || state.lastBattleEnemy;
@@ -1108,7 +1108,7 @@ function renderMissionBar() {
       ? `<option value="last_event" ${state.sandEvent === 'last_event' ? 'selected' : ''}>🎯 最近戰場：${esc(enemySource.event.name)}</option>`
       : '';
     h = `${subTabsHtml}
-      <div class="mission-item">
+      <div class="mission-item sandbox-mission-item">
         <span class="mission-label-text">對手風格：</span>
         <select class="select sm" id="sandEnemy">
           ${customOpt}

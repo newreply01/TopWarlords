@@ -725,6 +725,30 @@ try:
         assert daily_init["mode"] == "daily" and daily_init["enemyLen"] == 5 and 19 <= daily_init["enemyCost"] <= 25, f"Daily init failed: {daily_init}"
         assert daily_init["options"] >= 17 and daily_init["groups"] == 7 and not daily_init["hOverflow"], f"Daily selector/layout failed: {daily_init}"
 
+        for dw, dh in [(1280, 720), (1180, 720), (960, 720)]:
+            daily_page.set_viewport_size({"width": dw, "height": dh})
+            daily_page.wait_for_timeout(120)
+            daily_overlap = daily_page.evaluate("""() => {
+                const mc = document.querySelector('#missionContent')?.getBoundingClientRect();
+                const dm = document.querySelector('.daily-mission-item')?.getBoundingClientRect();
+                const form = document.querySelector('#formationDropdown')?.getBoundingClientRect();
+                const right = document.querySelector('#missionRightTools')?.getBoundingClientRect();
+                return {
+                    mcRight: mc?.right || 0,
+                    dmRight: dm?.right || 0,
+                    formLeft: form?.left || 0,
+                    formRight: form?.right || 0,
+                    rightLeft: right?.left || 0,
+                    bleedsForm: Boolean(dm && form && dm.right > form.left + 1),
+                    formBleedsRight: Boolean(form && right && form.right > right.left + 1),
+                    overflow: document.documentElement.scrollWidth > window.innerWidth + 1
+                };
+            }""")
+            assert not daily_overlap["bleedsForm"] and not daily_overlap["formBleedsRight"] and not daily_overlap["overflow"], \
+                f"Daily mission bar overlapped at {dw}x{dh}: {daily_overlap}"
+        daily_page.set_viewport_size({"width": 1280, "height": 720})
+        daily_page.wait_for_timeout(80)
+
         daily_page.select_option("#dailyPlanSel", "pantheon-25")
         daily_page.wait_for_timeout(100)
         assert daily_page.evaluate("() => __db15.state.enemy.reduce((s, id) => s + (UNIT_MAP[id]?.cost || 0), 0)") == 25, "Pantheon-25 should have cost 25"

@@ -182,7 +182,7 @@ const BattleFigures = (() => {
       return {
         x: offset.x * (mounted ? 1.22 : 1.05) + (i === 0 ? 0 : jitterX),
         z: offset.z * (mounted ? 1.36 : 1.04) + (i === 0 ? 0 : jitterZ),
-        scale: 0.94 + (i % 5) * 0.028
+        scale: (0.94 + (i % 5) * 0.028) * 1.24
       };
     });
     parts.forEach(part => {
@@ -449,6 +449,7 @@ const BattleFigures = (() => {
 
     const root = new THREE.Group();
     root.userData.isCommanderHero = true;
+    root.scale.setScalar(1.26);
     const heroScale = isElite ? 1.24 : 1.14;
     const riderBaseY = mounted ? 0.72 : 0.0;
 

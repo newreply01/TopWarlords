@@ -4878,19 +4878,7 @@ async function showBattle(res, opts = {}) {
   updateFieldStrength();
   $('#fieldPhase').textContent = '兩軍列陣';
   $('#battleRecentEvents').replaceChildren();
-  const skillTickerRowInit = $('#battleSkillTickerRow');
-  if (skillTickerRowInit) skillTickerRowInit.hidden = true;
-  for (const sid of ['#battleSkillTickerA', '#battleSkillTickerB']) {
-    const el = $(sid);
-    if (el) {
-      el.querySelectorAll('.battle-skill-ticker').forEach(item => {
-        clearTimeout(item._leaveTimer);
-        clearTimeout(item._removeTimer);
-      });
-      el.hidden = true;
-      el.replaceChildren();
-    }
-  }
+  clearBattleSkillTickers();
   $('#battleLog').innerHTML = '';
   $('#phaseTitle').textContent = '戰 場 就 緒';
   const initTimer = $('#camTimer');
@@ -5027,11 +5015,15 @@ async function showBattle(res, opts = {}) {
             const rawTxt = String(ln.text || '');
             const colonIdx = rawTxt.indexOf('：');
             const descTxt = colonIdx >= 0 ? rawTxt.slice(colonIdx + 1).trim() : rawTxt;
+            const portraitSrc = attacker?.img || (attacker?.id ? `assets/warlords/${attacker.id}.jpg?v=7.11.1` : '');
+            const portraitHtml = portraitSrc
+              ? `<img class="skill-portrait" src="${esc(portraitSrc)}" alt="" decoding="async" onerror="this.style.display='none'">`
+              : '';
             const item = document.createElement('div');
             item.className = `battle-skill-ticker side-${isSideA ? 'a' : 'b'} is-entering`;
-            item.innerHTML = `<span class="skill-tag">${isSideA ? '我軍' : '敵軍'} · ${esc(attacker?.name || '')} ⚡ ${esc(ln.brevity || '')}</span><span class="skill-desc">${esc(descTxt)}</span>`;
+            item.innerHTML = `${portraitHtml}<div class="skill-content"><span class="skill-tag">${isSideA ? '我軍' : '敵軍'} · ${esc(attacker?.name || '')} ⚡ ${esc(ln.brevity || '')}</span><span class="skill-desc">${esc(descTxt)}</span></div>`;
             stack.appendChild(item);
-            while (stack.children.length > 4) {
+            while (stack.children.length > 3) {
               const oldest = stack.firstElementChild;
               clearTimeout(oldest._leaveTimer);
               clearTimeout(oldest._removeTimer);
@@ -5049,8 +5041,8 @@ async function showBattle(res, opts = {}) {
                 if (!stack.children.length) stack.hidden = true;
                 const aEl = $('#battleSkillTickerA'), bEl = $('#battleSkillTickerB');
                 if (tickerRow && (!aEl || aEl.hidden) && (!bEl || bEl.hidden)) tickerRow.hidden = true;
-              }, 350);
-            }, 3600);
+              }, 300);
+            }, 2700);
           }
         }
         if (ln.kind === 'info' && !ln.skillActivation) return;
@@ -5663,6 +5655,22 @@ $('#btnPause')?.addEventListener('click', () => {
   }
   toast(paused ? '⏸ 戰場推演已暫停（可自由檢視日誌與裝備血量）' : '▶ 繼續戰場推演');
 });
+function clearBattleSkillTickers() {
+  const row = $('#battleSkillTickerRow');
+  if (row) row.hidden = true;
+  for (const sid of ['#battleSkillTickerA', '#battleSkillTickerB']) {
+    const el = $(sid);
+    if (el) {
+      el.querySelectorAll('.battle-skill-ticker').forEach(item => {
+        clearTimeout(item._leaveTimer);
+        clearTimeout(item._removeTimer);
+      });
+      el.hidden = true;
+      el.replaceChildren();
+    }
+  }
+}
+
 function fastForwardBattle(res, opts = {}) {
   if (!res) res = lastBattleRes;
   if (!res) return;
@@ -5670,6 +5678,7 @@ function fastForwardBattle(res, opts = {}) {
   paused = false;
   skip = true;
   wakeSleep();
+  clearBattleSkillTickers();
 
   const fxLayer = $('#combatFxLayer');
   if (fxLayer) fxLayer.innerHTML = '';

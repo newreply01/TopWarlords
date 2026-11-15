@@ -110,12 +110,24 @@ const Battle3DEngine = (function () {
   let camZoomTarget = 0;
 
   // 相機軌道控制與動態微聚焦
+  const CAM_SHAKE_STORAGE_KEY = 'wl15_battle_cam_shake';
+  let cameraShakeEnabled = (() => {
+    try {
+      const saved = localStorage.getItem(CAM_SHAKE_STORAGE_KEY);
+      if (saved === '0' || saved === 'false') return false;
+      if (saved === '1' || saved === 'true') return true;
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return false;
+      }
+    } catch (_) {}
+    return true;
+  })();
   let isDragging = false;
   let prevMouseX = 0, prevMouseY = 0;
-  let camTheta = -0.16, camPhi = 1.17, camRadius = 17.2;
+  let camTheta = -0.16, camPhi = 1.14, camRadius = 13.4;
   let cameraView = 'cinematic';
   let showUnitLabels = false;
-  const CAM_BASE_TARGET = new THREE.Vector3(0, 1.05, 0.15);
+  const CAM_BASE_TARGET = new THREE.Vector3(0, 0.85, 0.10);
   const camFocusOffset = new THREE.Vector3(0, 0, 0);
   const camFocusTarget = new THREE.Vector3(0, 0, 0);
   let lastFocusAt = 0;
@@ -504,6 +516,11 @@ const Battle3DEngine = (function () {
       updateCommanderLabels();
       if (isAnimationPaused) renderer.render(scene, camera);
     };
+    const shakeButton = container.closest('#battle3DWrapper').querySelector('#btnBattleShake');
+    if (shakeButton) {
+      shakeButton.onclick = () => setCameraShakeEnabled(!cameraShakeEnabled);
+    }
+    syncCameraShakeButton();
     injectCutinLayer();
 
     window.removeEventListener('resize', onWindowResize);
@@ -714,9 +731,9 @@ const Battle3DEngine = (function () {
     ]);
     const allCampFlags = [];
     const westOffsets = [
-      [-9.0, -7.8], [-11.3, -7.6], [-13.6, -7.3], [-15.8, -6.8],
-      [-15.8, -4.4], [-12.8, -0.9], [-12.8, 0.9], [-15.8, 4.4],
-      [-15.6, 6.8], [-13.2, 7.3], [-11.0, 7.7], [-12.6, -3.8]
+      [-13.4, -8.2], [-15.2, -8.0], [-17.0, -7.6], [-17.6, -5.0],
+      [-16.2, -3.2], [-14.8, -1.3], [-14.8, 1.3], [-16.2, 3.2],
+      [-17.6, 5.0], [-17.0, 7.6], [-15.2, 8.0], [-13.4, 8.2]
     ];
     const perSideCount = isLowPowerDevice ? 7 : 12;
     for (const sideSign of [-1, 1]) {
@@ -726,7 +743,7 @@ const Battle3DEngine = (function () {
           sideSign,
           x: Math.abs(wx) * sideSign,
           z: wz,
-          scale: 0.92 + (i % 4) * 0.08,
+          scale: 0.62 + (i % 4) * 0.05,
           phase: i * 0.75 + (sideSign > 0 ? 1.6 : 0)
         });
       }
@@ -965,10 +982,10 @@ const Battle3DEngine = (function () {
 
     // 5. 東西大營門篝火火盆（合併實例渲染壓低繪製開銷）
     const campBraziers = [
-      { x: -13.2, z: -3.8 },
-      { x: -13.2, z: 3.8 },
-      { x: 13.2, z: -3.8 },
-      { x: 13.2, z: 3.8 }
+      { x: -15.0, z: -4.2 },
+      { x: -15.0, z: 4.2 },
+      { x: 15.0, z: -4.2 },
+      { x: 15.0, z: 4.2 }
     ];
     const ironMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.5, metalness: 0.7 });
     const brazierStands = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.28, 0.36, 0.65, 8), ironMat, campBraziers.length);
@@ -1352,29 +1369,29 @@ const Battle3DEngine = (function () {
     ].forEach(({ sx, tint }) => {
       const faceY = sx < 0 ? Math.PI / 2 : -Math.PI / 2;
 
-      [-5.6, 5.6].forEach((zPos) => {
-        const tower = spawnModelInstance('watchtower', { targetHeight: 2.25, tintHex: tint, tintStrength: 0.14 });
+      [-6.8, 6.8].forEach((zPos) => {
+        const tower = spawnModelInstance('watchtower', { targetHeight: 1.60, tintHex: tint, tintStrength: 0.14 });
         if (tower) {
-          tower.group.position.set(sx * 14.8, 0, zPos);
+          tower.group.position.set(sx * 16.5, 0, zPos);
           tower.group.rotation.y = faceY;
           tower.group.userData.terrainRole = 'tower';
           envPropsGroup.add(tower.group);
         }
       });
 
-      [-2.3, 2.3].forEach((zPos) => {
-        const tent = spawnModelInstance('tent', { targetHeight: 1.35, tintHex: tint, tintStrength: 0.25 });
+      [-2.8, 2.8].forEach((zPos) => {
+        const tent = spawnModelInstance('tent', { targetHeight: 0.92, tintHex: tint, tintStrength: 0.25 });
         if (tent) {
-          tent.group.position.set(sx * 14.2, 0, zPos);
+          tent.group.position.set(sx * 16.0, 0, zPos);
           tent.group.rotation.y = faceY;
           envPropsGroup.add(tent.group);
         }
       });
 
-      [-6.8, -3.8, 3.8, 6.8].forEach((zPos) => {
-        const flag = spawnModelInstance('banner', { targetHeight: 1.95, tintHex: tint, tintStrength: 0.42 });
+      [-7.4, -4.4, 4.4, 7.4].forEach((zPos) => {
+        const flag = spawnModelInstance('banner', { targetHeight: 1.28, tintHex: tint, tintStrength: 0.42 });
         if (flag) {
-          flag.group.position.set(sx * 12.6, 0, zPos);
+          flag.group.position.set(sx * 14.4, 0, zPos);
           flag.group.rotation.y = faceY;
           envPropsGroup.add(flag.group);
         }
@@ -1392,12 +1409,12 @@ const Battle3DEngine = (function () {
 
     // 南北山崖深色岩群
     const rockSpots = [
-      [-18, -13.8, 2.4, 'rock_a'], [-13, -14.8, 2.8, 'rock_b'], [13, -14.6, 2.6, 'rock_a'], [18, -13.6, 2.9, 'rock_b'],
-      [-18, 13.8, 2.5, 'rock_b'], [-13, 14.8, 2.3, 'rock_a'], [13, 14.6, 2.7, 'rock_b'], [18, 13.6, 2.5, 'rock_a']
+      [-19, -15.6, 2.4, 'rock_a'], [-13.5, -16.8, 2.8, 'rock_b'], [13.5, -16.6, 2.6, 'rock_a'], [19, -15.4, 2.9, 'rock_b'],
+      [-19, 15.6, 2.5, 'rock_b'], [-13.5, 16.8, 2.3, 'rock_a'], [13.5, 16.6, 2.7, 'rock_b'], [19, 15.4, 2.5, 'rock_a']
     ];
     rockSpots.forEach(([rx, rz, rh, rkey], i) => {
       const rk = spawnModelInstance(rkey, {
-        targetHeight: rh * 0.24, castShadow: true, tintHex: 0x3e352c, tintStrength: 0.92
+        targetHeight: rh * 0.19, castShadow: true, tintHex: 0x3e352c, tintStrength: 0.92
       });
       if (rk) {
         rk.group.position.set(rx, 0.15, rz);
@@ -1616,7 +1633,7 @@ const Battle3DEngine = (function () {
     // C. 光榮式懸浮名將頭像軍徽與即時兵力銘牌 (Sprite 永遠正對鏡頭、不遮擋 3D 士兵！)
     const startHp = Math.max(1, Number(unit.maxHp || unit.hpMax || unit.hp || 200));
     const hud = buildWarlordCrestHud(unit, isSideA, meta, startHp, startHp);
-    hud.sprite.position.set(0, cat === 'air' ? 1.95 : 1.35, 0);
+    hud.sprite.position.set(0, cat === 'air' ? 2.15 : 1.55, 0);
     hud.sprite.visible = true;
     rootGroup.add(hud.sprite);
 
@@ -2179,12 +2196,12 @@ const Battle3DEngine = (function () {
       token.origX = direction * (8.5 + slot.depth * 0.6);
       token.origZ = slot.z;
       token.mesh.position.set(token.origX, getBattleTerrainHeight(token.origX, token.origZ), token.origZ);
-      const frontDistance = token.formationRanged ? (token.cat === 'support' ? 5.0 : 4.1) : {
-        armor: 0.82,
-        air: 0.82,
-        naval: 0.9,
-        air_defense: 4.1,
-        support: 5.0
+      const frontDistance = token.formationRanged ? (token.cat === 'support' ? 4.8 : 3.9) : {
+        armor: 1.05,
+        air: 1.15,
+        naval: 1.25,
+        air_defense: 3.9,
+        support: 4.8
       }[token.cat] || 2.5;
       token.frontX = direction * (frontDistance + slot.depth * 0.24);
       token.frontZ = slot.z;
@@ -2245,7 +2262,7 @@ const Battle3DEngine = (function () {
           targetDist = absStartX >= 3.75 ? absStartX - 0.45 : absStartX + 0.50;
         }
       } else {
-        targetDist = 0.85 + slot.depth * 0.12;
+        targetDist = 0.65 + slot.depth * 0.14;
         if (Math.abs(start.x - side * targetDist) < 0.35) {
           targetDist = Math.max(targetDist + 0.45, Math.abs(start.x) + 0.45);
         }
@@ -2255,7 +2272,7 @@ const Battle3DEngine = (function () {
       const target = new THREE.Vector3(
         side * distance,
         0,
-        slot.z + side * (0.32 + flank)
+        slot.z * 1.12 + side * (0.48 + flank)
       );
       target.y = getBattleTerrainHeight(target.x, target.z);
       token.march = null;
@@ -2323,7 +2340,7 @@ const Battle3DEngine = (function () {
 
   function advanceBattalionToContact(token) {
     if (!token || !token.alive || token.engagement || token.formationRanged || token.cat === 'support' || token.cat === 'air_defense') return;
-    const contactX = token.side === 'A' ? -0.68 : 0.68;
+    const contactX = token.side === 'A' ? -0.95 : 0.95;
     const targetX = token.side === 'A'
       ? Math.max(token.mesh.position.x, contactX)
       : Math.min(token.mesh.position.x, contactX);
@@ -2479,7 +2496,6 @@ const Battle3DEngine = (function () {
       if (!tToken) {
         performWarlordSkillVfx(aToken, null, ln.skillFx || aToken.skillFx, ln, true);
       }
-      scheduleWarlordCutin(aToken, ln.kind === 'kill' || ln.kind === 'capture', ln);
     }
 
     // 2. 攝影機微聚焦於交鋒熱區
@@ -4114,8 +4130,32 @@ const Battle3DEngine = (function () {
   /* ----------------------------------------------------
      7. 粒子火花、塵土、震屏與相機控制
      ---------------------------------------------------- */
+  function syncCameraShakeButton() {
+    if (!container) return;
+    const btn = container.closest('#battle3DWrapper')?.querySelector('#btnBattleShake');
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', String(cameraShakeEnabled));
+    btn.textContent = cameraShakeEnabled ? '震動：開' : '震動：關';
+  }
+
+  function setCameraShakeEnabled(enabled) {
+    cameraShakeEnabled = Boolean(enabled);
+    try {
+      localStorage.setItem(CAM_SHAKE_STORAGE_KEY, cameraShakeEnabled ? '1' : '0');
+    } catch (_) {}
+    if (!cameraShakeEnabled) {
+      shakePower = 0;
+      camZoomTarget = 0;
+      camZoomOffset = 0;
+      camShakeOffset.set(0, 0, 0);
+      updateCameraPosition();
+    }
+    syncCameraShakeButton();
+    return cameraShakeEnabled;
+  }
+
   function triggerCameraShake(power = 0.25) {
-    if (battleSettled) return;
+    if (battleSettled || !cameraShakeEnabled) return;
     shakePower = Math.min(0.65, Math.max(shakePower, power));
     camZoomTarget = Math.max(-1.6, camZoomTarget - power * 0.95);
   }
@@ -4406,7 +4446,7 @@ const Battle3DEngine = (function () {
   function updateCameraPosition() {
     if (!camera) return;
     const target = CAM_BASE_TARGET.clone().add(camFocusOffset).add(camShakeOffset);
-    const radius = Math.max(11, camRadius + camZoomOffset);
+    const radius = Math.max(9.5, camRadius + camZoomOffset);
     const x = target.x + radius * Math.sin(camPhi) * Math.sin(camTheta);
     const y = target.y + radius * Math.cos(camPhi);
     const z = target.z + radius * Math.sin(camPhi) * Math.cos(camTheta);
@@ -4437,16 +4477,18 @@ const Battle3DEngine = (function () {
     });
     dom.addEventListener('wheel', (e) => {
       e.preventDefault();
-      camRadius = Math.max(13, Math.min(38, camRadius + e.deltaY * 0.018));
+      camRadius = Math.max(10.5, Math.min(38, camRadius + e.deltaY * 0.018));
       updateCameraPosition();
     }, { passive: false });
   }
 
   function resetCamera() {
     camTheta = cameraView === 'cinematic' ? -0.16 : 0;
-    camPhi = cameraView === 'cinematic' ? 1.07 : 0.78;
-    camRadius = (container && container.clientWidth < 720) ? 21 : cameraView === 'cinematic' ? 17.2 : 24.5;
-    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 21.5);
+    camPhi = cameraView === 'cinematic' ? 1.14 : 0.78;
+    camRadius = (container && container.clientWidth < 720)
+      ? (cameraView === 'cinematic' ? 18.5 : 21)
+      : (cameraView === 'cinematic' ? 13.4 : 22.8);
+    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 17.5);
     camFocusOffset.set(0, 0, 0);
     camFocusTarget.set(0, 0, 0);
     camZoomOffset = 0;
@@ -4519,7 +4561,7 @@ const Battle3DEngine = (function () {
 
       const anchor = token.mesh.position.clone().add(new THREE.Vector3(
         token.side === 'A' ? -0.55 : 0.55,
-        token.cat === 'air' ? 2.15 : 1.65,
+        token.cat === 'air' ? 2.45 : 1.90,
         0
       ));
       const point = anchor.clone().add(camShakeOffset).project(camera);
@@ -5313,6 +5355,7 @@ const Battle3DEngine = (function () {
       isInitialized,
       isEnabled,
       cameraView,
+      cameraShakeEnabled,
       unitLabels: showUnitLabels,
       nameLabelsIgnoreFog: [...unitsMap.values()].every(token => token.hud.sprite.material.fog === false),
       cameraPosition: camera ? camera.position.toArray() : [],
@@ -5416,6 +5459,8 @@ const Battle3DEngine = (function () {
     toggleMode,
     clearAllTokens,
     resetCamera,
+    setCameraShakeEnabled,
+    isCameraShakeEnabled: () => cameraShakeEnabled,
     getDebugState,
     whenModelsReady: ensureModelsLoaded
   };

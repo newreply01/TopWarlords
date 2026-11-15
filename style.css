@@ -26232,27 +26232,48 @@ html:not([data-theme="light"]) .formation-slot-row {
   pointer-events: none;
 }
 
-.formation-slot-chip:hover:not(:disabled) {
+.formation-slot-chip:not(.active):hover:not(:disabled) {
   border-color: var(--cyan);
   color: var(--text);
   background: rgba(56, 189, 248, 0.1);
 }
 
-.formation-slot-chip.active {
-  background: rgba(56, 189, 248, 0.22);
-  border-color: var(--cyan);
-  color: var(--cyan);
+.formation-slot-chip.active,
+.formation-slot-chip.active:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border-color: #38bdf8;
+  color: #f0f9ff;
   font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(125, 211, 252, 0.3);
 }
 
-[data-theme="light"] .formation-slot-chip.active {
-  background: #0284c7;
-  border-color: #0284c7;
+.formation-slot-chip.active .slot-chip-label,
+.formation-slot-chip.active:hover:not(:disabled) .slot-chip-label {
+  color: #f0f9ff;
+}
+
+.formation-slot-chip.active .slot-rec-star {
+  color: #fde047;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="light"] .formation-slot-chip.active,
+[data-theme="light"] .formation-slot-chip.active:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0369a1, #075985);
+  border-color: #075985;
   color: #ffffff;
+  box-shadow: 0 1px 3px rgba(7, 89, 133, 0.35);
+}
+
+[data-theme="light"] .formation-slot-chip.active .slot-chip-label,
+[data-theme="light"] .formation-slot-chip.active:hover:not(:disabled) .slot-chip-label {
+  color: #ffffff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
 }
 
 [data-theme="light"] .formation-slot-chip.active .slot-rec-star {
   color: #fde047;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 @media (max-width: 520px) {

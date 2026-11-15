@@ -386,10 +386,13 @@ try:
         print(f"[TEST 7] 行動端 (390x844) 雙層指揮列與新手引導流驗證通過: {onboard_rect}")
 
         # 8. 線上真人雙人房：私人/公開權限切換、公開大廳過濾、跨專案隔離與快速配對實測
-        pvp_context = browser.new_context(viewport={"width": 1280, "height": 720})
+        pvp_context = browser.new_context(viewport={"width": 1280, "height": 720}, service_workers='block')
         pvp_context.route("https://www.gstatic.com/**", lambda route: route.fulfill(status=200, content_type="application/javascript", body=""))
         pvp_context.route("https://unpkg.com/**", lambda route: route.fulfill(status=200, content_type="application/javascript", body=""))
         pvp_context.add_init_script("""(() => {
+            localStorage.setItem('wl15_onboard_done', 'true');
+            localStorage.setItem('wl15_seen', '1');
+            localStorage.setItem('topwarlords_cached_global_visits', '100');
             const dbStore = {
                 pvp_rooms: {
                     WL_PUB888: {
@@ -697,6 +700,60 @@ try:
         assert qm_check["settings"]["isPublic"] is True and qm_check["fb"] and qm_check["fb"]["isPublic"] is True and qm_check["fb"]["gameId"] == "topwarlords", f"Quick match empty fallback did not create public room: {qm_check}"
         pvp_context.close()
         print(f"[TEST 8] 線上真人雙人房（私人/公開切換、公開大廳隔離、一鍵加入與快速配對）測試通過: {qm_check['code']}")
+
+        # 9. 精選破局 (Daily Challenge $19~$25 超標 BOSS)：切換題庫、編組出擊與破局次數更新實測
+        daily_ctx = browser.new_context(viewport={"width": 1280, "height": 720})
+        daily_page = daily_ctx.new_page()
+        daily_page.on("pageerror", lambda err: errors.append(f"daily_page: {err}"))
+        daily_page.goto(f"http://127.0.0.1:{PORT}/index.html")
+        daily_page.wait_for_selector(".m-card", timeout=10000)
+        daily_page.wait_for_timeout(150)
+        if daily_page.locator("#helpModal").is_visible():
+            daily_page.locator("#helpClose").click()
+            daily_page.wait_for_timeout(150)
+
+        daily_page.locator('[data-submode="daily"]').click()
+        daily_page.wait_for_selector("#dailyPlanSel", timeout=5000)
+        daily_init = daily_page.evaluate("""() => ({
+            mode: __db15.state.mode,
+            enemyLen: __db15.state.enemy ? __db15.state.enemy.length : 0,
+            enemyCost: __db15.state.enemy ? __db15.state.enemy.reduce((s, id) => s + (UNIT_MAP[id]?.cost || 0), 0) : 0,
+            options: document.querySelectorAll('#dailyPlanSel option').length,
+            groups: document.querySelectorAll('#dailyPlanSel optgroup').length,
+            hOverflow: document.documentElement.scrollWidth > window.innerWidth + 1
+        })""")
+        assert daily_init["mode"] == "daily" and daily_init["enemyLen"] == 5 and 19 <= daily_init["enemyCost"] <= 25, f"Daily init failed: {daily_init}"
+        assert daily_init["options"] >= 17 and daily_init["groups"] == 7 and not daily_init["hOverflow"], f"Daily selector/layout failed: {daily_init}"
+
+        daily_page.select_option("#dailyPlanSel", "pantheon-25")
+        daily_page.wait_for_timeout(100)
+        assert daily_page.evaluate("() => __db15.state.enemy.reduce((s, id) => s + (UNIT_MAP[id]?.cost || 0), 0)") == 25, "Pantheon-25 should have cost 25"
+        daily_page.select_option("#dailyPlanSel", "random_tier")
+        daily_page.wait_for_timeout(100)
+        rt_cost = daily_page.evaluate("() => __db15.state.enemy.reduce((s, id) => s + (UNIT_MAP[id]?.cost || 0), 0)")
+        assert 19 <= rt_cost <= 25, f"Random tier cost out of range: {rt_cost}"
+
+        daily_page.locator("#btnRand").click()
+        daily_page.wait_for_function("() => !document.querySelector('#btnGo').disabled", timeout=5000)
+        assert "挑戰超標破局" in daily_page.locator("#btnGo").inner_text()
+        daily_page.evaluate("() => document.querySelector('#btnGo').click()")
+        daily_page.wait_for_function("() => document.body.classList.contains('in-battle') && !document.querySelector('#viewBattle').hidden", timeout=5000)
+        daily_page.wait_for_timeout(400)
+        daily_page.evaluate("() => document.querySelector('#btnSkip').click()")
+        daily_page.wait_for_selector("#rRematch", state="visible", timeout=10000)
+        daily_page.evaluate("() => document.querySelector('#rRematch').click()")
+        daily_page.wait_for_timeout(150)
+        daily_after = daily_page.evaluate("""() => ({
+            inBattle: document.body.classList.contains('in-battle'),
+            missionText: document.querySelector('#missionBar').innerText
+        })""")
+        assert not daily_after["inBattle"] and "1次" in daily_after["missionText"], f"Daily rematch/counter failed: {daily_after}"
+
+        daily_page.set_viewport_size({"width": 390, "height": 844})
+        daily_page.wait_for_timeout(150)
+        assert not daily_page.evaluate("() => document.documentElement.scrollWidth > window.innerWidth + 1"), "Daily mode overflowed at 390x844"
+        daily_ctx.close()
+        print(f"[TEST 9] 精選破局 ($19~$25 超標題庫、切換與再戰結算) 測試通過: randomCost=${rt_cost}")
 
         # 檢查過程是否有 JS 報錯
         assert len(errors) == 0, f"瀏覽器執行出現 JS 報錯: {errors}"

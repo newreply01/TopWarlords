@@ -1096,7 +1096,8 @@ function renderMissionBar() {
           <option value="random_tier" ${state.dailyPlanId === 'random_tier' ? 'selected' : ''}>🎲 隨機自由對手</option>
           ${groupedOptions}
         </select>
-        ${rec ? `<span style="margin-left:8px;font-size:12px" class="${rec.won ? 'badge-ok' : 'badge-no'}">${rec.won ? '✔ 已破局' : '尚未破局'} (${rec.tries}次)</span>` : ''}
+        <span class="badge badge-no" style="margin-left:6px;font-size:11.5px;font-weight:700" title="當前挑戰敵軍為 $${enemyCost} 預算超標陣容（我方上限 $15）">${esc(state.enemyName || '超標勁旅')} · $${enemyCost}${overCost > 0 ? ` (+$${overCost})` : ''}</span>
+        ${rec ? `<span style="margin-left:6px;font-size:12px" class="${rec.won ? 'badge-ok' : 'badge-no'}">${rec.won ? '✔ 已破局' : '尚未破局'} (${rec.tries}次)</span>` : ''}
       </div>`;
   } else if (mode === 'sandbox') {
     const enemySource = state.customSandEnemy || state.lastBattleEnemy;
@@ -3029,9 +3030,15 @@ $('#missionBar').addEventListener('change', e => {
 
   if (e.target.id === 'dailyPlanSel') {
     handleDailyPlanChange(e.target.value);
+    return;
   }
-  if (e.target.id === 'sandEnemy') state.sandEnemy = e.target.value;
-  if (e.target.id === 'sandEvent') { state.sandEvent = e.target.value; renderMatrix(); }
+  if (e.target.id === 'sandEnemy') { state.sandEnemy = e.target.value; return; }
+  if (e.target.id === 'sandEvent') { state.sandEvent = e.target.value; renderMatrix(); return; }
+  if (e.target.id === 'aiArchSel') {
+    state.aiArch = e.target.value;
+    setupMatch();
+    renderAll();
+  }
 });
 
 function handleDailyPlanChange(val) {
@@ -3050,19 +3057,6 @@ function handleDailyPlanChange(val) {
   }
   toast(`已切換精選對戰題目：${planName}`);
 }
-
-$('#missionBar').addEventListener('change', e => {
-  if (e.target.id === 'dailyPlanSel') {
-    handleDailyPlanChange(e.target.value);
-  }
-  if (e.target.id === 'sandEnemy') state.sandEnemy = e.target.value;
-  if (e.target.id === 'sandEvent') state.sandEvent = e.target.value;
-  if (e.target.id === 'aiArchSel') {
-    state.aiArch = e.target.value;
-    setupMatch();
-    renderAll();
-  }
-});
 
 /* ---------- 離開/清理戰鬥推演與檢視戰場 ---------- */
 function exitActiveBattle() {
@@ -7012,8 +7006,10 @@ function showResult(res, bo3Custom) {
           }
           if (state.mode !== 'daily') {
             setupMatch();
-                      renderAll();
+            renderAll();
             if (state.deck.every(Boolean)) startBattle(); else toast('請先補齊編組');
+          } else {
+            renderMissionBar();
           }
         };
       }

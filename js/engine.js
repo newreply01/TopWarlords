@@ -1048,6 +1048,38 @@ const ARCHETYPES = [
   { id: 'ew',       name: '智聖奇謀', desc: '頂尖軍師運籌帷幄，死士奇兵暗襲破局。',   plan: [['air', 2], ['armor', 3], ['air_defense', 2], ['naval', 3], ['support', 5]] }
 ];
 
+/* 精選破局（每日挑戰）：對手預算 $19~$25 元超標階梯配置（玩家僅 $15，以小博大破局挑戰） */
+const DAILY_PLANS = [
+  // --- $19 超標階梯 ---
+  { id: 'cavalry-19',        cost: 19, name: '超標鐵騎洪流',     desc: '5元頂級突騎衝陣＋雙4元重甲神射護翼，強襲壓迫極強。', plan: [['air', 5], ['armor', 4], ['air_defense', 4], ['naval', 3], ['support', 3]] },
+  { id: 'phalanx-19',        cost: 19, name: '超標重甲鐵壁',     desc: '5元重甲柱國鎮守中軍，4元突騎與奇兵兩翼夾擊。',     plan: [['air', 4], ['armor', 5], ['air_defense', 3], ['naval', 4], ['support', 3]] },
+  { id: 'archer-19',         cost: 19, name: '超標萬箭齊發陣',   desc: '5元絕世神射遠程覆蓋，搭配4元突騎與先登攔截突圍。', plan: [['air', 4], ['armor', 3], ['air_defense', 5], ['naval', 4], ['support', 3]] },
+  { id: 'stratagem-19',      cost: 19, name: '超標奇謀暗襲陣',   desc: '5元不世軍師全軍增幅，配合雙4元前排構築鐵陣。',     plan: [['air', 3], ['armor', 4], ['air_defense', 4], ['naval', 3], ['support', 5]] },
+
+  // --- $20 雙核主力階梯 ---
+  { id: 'twin-spear-20',     cost: 20, name: '超標騎兵雙絕陣',   desc: '5元突騎＋5元先登奇兵雙星突刺，輔以4元神射壓陣。',   plan: [['air', 5], ['armor', 3], ['air_defense', 4], ['naval', 5], ['support', 3]] },
+  { id: 'twin-fortress-20',  cost: 20, name: '超標重盾強弩營',   desc: '5元重甲＋5元神射構築銅牆鐵壁，正面難以撼動。',     plan: [['air', 3], ['armor', 5], ['air_defense', 5], ['naval', 4], ['support', 3]] },
+
+  // --- $21 精銳集團階梯 ---
+  { id: 'assault-21',        cost: 21, name: '超標龍騎陷陣營',   desc: '5元飛將突騎＋5元重甲陷陣，搭配雙4元神射與奇兵。',   plan: [['air', 5], ['armor', 5], ['air_defense', 4], ['naval', 4], ['support', 3]] },
+  { id: 'net-21',            cost: 21, name: '超標天羅伏波網',   desc: '5元突騎＋5元神射＋5元奇兵三路並進，步步封鎖。',     plan: [['air', 5], ['armor', 3], ['air_defense', 5], ['naval', 5], ['support', 3]] },
+
+  // --- $22 三核重裝階梯 ---
+  { id: 'tri-flank-22',      cost: 22, name: '超標三核奔襲戰陣', desc: '5元突騎＋5元神射＋5元奇兵＋4元重甲，三軍立體夾殺。', plan: [['air', 5], ['armor', 4], ['air_defense', 5], ['naval', 5], ['support', 3]] },
+  { id: 'tri-bulwark-22',    cost: 22, name: '超標三核重甲水寨', desc: '5元重甲＋5元神射＋5元奇兵＋4元軍師，攻守兼備無懈可擊。', plan: [['air', 3], ['armor', 5], ['air_defense', 5], ['naval', 5], ['support', 4]] },
+
+  // --- $23 準神裝狂瀾階梯 ---
+  { id: 'apex-vanguard-23',  cost: 23, name: '超標三柱神將軍團', desc: '突騎、重甲、神射全滿5元頂配，雙4元奇兵軍師助陣。',   plan: [['air', 5], ['armor', 5], ['air_defense', 5], ['naval', 4], ['support', 4]] },
+  { id: 'apex-mastermind-23',cost: 23, name: '超標天策四維霸府', desc: '5元突騎＋5元奇兵＋5元軍師＋雙4元重甲神射，全場壓制。', plan: [['air', 5], ['armor', 4], ['air_defense', 4], ['naval', 5], ['support', 5]] },
+
+  // --- $24 四天王準全神裝 ---
+  { id: 'four-marshals-24',  cost: 24, name: '超標四大柱國聯軍', desc: '四大戰鬥兵種全數配置5元傳奇名將，唯有軍師位略留破綻。', plan: [['air', 5], ['armor', 5], ['air_defense', 5], ['naval', 5], ['support', 4]] },
+
+  // --- $25 終極滅世五星神裝 (極限挑戰) ---
+  { id: 'pantheon-25',       cost: 25, name: '五神將滅世聯軍',   desc: '【終極滅世挑戰】五大兵種全部配置 $5 傳奇名將！考驗極限以小博大！', plan: [['air', 5], ['armor', 5], ['air_defense', 5], ['naval', 5], ['support', 5]] },
+  { id: 'hegemon-25',        cost: 25, name: '千古霸業終極決戰陣', desc: '【終極滅世挑戰】全兵種頂配神將，唯有精準教條與陣型克制能破敵！', plan: [['air', 5], ['armor', 5], ['air_defense', 5], ['naval', 5], ['support', 5]] }
+];
+
 function buildFromPlan(plan, rng) {
   const ids = [];
   for (const [cat, cost] of plan) {

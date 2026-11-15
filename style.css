@@ -29534,3 +29534,70 @@ html:not([data-theme="light"]) .formation-slot-row {
     padding: 0 3px;
   }
 }
+
+/* =====================================================
+   底欄「隨機補滿 / 清空」按鈕文字恢復 (960px ~ 1249px 平板橫屏與窄桌機)
+   覆寫 1249px 以下強制隱藏 .tool-btn-text 的舊規則，精簡冗餘標籤騰出空間
+   ===================================================== */
+@media (min-width: 960px) and (max-width: 1249px) {
+  .tool-btn {
+    width: auto !important;
+    padding: 0 7px !important;
+    gap: 3px !important;
+    white-space: nowrap !important;
+  }
+
+  .tool-btn .tool-btn-text {
+    display: inline !important;
+    font-size: 12.5px !important;
+  }
+}
+
+@media (min-width: 960px) and (max-width: 1199px) {
+  .command-deck:not([hidden]) {
+    padding: 0 8px !important;
+    gap: 4px !important;
+  }
+
+  .deck-section-label,
+  .deck-label-split {
+    display: none !important;
+  }
+
+  .deck-right {
+    gap: 4px !important;
+  }
+
+  .tools-btn-group {
+    padding: 1px 3px !important;
+    gap: 2px !important;
+  }
+
+  .tool-btn {
+    padding: 0 6px !important;
+  }
+
+  .tool-btn .tool-btn-text {
+    font-size: 12px !important;
+  }
+
+  .budget-badge {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    padding: 0 4px !important;
+    gap: 3px !important;
+  }
+
+  .budget-hero-num {
+    font-size: 25px !important;
+  }
+
+  .mega-launch-btn {
+    padding: 0 8px !important;
+  }
+
+  .mega-launch-btn .launch-sub {
+    display: none !important;
+  }
+}

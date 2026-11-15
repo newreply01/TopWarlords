@@ -124,10 +124,10 @@ const Battle3DEngine = (function () {
   })();
   let isDragging = false;
   let prevMouseX = 0, prevMouseY = 0;
-  let camTheta = -0.16, camPhi = 1.14, camRadius = 13.4;
+  let camTheta = -0.16, camPhi = 1.04, camRadius = 16.4;
   let cameraView = 'cinematic';
   let showUnitLabels = false;
-  const CAM_BASE_TARGET = new THREE.Vector3(0, 0.85, 0.10);
+  const CAM_BASE_TARGET = new THREE.Vector3(0, 0.65, 0.55);
   const camFocusOffset = new THREE.Vector3(0, 0, 0);
   const camFocusTarget = new THREE.Vector3(0, 0, 0);
   let lastFocusAt = 0;
@@ -4157,7 +4157,7 @@ const Battle3DEngine = (function () {
   function triggerCameraShake(power = 0.25) {
     if (battleSettled || !cameraShakeEnabled) return;
     shakePower = Math.min(0.65, Math.max(shakePower, power));
-    camZoomTarget = Math.max(-1.6, camZoomTarget - power * 0.95);
+    camZoomTarget = Math.max(-0.8, camZoomTarget - power * 0.65);
   }
 
   function triggerHitStop(ms = 75) {
@@ -4438,9 +4438,9 @@ const Battle3DEngine = (function () {
   }
 
   function getBattleCameraFov(aspect) {
-    if (aspect <= 2.4) return cameraView === 'cinematic' ? 42 : 48;
-    const horizontalFov = (cameraView === 'cinematic' ? 78 : 100) * Math.PI / 180;
-    return 2 * Math.atan(Math.tan(horizontalFov / 2) / aspect) * 180 / Math.PI;
+    if (aspect <= 2.75) return cameraView === 'cinematic' ? 45 : 49;
+    const horizontalFov = (cameraView === 'cinematic' ? 88 : 104) * Math.PI / 180;
+    return Math.max(41, 2 * Math.atan(Math.tan(horizontalFov / 2) / aspect) * 180 / Math.PI);
   }
 
   function updateCameraPosition() {
@@ -4484,11 +4484,12 @@ const Battle3DEngine = (function () {
 
   function resetCamera() {
     camTheta = cameraView === 'cinematic' ? -0.16 : 0;
-    camPhi = cameraView === 'cinematic' ? 1.14 : 0.78;
+    camPhi = cameraView === 'cinematic' ? 1.04 : 0.78;
+    const wideShort = Boolean(container && container.clientHeight > 0 && (container.clientWidth / container.clientHeight) >= 2.15);
     camRadius = (container && container.clientWidth < 720)
-      ? (cameraView === 'cinematic' ? 18.5 : 21)
-      : (cameraView === 'cinematic' ? 13.4 : 22.8);
-    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 17.5);
+      ? (cameraView === 'cinematic' ? 19.2 : 21.5)
+      : (cameraView === 'cinematic' ? (wideShort ? 17.2 : 16.4) : 22.8);
+    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 18.0);
     camFocusOffset.set(0, 0, 0);
     camFocusTarget.set(0, 0, 0);
     camZoomOffset = 0;

@@ -29603,9 +29603,10 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 /* =====================================================
-   戰場畫面與結算報告平板橫屏滾動修正 (v7.11.50)
-   1. 解除 #viewBattle 寫死高度與 overflow: hidden，改為彈性撐滿且支援觸控順暢滑動到底
-   2. 統一 .modal / .result-card 等結算彈窗使用 100dvh，避免瀏覽器工具列遮擋底部按鈕
+   戰場畫面與結算報告平板橫屏滾動修正 (v7.11.51)
+   1. 恢復 #viewBattle.battle 與 .battle-3d-wrapper 全滿版 100% 撐滿剩餘高度，不再被舊 max-height 壓成半屏
+   2. 修正 #battleIntelDialog（部隊／戰報與 2D 視圖）內部捲動鏈結，確保能滑到最下方
+   3. 保留 .modal / .result-card 等結算彈窗使用 100dvh，避免瀏覽器工具列遮擋底部按鈕
    ===================================================== */
 @media (min-width: 769px) {
   #viewBattle.battle {
@@ -29613,23 +29614,43 @@ html:not([data-theme="light"]) .formation-slot-row {
     height: auto !important;
     max-height: none !important;
     min-height: 0 !important;
+    overflow: hidden !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #viewBattle .battle-3d-wrapper {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  #viewBattle:has(#battle3DWrapper[hidden]) #battleIntelDialog {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+  }
+
+  #viewBattle #battleIntelDialog .battle-grid {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  #viewBattle #battleIntelDialog .team-col,
+  #viewBattle #battleIntelDialog .log-col {
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+
+  #viewBattle #battleIntelDialog .units-card-list,
+  #viewBattle #battleIntelDialog .log {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding-bottom: max(18px, env(safe-area-inset-bottom, 0px)) !important;
-  }
-}
-
-@media (min-width: 769px) and (max-height: 760px) {
-  #viewBattle .battle-3d-wrapper {
-    height: clamp(200px, 34dvh, 260px) !important;
-    min-height: 200px !important;
-    max-height: 260px !important;
-    margin-bottom: 6px !important;
-  }
-
-  #viewBattle .battle-grid {
-    min-height: 220px !important;
+    padding-bottom: 14px !important;
   }
 }
 

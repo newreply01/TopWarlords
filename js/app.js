@@ -49,10 +49,10 @@ window.SoundEngine = SoundEngine;
 const SEED_GHOSTS = [
   { id: 'g_falcon', callsign: '冠軍侯・驃騎營', title: '驃騎將軍', rating: 1420, wins: 58, losses: 19, deck: ['HUO','ZHOUTAI','GENGYAN','GANNING','LIUBOWEN'], doctrine: 'strike', motto: '疾如風千里奔襲，閃擊直取中軍帥帳！', isUser: false },
   { id: 'g_iron', callsign: '武安君・鐵壁陣', title: '鎮國大將軍', rating: 1310, wins: 41, losses: 22, deck: ['DATE','BAIQI','ZONGZE','YUEJIN','SIMAYI'], doctrine: 'defense', motto: '不動如山大盾重甲，長平鐵壁固若金湯。', isUser: false },
-  { id: 'g_shadow', callsign: '臥龍崗・八陣圖', title: '軍師祭酒', rating: 1490, wins: 64, losses: 14, deck: ['ZHAOYUN','LIANPO','HUANGZHONG','CAOBIN','ZHUGELIANG'], doctrine: 'deception', motto: '奇門八陣迷霧困敵，未戰而廟算先勝。', isUser: false },
-  { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['MADAI','KATOKIYOMASA','ASAKURA_SOT','YISUNSIN','PANGTONG'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
-  { id: 'g_viper', callsign: '毘沙門天・車懸陣', title: '越後守護', rating: 1610, wins: 88, losses: 21, deck: ['KENSHIN','ZHANGFEI','TORII','MENGHUO','GUOJIA'], doctrine: 'strike', motto: '車懸輪番急襲破陣，白刃一騎討斬將奪旗。', isUser: false },
-  { id: 'g_aegis', callsign: '大司馬・漢軍鐵騎', title: '大將軍大司馬', rating: 1720, wins: 104, losses: 25, deck: ['WEI','LIANPO','LIGUANG','TIANDAN','ZHUGELIANG'], doctrine: 'strike', motto: '武剛車陣奇兵破虜，神射強弩萬箭齊發。', isUser: false }
+  { id: 'g_shadow', callsign: '臥龍崗・八陣圖', title: '軍師祭酒', rating: 1490, wins: 64, losses: 14, deck: ['ZHAOYUN','DIANWEI','MALONG','CAOBIN','ZHUGELIANG'], doctrine: 'deception', motto: '奇門八陣迷霧困敵，未戰而廟算先勝。', isUser: false },
+  { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['EULJI','HOJO_UJIYASU','GWONYUL','YISUNSIN','ZHOUYU'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
+  { id: 'g_viper', callsign: '毘沙門天・車懸陣', title: '越後守護', rating: 1610, wins: 88, losses: 21, deck: ['KENSHIN','ZHANGFEI','TAKIGAWA','MENGHUO','CAOCAO'], doctrine: 'strike', motto: '車懸輪番急襲破陣，白刃一騎討斬將奪旗。', isUser: false },
+  { id: 'g_aegis', callsign: '大司馬・漢軍鐵騎', title: '大將軍大司馬', rating: 1720, wins: 104, losses: 25, deck: ['WEI','DIANWEI','LIGUANG','MENGHUO','LIUBOWEN'], doctrine: 'strike', motto: '武剛車陣奇兵破虜，神射強弩萬箭齊發。', isUser: false }
 ];
 
 function getGhostPool() {
@@ -63,7 +63,7 @@ function getGhostPool() {
 function saveGhostPool(p) { LS.set('wl15_ghost_pool_v2', p); }
 
 const stats = LS.get('wl15_stats', { played: 0, win: 0, streak: 0, best: 0, bo3Won: 0 });
-const playerGhost = LS.get('wl15_player_ghost', { rp: 0, callsign: '虎步先鋒鐵騎營', rankTitle: '作戰少尉', wins: 0, losses: 0, myGhostDeck: null });
+const playerGhost = LS.get('wl15_player_ghost', { rp: 0, callsign: '虎步先鋒鐵騎營', rankTitle: '先鋒校尉', wins: 0, losses: 0, myGhostDeck: null });
 
 function calcRankTitle(rp) {
   if (typeof LadderEngine !== 'undefined' && LadderEngine.getRankTier) {
@@ -293,7 +293,7 @@ function autoFillAndSubmitPvpDeck() {
     filledDeck = randomDeck(Math.random, budgetLimit(), [], banned);
   }
   if (!filledDeck) {
-    filledDeck = ['ZHAOYUN', 'GYEBAEK', 'ZONGZE', 'MENGHUO', 'LIUCHENG'];
+    filledDeck = ['ZHAOYUN', 'GYEBAEK', 'MALONG', 'CAOBIN', 'ZHUGELIANG'];
   }
 
   state.deck = filledDeck.slice();
@@ -1236,7 +1236,8 @@ function getCandidateNewSynergies(u, targetSlot, currentDeck, currentSynIds, nee
       });
     }
   }
-  if (needsFourYiHint && u.id === 'MENGHUO') {
+  const fourYiIds = (typeof FOUR_YI_ELIGIBLE_IDS !== 'undefined' ? FOUR_YI_ELIGIBLE_IDS : ['MENGHUO', 'MALONG', 'JIANGWEI', 'DENGAI', 'LIJING']);
+  if (needsFourYiHint && fourYiIds.includes(u.id)) {
     out.push({ id: 'fourYi', label: '四夷', title: '領軍解鎖「四夷」陣形（山岳／森林攻防 +50%）' });
   }
   return out;
@@ -1246,8 +1247,9 @@ function getCardTacticalTags(u) {
   if (!u) return [];
   const tags = [];
   const flags = u.roleFlags || [];
-  if (u.skill?.effects?.armorPierce) tags.push({ cls: 'tag-ap', text: '破甲', title: '專屬戰法附帶破甲無視部分護甲' });
-  if (u.id === 'MENGHUO') tags.push({ cls: 'tag-fy', text: '四夷', title: '可解鎖四夷特殊陣形' });
+  const fourYiIds = (typeof FOUR_YI_ELIGIBLE_IDS !== 'undefined' ? FOUR_YI_ELIGIBLE_IDS : ['MENGHUO', 'MALONG', 'JIANGWEI', 'DENGAI', 'LIJING']);
+  if (u.skill?.effects?.armorPierce || (u.traits || []).includes('TRUE_AT')) tags.push({ cls: 'tag-ap', text: '破甲', title: '具備破甲重擊或戰法破甲效果（可穿透或削減重甲防護）' });
+  if (fourYiIds.includes(u.id)) tags.push({ cls: 'tag-fy', text: '四夷', title: '可解鎖四夷特殊陣形' });
   if (flags.includes('PASSIVE_VOLLEY')) tags.push({ cls: 'tag-stealth', text: '隱伏', title: '隱蔽伏弩，階段一不易被優先鎖定' });
   if (flags.includes('FORMATION_SHIELD')) tags.push({ cls: 'tag-shield', text: '護軍', title: '護軍大陣庇護友軍免受先制斬首' });
   if (flags.includes('STAMINA_DEEP')) tags.push({ cls: 'tag-deep', text: '久戰', title: '百戰老將，持久戰氣力多 1 波' });
@@ -1265,7 +1267,8 @@ function renderMatrix() {
   const activeWeather = getActiveBuildWeather();
   const pickedUnitsAll = (state.deck || []).map(id => (id ? UNIT_MAP[id] : null)).filter(Boolean);
   const currentSynIds = new Set(typeof getDeckSynergies === 'function' ? getDeckSynergies(pickedUnitsAll).map(s => s.id) : []);
-  const hasFourYiLeader = pickedUnitsAll.some(x => x.id === 'MENGHUO');
+  const fourYiIds = (typeof FOUR_YI_ELIGIBLE_IDS !== 'undefined' ? FOUR_YI_ELIGIBLE_IDS : ['MENGHUO', 'MALONG', 'JIANGWEI', 'DENGAI', 'LIJING']);
+  const hasFourYiLeader = pickedUnitsAll.some(x => fourYiIds.includes(x.id));
   const needsFourYiHint = !hasFourYiLeader && ((Array.isArray(state.formations) && state.formations.includes('fourYi')) || state.terrain === 'mountain' || state.terrain === 'forest');
   const normFormations = normalizeArmyFormations(state.formations, state.deck);
   const availForms = getEligibleFormations(state.deck);
@@ -1323,7 +1326,7 @@ function renderMatrix() {
       const showWhy = Boolean(why && !isEquipped);
       const stat3 = getPrimaryTertiaryStat(u);
       const phase = u.skill?.phase || '';
-      const hasAp = Boolean(u.skill?.effects?.armorPierce);
+      const hasAp = Boolean(u.skill?.effects?.armorPierce || (u.traits || []).includes('TRUE_AT'));
       const candSyns = (!isEquipped && !showWhy) ? getCandidateNewSynergies(u, targetSlot, state.deck, currentSynIds, needsFourYiHint) : [];
       const isSynReady = candSyns.length > 0;
       const tacTags = getCardTacticalTags(u);
@@ -1360,7 +1363,7 @@ function renderMatrix() {
                 <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
               </button>
               ${phase ? `<span class="m-skill-phase phase-${phase.toLowerCase()}" data-info-id="${u.id}" title="${esc(PHASE_TIPS[phase] || '')}（點擊查看詳情）">${esc(phase)}</span>` : ''}
-              ${hasAp ? `<span class="m-ap-chip" data-info-id="${u.id}" title="專屬戰法附帶破甲效果（點擊查看詳情）">破甲</span>` : ''}
+              ${hasAp ? `<span class="m-ap-chip" data-info-id="${u.id}" title="具備破甲重擊或戰法破甲效果（點擊查看詳情）">破甲</span>` : ''}
             </div>
             <div class="m-bot">
               <div class="m-stats" aria-label="基本數值">
@@ -2013,7 +2016,7 @@ function updateCloudSyncButtonState() {
   const p = lState ? lState.player : null;
   const tier = (typeof LadderEngine !== 'undefined' && p)
     ? LadderEngine.getRankTier(p.rp)
-    : { name: '作戰少尉', color: '#475569' };
+    : { name: '先鋒校尉', color: '#475569' };
   const rawName = p?.name || (typeof playerGhost !== 'undefined' ? playerGhost.callsign : '') || '指揮官';
   const myName = esc(rawName);
 
@@ -2042,7 +2045,7 @@ function renderHud() {
   const myFlag = p?.flag || playerGhost.flag || '🇹🇼';
   const tier = (typeof LadderEngine !== 'undefined' && p)
     ? LadderEngine.getRankTier(p.rp)
-    : { name: '作戰少尉', color: '#475569' };
+    : { name: '先鋒校尉', color: '#475569' };
 
   if (p && typeof playerGhost !== 'undefined') {
     playerGhost.callsign = p.name;
@@ -2066,7 +2069,7 @@ function renderHud() {
     } else {
       const isTelAdmin = typeof Telemetry !== 'undefined' && typeof Telemetry.isAdmin === 'function' && Telemetry.isAdmin();
       const telCursor = isTelAdmin ? 'pointer' : 'default';
-      const telTitle = isTelAdmin ? '📡 全服 C4ISR 即時戰況大盤 (管理員已解鎖 · 點擊開啟)' : '全服累計到訪人次';
+      const telTitle = isTelAdmin ? '📡 全服戰略軍情即時大盤 (管理員已解鎖 · 點擊開啟)' : '全服累計到訪人次';
       hudStats.innerHTML = `
         <span class="chip-stat chip-telemetry" id="btnOpenTelemetry" style="cursor:${telCursor}" title="${telTitle}">
           <span class="live-pulse-dot"></span>
@@ -3713,7 +3716,7 @@ function renderLadderRosterTable() {
         const isMe = u.id === player.id;
         const rankNo = u.rank || (idx + 1);
         const topClass = rankNo === 1 ? 'top-1' : rankNo === 2 ? 'top-2' : rankNo === 3 ? 'top-3' : '';
-        const tier = (LadderEngine.getRankTier && LadderEngine.getRankTier(u.rp)) || { name: '作戰少尉', color: '#38bdf8' };
+        const tier = (LadderEngine.getRankTier && LadderEngine.getRankTier(u.rp)) || { name: '先鋒校尉', color: '#38bdf8' };
         const streak = u.streakDays || 1;
 
         const canEngage = isLive && (rankNo < player.rank) && (rankNo >= player.rank - 8);
@@ -5981,7 +5984,7 @@ function handleLadderMatchEnd(res) {
 
     <div class="res-actions">
       <button class="btn primary block" id="btnLadderReturn">返回天梯戰情室</button>
-      <button class="btn ghost block" id="btnLadderDetailedAar">📊 查看 C4ISR 詳細作戰戰報 (傷害/MVP)</button>
+      <button class="btn ghost block" id="btnLadderDetailedAar">📊 查看詳細戰略作戰戰報 (傷害/MVP)</button>
       <button class="btn ghost block" id="btnLadderReview">檢視戰場情形 🔍</button>
     </div>
   `;
@@ -6510,7 +6513,7 @@ function showBo3SeriesResult(isPlayerWon) {
   }
 }
 
-/* ---------- 旗艦級戰鬥結算報告 (C4ISR Tactical After-Action Report, AAR) ---------- */
+/* ---------- 旗艦級戰鬥結算報告 (Tactical After-Action Report, AAR) ---------- */
 function showResult(res, bo3Custom) {
   if (!res) return;
   try {
@@ -10101,7 +10104,7 @@ function openCloudSyncModal() {
   const myFlag = p?.flag || playerGhost.flag || '🇹🇼';
   const tier = (typeof LadderEngine !== 'undefined' && p)
     ? LadderEngine.getRankTier(p.rp)
-    : { name: '作戰少尉', color: '#475569' };
+    : { name: '先鋒校尉', color: '#475569' };
   const winRate = stats.played ? Math.round(stats.win / stats.played * 100) : 0;
 
   const flagEl = $('#cloudModalFlag'); if (flagEl) flagEl.textContent = myFlag;

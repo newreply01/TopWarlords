@@ -691,7 +691,7 @@ const LadderEngine = (function () {
       return { ok: false, reason: '該呼號包含系統保留關鍵字，無法使用！' };
     }
     if (isCallsignTaken(clean, true)) {
-      return { ok: false, reason: `該軍武呼號【${clean}】已被現役席次佔用，請重新命名！` };
+      return { ok: false, reason: `該將帥呼號【${clean}】已被現役席次佔用，請重新命名！` };
     }
     return { ok: true, cleanName: clean };
   }

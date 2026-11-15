@@ -62,14 +62,14 @@ async def main():
         await page.wait_for_timeout(300)
         cn_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-1] 篩選 🇨🇳 中國名將數量: {cn_cards} 張")
-        assert cn_cards == 77, f"預期 77 位中國名將，實際得到 {cn_cards}"
+        assert cn_cards == 75, f"預期 75 位中國名將，實際得到 {cn_cards}"
 
         # 🇯🇵 日本
         await page.locator("button[data-nat='🇯🇵']").click()
         await page.wait_for_timeout(300)
         jp_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-2] 篩選 🇯🇵 日本名將數量: {jp_cards} 張")
-        assert jp_cards == 37, f"預期 37 位日本名將，實際得到 {jp_cards}"
+        assert jp_cards == 39, f"預期 39 位日本名將，實際得到 {jp_cards}"
 
         # 🇰🇷 韓國
         await page.locator("button[data-nat='🇰🇷']").click()

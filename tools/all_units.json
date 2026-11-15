@@ -123,7 +123,7 @@
     "id": "KIMYUSHIN",
     "name": "金庾信",
     "cat": "air",
-    "cost": 2,
+    "cost": 4,
     "tag": "新羅太大角干·風火神騎",
     "flag": "🇰🇷",
     "origin": "韓國 · 新羅",
@@ -183,7 +183,7 @@
     "id": "EULJI",
     "name": "乙支文德",
     "cat": "air",
-    "cost": 1,
+    "cost": 2,
     "tag": "佯退誘敵·薩水反擊",
     "flag": "🇰🇷",
     "origin": "韓國 · 高句麗",
@@ -203,7 +203,7 @@
     "id": "YAMAGATA",
     "name": "山縣昌景",
     "cat": "air",
-    "cost": 2,
+    "cost": 1,
     "tag": "赤備猛將·長驅衝鋒",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -213,7 +213,7 @@
     "id": "TACHIBANA",
     "name": "立花宗茂",
     "cat": "air",
-    "cost": 4,
+    "cost": 2,
     "tag": "西國無雙·勇猛無匹",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -322,9 +322,9 @@
   {
     "id": "MENGTIAN",
     "name": "蒙恬",
-    "cat": "armor",
+    "cat": "air_defense",
     "cost": 4,
-    "tag": "中華第一勇·築長城禦胡",
+    "tag": "秦軍強弩·築長城禦胡",
     "flag": "🇨🇳",
     "origin": "中國 · 秦朝",
     "weapon": "秦軍重弩 + 狼毫筆"
@@ -363,8 +363,8 @@
     "id": "XIAHOU_DUN",
     "name": "夏侯惇",
     "cat": "armor",
-    "cost": 1,
-    "tag": "魏之元勳·親冒矢石",
+    "cost": 2,
+    "tag": "魏之元勳·拔矢啖睛",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "環首刀 + 曹魏軍旗"
@@ -393,8 +393,8 @@
     "id": "DIANWEI",
     "name": "典韋",
     "cat": "armor",
-    "cost": 2,
-    "tag": "古之惡來·重雙鐵戟",
+    "cost": 1,
+    "tag": "古之惡來·雙鐵戟護主",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "雙鐵戟 + 重裝近衛鎧"
@@ -630,24 +630,24 @@
     "weapon": "黑角落雕強弓 + 鐵羽鑿子箭"
   },
   {
-    "id": "ZHANGHE",
-    "name": "張郃",
+    "id": "MALONG",
+    "name": "馬隆",
     "cat": "air_defense",
     "cost": 3,
-    "tag": "巧變良將·街亭斷汲",
+    "tag": "奇謀強弩·涼州平叛",
     "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "巧變長弓 + 綠沉槍"
+    "origin": "中國 · 西晉",
+    "weapon": "西晉強弩 + 偏箱車八陣"
   },
   {
     "id": "ZHOUYAFU",
     "name": "周亞夫",
-    "cat": "air_defense",
+    "cat": "armor",
     "cost": 4,
-    "tag": "細柳嚴軍·強弩堅陣",
+    "tag": "細柳嚴軍·重步堅壁",
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
-    "weapon": "漢軍武剛弩 + 精鋼大箭"
+    "weapon": "漢軍大盾長戟 + 細柳令旗"
   },
   {
     "id": "ZONGZE",
@@ -730,24 +730,24 @@
     "weapon": "南蠻炸藥引線 + 短鐵砲"
   },
   {
-    "id": "TANDAOJI",
-    "name": "檀道濟",
+    "id": "SHIMAZU_IEHISA",
+    "name": "島津家久",
     "cat": "air_defense",
     "cost": 3,
-    "tag": "唱籌量沙·強弩退魏",
-    "flag": "🇨🇳",
-    "origin": "中國 · 南北朝",
-    "weapon": "宋軍神臂大弓 + 鐵羽矢"
+    "tag": "釣野伏·沖田畷之射",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "薩摩種子島鐵砲 + 釣野伏陣圖"
   },
   {
-    "id": "KUANGZHANG",
-    "name": "匡章",
+    "id": "TAKIGAWA",
+    "name": "瀧川一益",
     "cat": "air_defense",
     "cost": 1,
-    "tag": "齊國元戎·垂沙破楚",
-    "flag": "🇨🇳",
-    "origin": "中國 · 戰國",
-    "weapon": "齊國臨淄強弩 + 箭陣纛旗"
+    "tag": "進退自在·甲賀鐵砲眾",
+    "flag": "🇯🇵",
+    "origin": "日本 · 戰國",
+    "weapon": "甲賀連發鐵砲 + 瀧川丸旗"
   },
   {
     "id": "HONDA_TADATSUGU",
@@ -833,7 +833,7 @@
     "id": "HUANGGAI",
     "name": "黃蓋",
     "cat": "naval",
-    "cost": 3,
+    "cost": 2,
     "tag": "苦肉火船·赤壁烈焰",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -873,7 +873,7 @@
     "id": "MURAKAMI",
     "name": "村上武吉",
     "cat": "naval",
-    "cost": 2,
+    "cost": 1,
     "tag": "能島水軍·焙烙玉焚艦",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
@@ -964,7 +964,7 @@
     "name": "徐晃",
     "cat": "naval",
     "cost": 4,
-    "tag": "長驅直入·聲東破陣",
+    "tag": "漢水背水·聲東破圍",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "宣花開山大斧 + 破陣鎧"
@@ -990,14 +990,14 @@
     "weapon": "築城大銃 + 水軍旗艦"
   },
   {
-    "id": "HEQI",
-    "name": "賀齊",
+    "id": "ZHANGHE",
+    "name": "張郃",
     "cat": "naval",
-    "cost": 1,
-    "tag": "艨艟華彩·百越先登",
+    "cost": 3,
+    "tag": "巧變奇兵·街亭斷汲",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
-    "weapon": "精鋼短戟 + 先登皮鎧"
+    "weapon": "巧變綠沉槍 + 截道奇兵旗"
   },
   {
     "id": "CAOBIN",

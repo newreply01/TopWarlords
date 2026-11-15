@@ -4,6 +4,22 @@
 
 ---
 
+## [7.11.39] - 2026-11-15
+### Refactored & Rebalanced (跨軍種定位梳理、引擎機制修正與 $15 天梯／範本重平衡)
+- **五大兵團名將調動與替補 (`js/data.js`, `assets/warlords/`)**：
+  - **神射強弩 (`air_defense`)**：由 `$3` **馬隆 (`MALONG`)**、`$3` **島津家久 (`SHIMAZU_IEHISA`)**、`$1` **瀧川一益 (`TAKIGAWA`)** 替補原張郃、檀道濟、匡章；國別編制更新為 `75 CN / 39 JP / 11 KR`。
+  - **雙人互換與定錨 (`armor` ↔ `air_defense`)**：`$4` **周亞夫 (`ZHOUYAFU`)** 轉調重甲陷陣 (`armor $4`)，`$4` **蒙恬 (`MENGTIAN`)** 轉調神射強弩 (`air_defense $4`)，對應秦軍重弩與細柳堅壁史實專長。
+  - **先登奇兵 (`naval`)**：`$3` **張郃 (`ZHANGHE`)** 轉調先登奇兵（巧變斷汲），搭配 **黃蓋 (`$3 → $2`)**、**村上武吉 (`$2 → $1`)** 調階並移除 **賀齊 (`HEQI`)**；`$4` **徐晃 (`XUHUANG`)** 文案重寫為「漢水背水·聲東破圍」。
+  - **奔雷突騎與重甲階梯微調**：**金庾信 (`$2 → $4`)** 與 **立花宗茂 (`$4 → $2`)**、**乙支文德 (`$1 → $2`)** 與 **山縣昌景 (`$2 → $1`)**、**夏侯惇 (`$1 → $2`)** 與 **典韋 (`$2 → $1`)** 互換調階；**源義經 (`$5`)** 戰法與定位對齊絕壁繞後狙殺後排。
+- **跨軍種戰術機制與戰鬥引擎修復 (`js/engine.js`, `js/data.js`, `js/app.js`)**：
+  - `HUO` 與 `YOSHITSUNE` 於階段三優先鎖定敵方後陣（`air_defense` / `support`）；`YANGYE` 與 `YUEFEI` 於階段三優先迎擊敵方 `air`。
+  - 弓騎名將 `DATE`、`XIAHOUYUAN`、`MADAI` 正式納入 `SYNERGIES.cec`（八陣神機網）遠程搭檔條件；`fourYi`（四夷陣）解鎖領袖擴編至 `MENGHUO`、`MALONG`、`JIANGWEI`、`DENGAI`、`LIJING`。
+  - 修復 `TRUE_AT + armorPierce` 同時存在時之貫穿邏輯（擊穿 `HEAVY` 25% 底線並提供 `+armorPierce × 20%` 增傷）及選將卡 `破甲` 徽章顯示；`HEAVY_AP`（`MACHO`、`XUCHU`、`DIANWEI`、`IINAOMASA`）補齊 `TRUE_AT` 並於全階段統一以 `unitHasTrueAt` 判定；`highCostDamage` 與「克敵」判定擴展至 `$4+` 對 `$4+` 精銳對決。
+  - 補全 `DRONE_IDS` / `SWARM` 在 `naval`、`air_defense`、`support` 之 `droneMult × droneDmg` 與敵方 `CIWS`（`0.85` 減傷）判定，並將 `support + TRUE_AT` 的 `CIWS` 壓制由 `0.6` 放寬為 `0.8`。
+- **$15 陣容校準、現代用語清理與版本同步 (`js/app.js`, `js/ladder-data.js`, `index.html`, `armory.html`, `sw.js`, `tools/export_units.py`)**：
+  - 修正 `TEMPLATES`、`SEED_GHOSTS`、`js/app.js` 備援陣容（移除無效 `LIUCHENG`）及全數 100 筆 `LADDER_PRESETS`，確保皆為五軍種完整且精確 `$15` 合法編組。
+  - 清理殘留現代用語（`● REC` → `● 戰局計時`、`C4ISR` → `戰略軍情`、`作戰少尉` → `先鋒校尉`、`戰區上校` → `鎮國將軍`、`軍武世界盃` → `天下名將武道會`），修正 `armory.html` 站名與國別人數，同步匯出 JSON 並將全站版本更新為 `v7.11.39`。
+
 ## [7.11.38] - 2026-11-15
 ### Rebalanced & Refined (五大兵團全系統重平衡、引擎機制補全與名將史實補完)
 - **核心戰鬥引擎與機制修復 (`js/engine.js`)**：

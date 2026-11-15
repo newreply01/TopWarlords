@@ -94,7 +94,7 @@ const Telemetry = (() => {
     if (!btn) return;
     if (isAdmin()) {
       btn.style.setProperty('cursor', 'pointer', 'important');
-      btn.title = '📡 全服 C4ISR 即時戰況大盤 (管理員已解鎖 · 點擊開啟)';
+      btn.title = '📡 全服戰略軍情即時大盤 (管理員已解鎖 · 點擊開啟)';
     } else {
       btn.style.setProperty('cursor', 'default', 'important');
       btn.title = '全服累計到訪人次';
@@ -135,7 +135,7 @@ const Telemetry = (() => {
         <div class="modal-card" style="max-width:400px;width:92%">
           <div class="cloud-modal-header" style="margin-bottom:12px">
             <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:#f59e0b;background:rgba(245,158,11,0.12);padding:2px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.35);">🔐 DEVELOPER CLEARANCE</div>
-            <h2 style="font-size:18px;margin:4px 0 6px;">C4ISR 開發者權限驗證</h2>
+            <h2 style="font-size:18px;margin:4px 0 6px;">戰略軍情開發者權限驗證</h2>
             <p class="muted" style="font-size:12px;line-height:1.5;">此遙測大盤與 GA4 配置僅限授權開發者存取。驗證通過後將記憶於本機瀏覽器。</p>
           </div>
           <div style="margin-bottom:10px">

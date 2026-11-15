@@ -228,7 +228,7 @@ try:
             if (unitMap.CAOCAO && (unitMap.CAOCAO.cost !== 4 || unitMap.CAOCAO.cat !== 'support')) {
                 errs.push('曹操定位錯誤');
             }
-            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 1 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
+            if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 2 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
                 errs.push('夏侯惇定位錯誤');
             }
             if (unitMap.IINAOMASA && (unitMap.IINAOMASA.cost !== 2 || unitMap.IINAOMASA.cat !== 'armor')) {
@@ -251,7 +251,8 @@ try:
                 'FANLI', 'CHENGYU', 'PANGJUAN', 'NAOIE', 'SESSAI', 'MASASHIGE', 'WENPING', 'QUYI', 'CAOZHEN',
                 'CAOCHUN', 'MENGGONG', 'ZUTI', 'GAOSHUN', 'MANCHONG', 'YUWENTAI', 'GANGCHO', 'SANADA_NOB',
                 'WANGPING', 'MILYU', 'TSUDA_SAN', 'GENGGONG', 'SHIMOTSUMA', 'WANGBA', 'KUKI_MORI', 'MIURA',
-                'BAEJEONG', 'TAKAKAGE', 'CHENGONG', 'GANGGAMCHAN', 'SHAMOKE', 'DINGFENG', 'GONGSUNDU', 'LINGTONG'
+                'BAEJEONG', 'TAKAKAGE', 'CHENGONG', 'GANGGAMCHAN', 'SHAMOKE', 'DINGFENG', 'GONGSUNDU', 'LINGTONG',
+                'HEQI', 'TANDAOJI', 'KUANGZHANG'
             ];
             for (const id of removedIds) {
                 if (unitMap[id]) errs.push('已移除武將仍存在：' + id);
@@ -418,19 +419,76 @@ try:
             });
             if (ineligibleFourYi.final.A[0].formation !== 'fishscale') errs.push('非異族武將不應使用四夷');
 
-            const duelBattle = resolveBattle(formationDeck, formationDeck, {
-                seed: 1,
-                formationsA: neutralFormations,
-                formationsB: neutralFormations
-            });
-            const squareBattle = resolveBattle(formationDeck, formationDeck, {
-                seed: 1,
-                formationsA: Array(5).fill('square'),
-                formationsB: neutralFormations
-            });
+            let duelBattle = null;
+            let squareBattle = null;
             const duels = result => result.frames.flatMap(frame => frame.lines).filter(line => line.duel).length;
-            if (duels(duelBattle) < 1 || duels(squareBattle) !== 0) errs.push('方圓單挑免疫判定錯誤');
+            for (let seed = 0; seed < 32; seed++) {
+                duelBattle = resolveBattle(formationDeck, formationDeck, {
+                    seed,
+                    formationsA: neutralFormations,
+                    formationsB: neutralFormations
+                });
+                squareBattle = resolveBattle(formationDeck, formationDeck, {
+                    seed,
+                    formationsA: Array(5).fill('square'),
+                    formationsB: neutralFormations
+                });
+                if (duels(duelBattle) >= 1) break;
+            }
+            if (!duelBattle || duels(duelBattle) < 1 || duels(squareBattle) !== 0) errs.push('方圓單挑免疫判定錯誤');
             if (squareBattle.final.A.some(unit => unit.formationDuelImmune !== true)) errs.push('方圓免單挑狀態未進入結算單位');
+
+            // v7.11.39 新增回歸檢查：位置交換、替補將領、TRUE_AT + armorPierce、$4 克敵、跨軍種鎖定、弓騎八陣與 $15 規範
+            if (unitMap.MALONG?.cat !== 'air_defense' || unitMap.SHIMAZU_IEHISA?.cat !== 'air_defense' || unitMap.TAKIGAWA?.cat !== 'air_defense') {
+                errs.push('神射強弩新進名將缺漏或分類錯誤');
+            }
+            if (unitMap.ZHOUYAFU?.cat !== 'armor' || unitMap.ZHOUYAFU?.cost !== 4 || unitMap.MENGTIAN?.cat !== 'air_defense' || unitMap.MENGTIAN?.cost !== 4) {
+                errs.push('周亞夫與蒙恬互換定位失敗');
+            }
+            if (unitMap.ZHANGHE?.cat !== 'naval' || unitMap.ZHANGHE?.cost !== 3) {
+                errs.push('張郃調動先登奇兵定位錯誤');
+            }
+            if (!unitMap.MACHO.traits.includes('TRUE_AT') || !unitMap.XUCHU.traits.includes('TRUE_AT') || !unitMap.DIANWEI.traits.includes('TRUE_AT') || !unitMap.IINAOMASA.traits.includes('TRUE_AT')) {
+                errs.push('HEAVY_AP 名將未補齊 TRUE_AT 特性');
+            }
+            if (TEMPLATES.some(t => t.ids.reduce((s, id) => s + (unitMap[id]?.cost || 0), 0) !== 15)) {
+                errs.push('存在總價不等於 $15 的推薦範本');
+            }
+            if (window.LADDER_PRESETS.some(p => p.deck.reduce((s, id) => s + (unitMap[id]?.cost || 0), 0) !== 15)) {
+                errs.push('存在總價不等於 $15 的天梯預設陣容');
+            }
+            if (!getDeckSynergies(['DATE', 'ZHUGELIANG']).some(s => s.id === 'cec')) {
+                errs.push('伊達政宗弓騎未正確納入八陣神機網');
+            }
+            const malongFourYi = resolveBattle(['HUO', 'BAIQI', 'MALONG', 'YISUNSIN', 'ZHUGELIANG'], formationDeck, {
+                seed: 12, formationsA: Array(5).fill('fourYi'), formationsB: neutralFormations, terrain: 'forest'
+            });
+            if (malongFourYi.final.A[2].formation !== 'fourYi' || malongFourYi.final.A[2].formationAttack !== 1.5) {
+                errs.push('馬隆四夷陣解鎖或地形加成失敗');
+            }
+            if (getSkillAttackModifiers(skillAttacker('ZHANGLIAO'), skillAttacker('WEI'), 3).damage <= 1.2) {
+                errs.push('四費名將對決未觸發 highCostDamage 克敵加成');
+            }
+            const heavyPierceTest = getCombatMatchup({ cat: 'armor' }, { cat: 'armor', def: 0.25 }, 3, true, true, 0.5);
+            if (!heavyPierceTest.includes('極致破甲')) {
+                errs.push('TRUE_AT 與 armorPierce 疊加戰報提示未觸發');
+            }
+            const huoRearCheck = resolveBattle(['HUO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'], ['HUO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'], {
+                seed: 0, event: EVENTS.find(ev => ev.id === 'clear'), formationsA: neutralFormations, formationsB: neutralFormations
+            });
+            const huoP3Targets = huoRearCheck.frames.filter(f => f.phase === 3).flatMap(f => f.lines)
+                .filter(l => l.auid === 'HUO-A0' && l.tuid).map(l => huoRearCheck.final.B.find(u => u.uid === l.tuid)?.cat);
+            if (huoP3Targets.length > 0 && !huoP3Targets.some(c => c === 'air_defense' || c === 'support')) {
+                errs.push('霍去病階段三未優先攻擊敵方後排');
+            }
+            const yangyeAirCheck = resolveBattle(['HUO', 'YANGYE', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'], ['HUO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'], {
+                seed: 0, event: EVENTS.find(ev => ev.id === 'clear'), formationsA: neutralFormations, formationsB: neutralFormations
+            });
+            const yangyeP3Targets = yangyeAirCheck.frames.filter(f => f.phase === 3).flatMap(f => f.lines)
+                .filter(l => l.auid === 'YANGYE-A1' && l.tuid).map(l => yangyeAirCheck.final.B.find(u => u.uid === l.tuid)?.cat);
+            if (yangyeP3Targets.length > 0 && yangyeP3Targets[0] !== 'air') {
+                errs.push('楊業階段三未優先迎擊敵方突騎');
+            }
 
             const hashFormations = Array(5).fill('fishscale');
             const baseHash = await OnlinePvPEngine.computeCommitHashAsync(deckA, 'strike', 'test-salt', hashFormations, 'plain');

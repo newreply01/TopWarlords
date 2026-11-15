@@ -393,12 +393,12 @@ const FirebaseTourneyEngine = (function () {
             resolve(Object.assign({ isNew: false }, res));
           } catch (e) {
             // 加入失敗則轉為建房
-            const res = await createRoom({ name: `軍武世界盃 ${preferredSize}強公開賽`, size: preferredSize, format: preferredFormat, armoryRule: preferredArmory, isPublic: true, playerProfile });
+            const res = await createRoom({ name: `天下名將武道會 ${preferredSize}強公開賽`, size: preferredSize, format: preferredFormat, armoryRule: preferredArmory, isPublic: true, playerProfile });
             resolve(Object.assign({ isNew: true }, res));
           }
         } else {
           // 無空房，建立新公開房並啟動 60s (1分鐘) 倒數
-          const res = await createRoom({ name: `軍武世界盃 ${preferredSize}強公開賽`, size: preferredSize, format: preferredFormat, armoryRule: preferredArmory, isPublic: true, playerProfile });
+          const res = await createRoom({ name: `天下名將武道會 ${preferredSize}強公開賽`, size: preferredSize, format: preferredFormat, armoryRule: preferredArmory, isPublic: true, playerProfile });
           resolve(Object.assign({ isNew: true }, res));
         }
       }).catch(reject);

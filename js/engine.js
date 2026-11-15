@@ -58,6 +58,10 @@ function hasRoleFlag(u, flag) {
   return false;
 }
 
+function unitHasTrueAt(u, ammo) {
+  return ((u.traits || []).includes('TRUE_AT') || hasRoleFlag(u, 'HEAVY_AP')) && ammo.canTrueAt;
+}
+
 function getAmmoProfile(u) {
   const bonus = hasRoleFlag(u, 'STAMINA_DEEP') ? 1 : 0;
   const s = u.shots || 0;
@@ -81,6 +85,7 @@ function getCombatRoleSummary(unit) {
 }
 
 function getCombatMatchup(attacker, target, phase, trueDamage = false, skillProc = false, armorPierce = 0) {
+  if (trueDamage && armorPierce > 0) return `極致破甲：貫穿玄甲且增傷 +${Math.round(armorPierce * 20)}%`;
   if (trueDamage || armorPierce >= 1) return '破甲：本次忽略護甲';
   if (armorPierce > 0 && target.def > 0) return `破甲：護甲效果降低 ${Math.round(armorPierce * 100)}%`;
   if (attacker.cat === 'air_defense' && target.cat === 'air') return '神射攔截突騎';
@@ -95,11 +100,12 @@ function getSkillAttackModifiers(attacker, target, phase, terrain = 'plain') {
   const effects = active ? attacker.skill.effects : null;
   const missingHp = clamp(1 - attacker.hp / attacker.hpMax, 0, 1);
   const targetMissingHp = clamp(1 - target.hp / target.hpMax, 0, 1);
+  const isHighCostMatchup = target.cost > attacker.cost || (attacker.cost >= 4 && target.cost >= 4);
   return {
     damage: active ? (effects ? (effects.damage || 1)
       + missingHp * (effects.missingHpDamage || 0)
       + targetMissingHp * (effects.woundedTargetDamage || 0)
-      + (target.cost > attacker.cost ? effects.highCostDamage || 0 : 0)
+      + (isHighCostMatchup ? effects.highCostDamage || 0 : 0)
       + (['mountain', 'forest'].includes(terrain) ? effects.terrainDamage || 0 : 0)
       + (effects.bonusVs?.[target.cat] || 0)
       : ({ 1: 1.12, 2: 1.15, 3: 1.18 }[phase] || 1)) : 1,
@@ -179,6 +185,8 @@ function resolveBrevityAndSfx(at, t, tier, skillProc = false) {
 const DMG_SCALE = 1.0;
 
 
+const FOUR_YI_ELIGIBLE_IDS = ['MENGHUO', 'MALONG', 'JIANGWEI', 'DENGAI', 'LIJING'];
+
 const BATTLE_FORMATION_DEFS = [
   { id: 'fishscale', name: '魚鱗', desc: '野戰均衡、攻守穩定，戰法發動率提高。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.06, tacticDamage: 1.08, layout: 'line' },
   { id: 'spearhead', name: '鋒矢', desc: '突擊高傷、戰法較易發動，但承受傷害增加。', attack: 1.12, damageTaken: 1.08, hit: 0.03, tacticChance: 0.12, tacticDamage: 1.2, layout: 'wedge' },
@@ -187,7 +195,7 @@ const BATTLE_FORMATION_DEFS = [
   { id: 'crane', name: '鶴翼', desc: '展開兩翼包抄，略增命中與攻勢。', attack: 1.05, damageTaken: 1, hit: 0.02, tacticChance: 0.04, tacticDamage: 1.15, layout: 'wings', occupation: true },
   { id: 'longsnake', name: '長蛇', desc: '山地、森林中攻防能力提升 50%。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.02, tacticDamage: 1.15, layout: 'column', terrainMultiplier: 1.5 },
   { id: 'cone', name: '錐行', desc: '高速穿插；戰鬥力較弱且無法發動戰法。', attack: 0.78, damageTaken: 1.05, hit: -0.02, tacticChance: 0, tacticDamage: 1, layout: 'cone', mobility: 1.5 },
-  { id: 'fourYi', name: '四夷', desc: '由孟獲領軍解鎖；全軍在山岳、森林中攻防提升 50%，容易發動戰法。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.14, tacticDamage: 1.2, layout: 'wedge', terrainMultiplier: 1.5, eligibleUnitIds: ['MENGHUO'] }
+  { id: 'fourYi', name: '四夷', desc: '由孟獲、馬隆、姜維、鄧艾或李靖領軍解鎖；全軍在山岳、森林中攻防提升 50%，容易發動戰法。', attack: 1, damageTaken: 1, hit: 0, tacticChance: 0.14, tacticDamage: 1.2, layout: 'wedge', terrainMultiplier: 1.5, eligibleUnitIds: FOUR_YI_ELIGIBLE_IDS }
 ];
 
 const BATTLE_TERRAINS = [
@@ -202,14 +210,14 @@ function getBattleFormation(id) {
 
 function getRecommendedFormations(deck, terrain = 'plain') {
   const rough = terrain === 'mountain' || terrain === 'forest';
-  const id = rough && (deck || []).some(unit => unit === 'MENGHUO') ? 'fourYi'
+  const id = rough && (deck || []).some(unit => FOUR_YI_ELIGIBLE_IDS.includes(unit)) ? 'fourYi'
     : rough ? 'longsnake' : 'fishscale';
   return (deck || []).map(() => id);
 }
 
 function getSmartFormationsForDeck(deck, terrain = 'plain') {
   const rough = terrain === 'mountain' || terrain === 'forest';
-  const hasFourYi = Array.isArray(deck) && deck.some(unit => unit === 'MENGHUO');
+  const hasFourYi = Array.isArray(deck) && deck.some(unit => FOUR_YI_ELIGIBLE_IDS.includes(unit));
   const defaults = [
     'spearhead',
     'square',
@@ -219,7 +227,7 @@ function getSmartFormationsForDeck(deck, terrain = 'plain') {
   ];
   return Array.from({ length: 5 }, (_, i) => {
     const unitId = Array.isArray(deck) ? deck[i] : null;
-    if (rough && hasFourYi && unitId === 'MENGHUO') return 'fourYi';
+    if (rough && hasFourYi && FOUR_YI_ELIGIBLE_IDS.includes(unitId)) return 'fourYi';
     return defaults[i];
   });
 }
@@ -428,7 +436,7 @@ function resolveBattle(deckA, deckB, opts) {
         if (r.skillModifiers.armorPierce > 0) skillTag = '破甲';
         else if (eff.woundedTargetDamage) skillTag = '斬殺';
         else if (eff.missingHpDamage) skillTag = '背水';
-        else if (eff.highCostDamage && t.cost > at.cost) skillTag = '克敵';
+        else if (eff.highCostDamage && (t.cost > at.cost || (at.cost >= 4 && t.cost >= 4))) skillTag = '克敵';
         else if (eff.bonusVs?.[t.cat]) skillTag = '特攻';
         else if (eff.terrainDamage && ['mountain', 'forest'].includes(terrain)) skillTag = '地形';
         else if (eff.heal) skillTag = '回春';
@@ -496,10 +504,13 @@ function resolveBattle(deckA, deckB, opts) {
         continue;
       }
       const effectiveDef = Math.min(0.9, t.def * t.formationDefense);
-      const heavyFloor = t.traits.includes('HEAVY') ? 0.25 : 0;
-      const pierceFrac = a.trueDmg ? 1 : clamp(r.skillModifiers.armorPierce || 0, 0, 1);
+      const skillArmorPierce = r.skillModifiers.armorPierce || 0;
+      const hasTrueAndSkillPierce = Boolean(a.trueDmg && skillArmorPierce > 0);
+      const heavyFloor = (t.traits.includes('HEAVY') && !hasTrueAndSkillPierce) ? 0.25 : 0;
+      const pierceFrac = a.trueDmg ? 1 : clamp(skillArmorPierce, 0, 1);
       const defAfterPierce = effectiveDef * (1 - pierceFrac * (1 - heavyFloor));
-      const d = r.raw * (1 - defAfterPierce) * S[t.side].taken * t.formationDamageTaken * (1 - Math.max(t.skillGuard, S[t.side].skillGuard || 0));
+      const skillPierceBonus = hasTrueAndSkillPierce ? (1 + skillArmorPierce * 0.20) : 1;
+      const d = r.raw * skillPierceBonus * (1 - defAfterPierce) * S[t.side].taken * t.formationDamageTaken * (1 - Math.max(t.skillGuard, S[t.side].skillGuard || 0));
       t.hp -= d;
       at.dmgDone += d;
       if (t.hp <= 0) {
@@ -633,7 +644,7 @@ function resolveBattle(deckA, deckB, opts) {
         at.push({
           att: u, tgt: t, ammoTier: ammo.tier,
           hit: hitP(u, t, 0.82, 0.55, ammo.hitMod + passiveIrPen),
-          trueDmg: u.traits.includes('TRUE_AT') && ammo.canTrueAt,
+          trueDmg: unitHasTrueAt(u, ammo),
           dmg: u.atk * 1.5 * S[s].atkEarly * ammo.dmgMult
         });
       }
@@ -652,7 +663,7 @@ function resolveBattle(deckA, deckB, opts) {
         const t = pickTop(alive(e, x => x.cat === 'air'));
         if (!t) continue;
         const ammo = getAmmoProfile(u);
-        const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
+        const isTrueAt = unitHasTrueAt(u, ammo);
         u.shots++;
         const f = u.cat === 'air_defense' ? 1 : 0.55;
         const hit = hitP(u, t, 0.82 + (u.traits.includes('AA_LONG') ? 0.08 : 0) + S[s].adHit, 0.55, m.airHit + ammo.hitMod);
@@ -692,7 +703,7 @@ function resolveBattle(deckA, deckB, opts) {
         if (!pool.length) continue;
         const ammo = getAmmoProfile(u);
         const tgts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
-        const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
+        const isTrueAt = unitHasTrueAt(u, ammo);
         u.shots++;
         for (const t of tgts) {
           if (!t) continue;
@@ -764,15 +775,20 @@ function resolveBattle(deckA, deckB, opts) {
         addKey(3, `${s === 'A' ? '我軍' : '敵軍'}錐行部隊截斷敵軍糧道，削弱其持續作戰能力`, s);
       }
 
+      const isSwarmOrDrone = u => (typeof DRONE_IDS !== 'undefined' && DRONE_IDS.has(u.id)) || u.traits.includes('SWARM');
+
       for (const u of myAlive) {
         const ground = u.cat === 'air_defense' && u.formationRanged && rearGround.length
           ? rearGround
           : frontlineGround;
+        const droneScale = isSwarmOrDrone(u) ? S[s].droneMult * m.droneDmg * (ciws ? 0.85 : 1) : 1;
         if (u.cat === 'air') {
-          // 突騎繞後側翼包抄重甲
+          // 突騎繞後側翼包抄重甲（霍去病、源義經優先穿插敵方後陣）
+          const isRearRaider = u.id === 'HUO' || u.id === 'YOSHITSUNE';
+          const airPool = isRearRaider && rearGround.length ? rearGround : ground;
           const ammo = getAmmoProfile(u);
-          const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [pickTop(ground)];
-          const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
+          const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(airPool, 2) : [pickTop(airPool)];
+          const isTrueAt = unitHasTrueAt(u, ammo);
           const mult = u.traits.includes('CAS') ? 1.8 : (isTrueAt ? 1.65 : 1.15);
           u.shots++;
           for (const t of ts) {
@@ -788,7 +804,7 @@ function resolveBattle(deckA, deckB, opts) {
           const ammo = getAmmoProfile(u);
           const pool = !u.formationRanged && enemyNaval.length ? enemyNaval : ground;
           const ts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
-          const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
+          const isTrueAt = unitHasTrueAt(u, ammo);
           u.shots++;
           for (const t of ts) {
             if (!t) continue;
@@ -798,26 +814,31 @@ function resolveBattle(deckA, deckB, opts) {
             at.push({
               att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
               hit: hitP(u, t, 0.78 + S[s].navHit, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-              dmg: u.atk * nMult * m.navalDmg * ammo.dmgMult
+              dmg: u.atk * nMult * m.navalDmg * droneScale * ammo.dmgMult
             });
           }
         } else if (u.cat === 'armor') {
-          // 重甲中軍正面對決
-          const t = pickTop(ground);
+          // 重甲中軍正面對決（楊業、岳飛優先迎擊敵方突騎）
+          const isAntiAirArmor = u.id === 'YANGYE' || u.id === 'YUEFEI';
+          const armorPool = (isAntiAirArmor && enemyAir.length) ? enemyAir : ground;
+          const t = pickTop(armorPool);
           if (!t) continue;
           const ammo = getAmmoProfile(u);
-          const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
+          const isTrueAt = unitHasTrueAt(u, ammo);
           u.shots++;
+          const vsFactor = t.cat === 'armor'
+            ? (isTrueAt ? 1.16 : 1.1)
+            : (isAntiAirArmor && t.cat === 'air' ? 1.05 : 0.9);
           at.push({
             att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
             hit: hitP(u, t, 0.85, 0.2, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-            dmg: u.atk * (isTrueAt ? 1.54 : 1.46) * S[s].landMult * m.armorDmg * (t.cat === 'armor' ? (isTrueAt ? 1.16 : 1.1) : 0.9) * ammo.dmgMult
+            dmg: u.atk * (isTrueAt ? 1.54 : 1.46) * S[s].landMult * m.armorDmg * vsFactor * ammo.dmgMult
           });
         } else if (u.cat === 'support') {
           // 軍師奇計／火器攻城
           const ammo = getAmmoProfile(u);
           u.shots++;
-          if (u.traits.includes('TRUE_AT')) {
+          if (u.traits.includes('TRUE_AT') || hasRoleFlag(u, 'HEAVY_AP')) {
             const isTrueAt = ammo.canTrueAt;
             const ts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(ground, 2) : [pickTop(ground)];
             for (const t of ts) {
@@ -826,7 +847,7 @@ function resolveBattle(deckA, deckB, opts) {
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.78, 0.35, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
                 trueDmg: isTrueAt,
-                dmg: u.atk * 1.95 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.6 : 1) * ammo.dmgMult
+                dmg: u.atk * 1.95 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.8 : 1) * ammo.dmgMult
               });
             }
           } else if (u.traits.includes('ARTY')) {
@@ -836,16 +857,17 @@ function resolveBattle(deckA, deckB, opts) {
               at.push({
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.78, 0.3, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                dmg: u.atk * 1.14 * (ts.length > 1 ? 0.75 : 1) * S[s].landMult * m.artyDmg * spot * ammo.dmgMult
+                dmg: u.atk * 1.14 * (ts.length > 1 ? 0.75 : 1) * S[s].landMult * m.artyDmg * spot * droneScale * ammo.dmgMult
               });
             }
           } else {
             const t = pickTop(ground);
             if (t) {
+              const supScale = isSwarmOrDrone(u) ? droneScale : S[s].droneMult;
               at.push({
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.80, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                dmg: u.atk * (0.92 + Math.max(0, u.ew - 60) * 0.006) * S[s].droneMult * spot * ammo.dmgMult
+                dmg: u.atk * (0.92 + Math.max(0, u.ew - 60) * 0.006) * supScale * spot * ammo.dmgMult
               });
             }
           }
@@ -856,14 +878,14 @@ function resolveBattle(deckA, deckB, opts) {
             if (t) {
               const ammo = getAmmoProfile(u);
               const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(enemyAir, 2) : [t];
-              const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
+              const isTrueAt = unitHasTrueAt(u, ammo);
               u.shots++;
               for (const airTgt of ts) {
                 if (!airTgt) continue;
                 at.push({
                   att: u, tgt: airTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
                   hit: hitP(u, airTgt, 0.88 + (u.traits.includes('AA_LONG') ? 0.05 : 0) + S[s].adHit, 0.35, m.airHit + lockBonus + ammo.hitMod, stealthScale),
-                  dmg: u.atk * 2.2 * (ts.length > 1 ? 0.75 : 1) * ammo.dmgMult
+                  dmg: u.atk * 2.2 * (ts.length > 1 ? 0.75 : 1) * droneScale * ammo.dmgMult
                 });
               }
             }
@@ -872,7 +894,7 @@ function resolveBattle(deckA, deckB, opts) {
             if (t) {
               const ammo = getAmmoProfile(u);
               const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [t];
-              const isTrueAt = u.traits.includes('TRUE_AT') && ammo.canTrueAt;
+              const isTrueAt = unitHasTrueAt(u, ammo);
               const abmScale = hasRoleFlag(u, 'FORMATION_SHIELD') ? 0.50 : 0.7;
               u.shots++;
               for (const gTgt of ts) {
@@ -880,7 +902,7 @@ function resolveBattle(deckA, deckB, opts) {
                 at.push({
                   att: u, tgt: gTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
                   hit: clamp(0.72 + lockBonus + ammo.hitMod, 0.08, 0.96),
-                  dmg: u.atk * abmScale * (ts.length > 1 ? 0.75 : 1) * ammo.dmgMult
+                  dmg: u.atk * abmScale * (ts.length > 1 ? 0.75 : 1) * droneScale * ammo.dmgMult
                 });
               }
             }

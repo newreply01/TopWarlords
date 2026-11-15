@@ -1266,8 +1266,10 @@ function renderMatrix() {
   const pickedUnitsAll = (state.deck || []).map(id => (id ? UNIT_MAP[id] : null)).filter(Boolean);
   const currentSynIds = new Set(typeof getDeckSynergies === 'function' ? getDeckSynergies(pickedUnitsAll).map(s => s.id) : []);
   const hasFourYiLeader = pickedUnitsAll.some(x => x.id === 'MENGHUO' || x.id === 'SHAMOKE');
-  const activeFormationId = (Array.isArray(state.formations) ? state.formations[0] : '') || '';
-  const needsFourYiHint = !hasFourYiLeader && (activeFormationId === 'fourYi' || state.terrain === 'mountain' || state.terrain === 'forest');
+  const needsFourYiHint = !hasFourYiLeader && ((Array.isArray(state.formations) && state.formations.includes('fourYi')) || state.terrain === 'mountain' || state.terrain === 'forest');
+  const normFormations = normalizeArmyFormations(state.formations, state.deck);
+  const availForms = getEligibleFormations(state.deck);
+  const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
 
   if (!state.marketPool) {
     generateRandomMarketPool();
@@ -1276,6 +1278,12 @@ function renderMatrix() {
   mb.innerHTML = cats.map(cat => {
     const c = CATS[cat].color;
     const isMobileActive = (state.mobileCat || 'air') === cat;
+    const slotIdx = CAT_TO_SLOT[cat];
+    const slotFormId = normFormations[slotIdx] || 'fishscale';
+    const slotForm = getBattleFormation(slotFormId);
+    const isRandForm = Boolean(state.isFormationRandom);
+    const recList = SLOT_RECOMMENDED_FORMATIONS[cat] || [];
+    const isSlotPopoverOpen = openCatFormationSlot === slotIdx && !formationEditingLocked;
 
     // 取得當前兵種隨機抽出的 5 筆名將選項
     let displayUnits = state.marketPool[cat] || [];
@@ -1320,6 +1328,7 @@ function renderMatrix() {
       const isSynReady = candSyns.length > 0;
       const tacTags = getCardTacticalTags(u);
       const topBadgesHtml = [
+        isEquipped ? `<span class="m-form-badge${isRandForm ? ' is-rand' : ''}" title="本將目前出征陣型：${isRandForm ? '開戰隨機' : esc(slotForm.name) + '陣'}">${isRandForm ? '🎲隨機' : esc(slotForm.name) + '陣'}</span>` : '',
         candSyns.slice(0, 1).map(s => `<span class="m-syn-pill" title="${esc(s.title)}">✦${esc(s.label)}</span>`).join(''),
         envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}" aria-label="${esc(envMod.tip)}">${envMod.shortHtml || esc(envMod.short)}</span>` : ''
       ].filter(Boolean).join('');
@@ -1370,7 +1379,37 @@ function renderMatrix() {
     return `<div class="col-category ${isMobileActive ? 'mobile-active' : ''}" style="--c:${c}" data-cat="${cat}">
       <div class="cat-head">
         <div class="cat-title">${ICON[cat]} <span>${CATS[cat].label}</span></div>
-        <div class="cat-sub">${CATS[cat].short} · ${catSlots[cat]}</div>
+        <div class="cat-head-actions">
+          <button type="button" class="cat-form-btn${isRandForm ? ' is-rand' : ''}${isSlotPopoverOpen ? ' is-open' : ''}" data-cat-form-toggle="${slotIdx}" aria-expanded="${isSlotPopoverOpen ? 'true' : 'false'}" ${formationEditingLocked ? 'disabled' : ''} title="點擊單獨設定【${CATS[cat].label}】出征陣型（目前：${isRandForm ? '隨機' : esc(slotForm.name)}陣）">
+            <span class="cat-form-svg" aria-hidden="true">${isRandForm ? '🎲' : getFormationSvg(slotForm.id)}</span>
+            <span class="cat-form-name">${isRandForm ? '隨機' : esc(slotForm.name)}陣</span>
+            <span class="cat-form-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="cat-sub">${CATS[cat].short} · ${catSlots[cat]}</div>
+        </div>
+        ${isSlotPopoverOpen ? `<div class="cat-form-popover${slotIdx >= 3 ? ' pop-align-right' : ''}" role="listbox" aria-label="${esc(CATS[cat].label)}陣型設定">
+          <div class="cat-form-pop-head">
+            <span>${ICON[cat]} ${esc(equippedInDeck ? equippedInDeck.name : CATS[cat].label)} · 專屬陣型</span>
+            <button type="button" class="cat-form-smart-btn" data-cat-form-smart="${slotIdx}" title="自動套用最適合此兵種的推薦陣型">⚡ 智能推薦</button>
+          </div>
+          <div class="cat-form-pop-list">
+            ${availForms.map(opt => {
+              const isRec = recList.includes(opt.id);
+              const isCur = !isRandForm && slotForm.id === opt.id;
+              return `<button type="button" class="cat-form-opt ${isCur ? 'active' : ''}" data-slot-idx="${slotIdx}" data-slot-val="${opt.id}" role="option" aria-selected="${isCur ? 'true' : 'false'}">
+                <span class="cat-form-opt-svg" aria-hidden="true">${getFormationSvg(opt.id)}</span>
+                <span class="cat-form-opt-main">
+                  <span class="cat-form-opt-title">
+                    <b>${esc(opt.name)}陣</b>
+                    ${isRec ? '<span class="form-pill buff">★推薦</span>' : ''}
+                    ${getFormationBuffPills(opt)}
+                  </span>
+                  <span class="cat-form-opt-desc">${esc(opt.desc)}</span>
+                </span>
+              </button>`;
+            }).join('')}
+          </div>
+        </div>` : ''}
       </div>
       ${cardsHtml}
     </div>`;
@@ -1530,6 +1569,15 @@ function getFormationSvg(id) {
   return FORMATION_SVGS[id] || FORMATION_SVGS.fishscale;
 }
 
+const SLOT_RECOMMENDED_FORMATIONS = {
+  air: ['spearhead', 'cone'],
+  armor: ['square', 'fishscale'],
+  air_defense: ['goose', 'crane'],
+  naval: ['crane', 'longsnake', 'fourYi'],
+  support: ['fishscale', 'square']
+};
+let openCatFormationSlot = null;
+
 function getFormationBuffPills(f) {
   const pills = [];
   if (f.attack > 1) pills.push({ t: `攻+${Math.round((f.attack - 1) * 100)}%`, cls: 'buff' });
@@ -1554,6 +1602,18 @@ function getEligibleFormations(deck = state.deck) {
 }
 
 function getBattleActiveFormations(deck = state.deck) {
+  if (state.isFormationRandom === 'each') {
+    const pool = getEligibleFormations(deck);
+    const cats = ['air', 'armor', 'air_defense', 'naval', 'support'];
+    return cats.map((cat, idx) => {
+      const unitId = Array.isArray(deck) ? deck[idx] : null;
+      const u = unitId ? UNIT_MAP[unitId] : null;
+      const unitCat = u ? u.cat : cat;
+      const rec = (SLOT_RECOMMENDED_FORMATIONS[unitCat] || []).filter(id => pool.some(option => option.id === id));
+      const candidates = rec.length ? rec : pool.map(option => option.id);
+      return pick(candidates.length ? candidates : ['fishscale']);
+    });
+  }
   if (state.isFormationRandom) {
     const pool = getEligibleFormations(deck);
     const chosen = pick(pool.length ? pool : BATTLE_FORMATION_DEFS);
@@ -1575,34 +1635,95 @@ function renderFormationEditor() {
     syncActiveDeck();
   }
   const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
-  const isRandom = Boolean(state.isFormationRandom);
+  const randMode = state.isFormationRandom;
+  const isRandomEach = randMode === 'each';
+  const isRandomAll = Boolean(randMode) && !isRandomEach;
+  const isRandom = Boolean(randMode);
+  const isUniform = new Set(selectedIds).size === 1;
   const activeId = selectedIds[0];
   const activeFormation = getBattleFormation(activeId);
-  summary.textContent = isRandom ? '隨機陣型' : activeFormation.name;
-  if (svgIcon) svgIcon.innerHTML = isRandom ? '🎲' : getFormationSvg(activeId);
+  const smartIds = typeof getSmartFormationsForDeck === 'function'
+    ? getSmartFormationsForDeck(state.deck, state.terrain)
+    : ['spearhead', 'square', 'goose', 'crane', 'fishscale'];
+  const isSmartMatch = !isRandom && smartIds.every((id, i) => selectedIds[i] === id);
+  const slotCats = ['air', 'armor', 'air_defense', 'naval', 'support'];
+  const slotShortNames = { air: '突騎', armor: '重甲', air_defense: '神射', naval: '先登', support: '軍師' };
+
+  if (isRandomEach) {
+    summary.textContent = '五軍分抽';
+    if (svgIcon) svgIcon.innerHTML = '🎲';
+  } else if (isRandomAll) {
+    summary.textContent = '隨機陣型';
+    if (svgIcon) svgIcon.innerHTML = '🎲';
+  } else if (isUniform) {
+    summary.textContent = activeFormation.name;
+    if (svgIcon) svgIcon.innerHTML = getFormationSvg(activeId);
+  } else {
+    summary.textContent = selectedIds.map(id => getBattleFormation(id).name.slice(0, 1)).join('·');
+    if (svgIcon) svgIcon.innerHTML = '⚡';
+  }
+
   button.disabled = formationEditingLocked;
   button.title = formationEditingLocked
     ? '陣容已鎖定，本局陣形已提交'
-    : isRandom
-      ? '隨機陣型：開戰自動自可用陣型隨機抽選'
-      : `出征陣型：${activeFormation.name}（${activeFormation.desc}）`;
+    : isRandomEach
+      ? '五軍分抽：開戰依各兵種推薦陣型各自隨機抽選'
+      : isRandomAll
+        ? '隨機陣型：開戰自動自可用陣型隨機抽選'
+        : isUniform
+          ? `出征陣型：${activeFormation.name}（${activeFormation.desc}）`
+          : `五軍分陣：${selectedIds.map((id, i) => `${slotShortNames[slotCats[i]]}-${getBattleFormation(id).name}`).join(' / ')}`;
 
   const availableFormations = getEligibleFormations(state.deck);
 
   menu.innerHTML = `
+    <div class="formation-preset-bar">
+      <button type="button" class="formation-preset-btn ${isSmartMatch ? 'active' : ''}" data-val="smart" ${formationEditingLocked ? 'disabled' : ''} title="一鍵為騎、盾、弓、鋒、謀五槽位配置最適合兵種的獨立陣型">
+        <span>⚡ 依兵種智能分陣</span>
+        <span class="form-pill buff">推薦</span>
+      </button>
+      <button type="button" class="formation-preset-btn ${isRandomEach ? 'active' : ''}" data-val="random_each" ${formationEditingLocked ? 'disabled' : ''} title="開戰時五位名將各自依兵種適性隨機抽選陣型">
+        <span>🎲 五軍隨機分陣</span>
+      </button>
+    </div>
+    <div class="formation-section-label"><span>五將獨立微調</span><span class="muted">點擊可單獨指定各槽陣型</span></div>
+    <div class="formation-slot-matrix">
+      ${slotCats.map((cat, idx) => {
+        const unitId = Array.isArray(state.deck) ? state.deck[idx] : null;
+        const unit = unitId ? UNIT_MAP[unitId] : null;
+        const recSet = new Set(SLOT_RECOMMENDED_FORMATIONS[cat] || []);
+        const currentSlotId = selectedIds[idx];
+        return `<div class="formation-slot-row" style="--slot-c:${CATS[cat].color}">
+          <div class="formation-slot-meta" title="${esc(unit ? unit.name : CATS[cat].label)}">
+            <span class="formation-slot-icon">${ICON[cat]}</span>
+            <span class="formation-slot-who">${esc(unit ? unit.name : slotShortNames[cat])}</span>
+          </div>
+          <div class="formation-slot-chips">
+            ${availableFormations.map(option => {
+              const isSlotActive = !isRandom && currentSlotId === option.id;
+              const isRec = recSet.has(option.id);
+              return `<button type="button" class="formation-slot-chip ${isSlotActive ? 'active' : ''} ${isRec ? 'is-rec' : ''}" data-slot-idx="${idx}" data-slot-val="${option.id}" ${formationEditingLocked ? 'disabled' : ''} title="${esc(option.name)}陣${isRec ? '（★兵種推薦）' : ''}：${esc(option.desc)}">
+                ${isRec ? '<span class="slot-rec-star">★</span>' : ''}${esc(option.name)}
+              </button>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="formation-section-label"><span>全軍統一陣型</span><span class="muted">一鍵全體採用單一陣法</span></div>
     <div class="formation-opt-list">
-      <button type="button" class="formation-opt-item ${isRandom ? 'active' : ''}" data-val="random" role="option" aria-selected="${isRandom ? 'true' : 'false'}" ${formationEditingLocked ? 'disabled' : ''}>
+      <button type="button" class="formation-opt-item ${isRandomAll ? 'active' : ''}" data-val="random" role="option" aria-selected="${isRandomAll ? 'true' : 'false'}" ${formationEditingLocked ? 'disabled' : ''}>
         <span class="formation-opt-svg" aria-hidden="true">🎲</span>
         <span class="formation-opt-body">
           <span class="formation-opt-head">
-            <span class="formation-opt-name">隨機陣型</span>
+            <span class="formation-opt-name">全軍隨機陣型</span>
             <span class="formation-opt-pills"><span class="form-pill buff">開戰自動抽選</span></span>
           </span>
-          <span class="formation-opt-desc">每場開戰隨機選用最適合當前陣容的出征陣型。</span>
+          <span class="formation-opt-desc">每場開戰為全軍隨機選用最適合的統一出征陣型。</span>
         </span>
       </button>
       ${availableFormations.map(option => {
-        const isActive = !isRandom && option.id === activeId;
+        const isActive = !isRandom && isUniform && option.id === activeId;
         return `<button type="button" class="formation-opt-item ${isActive ? 'active' : ''}" data-val="${option.id}" role="option" aria-selected="${isActive ? 'true' : 'false'}" ${formationEditingLocked ? 'disabled' : ''}>
           <span class="formation-opt-svg" aria-hidden="true">${getFormationSvg(option.id)}</span>
           <span class="formation-opt-body">
@@ -2051,8 +2172,95 @@ function renderAll() {
 }
 
 document.addEventListener('click', event => {
+  const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
+
+  const catFormToggle = event.target.closest('[data-cat-form-toggle]');
+  if (catFormToggle) {
+    event.stopImmediatePropagation();
+    $('#formationDropdownMenu')?.setAttribute('hidden', '');
+    $('#formationDropdown')?.classList.remove('open');
+    $('#btnOpenFormation')?.setAttribute('aria-expanded', 'false');
+    if (formationEditingLocked) return;
+    const slotIdx = Number(catFormToggle.dataset.catFormToggle);
+    openCatFormationSlot = openCatFormationSlot === slotIdx ? null : slotIdx;
+    renderMatrix();
+    return;
+  }
+
+  const catFormSmart = event.target.closest('[data-cat-form-smart]');
+  if (catFormSmart) {
+    event.stopImmediatePropagation();
+    if (formationEditingLocked) return;
+    const slotIdx = Number(catFormSmart.dataset.catFormSmart);
+    const smart = typeof getSmartFormationsForDeck === 'function'
+      ? getSmartFormationsForDeck(state.deck, state.terrain)
+      : ['spearhead', 'square', 'goose', 'crane', 'fishscale'];
+    const base = normalizeArmyFormations(state.formations, state.deck);
+    base[slotIdx] = smart[slotIdx] || 'fishscale';
+    state.isFormationRandom = false;
+    LS.set('wl15_formation_random', false);
+    state.formations = normalizeArmyFormations(base, state.deck);
+    openCatFormationSlot = null;
+    syncActiveDeck();
+    renderFormationEditor();
+    renderMatrix();
+    toast(`⚡ 已為【${CATS[['air', 'armor', 'air_defense', 'naval', 'support'][slotIdx]].label}】套用推薦陣型：${getBattleFormation(state.formations[slotIdx]).name}陣`);
+    return;
+  }
+
+  const slotChoice = event.target.closest('[data-slot-idx][data-slot-val]');
+  if (slotChoice) {
+    event.stopImmediatePropagation();
+    if (formationEditingLocked) return;
+    const slotIdx = Number(slotChoice.dataset.slotIdx);
+    const val = slotChoice.dataset.slotVal;
+    if (slotIdx >= 0 && slotIdx < 5 && validFormationIds.has(val)) {
+      const next = normalizeArmyFormations(state.formations, state.deck);
+      next[slotIdx] = val;
+      state.isFormationRandom = false;
+      LS.set('wl15_formation_random', false);
+      state.formations = normalizeArmyFormations(next, state.deck);
+      if (slotChoice.closest('.cat-form-popover')) {
+        openCatFormationSlot = null;
+      }
+      syncActiveDeck();
+      renderFormationEditor();
+      renderMatrix();
+    }
+    return;
+  }
+
+  const presetBtn = event.target.closest('#formationDropdownMenu .formation-preset-btn');
+  if (presetBtn) {
+    if (!formationEditingLocked) {
+      const val = presetBtn.dataset.val;
+      if (val === 'smart') {
+        state.isFormationRandom = false;
+        LS.set('wl15_formation_random', false);
+        state.formations = typeof getSmartFormationsForDeck === 'function'
+          ? getSmartFormationsForDeck(state.deck, state.terrain)
+          : ['spearhead', 'square', 'goose', 'crane', 'fishscale'];
+        syncActiveDeck();
+        renderFormationEditor();
+        renderMatrix();
+        toast('⚡ 已為五軍依兵種套用專屬智能推薦陣型！');
+      } else if (val === 'random_each') {
+        state.isFormationRandom = 'each';
+        LS.set('wl15_formation_random', 'each');
+        renderFormationEditor();
+        renderMatrix();
+        toast('🎲 已設為「五軍隨機分陣」（開戰各兵種各自抽陣）');
+      }
+    }
+    $('#formationDropdownMenu')?.setAttribute('hidden', '');
+    $('#formationDropdown')?.classList.remove('open');
+    $('#btnOpenFormation')?.setAttribute('aria-expanded', 'false');
+    return;
+  }
+
   const openBtn = event.target.closest('#btnOpenFormation');
   if (openBtn) {
+    openCatFormationSlot = null;
     const dropdown = $('#formationDropdown');
     const menu = $('#formationDropdownMenu');
     if (menu) {
@@ -2072,7 +2280,6 @@ document.addEventListener('click', event => {
   }
   const optItem = event.target.closest('#formationDropdownMenu .formation-opt-item');
   if (optItem) {
-    const formationEditingLocked = state.isOnlinePvp && state.pvpMyReady;
     const val = optItem.dataset.val;
     if (!formationEditingLocked && val === 'random') {
       state.isFormationRandom = true;
@@ -2091,6 +2298,18 @@ document.addEventListener('click', event => {
     $('#formationDropdown')?.classList.remove('open');
     $('#btnOpenFormation')?.setAttribute('aria-expanded', 'false');
     return;
+  }
+
+  if (openCatFormationSlot !== null && !event.target.closest('.cat-form-popover')) {
+    openCatFormationSlot = null;
+    renderMatrix();
+  }
+});
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && openCatFormationSlot !== null) {
+    openCatFormationSlot = null;
+    renderMatrix();
   }
 });
 

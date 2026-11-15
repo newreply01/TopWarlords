@@ -374,7 +374,7 @@ const BattleFigures = (() => {
         if (part === 'body' && fighting) {
           const sway = token.cat === 'support' ? 0.09 : isBackline ? 0.05 : 0.12;
           angle = Math.sin(now * 0.007 + i * 1.45 + attackPhaseOffset) * sway;
-          if (!isBackline) torsoYaw = Math.cos(now * 0.011 + i * 1.25 + attackPhaseOffset) * 0.22;
+          torsoYaw = (token.individualYawOffset || 0) + (!isBackline ? Math.cos(now * 0.011 + i * 1.25 + attackPhaseOffset) * 0.22 : 0);
         }
         animationRotation.setFromAxisAngle(axis, angle);
         rotation.multiply(animationRotation);
@@ -593,13 +593,13 @@ const BattleFigures = (() => {
     capePivot.rotation.x = 0.25 + (moving ? 0.38 : 0.14) + Math.sin(now * 0.009 + (token.attackPhaseOffset || 0)) * 0.16;
     if (attack) {
       rightArm.rotation.x = -1.25 + Math.sin(pulse * 1.5) * 0.82;
-      bodyGrp.rotation.y = Math.cos(pulse * 1.5) * 0.32;
+      bodyGrp.rotation.y = (token.individualYawOffset || 0) + Math.cos(pulse * 1.5) * 0.32;
     } else if (fighting) {
       rightArm.rotation.x = token.cat === 'support'
         ? -0.45 + Math.sin(now * 0.005) * 0.45
         : (-0.65 + Math.sin(pulse * 0.85) * 0.55);
       leftArm.rotation.x = token.cat === 'air_defense' ? -0.9 : (-0.28 + Math.cos(pulse * 0.8) * 0.2);
-      bodyGrp.rotation.y = Math.sin(pulse * 0.65) * 0.14;
+      bodyGrp.rotation.y = (token.individualYawOffset || 0) + Math.sin(pulse * 0.65) * 0.14;
     } else {
       rightArm.rotation.x = moving ? Math.sin(pulse) * 0.35 : 0;
       leftArm.rotation.x = 0;

@@ -207,13 +207,38 @@ function getRecommendedFormations(deck, terrain = 'plain') {
   return (deck || []).map(() => id);
 }
 
+function getSmartFormationsForDeck(deck, terrain = 'plain') {
+  const rough = terrain === 'mountain' || terrain === 'forest';
+  const hasFourYi = Array.isArray(deck) && deck.some(unit => ['MENGHUO', 'SHAMOKE'].includes(unit));
+  const defaults = [
+    'spearhead',
+    'square',
+    'goose',
+    rough ? (hasFourYi ? 'fourYi' : 'longsnake') : 'crane',
+    'fishscale'
+  ];
+  return Array.from({ length: 5 }, (_, i) => {
+    const unitId = Array.isArray(deck) ? deck[i] : null;
+    if (rough && hasFourYi && (unitId === 'MENGHUO' || unitId === 'SHAMOKE')) return 'fourYi';
+    return defaults[i];
+  });
+}
+
 function normalizeArmyFormations(values, deck = null, fallback = 'fishscale') {
-  const choices = typeof values === 'string' ? [values] : Array.isArray(values) ? values : [];
-  const selected = choices.find(id => BATTLE_FORMATION_DEFS.some(formation => formation.id === id)) || fallback;
-  const formation = getBattleFormation(selected);
-  const id = formation.eligibleUnitIds && deck && !deck.some(unit => formation.eligibleUnitIds.includes(unit))
-    ? 'fishscale' : formation.id;
-  return Array(5).fill(id);
+  const raw = typeof values === 'string'
+    ? Array(5).fill(values)
+    : Array.isArray(values)
+      ? (values.length === 1 ? Array(5).fill(values[0]) : values)
+      : [];
+  const defaultId = raw.find(id => BATTLE_FORMATION_DEFS.some(formation => formation.id === id)) || fallback;
+  return Array.from({ length: 5 }, (_, i) => {
+    const candidate = raw[i];
+    const selected = BATTLE_FORMATION_DEFS.some(formation => formation.id === candidate) ? candidate : defaultId;
+    const formation = getBattleFormation(selected);
+    const id = formation.eligibleUnitIds && deck && !deck.some(unit => formation.eligibleUnitIds.includes(unit))
+      ? fallback : formation.id;
+    return id;
+  });
 }
 
 function getBattleEnvironment(event, terrain = 'plain') {
@@ -551,9 +576,14 @@ function resolveBattle(deckA, deckB, opts) {
   let advSide = null;
   const l1 = [];
   const terrainName = BATTLE_TERRAINS.find(item => item.id === terrain).name;
+  const formatTeamDeployment = team => {
+    const unique = new Set(team.map(unit => unit.formationName));
+    if (unique.size === 1) return team.map(unit => unit.formationName).join('、');
+    return team.map(unit => `${unit.name}【${unit.formationName}】`).join('、');
+  };
   l1.push({ side: 'N', kind: 'info', text: `戰場地形：${terrainName}` });
-  l1.push({ side: 'A', kind: 'info', text: `我軍布陣：${T.A.map(unit => unit.formationName).join('、')}` });
-  l1.push({ side: 'B', kind: 'info', text: `敵軍布陣：${T.B.map(unit => unit.formationName).join('、')}` });
+  l1.push({ side: 'A', kind: 'info', text: `我軍布陣：${formatTeamDeployment(T.A)}` });
+  l1.push({ side: 'B', kind: 'info', text: `敵軍布陣：${formatTeamDeployment(T.B)}` });
   if (syn.A.length) l1.push({ side: 'A', kind: 'info', text: `我方啟動軍陣協同體系：${syn.A.map(x => x.icon + ' ' + x.name).join('、')}` });
   if (syn.B.length) l1.push({ side: 'B', kind: 'info', text: `敵方啟動軍陣協同體系：${syn.B.map(x => x.icon + ' ' + x.name).join('、')}` });
   l1.push({ side: 'N', kind: 'info', text: `全軍謀略值：我方 ${ewA.toFixed(0)} ／ 敵方 ${ewB.toFixed(0)}` });

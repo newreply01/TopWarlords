@@ -400,8 +400,10 @@ try:
             if (fourYiMountain.final.A[3].formationAttack !== 1.5) errs.push('孟獲四夷山岳加成未套用');
             if (fourYiBattle.final.A.some(unit => unit.formation !== 'fourYi' || unit.formationTacticChance !== 0.14)) errs.push('四夷未套用全軍');
             if (makeTeam(formationDeck, 'A', neutralFormations, 'plain').some(unit => unit.formationTacticChance !== 0.06)) errs.push('魚鱗基礎戰法率未提高');
-            const migrated = makeTeam(formationDeck, 'A', ['square', 'goose', 'cone', 'crane', 'longsnake'], 'plain');
-            if (migrated.some(unit => unit.formation !== 'square')) errs.push('舊混合陣形未統一為首個有效陣形');
+            const mixedTeam = makeTeam(formationDeck, 'A', ['square', 'goose', 'cone', 'crane', 'longsnake'], 'plain');
+            if (mixedTeam.map(u => u.formation).join(',') !== 'square,goose,cone,crane,longsnake') errs.push('個別武將陣形未正確保留');
+            const smartAssigned = getSmartFormationsForDeck(formationDeck, 'plain');
+            if (smartAssigned.join(',') !== 'spearhead,square,goose,crane,fishscale') errs.push('依兵種智能配陣結果不符預期');
             if (new Set(getRecommendedFormations(barbarianDeck, 'forest')).size !== 1) errs.push('AI推薦仍混用陣形');
             if (getBattleEnvironment(EVENTS.find(event => event.id === 'strait'), 'plain').terrain !== 'mountain'
                 || getBattleEnvironment(EVENTS.find(event => event.id === 'urban'), 'forest').scene !== 'city'

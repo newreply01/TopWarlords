@@ -1473,62 +1473,118 @@ const Battle3DEngine = (function () {
   /* ----------------------------------------------------
      3. 打造《三國志》立體部隊方陣托盤 + 全 3D 骨骼動畫兵種
      ---------------------------------------------------- */
+  function clampFormationYaw(side, desiredYaw, maxTurn = 0.48) {
+    const baseYaw = side === 'A' ? Math.PI / 2 : -Math.PI / 2;
+    let diff = desiredYaw - baseYaw;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    const clampedDiff = Math.max(-maxTurn, Math.min(maxTurn, diff));
+    return {
+      yaw: baseYaw + clampedDiff,
+      remainder: Math.max(-0.42, Math.min(0.42, diff - clampedDiff))
+    };
+  }
+
   function getFormationOffset(layout, index, count, mounted) {
-    const stepX = mounted ? 0.54 : 0.43;
-    const stepZ = mounted ? 0.88 : 0.47;
-    if (layout === 'wedge' || layout === 'cone') {
-      const maxColumns = mounted ? 4 : 6;
+    // 橫寬大於縱深之古代實戰陣列：全陣寬度約 2.1~2.4m (受 local X 邊界 <= 2.5m 保護)，縱深約 1.2~1.9m
+    const stepX = mounted ? 0.36 : 0.30;
+    const stepZ = mounted ? 0.36 : 0.27;
+    if (layout === 'wedge') {
+      const maxColumns = mounted ? 6 : 8;
       let row = 0, column = index;
-      while (column >= Math.min(row + 1, maxColumns)) {
-        column -= Math.min(row + 1, maxColumns);
+      while (column >= Math.min(row * 2 + 1, maxColumns)) {
+        column -= Math.min(row * 2 + 1, maxColumns);
         row++;
       }
-      const columns = Math.min(row + 1, maxColumns);
-      return { x: (column - (columns - 1) / 2) * stepX * (layout === 'cone' ? 0.85 : 1),
-        z: 0.5 - row * stepZ };
+      const columns = Math.min(row * 2 + 1, maxColumns);
+      const colOff = column - (columns - 1) / 2;
+      return {
+        x: colOff * stepX * 0.96,
+        z: 0.56 - row * stepZ - Math.abs(colOff) * 0.06
+      };
+    }
+    if (layout === 'cone') {
+      // 錐行：銳利狹長鑽頭陣 (2-4-5-5-4-2 菱形突貫縱陣，區別於鋒矢)
+      const pattern = mounted ? [1, 3, 4, 4, 4, 4, 3, 1] : [2, 4, 5, 6, 6, 6, 6, 5, 4, 4];
+      let row = 0, rem = index;
+      while (rem >= (pattern[row] || (mounted ? 4 : 5))) {
+        rem -= (pattern[row] || (mounted ? 4 : 5));
+        row++;
+      }
+      const cols = Math.min(pattern[row] || (mounted ? 4 : 5), count - (index - rem));
+      return {
+        x: (rem - (cols - 1) / 2) * stepX * 0.84,
+        z: 0.64 - row * stepZ * 0.95
+      };
     }
     if (layout === 'square') {
-      const columns = Math.ceil(Math.sqrt(count));
+      // 方圓：外厚內穩的圓角方陣，緊湊抗衝鋒
+      const columns = mounted ? 5 : 7;
       const rows = Math.ceil(count / columns);
       const row = Math.floor(index / columns);
       const inRow = Math.min(columns, count - row * columns);
-      return { x: (index % columns - (inRow - 1) / 2) * stepX * 0.85,
-        z: (rows - 1) * stepZ * 0.3 - row * stepZ };
+      const colOff = (index % columns) - (inRow - 1) / 2;
+      const isOuter = row === 0 || row === rows - 1 || Math.abs(colOff) >= (inRow - 1) / 2 - 0.5;
+      return {
+        x: colOff * (mounted ? 0.34 : 0.29) * (isOuter ? 1.04 : 0.92),
+        z: (rows - 1) * (mounted ? 0.18 : 0.14) - row * (mounted ? 0.36 : 0.28)
+      };
     }
     if (layout === 'staggered') {
-      const columns = mounted ? 3 : 4;
+      // 雁行：橫展斜雁交錯列，利於弓弩錯開射界
+      const columns = mounted ? 6 : 8;
       const row = Math.floor(index / columns);
-      return { x: (index % columns - (columns - 1) / 2) * stepX + (row % 2 ? stepX * 0.4 : 0),
-        z: 0.42 - row * stepZ };
+      const col = index % columns;
+      const colOff = col - (columns - 1) / 2;
+      return {
+        x: colOff * (mounted ? 0.32 : 0.28) + (row % 2 ? (mounted ? 0.13 : 0.11) : -(mounted ? 0.06 : 0.05)),
+        z: 0.44 - row * stepZ - Math.abs(colOff) * 0.075
+      };
     }
     if (layout === 'wings') {
-      if (count <= 2) return { x: (index - (count - 1) / 2) * 1.0, z: 0.1 };
-      if (index === 0) return { x: 0, z: 0.55 };
-      if (index === count - 1 && count % 2 === 0) return { x: 0, z: -0.55 };
-      const wingIndex = index - 1;
-      const columns = mounted ? 2 : 3;
-      const rank = Math.floor(wingIndex / (columns * 2));
-      const column = Math.floor((wingIndex % (columns * 2)) / 2);
-      return { x: (wingIndex % 2 ? 1 : -1) * (0.24 + column * (mounted ? 0.44 : 0.30) + rank * 0.01),
-        z: 0.08 - rank * stepZ - column * 0.14 };
+      // 鶴翼：雙翼朝前左右包抄、中軍微收之弧形包夾陣
+      const columns = mounted ? 6 : 8;
+      const row = Math.floor(index / columns);
+      const inRow = Math.min(columns, count - row * columns);
+      const col = index % columns;
+      const colOff = col - (inRow - 1) / 2;
+      const normX = Math.abs(colOff) / Math.max(1, (columns - 1) / 2);
+      return {
+        x: colOff * stepX * 1.02,
+        z: 0.12 - row * stepZ + Math.pow(normX, 1.35) * (mounted ? 0.44 : 0.48)
+      };
     }
     if (layout === 'column') {
-      if (count > 8) return { x: (index % 3 - 1) * stepX, z: 0.68 - Math.floor(index / 3) * stepZ };
-      return { x: index % 2 ? 0.12 : -0.12, z: 0.68 - index * 0.48 };
+      // 長蛇：S 形蜿蜒游擊行軍陣
+      const columns = mounted ? 3 : 4;
+      const row = Math.floor(index / columns);
+      const inRow = Math.min(columns, count - row * columns);
+      const col = index % columns;
+      const snakeX = Math.sin(row * 0.78) * (mounted ? 0.32 : 0.34);
+      return {
+        x: (col - (inRow - 1) / 2) * (mounted ? 0.36 : 0.31) + snakeX,
+        z: 0.62 - row * (mounted ? 0.33 : 0.25)
+      };
     }
-    return null;
+    // fishscale（魚鱗）及預設橫陣：中央略凸之寬正面魚鱗方陣
+    const columns = mounted ? 6 : 8;
+    const row = Math.floor(index / columns);
+    const inRow = Math.min(columns, count - row * columns);
+    const colOff = (index % columns) - (inRow - 1) / 2;
+    const normX = colOff / Math.max(1, (columns - 1) / 2);
+    return {
+      x: colOff * stepX,
+      z: 0.34 - row * stepZ + (1 - normX * normX) * (mounted ? 0.22 : 0.24)
+    };
   }
 
   function addBattalionRanks(token) {
     const mounted = token.cat === 'air';
     const count = mounted ? (isLowPowerDevice ? 12 : 24) : (isLowPowerDevice ? 24 : 48);
     token.lowPower = isLowPowerDevice;
-    const ranks = BattleFigures.createRanks(token, count, (i, total) => {
-      const offset = getFormationOffset(token.formationLayout, i, total, mounted);
-      const columns = mounted ? 4 : 6;
-      return offset || { x: (i % columns - (columns - 1) / 2) * (mounted ? 0.54 : 0.43),
-        z: -Math.floor(i / columns) * (mounted ? 0.88 : 0.47) };
-    });
+    const ranks = BattleFigures.createRanks(token, count, (i, total) =>
+      getFormationOffset(token.formationLayout, i, total, mounted)
+    );
     token.troopsContainer.add(ranks);
   }
 
@@ -1545,7 +1601,8 @@ const Battle3DEngine = (function () {
     // 朝向旋轉群組：本地 +Z 一律代表「面向敵陣前方」
     // A 軍 (+X 方向): rotation.y = +Math.PI/2；B 軍 (-X 方向): rotation.y = -Math.PI/2
     const formationRig = new THREE.Group();
-    formationRig.rotation.y = isSideA ? Math.PI / 2 : -Math.PI / 2;
+    const baseYaw = isSideA ? Math.PI / 2 : -Math.PI / 2;
+    formationRig.rotation.y = baseYaw;
     rootGroup.add(formationRig);
 
     // B. 3D 兵種模型方陣容器
@@ -1584,6 +1641,9 @@ const Battle3DEngine = (function () {
       troopsContainer,
       hud,
       unitAnims: [],
+      baseYaw,
+      targetYaw: baseYaw,
+      individualYawOffset: 0,
       origX: coords.x,
       origZ: coords.z,
       frontX: coords.x,
@@ -2105,14 +2165,14 @@ const Battle3DEngine = (function () {
       token.origX = direction * (8.5 + slot.depth * 0.6);
       token.origZ = slot.z;
       token.mesh.position.set(token.origX, getBattleTerrainHeight(token.origX, token.origZ), token.origZ);
-      const frontDistance = token.formationRanged ? (token.cat === 'support' ? 7.6 : 5.2) : {
+      const frontDistance = token.formationRanged ? (token.cat === 'support' ? 5.0 : 4.1) : {
         armor: 0.82,
         air: 0.82,
         naval: 0.9,
-        air_defense: 5.2,
-        support: 7.6
+        air_defense: 4.1,
+        support: 5.0
       }[token.cat] || 2.5;
-      token.frontX = direction * (frontDistance + slot.depth * 0.35);
+      token.frontX = direction * (frontDistance + slot.depth * 0.24);
       token.frontZ = slot.z;
       token.frontY = getBattleTerrainHeight(token.frontX, token.frontZ);
       token.march = {
@@ -2163,7 +2223,20 @@ const Battle3DEngine = (function () {
       const slot = getArmySlot(token);
       const ranged = !allOut && (['air_defense', 'support'].includes(token.cat) || token.formationRanged);
       const side = token.side === 'A' ? 1 : -1;
-      const distance = ranged ? -(4.5 + slot.depth * 0.35) : 0.85 + slot.depth * 0.12;
+      let targetDist;
+      if (ranged) {
+        targetDist = 3.25 + (slot.depth % 3) * 0.10;
+        const absStartX = Math.abs(start.x);
+        if (Math.abs(absStartX - targetDist) < 0.35) {
+          targetDist = absStartX >= 3.75 ? absStartX - 0.45 : absStartX + 0.50;
+        }
+      } else {
+        targetDist = 0.85 + slot.depth * 0.12;
+        if (Math.abs(start.x - side * targetDist) < 0.35) {
+          targetDist = Math.max(targetDist + 0.45, Math.abs(start.x) + 0.45);
+        }
+      }
+      const distance = ranged ? -targetDist : targetDist;
       const flank = token.formationLayout === 'wings' || token.cat === 'naval' ? 0.65 : 0;
       const target = new THREE.Vector3(
         side * distance,
@@ -2256,6 +2329,40 @@ const Battle3DEngine = (function () {
       finished: false
     };
     triggerSquadAnim(token, 'move', token.cat === 'air' ? 1.45 : 1.15);
+  }
+
+  function advanceRangedToEffectiveRange(attacker, target) {
+    if (!attacker || !attacker.alive || attacker.engagement || !target || !target.alive) return;
+    const isRanged = attacker.formationRanged || attacker.cat === 'air_defense' || attacker.cat === 'support';
+    if (!isRanged) return;
+    if (attacker.march && !attacker.march.finished) return;
+    const dx = target.mesh.position.x - attacker.mesh.position.x;
+    const dz = target.mesh.position.z - attacker.mesh.position.z;
+    const dist = Math.hypot(dx, dz);
+    const effectiveRange = attacker.cat === 'support' ? 7.8 : 7.2;
+    if (dist <= effectiveRange) return;
+    const stepX = Math.min(1.65, (dist - effectiveRange) * 0.72);
+    const minAbsX = attacker.cat === 'support' ? 4.0 : 3.25;
+    const rawTargetX = attacker.side === 'A'
+      ? Math.min(-minAbsX, attacker.mesh.position.x + stepX)
+      : Math.max(minAbsX, attacker.mesh.position.x - stepX);
+    const moveDist = Math.abs(rawTargetX - attacker.mesh.position.x);
+    if (moveDist < 0.12) return;
+    attacker.engagement = {
+      fromX: attacker.mesh.position.x,
+      fromY: attacker.mesh.position.y,
+      fromZ: attacker.mesh.position.z,
+      targetX: rawTargetX,
+      targetY: getBattleTerrainHeight(rawTargetX, attacker.mesh.position.z),
+      targetZ: attacker.mesh.position.z,
+      startedAt: combatNow(),
+      duration: Math.min(760, Math.max(280, moveDist * 380 / Math.max(0.75, attacker.formationMobility))),
+      lastDustAt: 0,
+      finished: false
+    };
+    attacker.frontX = rawTargetX;
+    attacker.frontY = attacker.engagement.targetY;
+    triggerSquadAnim(attacker, 'move', 1.08);
   }
 
   function waitForCombatBeat(duration, epoch) {
@@ -2373,6 +2480,14 @@ const Battle3DEngine = (function () {
       if (aToken.alive && tToken.alive) {
         if (aToken.cat !== 'air' && aToken.cat !== 'naval') advanceBattalionToContact(aToken);
         if (tToken.cat !== 'air' && tToken.cat !== 'naval') advanceBattalionToContact(tToken);
+        advanceRangedToEffectiveRange(aToken, tToken);
+        const rawAimYaw = Math.atan2(
+          tToken.mesh.position.x - aToken.mesh.position.x,
+          tToken.mesh.position.z - aToken.mesh.position.z
+        );
+        const aimTurn = clampFormationYaw(aToken.side, rawAimYaw, 0.38);
+        aToken.targetYaw = aimTurn.yaw;
+        aToken.individualYawOffset = aimTurn.remainder;
       }
     }
 
@@ -2399,10 +2514,13 @@ const Battle3DEngine = (function () {
     if ((ln.finale || (meleeActive && (!ranged || forcedMelee))) && aToken && tToken && aToken.alive) {
       await approachMeleeTarget(aToken, tToken);
       if (aToken.epoch !== battleEpoch || battleSettled) { finishEffects(); return effectsFinished; }
-      aToken.formationRig.rotation.y = Math.atan2(
+      const rawMeleeYaw = Math.atan2(
         tToken.mesh.position.x - aToken.mesh.position.x,
         tToken.mesh.position.z - aToken.mesh.position.z
       );
+      const meleeTurn = clampFormationYaw(aToken.side, rawMeleeYaw, 0.48);
+      aToken.targetYaw = meleeTurn.yaw;
+      aToken.individualYawOffset = meleeTurn.remainder;
       triggerSquadAnim(aToken, 'attack', 1.35);
       if (tToken.alive && ln.kind !== 'miss') triggerSquadAnim(tToken, 'hit', 1.25);
       const midpoint = aToken.mesh.position.clone().lerp(tToken.mesh.position, 0.5);
@@ -4474,6 +4592,13 @@ const Battle3DEngine = (function () {
                 }
               });
               if (target) {
+                const aimYaw = Math.atan2(
+                  target.mesh.position.x - token.mesh.position.x,
+                  target.mesh.position.z - token.mesh.position.z
+                );
+                const turn = clampFormationYaw(token.side, aimYaw, 0.32);
+                token.targetYaw = turn.yaw;
+                token.individualYawOffset = turn.remainder;
                 triggerSquadAnim(token, 'attack', 1.0);
                 if (token.cat === 'support') {
                   spawnStrategistBolt(token, target);
@@ -4507,11 +4632,9 @@ const Battle3DEngine = (function () {
             const dx = nearestEnemy.mesh.position.x - token.mesh.position.x;
             const dz = nearestEnemy.mesh.position.z - token.mesh.position.z;
             const desiredYaw = Math.atan2(dx, dz);
-            const curYaw = token.formationRig.rotation.y;
-            let diffYaw = desiredYaw - curYaw;
-            while (diffYaw > Math.PI) diffYaw -= Math.PI * 2;
-            while (diffYaw < -Math.PI) diffYaw += Math.PI * 2;
-            token.formationRig.rotation.y += diffYaw * Math.min(1, 5.5 * dt);
+            const turn = clampFormationYaw(token.side, desiredYaw, 0.48);
+            token.targetYaw = turn.yaw;
+            token.individualYawOffset = turn.remainder;
 
             if (nearestDist > 1.85 && nearestDist < 18) {
               isWheelAdvancing = true;
@@ -4545,6 +4668,12 @@ const Battle3DEngine = (function () {
         } else {
           token.formationRig.rotation.x = 0;
         }
+
+        const goalYaw = token.targetYaw !== undefined ? token.targetYaw : (token.baseYaw || (token.side === 'A' ? Math.PI / 2 : -Math.PI / 2));
+        let yawDiff = goalYaw - token.formationRig.rotation.y;
+        while (yawDiff > Math.PI) yawDiff -= Math.PI * 2;
+        while (yawDiff < -Math.PI) yawDiff += Math.PI * 2;
+        token.formationRig.rotation.y += yawDiff * Math.min(1, 3.2 * dt);
 
         const moving = isWheelAdvancing || finalChargeActive || Boolean((march && !march.finished) || (engagement && !engagement.finished));
         const fighting = battleMotionActive || meleeActive;

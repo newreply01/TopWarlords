@@ -29601,3 +29601,54 @@ html:not([data-theme="light"]) .formation-slot-row {
     display: none !important;
   }
 }
+
+/* =====================================================
+   戰場畫面與結算報告平板橫屏滾動修正 (v7.11.50)
+   1. 解除 #viewBattle 寫死高度與 overflow: hidden，改為彈性撐滿且支援觸控順暢滑動到底
+   2. 統一 .modal / .result-card 等結算彈窗使用 100dvh，避免瀏覽器工具列遮擋底部按鈕
+   ===================================================== */
+@media (min-width: 769px) {
+  #viewBattle.battle {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: max(18px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (min-width: 769px) and (max-height: 760px) {
+  #viewBattle .battle-3d-wrapper {
+    height: clamp(200px, 34dvh, 260px) !important;
+    min-height: 200px !important;
+    max-height: 260px !important;
+    margin-bottom: 6px !important;
+  }
+
+  #viewBattle .battle-grid {
+    min-height: 220px !important;
+  }
+}
+
+.modal {
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  overscroll-behavior: contain;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+}
+
+.result-card,
+.ladder-result-card,
+.bo3-series-card {
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}

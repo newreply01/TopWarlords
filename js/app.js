@@ -7378,6 +7378,7 @@ function switchPvpTab(tab) {
   if ($('#pvpVersusRulesBar')) $('#pvpVersusRulesBar').hidden = true;
   if ($('#pvpGuestWaitNotice')) $('#pvpGuestWaitNotice').hidden = true;
   $('#btnPvpStartBattle').hidden = true;
+  if ($('#btnPvpCancel')) $('#btnPvpCancel').textContent = (tab === 'host') ? '關閉房間 ✕' : '關閉視窗 ✕';
   setPvpJoinControlsBusy(false);
   if (tab === 'join') {
     if (OnlinePvPEngine.isHostUser() && OnlinePvPEngine.getCurrentRoomCode() && !OnlinePvPEngine.getState().connected) {
@@ -7420,7 +7421,8 @@ async function joinTargetRoom(overrideCode = null) {
   const waitingStatus = $('#pvpJoinWaitingStatus');
   const waitingText = $('#pvpJoinWaitingText');
 
-  const rawCode = String(overrideCode != null ? overrideCode : (input?.value || '')).trim().toUpperCase();
+  const forcedCode = (typeof overrideCode === 'string') ? overrideCode : null;
+  const rawCode = String(forcedCode != null ? forcedCode : (input?.value || '')).trim().toUpperCase();
   if (!rawCode) {
     toast('⚠️ 請輸入 6 位房間代碼！');
     if (input) input.focus();
@@ -7489,7 +7491,7 @@ $('#btnCopyShareUrl')?.addEventListener('click', () => {
   }
 });
 
-$('#btnSubmitJoinRoom')?.addEventListener('click', joinTargetRoom);
+$('#btnSubmitJoinRoom')?.addEventListener('click', () => joinTargetRoom());
 
 $('#pvpVisibilityToggle')?.addEventListener('click', e => {
   const btn = e.target.closest('.pvp-vis-btn');
@@ -7615,6 +7617,7 @@ OnlinePvPEngine.on('opponent_joined', ({ opponent, isHost }) => {
 
   // 只有房主顯示開戰按鈕
   $('#btnPvpStartBattle').hidden = !isHost;
+  if ($('#btnPvpCancel')) $('#btnPvpCancel').textContent = isHost ? '關閉房間 ✕' : '離開房間 ✕';
   toast(`⚡ 玩家【${opponent.flag || '🌐'} ${oppName}】(${opponent.uid}) 已成功連線進房！`);
 });
 

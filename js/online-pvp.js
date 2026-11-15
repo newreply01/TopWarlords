@@ -13,6 +13,7 @@ const OnlinePvPEngine = (function () {
   let isHost = false;
   let currentRoomId = '';
   let opponentInfo = null; // { name, uid, flag }
+  let opponentJoinedEmitted = false;
   let listeners = {};
   let useFirebaseRelay = false;
   let fbRoomRef = null;
@@ -23,6 +24,8 @@ const OnlinePvPEngine = (function () {
   let activeGuestSenderId = null;
   let claimedSeatCode = null;
   let roomHasStarted = false;
+  let packetSeq = 0;
+  const seenPacketKeys = new Set();
   let roomSettings = { isPublic: true, maxGames: 5, marketMode: 'locked' };
   const senderId = 'P-' + Math.random().toString(36).slice(2, 10);
 
@@ -107,6 +110,7 @@ const OnlinePvPEngine = (function () {
   function buildHandshakePayload(playerProfile, hostFlag) {
     return {
       gameId: 'topwarlords',
+      senderId,
       name: (playerProfile && playerProfile.name) || (hostFlag ? '本部特遣隊' : '挑戰突擊隊'),
       uid: (playerProfile && playerProfile.uid) || 'CMD-ONLINE',
       flag: (playerProfile && playerProfile.flag) || '🇹🇼',
@@ -168,26 +172,45 @@ const OnlinePvPEngine = (function () {
         sendPacket('HANDSHAKE', buildHandshakePayload(playerProfile, true));
         return;
       }
+      if (val.type === '__HOST_LEAVE__' && !hostFlag) {
+        if (currentRoomId === code) {
+          const beforeStart = !roomHasStarted;
+          useFirebaseRelay = false;
+          pvpState.connected = false;
+          opponentInfo = null;
+          opponentJoinedEmitted = false;
+          if (pendingJoinReject) {
+            pendingJoinReject(new Error('房主已關閉房間'));
+          } else {
+            emit('opponent_left', { beforeStart });
+          }
+        }
+        return;
+      }
       if (val.type === '__GUEST_LEAVE__' && hostFlag) {
-        if (!roomHasStarted && (!activeGuestSenderId || val.sender === activeGuestSenderId)) {
+        if (!activeGuestSenderId || val.sender === activeGuestSenderId) {
+          const beforeStart = !roomHasStarted;
           activeGuestSenderId = null;
           pvpState.connected = false;
           opponentInfo = null;
+          opponentJoinedEmitted = false;
           useFirebaseRelay = false;
-          fbRoomRef.update({
-            status: 'waiting',
-            guestId: null,
-            guestUid: null,
-            guestName: null,
-            updatedAt: Date.now()
-          }).catch(() => { });
-          emit('opponent_left', { beforeStart: true });
+          if (beforeStart) {
+            fbRoomRef.update({
+              status: 'waiting',
+              guestId: null,
+              guestUid: null,
+              guestName: null,
+              updatedAt: Date.now()
+            }).catch(() => { });
+          }
+          emit('opponent_left', { beforeStart });
         }
         return;
       }
       if (val.packet) {
         if (val.packet.type === 'ROOM_FULL') {
-          if (pendingJoinReject) {
+          if (pendingJoinReject && !opponentInfo) {
             pendingJoinReject(new Error((val.packet.payload && val.packet.payload.message) || '該房間人數已滿或已經開戰'));
           }
           return;
@@ -281,6 +304,8 @@ const OnlinePvPEngine = (function () {
     currentRoomId = shortCode;
     isHost = true;
     roomHasStarted = false;
+    opponentJoinedEmitted = false;
+    seenPacketKeys.clear();
     activeGuestSenderId = null;
     claimedSeatCode = null;
     pvpState.connected = false;
@@ -291,6 +316,7 @@ const OnlinePvPEngine = (function () {
     const fullPeerId = `${ROOM_PREFIX}${shortCode}`;
 
     return new Promise((resolve, reject) => {
+      let peerOpened = false;
       peer = new window.Peer(fullPeerId, {
         config: {
           iceServers: [
@@ -301,6 +327,7 @@ const OnlinePvPEngine = (function () {
       });
 
       peer.on('open', id => {
+        peerOpened = true;
         attachFirebaseRelay(shortCode, true, playerProfile, roomSettings);
         const info = {
           roomCode: shortCode,
@@ -314,7 +341,15 @@ const OnlinePvPEngine = (function () {
       });
 
       peer.on('connection', incoming => {
-        if (opponentInfo || (conn && conn.open) || roomHasStarted) {
+        const metaSender = incoming && incoming.metadata && incoming.metadata.senderId;
+        const isSameRelayGuest = !!(activeGuestSenderId && metaSender && metaSender === activeGuestSenderId);
+        const alreadyOccupiedByOther = Boolean(
+          (roomHasStarted && !isSameRelayGuest)
+          || (conn && conn.open && !isSameRelayGuest)
+          || (activeGuestSenderId && metaSender && metaSender !== activeGuestSenderId)
+          || (opponentInfo && !metaSender && conn && conn.open)
+        );
+        if (alreadyOccupiedByOther) {
           incoming.on('open', () => {
             try {
               incoming.send({
@@ -327,13 +362,48 @@ const OnlinePvPEngine = (function () {
           });
           return;
         }
+        // 若 Firebase Relay 已先連上但 Incoming 未帶 metadata，先驗證首個 HANDSHAKE 是否為同一位挑戰者再升級
+        if ((opponentInfo || activeGuestSenderId) && !metaSender) {
+          let verified = false;
+          const rejectDuplicate = () => {
+            try {
+              incoming.send({
+                type: 'ROOM_FULL',
+                payload: { message: '該房間已有對手進駐或已經開戰' },
+                timestamp: Date.now()
+              });
+            } catch (_) { }
+            setTimeout(() => { try { incoming.close(); } catch (_) { } }, 80);
+          };
+          const probeTimer = setTimeout(() => {
+            if (!verified) rejectDuplicate();
+          }, 1500);
+          incoming.on('data', firstPkt => {
+            if (verified) return;
+            if (firstPkt && firstPkt.type === 'HANDSHAKE') {
+              const pktSender = firstPkt.payload && firstPkt.payload.senderId;
+              if (activeGuestSenderId && pktSender && pktSender !== activeGuestSenderId) {
+                clearTimeout(probeTimer);
+                rejectDuplicate();
+                return;
+              }
+              verified = true;
+              clearTimeout(probeTimer);
+              setupConnection(incoming, playerProfile, { alreadyOpen: true, initialPacket: firstPkt });
+            }
+          });
+          incoming.on('close', () => clearTimeout(probeTimer));
+          return;
+        }
         setupConnection(incoming, playerProfile);
       });
 
       peer.on('error', err => {
         console.error('Peer error:', err);
-        emit('error', err.message || '連線錯誤');
-        reject(err);
+        if (!peerOpened) {
+          emit('error', err.message || '連線錯誤');
+          reject(err);
+        }
       });
     });
   }
@@ -399,6 +469,8 @@ const OnlinePvPEngine = (function () {
     currentRoomId = cleanCode;
     isHost = false;
     roomHasStarted = false;
+    opponentJoinedEmitted = false;
+    seenPacketKeys.clear();
     activeGuestSenderId = null;
     pvpState.connected = false;
     pvpState.winsA = 0;
@@ -433,7 +505,6 @@ const OnlinePvPEngine = (function () {
           releaseRoomSeat(cleanCode);
         }
         const message = (err && err.message) ? err.message : String(err || '加入房間失敗');
-        emit('error', message);
         reject(err instanceof Error ? err : new Error(message));
       };
 
@@ -484,7 +555,7 @@ const OnlinePvPEngine = (function () {
       if (peer) {
         peer.on('open', () => {
           try {
-            const outgoing = peer.connect(fullPeerId, { reliable: true });
+            const outgoing = peer.connect(fullPeerId, { reliable: true, metadata: { senderId } });
             setupConnection(outgoing, playerProfile);
 
             // 若 1.2 秒內 WebRTC 未能穿透對稱型 NAT，立即雙軌啟動 Firebase RTDB 雲端中繼
@@ -512,24 +583,51 @@ const OnlinePvPEngine = (function () {
   }
 
   /* 設定 DataChannel 雙向通訊監聽 */
-  function setupConnection(c, playerProfile) {
+  function setupConnection(c, playerProfile, options = {}) {
+    const prevConn = conn;
     conn = c;
+    if (prevConn && prevConn !== c) {
+      try { prevConn.close(); } catch (_) { }
+    }
 
-    conn.on('open', () => {
+    const onOpenChannel = () => {
+      if (c !== conn) return;
       pvpState.connected = true;
       // 發送身分握手封包 (Handshake)
       sendPacket('HANDSHAKE', buildHandshakePayload(playerProfile, isHost));
-    });
+    };
 
-    conn.on('data', data => {
+    if (options && options.alreadyOpen) {
+      onOpenChannel();
+      if (options.initialPacket) {
+        handleIncomingPacket(options.initialPacket);
+      }
+    } else {
+      c.on('open', onOpenChannel);
+    }
+
+    c.on('data', data => {
+      if (c !== conn) return;
       handleIncomingPacket(data);
     });
 
-    conn.on('close', () => {
+    c.on('close', () => {
+      if (c !== conn) return;
+      conn = null;
+      // 若 Firebase Relay 仍在線且雙方已完成握手，禁止因 P2P 通道退回中繼而誤觸離房關閉
+      if (useFirebaseRelay && fbRoomRef && opponentInfo) {
+        pvpState.connected = true;
+        return;
+      }
+      // 尚未完成握手前，交由 Firebase 中繼與逾時邏輯處理，不要提前發送離房
+      if (!opponentInfo) {
+        if (!useFirebaseRelay) pvpState.connected = false;
+        return;
+      }
       const beforeStart = !roomHasStarted;
       pvpState.connected = false;
-      conn = null;
       opponentInfo = null;
+      opponentJoinedEmitted = false;
       activeGuestSenderId = null;
       if (isHost && fbRoomRef && beforeStart) {
         fbRoomRef.update({
@@ -543,19 +641,27 @@ const OnlinePvPEngine = (function () {
       emit('opponent_left', { beforeStart });
     });
 
-    conn.on('error', err => {
+    c.on('error', err => {
+      if (c !== conn) return;
       console.error('Conn error', err);
-      emit('error', '對戰連線中斷');
+      if (!useFirebaseRelay || !opponentInfo) {
+        emit('error', '對戰連線中斷');
+      }
     });
   }
 
   /* 處理接收到的封包 */
   function handleIncomingPacket(data) {
     if (!data || !data.type) return;
+    if (data.id) {
+      if (seenPacketKeys.has(data.id)) return;
+      if (seenPacketKeys.size > 500) seenPacketKeys.clear();
+      seenPacketKeys.add(data.id);
+    }
 
     switch (data.type) {
       case 'ROOM_FULL':
-        if (pendingJoinReject) {
+        if (pendingJoinReject && !opponentInfo) {
           pendingJoinReject(new Error((data.payload && data.payload.message) || '該房間人數已滿或已經開戰'));
         }
         break;
@@ -566,17 +672,30 @@ const OnlinePvPEngine = (function () {
           emit('error', '對手來自不同遊戲專案，已自動中斷連線');
           return;
         }
-        if (isHost && fbRoomRef && !roomHasStarted) {
-          fbRoomRef.update({
-            status: 'full',
-            guestUid: (data.payload && data.payload.uid) || '',
-            guestName: (data.payload && data.payload.name) || '',
-            updatedAt: Date.now()
-          }).catch(() => { });
+        if (isHost) {
+          const pktSender = data.payload && data.payload.senderId;
+          if ((opponentInfo || activeGuestSenderId || roomHasStarted) && activeGuestSenderId && pktSender && pktSender !== activeGuestSenderId) {
+            return;
+          }
+          if (!activeGuestSenderId && pktSender) {
+            activeGuestSenderId = pktSender;
+          }
+          if (fbRoomRef && !roomHasStarted) {
+            fbRoomRef.update({
+              status: 'full',
+              guestUid: (data.payload && data.payload.uid) || '',
+              guestName: (data.payload && data.payload.name) || '',
+              updatedAt: Date.now()
+            }).catch(() => { });
+          }
         }
         opponentInfo = data.payload;
+        pvpState.connected = true;
         if (pendingJoinResolve) pendingJoinResolve();
-        emit('opponent_joined', { opponent: opponentInfo, isHost });
+        if (!opponentJoinedEmitted) {
+          opponentJoinedEmitted = true;
+          emit('opponent_joined', { opponent: opponentInfo, isHost });
+        }
         break;
 
       case 'SETTINGS_UPDATE':
@@ -627,12 +746,18 @@ const OnlinePvPEngine = (function () {
         fbRoomRef.update({ status: 'playing', updatedAt: Date.now() }).catch(() => { });
       }
     }
-    const packet = { type, payload, timestamp: Date.now() };
+    const packet = { id: `${senderId}:${++packetSeq}`, type, payload, timestamp: Date.now() };
+    let sentOverP2P = false;
     if (conn && conn.open) {
-      conn.send(packet);
-      return;
+      try {
+        conn.send(packet);
+        sentOverP2P = true;
+      } catch (_) {
+        sentOverP2P = false;
+      }
     }
-    if (useFirebaseRelay && fbRoomRef) {
+    const criticalPacket = (type === 'HANDSHAKE' || type === 'GAME_START_SESSION');
+    if (useFirebaseRelay && fbRoomRef && (!sentOverP2P || criticalPacket)) {
       fbRoomRef.child('messages').push({ sender: senderId, packet, ts: Date.now() }).catch(() => { });
     }
   }
@@ -663,6 +788,7 @@ const OnlinePvPEngine = (function () {
     }
     pvpState.connected = false;
     opponentInfo = null;
+    opponentJoinedEmitted = false;
     activeGuestSenderId = null;
     useFirebaseRelay = false;
     if (fbRoomRef) {
@@ -766,7 +892,24 @@ const OnlinePvPEngine = (function () {
     } else {
       claimedSeatCode = null;
     }
-    cleanupFirebaseRelay();
+    if (isHost && fbRoomRef && opponentInfo) {
+      const leavingRef = fbRoomRef;
+      const listenerToDetach = fbMsgListener;
+      try {
+        if (listenerToDetach) leavingRef.child('messages').off('child_added', listenerToDetach);
+      } catch (_) { }
+      fbRoomRef = null;
+      fbMsgListener = null;
+      useFirebaseRelay = false;
+      try {
+        leavingRef.child('messages').push({ sender: senderId, type: '__HOST_LEAVE__', ts: Date.now() }).catch(() => { });
+      } catch (_) { }
+      setTimeout(() => {
+        try { leavingRef.remove(); } catch (_) { }
+      }, 250);
+    } else {
+      cleanupFirebaseRelay();
+    }
     if (conn) {
       try { conn.close(); } catch (e) { }
       conn = null;
@@ -780,6 +923,8 @@ const OnlinePvPEngine = (function () {
     roomHasStarted = false;
     pvpState.connected = false;
     opponentInfo = null;
+    opponentJoinedEmitted = false;
+    seenPacketKeys.clear();
   }
 
   /* 產生 128-bit 密碼學安全隨機鹽值 */

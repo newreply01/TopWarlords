@@ -534,13 +534,20 @@ try:
                 push: (val) => {
                     const id = 'M-' + Math.random().toString(36).slice(2, 8);
                     setAt(path + '/' + id, val);
+                    subscribers.forEach(s => {
+                        if (s.path === path && s.evt === 'child_added') {
+                            setTimeout(() => s.fn(makeSnap(val)), 5);
+                        }
+                    });
                     if (path === 'pvp_rooms/WL_PUB888/messages' && val && val.type === '__RELAY_JOIN__') {
                         const msg = {
                             sender: 'HOST-PUB888',
                             packet: {
+                                id: 'HOST-PUB888:hs',
                                 type: 'HANDSHAKE',
                                 payload: {
                                     gameId: 'topwarlords',
+                                    senderId: 'HOST-PUB888',
                                     name: '織田信長公開房',
                                     uid: 'CMD-PUB888',
                                     flag: '🇯🇵',
@@ -583,10 +590,32 @@ try:
 
             window.Peer = function(id) {
                 const cbs = {};
+                const outgoingConns = [];
                 this.id = id || ('PEER-' + Math.random().toString(36).slice(2, 7));
                 this.on = (evt, fn) => { cbs[evt] = fn; };
-                this.connect = () => ({ on: () => {}, send: () => {}, close: () => {}, open: false });
+                this.connect = (target, opts) => {
+                    const ocbs = {};
+                    const connObj = {
+                        target,
+                        metadata: opts && opts.metadata ? opts.metadata : null,
+                        open: false,
+                        sent: [],
+                        on: (e, f) => { ocbs[e] = f; },
+                        send: (d) => { connObj.sent.push(d); },
+                        close: () => { connObj.open = false; if (ocbs.close) ocbs.close(); },
+                        _trigger: (e, a) => {
+                            if (e === 'open') connObj.open = true;
+                            if (e === 'close') connObj.open = false;
+                            if (ocbs[e]) ocbs[e](a);
+                        }
+                    };
+                    outgoingConns.push(connObj);
+                    window.__mockLastOutgoingConn = connObj;
+                    return connObj;
+                };
                 this.destroy = () => {};
+                this._trigger = (evt, arg) => { if (cbs[evt]) cbs[evt](arg); };
+                window.__mockLastPeer = this;
                 setTimeout(() => { if (cbs.open) cbs.open(this.id); }, 10);
             };
         })();""")
@@ -698,8 +727,113 @@ try:
             };
         }""")
         assert qm_check["settings"]["isPublic"] is True and qm_check["fb"] and qm_check["fb"]["isPublic"] is True and qm_check["fb"]["gameId"] == "topwarlords", f"Quick match empty fallback did not create public room: {qm_check}"
+
+        # 8b. 實測雙通道競態（Firebase 中繼先連上、WebRTC 後到）與「立即加入」按鈕點擊不得斷房或無法開戰
+        race_host_code = qm_check["code"]
+        pvp_page.evaluate("""(code) => {
+            const msgRef = window.firebase.database().ref('pvp_rooms/WL_' + code + '/messages');
+            msgRef.push({ sender: 'GUEST-RACE-01', type: '__RELAY_JOIN__', uid: 'CMD-GUEST', name: '模擬對手', ts: Date.now() });
+            msgRef.push({
+                sender: 'GUEST-RACE-01',
+                packet: {
+                    id: 'GUEST-RACE-01:hs',
+                    type: 'HANDSHAKE',
+                    payload: { gameId: 'topwarlords', senderId: 'GUEST-RACE-01', name: '模擬對手', uid: 'CMD-GUEST', flag: '🇹🇼', isHost: false }
+                },
+                ts: Date.now()
+            });
+        }""", race_host_code)
+        pvp_page.wait_for_function("() => !document.querySelector('#pvpVersusBox').hidden && !document.querySelector('#btnPvpStartBattle').hidden", timeout=5000)
+
+        race_check = pvp_page.evaluate("""() => {
+            const makeIncoming = (senderId, withMeta) => {
+                const icbs = {};
+                const connObj = {
+                    open: true,
+                    sent: [],
+                    closed: false,
+                    metadata: withMeta ? { senderId } : undefined,
+                    on: (e, f) => { icbs[e] = f; },
+                    send: (d) => { connObj.sent.push(d); },
+                    close: () => { connObj.closed = true; connObj.open = false; if (icbs.close) icbs.close(); },
+                    _emit: (e, a) => { if (icbs[e]) icbs[e](a); }
+                };
+                return connObj;
+            };
+            const sameGuestConn = makeIncoming('GUEST-RACE-01', false);
+            window.__mockLastPeer._trigger('connection', sameGuestConn);
+            sameGuestConn._emit('data', {
+                id: 'GUEST-RACE-01:p2p-hs',
+                type: 'HANDSHAKE',
+                payload: { gameId: 'topwarlords', senderId: 'GUEST-RACE-01', name: '模擬對手', uid: 'CMD-GUEST', flag: '🇹🇼', isHost: false }
+            });
+
+            const intruderConn = makeIncoming('INTRUDER-99', true);
+            window.__mockLastPeer._trigger('connection', intruderConn);
+            intruderConn._emit('open');
+
+            // 模擬 P2P 通道後續波動關閉，但 Firebase 中繼仍在線
+            sameGuestConn.close();
+
+            return {
+                sameGuestGotRoomFull: sameGuestConn.sent.some(p => p && p.type === 'ROOM_FULL'),
+                sameGuestClosedByHost: sameGuestConn.closed,
+                intruderGotRoomFull: intruderConn.sent.some(p => p && p.type === 'ROOM_FULL'),
+                hostVersusVisible: !document.querySelector('#pvpVersusBox').hidden,
+                hostStartVisible: !document.querySelector('#btnPvpStartBattle').hidden,
+                stillConnected: OnlinePvPEngine.getState().connected
+            };
+        }""")
+        assert not race_check["sameGuestGotRoomFull"] and race_check["intruderGotRoomFull"], f"Late WebRTC upgrade mishandled: {race_check}"
+        assert race_check["hostVersusVisible"] and race_check["hostStartVisible"] and race_check["stillConnected"], f"Host dropped room or start button after P2P close: {race_check}"
+
+        # 房主按下「正式開戰」必須能正常進入線上 BO5 備戰狀態
+        pvp_page.locator("#btnPvpStartBattle").click()
+        pvp_page.wait_for_function("() => document.querySelector('#onlinePvpModal').hidden && __db15.state.isOnlinePvp === true", timeout=5000)
+        start_check = pvp_page.evaluate("""(code) => ({
+            isOnlinePvp: __db15.state.isOnlinePvp,
+            mode: __db15.state.mode,
+            fbStatus: window.__mockDbStore.pvp_rooms['WL_' + code]?.status
+        })""", race_host_code)
+        assert start_check["isOnlinePvp"] and start_check["mode"] == "bo3" and start_check["fbStatus"] == "playing", f"Host failed to start match: {start_check}"
+
+        # 重置連線狀態並實測在輸入框輸入房號後點擊「立即加入」按鈕 (#btnSubmitJoinRoom) 與 P2P 失效防護
+        pvp_page.evaluate("""() => {
+            OnlinePvPEngine.closeConnection();
+            __db15.state.isOnlinePvp = false;
+            window.__mockDbStore.pvp_rooms.WL_PUB888 = {
+                gameId: 'topwarlords',
+                code: 'PUB888',
+                isPublic: true,
+                status: 'waiting',
+                createdAt: Date.now() - 15000,
+                hostId: 'HOST-PUB888',
+                hostUid: 'CMD-PUB888',
+                hostName: '織田信長公開房',
+                hostFlag: '🇯🇵',
+                maxGames: 7,
+                marketMode: 'free'
+            };
+        }""")
+        pvp_page.locator("#btnOnlinePvp").click()
+        pvp_page.wait_for_timeout(120)
+        pvp_page.locator("#tabPvpJoin").click()
+        pvp_page.wait_for_timeout(120)
+        pvp_page.fill("#pvpJoinCodeInput", "PUB888")
+        pvp_page.locator("#btnSubmitJoinRoom").click()
+        pvp_page.wait_for_function("() => !document.querySelector('#pvpVersusBox').hidden", timeout=5000)
+        guest_race_alive = pvp_page.evaluate("""() => {
+            if (window.__mockLastOutgoingConn) window.__mockLastOutgoingConn._trigger('close');
+            return {
+                versusVisible: !document.querySelector('#pvpVersusBox').hidden,
+                connected: OnlinePvPEngine.getState().connected,
+                cancelText: document.querySelector('#btnPvpCancel')?.textContent?.trim()
+            };
+        }""")
+        assert guest_race_alive["versusVisible"] and guest_race_alive["connected"] and guest_race_alive["cancelText"] == "離開房間 ✕", f"Guest dropped on fallback P2P close or submit click failed: {guest_race_alive}"
+
         pvp_context.close()
-        print(f"[TEST 8] 線上真人雙人房（私人/公開切換、公開大廳隔離、一鍵加入與快速配對）測試通過: {qm_check['code']}")
+        print(f"[TEST 8] 線上真人雙人房（私人/公開切換、公開大廳隔離、立即加入與雙通道防斷房開戰）測試通過: {qm_check['code']}")
 
         # 9. 精選破局 (Daily Challenge $19~$25 超標 BOSS)：切換題庫、編組出擊與破局次數更新實測
         daily_ctx = browser.new_context(viewport={"width": 1280, "height": 720})

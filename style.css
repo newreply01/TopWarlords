@@ -7643,6 +7643,20 @@ body:has(.battle:not([hidden])) .command-deck,
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
 }
 
+.bu.destroyed-badge[data-dead-label]::after {
+  content: attr(data-dead-label);
+  border-color: #f59e0b;
+  color: #fbbf24;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.48);
+}
+
+[data-theme="light"] .bu.destroyed-badge[data-dead-label]::after {
+  background: rgba(254, 243, 199, 0.96);
+  border-color: #d97706;
+  color: #b45309;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
+}
+
 @keyframes badge-pop {
   0% {
     transform: scale(0.6);
@@ -10319,6 +10333,8 @@ body:has(.battle:not([hidden])) .command-deck,
 .pvp-modal-card {
   max-width: 520px;
   width: 95vw;
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
 }
 
 .pvp-tabs-row {
@@ -10515,6 +10531,273 @@ body:has(.battle:not([hidden])) .command-deck,
   font-weight: 700;
   color: #10b981;
   margin-top: 2px;
+}
+
+.pvp-host-config {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pvp-vis-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pvp-vis-btn {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(15, 23, 42, 0.45);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: center;
+}
+
+.pvp-vis-btn:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+  color: var(--text);
+}
+
+.pvp-vis-btn.active[data-vis="public"] {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.55);
+  color: #34d399;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.16);
+}
+
+.pvp-vis-btn.active[data-vis="private"] {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.55);
+  color: var(--amber);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.16);
+}
+
+[data-theme="light"] .pvp-vis-btn {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.14);
+}
+
+[data-theme="light"] .pvp-vis-btn.active[data-vis="public"] {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #047857;
+}
+
+[data-theme="light"] .pvp-vis-btn.active[data-vis="private"] {
+  background: #fffbeb;
+  border-color: #d97706;
+  color: #b45309;
+}
+
+.pvp-host-rules-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pvp-host-rules-row .select {
+  width: 100%;
+}
+
+.pvp-vis-hint {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #34d399;
+  margin-bottom: 4px;
+}
+
+.pvp-vis-hint.is-private {
+  color: var(--amber);
+}
+
+[data-theme="light"] .pvp-vis-hint {
+  color: #047857;
+}
+
+[data-theme="light"] .pvp-vis-hint.is-private {
+  color: #b45309;
+}
+
+.pvp-public-lobby-box {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+[data-theme="light"] .pvp-public-lobby-box {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.pvp-lobby-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.pvp-lobby-title {
+  font-family: var(--head);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.pvp-public-rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 195px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.pvp-public-room-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pvp-public-room-item:hover {
+  border-color: var(--cyan);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+[data-theme="light"] .pvp-public-room-item {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+[data-theme="light"] .pvp-public-room-item:hover {
+  border-color: #0284c7;
+  background: #f0f9ff;
+}
+
+.pvp-room-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.pvp-room-host-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.pvp-room-host-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pvp-room-code-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--amber);
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 4px;
+  padding: 0 5px;
+  flex: 0 0 auto;
+}
+
+[data-theme="light"] .pvp-room-code-pill {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.pvp-room-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.pvp-public-empty {
+  text-align: center;
+  padding: 18px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.pvp-private-join-box {
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.pvp-versus-rules-bar {
+  margin-top: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #7dd3fc;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+[data-theme="light"] .pvp-versus-rules-bar {
+  background: #f0f9ff;
+  border-color: rgba(2, 132, 199, 0.28);
+  color: #0369a1;
+}
+
+.pvp-guest-wait-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.pvp-versus-rules-bar[hidden],
+.pvp-guest-wait-notice[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 480px) {
+  .pvp-vis-toggle,
+  .pvp-host-rules-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pvp-public-room-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pvp-public-room-item .btnJoinPublicPvpRoom {
+    width: 100%;
+  }
 }
 
 /* =====================================================
@@ -16787,13 +17070,25 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   }
 
   .bu.destroyed-badge::after {
-    content: '💥 擊毀' !important;
+    content: '⚔️ 陣亡' !important;
     right: 4px !important;
     bottom: 5px !important;
     font-size: 8.5px !important;
     padding: 0.5px 4px !important;
     border-radius: 3px !important;
     line-height: 1.15 !important;
+  }
+
+  .bu.destroyed-badge[data-dead-label]::after {
+    content: attr(data-dead-label) !important;
+    border-color: #f59e0b !important;
+    color: #fbbf24 !important;
+  }
+
+  [data-theme="light"] .bu.destroyed-badge[data-dead-label]::after {
+    color: #b45309 !important;
+    border-color: #d97706 !important;
+    background: rgba(254, 243, 199, 0.96) !important;
   }
 
   /* 4. 底部即時戰況日誌緊湊貼合 */
@@ -21447,6 +21742,8 @@ html:not([data-theme="light"]) input[type="checkbox"] {
   color: #ea580c;
   border-color: rgba(234, 88, 12, 0.3);
 }
+
+... [truncated for diff preview]
 
 /* 一體化輸入膠囊組 (Input-Button Group) */
 .portal-input-group {
@@ -27310,7 +27607,7 @@ html:not([data-theme="light"]) .formation-slot-row {
 
 #matrixBoard .m-card-info-col {
   min-width: 0;
-  padding: 5px 7px 4px 0;
+  padding: 5px 5px 4px 0;
   gap: 3px;
 }
 
@@ -27492,7 +27789,7 @@ html:not([data-theme="light"]) .formation-slot-row {
 #matrixBoard .m-skill-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
   width: 100%;
 }
@@ -27505,9 +27802,9 @@ html:not([data-theme="light"]) .formation-slot-row {
   width: fit-content;
   max-width: 100%;
   min-height: 22px;
-  padding: 2px 6px;
+  padding: 2px 3px;
   margin-top: 0;
-  gap: 5px;
+  gap: 2px;
   border: 1px solid var(--skill-edge);
   border-radius: 5px;
   background: var(--skill-bg);
@@ -27518,25 +27815,66 @@ html:not([data-theme="light"]) .formation-slot-row {
   font-size: 12px;
   line-height: 1.3;
   text-align: left;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
 #matrixBoard .m-skill::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  flex: 0 0 6px;
-  background: var(--c);
-  border: 1px solid var(--skill-edge);
-  border-radius: 1px;
-  transform: rotate(45deg);
+  content: none !important;
+  display: none !important;
 }
+
+#matrixBoard .m-skill-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  max-width: 12px;
+  flex: 0 0 12px;
+  line-height: 1;
+  color: var(--c);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+}
+
+#matrixBoard .m-skill-ico svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+#matrixBoard .m-skill-ico.ico-fire_storm { color: #fb923c; }
+#matrixBoard .m-skill-ico.ico-gunpowder { color: #f87171; }
+#matrixBoard .m-skill-ico.ico-thunder_strike { color: #38bdf8; }
+#matrixBoard .m-skill-ico.ico-bagua_array { color: #fbbf24; }
+#matrixBoard .m-skill-ico.ico-spear_charge { color: #facc15; }
+#matrixBoard .m-skill-ico.ico-overlord_cleave { color: #fb7185; }
+#matrixBoard .m-skill-ico.ico-piercing_volley { color: #c084fc; }
+#matrixBoard .m-skill-ico.ico-tidal_surge { color: #2dd4bf; }
+#matrixBoard .m-skill-ico.ico-aegis_command { color: #34d399; }
+#matrixBoard .m-skill-ico.ico-shadow_ambush { color: #a78bfa; }
+
+[data-theme="light"] #matrixBoard .m-skill-ico {
+  filter: none;
+}
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-fire_storm { color: #ea580c; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-gunpowder { color: #dc2626; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-thunder_strike { color: #0284c7; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-bagua_array { color: #b45309; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-spear_charge { color: #ca8a04; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-overlord_cleave { color: #e11d48; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-piercing_volley { color: #9333ea; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-tidal_surge { color: #0f766e; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-aegis_command { color: #059669; }
+[data-theme="light"] #matrixBoard .m-skill-ico.ico-shadow_ambush { color: #6d28d9; }
 
 #matrixBoard .m-skill strong {
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 #matrixBoard .m-skill:hover,
@@ -27594,10 +27932,10 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 .m-ap-chip {
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 800;
   line-height: 1.25;
-  padding: 1px 4px;
+  padding: 1px 2px;
   border-radius: 3px;
   flex: 0 0 auto;
   cursor: pointer;
@@ -27661,6 +27999,26 @@ html:not([data-theme="light"]) .formation-slot-row {
   flex-wrap: nowrap;
   gap: 2px;
   width: 100%;
+  min-width: 0;
+}
+
+.m-bot-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+#matrixBoard .m-bot .m-skill-phase {
+  padding: 0 3px;
+  font-size: 8.5px;
+  line-height: 1.25;
+}
+
+#matrixBoard .m-bot .m-form-badge {
+  line-height: 1.3;
+  padding: 0 3px;
 }
 
 [data-theme="light"] #matrixBoard .m-bot {
@@ -27673,8 +28031,8 @@ html:not([data-theme="light"]) .formation-slot-row {
   min-width: 0;
   align-items: baseline;
   justify-content: flex-start;
-  gap: 4px !important;
-  font-size: 10px !important;
+  gap: 3px !important;
+  font-size: 9px !important;
   font-weight: 700;
   line-height: 16px;
 }
@@ -27682,17 +28040,17 @@ html:not([data-theme="light"]) .formation-slot-row {
 #matrixBoard .m-stats span {
   display: inline-flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 1px;
   white-space: nowrap;
 }
 
 #matrixBoard .m-stats b {
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 16px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
 }
 
 #matrixBoard .m-stats,
@@ -27842,29 +28200,38 @@ html:not([data-theme="light"]) .formation-slot-row {
 
 @media (min-width: 769px) and (max-width: 1220px) {
   #matrixBoard .m-card-main-row {
-    gap: 3px;
+    gap: 2px;
   }
 
   #matrixBoard .m-card-info-col {
-    padding: 4px 2px 3px 0;
+    padding: 4px 1px 3px 0;
   }
 
   #matrixBoard .m-ap-chip {
     display: none;
   }
 
+  #matrixBoard .m-bot {
+    gap: 1px;
+  }
+
+  #matrixBoard .m-bot .m-skill-phase {
+    font-size: 8px;
+    padding: 0 2px;
+  }
+
   #matrixBoard .m-stats {
-    font-size: 9px !important;
-    gap: 2px !important;
+    font-size: 8px !important;
+    gap: 1px !important;
   }
 
   #matrixBoard .m-stats span {
-    gap: 1px;
+    gap: 0.5px;
   }
 
   #matrixBoard .m-stats b {
     font-size: 12px;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.07em;
     font-weight: 600;
   }
 
@@ -27873,6 +28240,11 @@ html:not([data-theme="light"]) .formation-slot-row {
   #matrixBoard .m-top-badges .m-form-badge {
     font-size: 8.5px;
     padding: 0 3px;
+  }
+
+  #matrixBoard .m-bot .m-form-badge {
+    font-size: 8px;
+    padding: 0 2px;
   }
 }
 
@@ -27951,10 +28323,22 @@ html:not([data-theme="light"]) .formation-slot-row {
     line-height: 14px;
   }
 
+  #matrixBoard .m-skill-ico {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    max-width: 10px;
+    flex: 0 0 10px;
+  }
+
   #matrixBoard .m-skill-phase {
     font-size: 9px;
     padding: 0 3px;
     line-height: 13px;
+  }
+
+  #matrixBoard .m-bot .m-form-badge {
+    display: none;
   }
 
   #matrixBoard .m-ap-chip,

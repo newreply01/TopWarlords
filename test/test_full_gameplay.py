@@ -385,6 +385,319 @@ try:
         fresh_mobile.close()
         print(f"[TEST 7] 行動端 (390x844) 雙層指揮列與新手引導流驗證通過: {onboard_rect}")
 
+        # 8. 線上真人雙人房：私人/公開權限切換、公開大廳過濾、跨專案隔離與快速配對實測
+        pvp_context = browser.new_context(viewport={"width": 1280, "height": 720})
+        pvp_context.route("https://www.gstatic.com/**", lambda route: route.fulfill(status=200, content_type="application/javascript", body=""))
+        pvp_context.route("https://unpkg.com/**", lambda route: route.fulfill(status=200, content_type="application/javascript", body=""))
+        pvp_context.add_init_script("""(() => {
+            const dbStore = {
+                pvp_rooms: {
+                    WL_PUB888: {
+                        gameId: 'topwarlords',
+                        code: 'PUB888',
+                        isPublic: true,
+                        status: 'waiting',
+                        hostId: 'HOST-PUB888',
+                        hostUid: 'CMD-PUB888',
+                        hostName: '織田信長公開房',
+                        hostFlag: '🇯🇵',
+                        maxGames: 7,
+                        marketMode: 'free',
+                        createdAt: Date.now() - 8000,
+                        messages: {}
+                    },
+                    WL_PRIV99: {
+                        gameId: 'topwarlords',
+                        code: 'PRIV99',
+                        isPublic: false,
+                        status: 'waiting',
+                        hostId: 'HOST-PRIV99',
+                        hostUid: 'CMD-PRIV99',
+                        hostName: '私人房應隱藏',
+                        hostFlag: '🇨🇳',
+                        maxGames: 5,
+                        marketMode: 'locked',
+                        createdAt: Date.now() - 8000
+                    },
+                    WL_FULL11: {
+                        gameId: 'topwarlords',
+                        code: 'FULL11',
+                        isPublic: true,
+                        status: 'full',
+                        hostId: 'HOST-FULL11',
+                        hostUid: 'CMD-FULL11',
+                        hostName: '滿員房應隱藏',
+                        hostFlag: '🇰🇷',
+                        maxGames: 3,
+                        marketMode: 'locked',
+                        createdAt: Date.now() - 8000
+                    },
+                    TC_CLASH1: {
+                        gameId: 'topclash',
+                        code: 'CLASH1',
+                        isPublic: true,
+                        status: 'waiting',
+                        hostId: 'HOST-TC',
+                        hostUid: 'CMD-TC',
+                        hostName: '友作房間應隔離',
+                        hostFlag: '🌐',
+                        maxGames: 5,
+                        marketMode: 'locked',
+                        createdAt: Date.now() - 8000
+                    },
+                    WL_BADGID: {
+                        gameId: 'othergame',
+                        code: 'BADGID',
+                        isPublic: true,
+                        status: 'waiting',
+                        hostId: 'HOST-BG',
+                        hostUid: 'CMD-BG',
+                        hostName: '異作ID應隔離',
+                        hostFlag: '🌐',
+                        maxGames: 5,
+                        marketMode: 'locked',
+                        createdAt: Date.now() - 8000
+                    }
+                }
+            };
+            window.__mockDbStore = dbStore;
+            const subscribers = [];
+
+            const getAt = (path) => {
+                const parts = String(path || '').split('/').filter(Boolean);
+                let cur = dbStore;
+                for (const p of parts) {
+                    if (!cur || typeof cur !== 'object') return undefined;
+                    cur = cur[p];
+                }
+                return cur;
+            };
+            const setAt = (path, val) => {
+                const parts = String(path || '').split('/').filter(Boolean);
+                if (!parts.length) return;
+                let cur = dbStore;
+                for (let i = 0; i < parts.length - 1; i++) {
+                    if (!cur[parts[i]] || typeof cur[parts[i]] !== 'object') cur[parts[i]] = {};
+                    cur = cur[parts[i]];
+                }
+                if (val === null || val === undefined) delete cur[parts[parts.length - 1]];
+                else cur[parts[parts.length - 1]] = JSON.parse(JSON.stringify(val));
+                notifyAll(path);
+            };
+            const updateAt = (path, patch) => {
+                const cur = getAt(path);
+                const merged = Object.assign(cur && typeof cur === 'object' ? JSON.parse(JSON.stringify(cur)) : {}, JSON.parse(JSON.stringify(patch)));
+                for (const k of Object.keys(merged)) {
+                    if (merged[k] === null || merged[k] === undefined) delete merged[k];
+                }
+                setAt(path, merged);
+            };
+            const makeSnap = (val) => ({
+                exists: () => val !== undefined && val !== null,
+                val: () => val === undefined ? null : JSON.parse(JSON.stringify(val))
+            });
+            const notifyAll = (changedPath) => {
+                subscribers.forEach(s => {
+                    if (s.evt === 'value') {
+                        s.fn(makeSnap(getAt(s.path)));
+                    }
+                });
+            };
+            const makeRef = (path) => ({
+                child: (sub) => makeRef(path ? path + '/' + sub : sub),
+                set: (v) => { setAt(path, v); return Promise.resolve(); },
+                update: (p) => { updateAt(path, p); return Promise.resolve(); },
+                remove: () => { setAt(path, null); return Promise.resolve(); },
+                onDisconnect: () => ({ remove: () => Promise.resolve(), set: () => Promise.resolve() }),
+                limitToLast: () => makeRef(path),
+                orderByChild: () => makeRef(path),
+                equalTo: () => makeRef(path),
+                once: () => Promise.resolve(makeSnap(getAt(path))),
+                on: (evt, fn) => {
+                    const entry = { path, evt, fn };
+                    subscribers.push(entry);
+                    if (evt === 'value') {
+                        setTimeout(() => fn(makeSnap(getAt(path))), 0);
+                    }
+                    return fn;
+                },
+                off: (evt, fn) => {
+                    for (let i = subscribers.length - 1; i >= 0; i--) {
+                        if (subscribers[i].path === path && (!fn || subscribers[i].fn === fn)) {
+                            subscribers.splice(i, 1);
+                        }
+                    }
+                },
+                push: (val) => {
+                    const id = 'M-' + Math.random().toString(36).slice(2, 8);
+                    setAt(path + '/' + id, val);
+                    if (path === 'pvp_rooms/WL_PUB888/messages' && val && val.type === '__RELAY_JOIN__') {
+                        const msg = {
+                            sender: 'HOST-PUB888',
+                            packet: {
+                                type: 'HANDSHAKE',
+                                payload: {
+                                    gameId: 'topwarlords',
+                                    name: '織田信長公開房',
+                                    uid: 'CMD-PUB888',
+                                    flag: '🇯🇵',
+                                    isHost: true,
+                                    isPublic: true,
+                                    maxGames: 7,
+                                    marketMode: 'free'
+                                }
+                            },
+                            ts: Date.now()
+                        };
+                        subscribers.forEach(s => {
+                            if (s.path === 'pvp_rooms/WL_PUB888/messages' && s.evt === 'child_added') {
+                                setTimeout(() => s.fn(makeSnap(msg)), 15);
+                            }
+                        });
+                    }
+                    return Promise.resolve({ key: id });
+                },
+                transaction: (fn) => {
+                    const cur = getAt(path);
+                    const next = fn(cur !== undefined ? JSON.parse(JSON.stringify(cur)) : null);
+                    if (next === undefined) {
+                        return Promise.resolve({ committed: false, snapshot: makeSnap(cur) });
+                    }
+                    setAt(path, next);
+                    return Promise.resolve({ committed: true, snapshot: makeSnap(getAt(path)) });
+                }
+            });
+
+            const fakeApp = {};
+            const fakeDb = { ref: (p) => makeRef(p) };
+            fakeDb.ServerValue = { TIMESTAMP: Date.now() };
+            window.firebase = {
+                apps: [fakeApp],
+                initializeApp: () => fakeApp,
+                auth: () => ({ onAuthStateChanged: () => () => {}, currentUser: null }),
+                database: Object.assign(() => fakeDb, { ServerValue: { TIMESTAMP: Date.now() } })
+            };
+
+            window.Peer = function(id) {
+                const cbs = {};
+                this.id = id || ('PEER-' + Math.random().toString(36).slice(2, 7));
+                this.on = (evt, fn) => { cbs[evt] = fn; };
+                this.connect = () => ({ on: () => {}, send: () => {}, close: () => {}, open: false });
+                this.destroy = () => {};
+                setTimeout(() => { if (cbs.open) cbs.open(this.id); }, 10);
+            };
+        })();""")
+        pvp_page = pvp_context.new_page()
+        pvp_page.on("pageerror", lambda err: errors.append(f"pvp_page: {err}"))
+        pvp_page.goto(f"http://127.0.0.1:{PORT}/index.html")
+        pvp_page.wait_for_selector(".m-card", timeout=10000)
+        pvp_page.wait_for_timeout(150)
+        if pvp_page.locator("#helpModal").is_visible():
+            pvp_page.locator("#helpClose").click()
+            pvp_page.wait_for_timeout(150)
+
+        pvp_page.locator("#tabBo3").click()
+        pvp_page.wait_for_timeout(150)
+        pvp_btn_text = pvp_page.locator("#btnOnlinePvp").inner_text()
+        assert "待戰" not in pvp_btn_text and "間" not in pvp_btn_text, f"Mission bar button must not show live waiting count: {pvp_btn_text}"
+
+        pvp_page.locator("#btnOnlinePvp").click()
+        pvp_page.wait_for_function("() => /^[A-Z0-9]{6}$/.test((document.querySelector('#pvpRoomCodeDisplay')?.textContent || '').trim())", timeout=5000)
+        host_code = pvp_page.locator("#pvpRoomCodeDisplay").inner_text().strip()
+        host_pub_check = pvp_page.evaluate("""(code) => {
+            const s = OnlinePvPEngine.getRoomSettings();
+            const fb = window.__mockDbStore.pvp_rooms['WL_' + code];
+            const modalCard = document.querySelector('#onlinePvpModal .pvp-modal-card');
+            return {
+                settings: s,
+                pubActive: document.querySelector('#btnPvpVisPublic').classList.contains('active'),
+                privActive: document.querySelector('#btnPvpVisPrivate').classList.contains('active'),
+                fbPublic: fb ? fb.isPublic : null,
+                fbGameId: fb ? fb.gameId : null,
+                fbStatus: fb ? fb.status : null,
+                hOverflow: modalCard.scrollWidth > modalCard.clientWidth + 1
+            };
+        }""", host_code)
+        assert host_pub_check["settings"]["isPublic"] is True and host_pub_check["pubActive"] and not host_pub_check["privActive"], f"Host room must default to public: {host_pub_check}"
+        assert host_pub_check["fbPublic"] is True and host_pub_check["fbGameId"] == "topwarlords" and host_pub_check["fbStatus"] == "waiting", f"Firebase host room payload mismatch: {host_pub_check}"
+        assert not host_pub_check["hOverflow"], f"Host modal overflowed on desktop: {host_pub_check}"
+
+        pvp_page.locator("#btnPvpVisPrivate").click()
+        pvp_page.wait_for_timeout(100)
+        host_priv_check = pvp_page.evaluate("""(code) => ({
+            settings: OnlinePvPEngine.getRoomSettings(),
+            privActive: document.querySelector('#btnPvpVisPrivate').classList.contains('active'),
+            fbPublic: window.__mockDbStore.pvp_rooms['WL_' + code]?.isPublic
+        })""", host_code)
+        assert host_priv_check["settings"]["isPublic"] is False and host_priv_check["privActive"] and host_priv_check["fbPublic"] is False, f"Private toggle failed: {host_priv_check}"
+
+        pvp_page.locator("#btnPvpVisPublic").click()
+        pvp_page.select_option("#pvpHostGamesSel", "3")
+        pvp_page.select_option("#pvpHostMarketSel", "free")
+        pvp_page.wait_for_timeout(100)
+        rule_check = pvp_page.evaluate("""(code) => ({
+            settings: OnlinePvPEngine.getRoomSettings(),
+            fb: window.__mockDbStore.pvp_rooms['WL_' + code]
+        })""", host_code)
+        assert rule_check["settings"] == {"isPublic": True, "maxGames": 3, "marketMode": "free"} and rule_check["fb"]["maxGames"] == 3 and rule_check["fb"]["marketMode"] == "free", f"Host rule update failed: {rule_check}"
+
+        # 切換到加入分頁：確認自己建的尚未開戰房被清除、公開清單嚴格過濾跨作/私人/滿房
+        pvp_page.locator("#tabPvpJoin").click()
+        pvp_page.wait_for_timeout(150)
+        lobby_check = pvp_page.evaluate("""(oldHostCode) => {
+            const items = [...document.querySelectorAll('#pvpPublicRoomsList .pvp-public-room-item')];
+            const modalCard = document.querySelector('#onlinePvpModal .pvp-modal-card');
+            return {
+                oldHostExists: !!window.__mockDbStore.pvp_rooms['WL_' + oldHostCode],
+                codes: items.map(el => el.dataset.code),
+                text: items.map(el => el.innerText.replace(/\\s+/g, ' ')),
+                hOverflow: modalCard.scrollWidth > modalCard.clientWidth + 1
+            };
+        }""", host_code)
+        assert not lobby_check["oldHostExists"], f"Idle hosted room should close when switching to join tab: {lobby_check}"
+        assert lobby_check["codes"] == ["PUB888"], f"Public room filtering leaked private/full/foreign rooms: {lobby_check}"
+        assert not lobby_check["hOverflow"], f"Join modal overflowed on desktop: {lobby_check}"
+
+        # 行動端 390x844 下檢查加入面板不溢位
+        pvp_page.set_viewport_size({"width": 390, "height": 844})
+        pvp_page.wait_for_timeout(150)
+        assert pvp_page.evaluate("() => { const m = document.querySelector('#onlinePvpModal .pvp-modal-card'); return m.scrollWidth <= m.clientWidth + 1; }"), "Join modal overflowed horizontally at 390x844"
+        pvp_page.set_viewport_size({"width": 1280, "height": 720})
+        pvp_page.wait_for_timeout(100)
+
+        # 點擊公開房「一鍵加入」並驗證握手完成後對峙欄與賽制同步
+        pvp_page.locator('#pvpPublicRoomsList .btnJoinPublicPvpRoom[data-code="PUB888"]').click()
+        pvp_page.wait_for_function("() => !document.querySelector('#pvpVersusBox').hidden", timeout=5000)
+        joined_check = pvp_page.evaluate("""() => ({
+            enemyName: document.querySelector('#pvpEnemyName').textContent,
+            boBadge: document.querySelector('#bo3PvpGamesSel')?.value || null,
+            maxGames: __db15.state.bo3.maxGames,
+            marketMode: __db15.state.bo3.marketMode
+        })""")
+        assert joined_check["enemyName"] == "織田信長公開房" and joined_check["maxGames"] == 7 and joined_check["marketMode"] == "free", f"Public room handshake/rule sync failed: {joined_check}"
+
+        # 關閉房間、清空大廳公開房，測試「⚡ 快速配對」無空房自動建公開房 (方案 A)
+        pvp_page.locator("#btnPvpCancel").click()
+        pvp_page.evaluate("() => { delete window.__mockDbStore.pvp_rooms.WL_PUB888; }")
+        pvp_page.locator("#btnOnlinePvp").click()
+        pvp_page.wait_for_timeout(100)
+        pvp_page.locator("#tabPvpJoin").click()
+        pvp_page.wait_for_timeout(120)
+        assert "目前沒有等待中的公開雙人房" in pvp_page.locator("#pvpPublicRoomsList").inner_text(), "Empty lobby message missing"
+        pvp_page.locator("#btnPvpQuickMatch").click()
+        pvp_page.wait_for_function("() => document.querySelector('#tabPvpHost').classList.contains('active') && /^[A-Z0-9]{6}$/.test((document.querySelector('#pvpRoomCodeDisplay')?.textContent || '').trim())", timeout=5000)
+        qm_check = pvp_page.evaluate("""() => {
+            const code = document.querySelector('#pvpRoomCodeDisplay').textContent.trim();
+            return {
+                code,
+                settings: OnlinePvPEngine.getRoomSettings(),
+                fb: window.__mockDbStore.pvp_rooms['WL_' + code]
+            };
+        }""")
+        assert qm_check["settings"]["isPublic"] is True and qm_check["fb"] and qm_check["fb"]["isPublic"] is True and qm_check["fb"]["gameId"] == "topwarlords", f"Quick match empty fallback did not create public room: {qm_check}"
+        pvp_context.close()
+        print(f"[TEST 8] 線上真人雙人房（私人/公開切換、公開大廳隔離、一鍵加入與快速配對）測試通過: {qm_check['code']}")
+
         # 檢查過程是否有 JS 報錯
         assert len(errors) == 0, f"瀏覽器執行出現 JS 報錯: {errors}"
 

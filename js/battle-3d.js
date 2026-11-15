@@ -95,7 +95,10 @@ const Battle3DEngine = (function () {
   let floatingPopups = [];         // 3D 浮動兵力傷害數字 (-3,200 / 格擋)
   let brazierLights = [];          // 營寨篝火動態光源
   let cutinTimeout = null;
+  let cutinTimer = null;
+  let cutinQueue = [];
   let lastCutinAt = 0;
+  let lastLabelLayoutKey = '';
   let riverTexRef = null;
   let bannerTexCache = new Map();
   let baguaTexCache = new Map();
@@ -1863,6 +1866,9 @@ const Battle3DEngine = (function () {
       const edge = isSideA ? (light ? '#175976' : '#8bbdd1') : (light ? '#93412e' : '#dc9a82');
       const hp = Math.max(0, hpVal);
       const ratio = Math.max(0, Math.min(1, hp / Math.max(1, maxHp)));
+      const tok = unitsMap.get(unit.uid);
+      const isCaptured = Boolean(unit.captured || tok?.captured);
+      const deadTag = hp <= 0 ? (isCaptured ? '【被俘】' : '【陣亡】') : '';
       ctx.clearRect(0, 0, 512, 176);
       if (!showUnitLabels) {
         roundRectPath(ctx, 14, 34, 484, 108, 14);
@@ -1895,7 +1901,13 @@ const Battle3DEngine = (function () {
         ctx.textAlign = 'left';
         ctx.fillStyle = '#fff6e0';
         ctx.font = '900 50px "Noto Serif TC", "Microsoft JhengHei", sans-serif';
-        ctx.fillText((unit.name || '無名武將').slice(0, 6), 94, 95, 386);
+        ctx.fillText((unit.name || '無名武將').slice(0, 6), 94, 95, deadTag ? 256 : 386);
+        if (deadTag) {
+          ctx.fillStyle = isCaptured ? '#fde68a' : '#fda4af';
+          ctx.font = '900 28px "Noto Sans TC", sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(deadTag, 480, 92);
+        }
 
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.fillRect(94, 114, 386, 12);
@@ -1954,15 +1966,17 @@ const Battle3DEngine = (function () {
       }
 
       const troopsNum = Math.round(hp * 100).toLocaleString();
-      ctx.fillStyle = light ? '#594119' : '#fde68a';
+      ctx.fillStyle = deadTag
+        ? (isCaptured ? (light ? '#b45309' : '#fbbf24') : (light ? '#be123c' : '#fb7185'))
+        : (light ? '#594119' : '#fde68a');
       ctx.font = 'bold 23px "JetBrains Mono", "Noto Sans TC", sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(`兵力 ${troopsNum}`, 474, 140);
+      ctx.fillText(deadTag ? `${deadTag} · 兵力 0` : `兵力 ${troopsNum}`, 474, 140, 195);
 
       ctx.fillStyle = edge;
       ctx.font = 'bold 20px "Noto Sans TC", sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(`${unit.formationName || '魚鱗'}陣 · ${isSideA ? '我軍' : '敵軍'}`, 168, 140);
+      ctx.fillText(`${unit.formationName || '魚鱗'}陣 · ${isSideA ? '我軍' : '敵軍'}`, 168, 140, 118);
 
       // 4. 左側鎏金圓形名將胸像勳章 (半徑 68)
       const cx = 86, cy = 88, r = 68;
@@ -2465,10 +2479,7 @@ const Battle3DEngine = (function () {
       if (!tToken) {
         performWarlordSkillVfx(aToken, null, ln.skillFx || aToken.skillFx, ln, true);
       }
-      if (nowMs - lastCutinAt > 1800) {
-        lastCutinAt = nowMs;
-        triggerWarlordCutin(aToken, ln.kind === 'kill', ln);
-      }
+      scheduleWarlordCutin(aToken, ln.kind === 'kill' || ln.kind === 'capture', ln);
     }
 
     // 2. 攝影機微聚焦於交鋒熱區
@@ -2499,6 +2510,9 @@ const Battle3DEngine = (function () {
     let deferTargetEffects = false;
 
     if (ln.kind === 'info') {
+      if (aToken && (ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation)) {
+        playFieldSound(ln.sfxOverride || 'strategy_gong', aToken, 0.58);
+      }
       finishEffects();
       return effectsFinished;
     }
@@ -2670,10 +2684,27 @@ const Battle3DEngine = (function () {
   }
 
   function performDuelClash(aToken, tToken) {
+    const dist = aToken.mesh.position.distanceTo(tToken.mesh.position);
+    if (dist > 1.5) {
+      const meet = aToken.mesh.position.clone().lerp(tToken.mesh.position, 0.5);
+      aToken.mesh.position.lerp(meet, 0.35);
+      tToken.mesh.position.lerp(meet, 0.35);
+      aToken.mesh.position.y = getBattleTerrainHeight(aToken.mesh.position.x, aToken.mesh.position.z);
+      tToken.mesh.position.y = getBattleTerrainHeight(tToken.mesh.position.x, tToken.mesh.position.z);
+    }
+    const duelYawA = Math.atan2(tToken.mesh.position.x - aToken.mesh.position.x, tToken.mesh.position.z - aToken.mesh.position.z);
+    const turnA = clampFormationYaw(aToken.side, duelYawA, 0.45);
+    aToken.targetYaw = turnA.yaw;
+    aToken.individualYawOffset = turnA.remainder;
+    const duelYawB = Math.atan2(aToken.mesh.position.x - tToken.mesh.position.x, aToken.mesh.position.z - tToken.mesh.position.z);
+    const turnB = clampFormationYaw(tToken.side, duelYawB, 0.45);
+    tToken.targetYaw = turnB.yaw;
+    tToken.individualYawOffset = turnB.remainder;
     triggerSquadAnim(aToken, 'attack', 1.35);
     triggerSquadAnim(tToken, 'attack', 1.2);
     const midpoint = aToken.mesh.position.clone().lerp(tToken.mesh.position, 0.5);
     const hitPos = midpoint.clone().add(new THREE.Vector3(0, 0.9, 0));
+    spawnFloatingDamagePopup(midpoint, '⚔️ 一騎討', '#fde047', true);
     spawnSparkBurst(hitPos, 20, 0xfef08a);
     spawnSlashArc(hitPos, aToken.side, 0xfbbf24, 1.45, true);
     spawnSlashArc(hitPos, tToken.side, 0x38bdf8, 1.25, false);
@@ -2704,6 +2735,7 @@ const Battle3DEngine = (function () {
     const impactPos = orig.clone().add(dir.multiplyScalar(Math.max(0, orig.distanceTo(target) - 0.82)));
     impactPos.y = getBattleTerrainHeight(impactPos.x, impactPos.z);
 
+    if (orig.distanceTo(target) > 1.85) aToken.chargeCommitted = false;
     if (aToken.chargeCommitted) {
       triggerSquadAnim(aToken, 'attack', 1.25);
       if (!miss) {
@@ -2853,6 +2885,7 @@ const Battle3DEngine = (function () {
     const direction = target.clone().sub(orig).normalize();
     const strikePos = orig.clone().add(direction.multiplyScalar(Math.max(0, orig.distanceTo(target) - 0.78)));
     strikePos.y = getBattleTerrainHeight(strikePos.x, strikePos.z);
+    if (orig.distanceTo(target) > 1.85) aToken.chargeCommitted = false;
     if (aToken.chargeCommitted) {
       triggerSquadAnim(aToken, 'attack', 1.3);
       if (!miss) {
@@ -3747,6 +3780,7 @@ const Battle3DEngine = (function () {
       });
       spawnShockwaveRing(fxPos, 0x0284c7, 3.5, 720);
       spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), 24, 0x38bdf8);
+      playFieldSound('cavalry_charge', targetToken, 0.65);
       if (isUltimate) {
         triggerCameraShake(0.26);
         triggerHitStop(45);
@@ -3771,6 +3805,7 @@ const Battle3DEngine = (function () {
       }
       spawnShockwaveRing(fxPos, 0xd97706, 3.4, 740);
       spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.0, 0)), 20, 0xfbbf24);
+      playFieldSound('strategy_gong', targetToken, 0.65);
     } else if (key === 'piercing_volley') {
       // 破甲準星印 + 立體鎖定準星 + 三支金龍穿雲巨箭自斜空貫穿陣地
       const start = casterAnchor.clone().add(new THREE.Vector3(0, 1.35, 0));
@@ -3799,6 +3834,7 @@ const Battle3DEngine = (function () {
       }
       spawnShockwaveRing(anchor, 0xf59e0b, 3.0, 640);
       spawnSparkBurst(end, 22, 0xfbbf24);
+      playFieldSound('arrow_volley', targetToken, 0.68);
     } else if (key === 'tidal_surge') {
       // 鳴梁漩渦陣 + 四面高聳浮世繪怒濤捲浪湧拍
       addTexPlane('whirlpool_seal', 5.6, 5.6, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
@@ -3815,6 +3851,7 @@ const Battle3DEngine = (function () {
       }
       spawnShockwaveRing(fxPos, 0x0891b2, 3.5, 720);
       spawnSparkBurst(fxPos.clone().add(new THREE.Vector3(0, 1.0, 0)), 22, 0x22d3ee);
+      playFieldSound('war_drum', targetToken, 0.65);
     } else if (key === 'aegis_command') {
       // 八角不動如山盾陣 + 四面大型環繞金剛獸面盾
       const shieldTarget = tToken ? aToken || targetToken : targetToken;
@@ -3832,6 +3869,7 @@ const Battle3DEngine = (function () {
       }
       spawnShockwaveRing(shPos, 0x059669, 3.2, 700);
       spawnSparkBurst(shPos.clone().add(new THREE.Vector3(0, 1.0, 0)), 20, 0x10b981);
+      playFieldSound('shield_block', shieldTarget, 0.65);
     } else if (key === 'shadow_ambush') {
       // 暗影風魔陣 + 巨大十字寒芒斬 + 高速旋轉手裏劍
       const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.2, 0));
@@ -3847,6 +3885,7 @@ const Battle3DEngine = (function () {
       spawnSlashArc(hitPos, aToken?.side || 'A', 0xa855f7, 2.1, true);
       spawnShockwaveRing(anchor, 0x7e22ce, 3.2, 660);
       spawnSparkBurst(hitPos, 22, 0xc084fc);
+      playFieldSound('blade_clash', targetToken, 0.65);
     } else {
       // overlord_cleave（霸王無雙：裂地破陣紋 + 立體旋轉月牙刀芒 + 雙重斬擊弧線）
       const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.15, 0));
@@ -3865,6 +3904,7 @@ const Battle3DEngine = (function () {
       spawnSlashArc(hitPos, aToken?.side || 'A', 0xe11d48, 2.2, true);
       spawnShockwaveRing(anchor, 0xe11d48, 3.4, 680);
       spawnSparkBurst(hitPos, 24, 0xfbbf24);
+      playFieldSound('blade_clash', targetToken, 0.72);
       if (isUltimate) triggerCameraShake(0.25);
     }
   }
@@ -3886,6 +3926,7 @@ const Battle3DEngine = (function () {
       return token.deathAnimation || Promise.resolve();
     }
     token.alive = false;
+    token.captured = Boolean(captured);
     token.march = null;
     token.engagement = null;
     token.impact = null;
@@ -3894,12 +3935,12 @@ const Battle3DEngine = (function () {
     triggerSquadAnim(token, 'death', 1.0);
     if (!immediate) {
       spawnWarSmoke(token.mesh.position, 2, 0x3b322b, 2.0, 0.45);
-      spawnShockwaveRing(token.mesh.position, 0xef4444, 2.2, 420);
+      spawnShockwaveRing(token.mesh.position, captured ? 0xf59e0b : 0xef4444, 2.2, 420);
       spawnBattleScar(token.mesh.position, 1.15, false);
       triggerCameraShake(0.38);
       triggerHitStop(80);
-      playFieldSound('warlord_fall', token, 0.85);
-      triggerImpactVignette('rgba(220, 38, 38, 0.34)');
+      playFieldSound(captured ? 'war_drum' : 'warlord_fall', token, 0.85);
+      triggerImpactVignette(captured ? 'rgba(217, 119, 6, 0.36)' : 'rgba(220, 38, 38, 0.34)');
     } else {
       spawnDustPuff(token.mesh.position);
     }
@@ -3998,6 +4039,31 @@ const Battle3DEngine = (function () {
     vig.style.boxShadow = `inset 0 0 85px 18px ${colorRgba}`;
     vig.style.opacity = '1';
     setTimeout(() => { vig.style.opacity = '0'; }, 180);
+  }
+
+  function scheduleWarlordCutin(token, isKill = false, ln = null) {
+    const nowMs = combatNow();
+    if (nowMs - lastCutinAt > 1050 && !cutinTimer) {
+      lastCutinAt = nowMs;
+      triggerWarlordCutin(token, isKill, ln);
+      return;
+    }
+    if (cutinQueue.length < 3) cutinQueue.push({ token, isKill, ln });
+    if (!cutinTimer) {
+      const drain = () => {
+        cutinTimer = null;
+        if (battleSettled || !cutinQueue.length) return;
+        const next = cutinQueue.shift();
+        if (next && next.token && next.token.epoch === battleEpoch) {
+          lastCutinAt = combatNow();
+          triggerWarlordCutin(next.token, next.isKill, next.ln);
+        }
+        if (cutinQueue.length && !battleSettled) {
+          cutinTimer = setTimeout(drain, 1050);
+        }
+      };
+      cutinTimer = setTimeout(drain, Math.max(80, 1050 - (nowMs - lastCutinAt)));
+    }
   }
 
   function triggerWarlordCutin(token, isKill = false, ln = null) {
@@ -4423,45 +4489,166 @@ const Battle3DEngine = (function () {
     const labelAreaHeight = Math.max(1, height - topInset - bottomInset);
     const placed = [];
     const narrow = width < 520;
+    const layoutKey = `${width}x${height}:${cameraView}:${showUnitLabels ? 1 : 0}`;
+    const shouldSmooth = !isAnimationPaused && !isDragging && layoutKey === lastLabelLayoutKey;
+    lastLabelLayoutKey = layoutKey;
+
+    const orderedTokens = [...unitsMap.values()].sort((a, b) => {
+      if (a.alive !== b.alive) return a.alive ? -1 : 1;
+      if (a.side !== b.side) return a.side === 'A' ? -1 : 1;
+      return (a.origZ || 0) - (b.origZ || 0);
+    });
+
     const sideRows = { A: 0, B: 0 };
     const sideIndex = { A: 0, B: 0 };
-    unitsMap.forEach(token => { sideRows[token.side]++; });
-    unitsMap.forEach(token => {
+    orderedTokens.forEach(token => { sideRows[token.side]++; });
+
+    orderedTokens.forEach(token => {
       const sprite = token.hud.sprite;
-      const desiredWidth = showUnitLabels ? Math.min(186, width * 0.38)
+      const desiredWidth = showUnitLabels
+        ? Math.min(186, width * 0.38) * (token.alive ? 1 : 0.86)
         : Math.max(104, Math.min(132, token.name.length * 14 + 34, (width - 12) / 2));
-      const pixels = narrow ? Math.min(desiredWidth, Math.max(1, labelAreaHeight / sideRows[token.side] - 4) * 512 / 176) : desiredWidth;
+      const pixels = narrow
+        ? Math.min(desiredWidth, Math.max(1, labelAreaHeight / Math.max(1, sideRows[token.side]) - 4) * 512 / 176)
+        : desiredWidth;
       const labelHeight = pixels * 176 / 512;
+      const minX = pixels / 2 + 2;
+      const maxX = Math.max(minX, width - pixels / 2 - 2);
+      const minY = topInset + labelHeight / 2 + 2;
+      const maxY = Math.max(minY, height - bottomInset - labelHeight / 2 - 2);
+
       const anchor = token.mesh.position.clone().add(new THREE.Vector3(
-        token.side === 'A' ? -0.55 : 0.55, token.cat === 'air' ? 2.15 : 1.65, 0));
-      const point = anchor.clone().project(camera);
-      let x = Math.max(pixels / 2 + 3, Math.min(width - pixels / 2 - 3, (point.x + 1) * width / 2));
-      const startY = Math.max(topInset + labelHeight / 2 + 3, Math.min(height - bottomInset - labelHeight / 2 - 3, (1 - point.y) * height / 2));
-      let y = startY;
+        token.side === 'A' ? -0.55 : 0.55,
+        token.cat === 'air' ? 2.15 : 1.65,
+        0
+      ));
+      const point = anchor.clone().add(camShakeOffset).project(camera);
+      const rawX = Math.max(minX, Math.min(maxX, (point.x + 1) * width / 2));
+      const rawY = Math.max(minY, Math.min(maxY, (1 - point.y) * height / 2));
+
+      if (!shouldSmooth || token.hud.smoothAnchorX == null) {
+        token.hud.smoothAnchorX = rawX;
+        token.hud.smoothAnchorY = rawY;
+      } else {
+        token.hud.smoothAnchorX += (rawX - token.hud.smoothAnchorX) * 0.22;
+        token.hud.smoothAnchorY += (rawY - token.hud.smoothAnchorY) * 0.22;
+      }
+      let x = Math.max(minX, Math.min(maxX, token.hud.smoothAnchorX));
+      let y = Math.max(minY, Math.min(maxY, token.hud.smoothAnchorY));
+
+      const overlapsAt = (cx, cy) => placed.some(rect =>
+        Math.abs(cx - rect.x) < (pixels + rect.width) / 2 + 2
+        && Math.abs(cy - rect.y) < (labelHeight + rect.height) / 2 + 2
+      );
+
       if (narrow) {
-        x = token.side === 'A' ? pixels / 2 + 3 : width - pixels / 2 - 3;
-        y = topInset + (++sideIndex[token.side] - 0.5) * labelAreaHeight / sideRows[token.side];
-      }
-      let found = false;
-      for (const candidateX of narrow ? [] : [x, x - pixels - 4, x + pixels + 4, pixels / 2 + 3, width - pixels / 2 - 3]) {
-        if (candidateX < pixels / 2 || candidateX > width - pixels / 2) continue;
-        for (let step = 0; step < 20; step++) {
-          const offset = step === 0 ? 0 : Math.ceil(step / 2) * (labelHeight + 3) * (step % 2 ? -1 : 1);
-          const candidateY = startY + offset;
-          if (candidateY < topInset + labelHeight / 2 || candidateY > height - bottomInset - labelHeight / 2) continue;
-          const overlaps = placed.some(rect => Math.abs(candidateX - rect.x) < (pixels + rect.width) / 2 + 2
-            && Math.abs(candidateY - rect.y) < (labelHeight + rect.height) / 2 + 2);
-          if (!overlaps) { x = candidateX; y = candidateY; found = true; break; }
+        x = token.side === 'A' ? minX + 1 : maxX - 1;
+        y = topInset + (++sideIndex[token.side] - 0.5) * labelAreaHeight / Math.max(1, sideRows[token.side]);
+      } else {
+        const prev = token.hud.prevRect;
+        const outDir = token.side === 'A' ? -1 : 1;
+        const halfMid = width * 0.5;
+        const ownHalfLimit = token.side === 'A' ? halfMid + 8 : halfMid - 8;
+        const ownEdgeX = token.side === 'A' ? minX + 1 : maxX - 1;
+        const rawPrimaryX = [x];
+        if (prev && shouldSmooth) {
+          rawPrimaryX.push(prev.x + (x - prev.x) * 0.45, prev.x);
         }
-        if (found) break;
+        rawPrimaryX.push(
+          x + outDir * (pixels * 0.45),
+          x + outDir * (pixels + 4),
+          ownHalfLimit,
+          ownEdgeX,
+          x - outDir * (pixels * 0.45),
+          x - outDir * (pixels + 4)
+        );
+        const primaryX = [];
+        rawPrimaryX.forEach(cx => {
+          const clamped = Math.max(minX, Math.min(maxX, cx));
+          if (!primaryX.some(v => Math.abs(v - clamped) < 4)) primaryX.push(clamped);
+        });
+        const fallbackX = [];
+        for (let k = 0; k <= 4; k++) {
+          fallbackX.push(token.side === 'A' ? minX + k * (pixels + 3) : maxX - k * (pixels + 3));
+        }
+        for (let k = 0; k <= 4; k++) {
+          fallbackX.push(token.side === 'A' ? maxX - k * (pixels + 3) : minX + k * (pixels + 3));
+        }
+
+        const baseY = (prev && shouldSmooth) ? prev.y : y;
+        const fineYOffsets = [0, -8, 8, -16, 16, -28, 28, -42, 42, -58, 58, -76, 76, -98, 98, -124, 124, -156, 156, -196, 196];
+        const searchCandidates = (xList) => {
+          let best = null;
+          for (const rawCandX of xList) {
+            const candX = Math.max(minX, Math.min(maxX, rawCandX));
+            const edgeYs = (prev && shouldSmooth)
+              ? [y, baseY + (y - baseY) * 0.45, baseY]
+              : [y];
+            for (const off of fineYOffsets) {
+              if (off !== 0) edgeYs.push(y + off);
+              if (prev && shouldSmooth && off !== 0) edgeYs.push(baseY + off);
+            }
+            for (const rect of placed) {
+              if (Math.abs(candX - rect.x) < (pixels + rect.width) / 2 + 2) {
+                const needY = (labelHeight + rect.height) / 2 + 2.5;
+                edgeYs.push(rect.y - needY, rect.y + needY);
+              }
+            }
+            for (const candY of edgeYs) {
+              if (candY < minY - 0.5 || candY > maxY + 0.5) continue;
+              const clampedY = Math.max(minY, Math.min(maxY, candY));
+              if (overlapsAt(candX, clampedY)) continue;
+              const overHalf = token.side === 'A'
+                ? Math.max(0, candX - (halfMid + 12))
+                : Math.max(0, (halfMid - 12) - candX);
+              const crossHalfPenalty = overHalf > 0 ? 420 + overHalf * 4 : 0;
+              const distAnchor = Math.hypot(candX - x, clampedY - y);
+              const distPrev = (prev && shouldSmooth) ? Math.hypot(candX - prev.x, clampedY - prev.y) : 0;
+              const jumpPenalty = Math.max(0, distPrev - 22) * 1.45;
+              const cost = distAnchor + distPrev * 0.35 + jumpPenalty + crossHalfPenalty;
+              if (!best || cost < best.cost) best = { x: candX, y: clampedY, cost };
+            }
+          }
+          return best;
+        };
+
+        const chosen = searchCandidates(primaryX) || searchCandidates(fallbackX);
+        if (chosen) {
+          if (shouldSmooth && prev) {
+            const deltaX = chosen.x - prev.x;
+            const deltaY = chosen.y - prev.y;
+            const dist = Math.hypot(deltaX, deltaY);
+            const maxStep = 18;
+            const blendSteps = dist > maxStep
+              ? [maxStep / dist, 0.35, 0.65, 1.0]
+              : [1.0, 0.65, 0.35];
+            let applied = null;
+            for (const blend of blendSteps) {
+              const candX = Math.max(minX, Math.min(maxX, prev.x + deltaX * blend));
+              const candY = Math.max(minY, Math.min(maxY, prev.y + deltaY * blend));
+              if (!overlapsAt(candX, candY)) {
+                applied = { x: candX, y: candY };
+                break;
+              }
+            }
+            x = applied ? applied.x : chosen.x;
+            y = applied ? applied.y : chosen.y;
+          } else {
+            x = chosen.x;
+            y = chosen.y;
+          }
+        }
       }
-      placed.push({ x, y, width: pixels, height: labelHeight });
+
+      const finalRect = { x, y, width: pixels, height: labelHeight };
+      token.hud.prevRect = finalRect;
+      placed.push(finalRect);
       point.set(x / width * 2 - 1, 1 - y / height * 2, point.z).unproject(camera);
       sprite.position.copy(point.sub(token.mesh.position));
       const depth = anchor.clone().applyMatrix4(camera.matrixWorldInverse).z;
       const perPixel = -2 * depth * Math.tan(camera.fov * Math.PI / 360) / height;
       sprite.scale.set(pixels * perPixel, pixels * perPixel * 176 / 512, 1);
-      sprite.userData.screenRect = placed[placed.length - 1];
+      sprite.userData.screenRect = finalRect;
     });
   }
 
@@ -4992,6 +5179,9 @@ const Battle3DEngine = (function () {
   function clearAllTokens() {
     battleEpoch++;
     battleMotionActive = false;
+    lastLabelLayoutKey = '';
+    cutinQueue = [];
+    if (cutinTimer) { clearTimeout(cutinTimer); cutinTimer = null; }
     activeAttackers.clear();
     window.SoundEngine?.stopSpatial?.();
     unitsMap.forEach((t) => {
@@ -5032,6 +5222,8 @@ const Battle3DEngine = (function () {
   }
 
   function clearBattleEffects() {
+    cutinQueue = [];
+    if (cutinTimer) { clearTimeout(cutinTimer); cutinTimer = null; }
     projectiles.forEach(p => {
       if (scene && p.mesh) scene.remove(p.mesh);
       if (p.isVolleyBatch) {

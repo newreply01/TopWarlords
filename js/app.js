@@ -1257,6 +1257,50 @@ function getCardTacticalTags(u) {
   return tags;
 }
 
+const SKILL_SVG_ICONS = {
+  gunpowder: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.8" fill="currentColor"/><path d="M8 1v2.6M8 12.4V15M1 8h2.6M12.4 8H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  fire_storm: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8.7 1.2c.4 2.4-1.2 3.7-2.2 5-.7.9-.9 2-.3 3.1.2-1 .9-1.8 1.6-2.2-.2 1.3.7 2 1.5 2.7.7.7.9 1.9.3 2.8A4.2 4.2 0 0 0 13 8.8c0-3-1.8-5.4-4.3-7.6ZM8 14.8c-2.6 0-4.6-1.9-4.6-4.5 0-2 1.1-3.8 2.4-5.2-.1 1.6.5 2.7 1.3 3.6-.1-1 .2-1.8.8-2.5-.1 1.3.6 2.1 1.3 2.9.6.6 1 1.4.8 2.3.7-.4 1.1-1.1 1.2-1.9.5.8.7 1.5.7 2.2 0 1.8-1.6 3.1-3.9 3.1Z" fill="currentColor"/></svg>`,
+  thunder_strike: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M9.6 1 3.4 9h4.1l-1.3 6 6.4-8.3H8.4L9.6 1Z" fill="currentColor"/></svg>`,
+  bagua_array: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><polygon points="5.4,1.6 10.6,1.6 14.4,5.4 14.4,10.6 10.6,14.4 5.4,14.4 1.6,10.6 1.6,5.4" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 5a1.5 1.5 0 0 1 0 3 1.5 1.5 0 0 0 0 3A3 3 0 0 1 8 5Z" fill="currentColor"/></svg>`,
+  spear_charge: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M14.5 1.5 9.2 4l1.5 1.3-8.6 8.6 1 1 8.6-8.6 1.3 1.5 1.5-6.3Z" fill="currentColor"/><path d="M4.2 8.2 7.8 11.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+  overlord_cleave: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M13.8 2.2 11 2l-1 2.2-1.8-.9-1.1 1.4 1.6 1.5-6.6 6.6 1.1 1.1 6.6-6.6 1.5 1.6 1.4-1.1-.9-1.8L14 5l-.2-2.8Z" fill="currentColor"/></svg>`,
+  piercing_volley: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M3.5 2.2C6.8 4.2 6.8 11.8 3.5 13.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3.5 2.5v11M2 8h11.5M11.3 5.5 14 8l-2.7 2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  tidal_surge: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 2v9M5.2 4.8h5.6M3.2 9.2a4.8 4.8 0 0 0 9.6 0M2 13.6c1.5-.8 3-.8 4.5 0s3 .8 4.5 0 2-.5 3 0" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  aegis_command: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 1.5 2.5 3.6v4.1c0 3.4 2.3 5.8 5.5 6.8 3.2-1 5.5-3.4 5.5-6.8V3.6L8 1.5Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 4v8M5.2 7.2h5.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+  shadow_ambush: `<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M8 1 9.8 6.2 15 8l-5.2 1.8L8 15l-1.8-5.2L1 8l5.2-1.8L8 1Z" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="#0f172a"/></svg>`
+};
+
+function getSkillIconKey(u) {
+  if (!u) return 'overlord_cleave';
+  const fx = u.skill?.fx || (typeof resolveSkillFx === 'function'
+    ? resolveSkillFx(u.id, u.cat, u.skill, u.skill?.effects, u.traits)
+    : 'overlord_cleave');
+  const label = `${u.weapon || ''} ${u.skill?.name || ''}`;
+  if (['NOBUNAGA', 'SAIKA', 'AKECHI', 'TAKIGAWA', 'SHIMAZU_IEHISA', 'CHOIMUSEON', 'DATE', 'GWONYUL'].includes(u.id)
+    || /銃|鐵砲|火車|神機箭|火器|炮/.test(label)) {
+    return 'gunpowder';
+  }
+  if (fx === 'fire_storm') return 'fire_storm';
+  if (fx === 'thunder_strike') return 'thunder_strike';
+  if (fx === 'bagua_array') return 'bagua_array';
+  if ((fx === 'overlord_cleave' || u.cat === 'air')
+    && (['ZHAOYUN', 'MACHO', 'YUKIMURA', 'MAEDATOSHI', 'HONDA', 'GAOCHANGGONG', 'IINAOMASA', 'KATOKIYOMASA'].includes(u.id)
+      || (/槍|槊|矛|騎/.test(label) && !/戟|刀|錘/.test(u.weapon || '')))) {
+    return 'spear_charge';
+  }
+  if (fx === 'overlord_cleave') return 'overlord_cleave';
+  if (fx === 'piercing_volley') return 'piercing_volley';
+  if (fx === 'tidal_surge') return 'tidal_surge';
+  if (fx === 'aegis_command') return 'aegis_command';
+  return 'shadow_ambush';
+}
+
+function renderSkillSvgIcon(u) {
+  const key = getSkillIconKey(u);
+  const svg = SKILL_SVG_ICONS[key] || SKILL_SVG_ICONS.overlord_cleave;
+  return `<span class="m-skill-ico ico-${key}" aria-hidden="true">${svg}</span>`;
+}
+
 /* ---------- 渲染：5x5 全景矩陣看板 (Matrix Board) ---------- */
 function renderMatrix() {
   renderMobileCatNav();
@@ -1360,9 +1404,8 @@ function renderMatrix() {
             </div>
             <div class="m-skill-row">
               <button type="button" class="m-skill" data-info-id="${u.id}" title="點擊查看詳細情報" aria-label="${esc(u.name)}：${phase ? phase + ' ' : ''}${esc(u.skill?.name || '未配置戰法')}，查看詳情">
-                <strong>${esc(u.skill?.name || '未配置戰法')}</strong>
+                ${renderSkillSvgIcon(u)}<strong>${esc(u.skill?.name || '未配置戰法')}</strong>
               </button>
-              ${phase ? `<span class="m-skill-phase phase-${phase.toLowerCase()}" data-info-id="${u.id}" title="${esc(PHASE_TIPS[phase] || '')}（點擊查看詳情）">${esc(phase)}</span>` : ''}
               ${hasAp ? `<span class="m-ap-chip" data-info-id="${u.id}" title="具備破甲重擊或戰法破甲效果（點擊查看詳情）">破甲</span>` : ''}
             </div>
             <div class="m-bot">
@@ -1371,9 +1414,10 @@ function renderMatrix() {
                 <span title="打擊 ATK" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
                 <span title="${stat3.fullLabel}" aria-label="${stat3.fullLabel} ${stat3.val}">${stat3.label} <b>${stat3.val}</b></span>
               </div>
-              ${selFormBadgeHtml}
+              ${phase ? `<div class="m-bot-right"><span class="m-skill-phase phase-${phase.toLowerCase()}" data-info-id="${u.id}" title="${esc(PHASE_TIPS[phase] || '')}（點擊查看詳情）">${esc(phase)}</span></div>` : ''}
             </div>
             <div class="m-mobile-brief">
+              ${selFormBadgeHtml}
               ${tacTags.slice(0, 2).map(t => `<span class="m-tac-chip ${t.cls}" title="${esc(t.title)}">${esc(t.text)}</span>`).join('')}
               <span class="m-mobile-skill-text">${esc(u.skill?.desc || getCombatRoleSummary(u))}</span>
             </div>
@@ -4693,22 +4737,22 @@ function setSideHero(side, unit, action, subtext) {
   const colEl = $('#team' + side);
 
   // 1. 本地照片瞬發切換（0 延遲）
-  const targetSrc = unit.img || `assets/units/${unit.id}.jpg`;
+  const targetSrc = unit.img || `assets/warlords/${unit.id}.jpg?v=7.11.1`;
   if (img) {
     img.src = targetSrc;
   }
 
-  // 2. HUD 軍規浮水印文字
+  // 2. 古典軍情浮水印文字
   if (nameEl) {
     nameEl.innerHTML = `<span style="margin-right:4px">${unit.flag || ''}</span> <strong>${esc(unit.name)}</strong>`;
   }
   if (statusEl) {
     if (action === 'fire') {
-      statusEl.innerHTML = `<span style="color:#38bdf8;font-weight:700">⚡ [OPEN FIRE] ${esc(subtext || unit.weapon || '火力齊射')}</span>`;
+      statusEl.innerHTML = `<span style="color:#38bdf8;font-weight:700">⚡ 【全軍突擊】 ${esc(subtext || unit.weapon || '重兵壓境')}</span>`;
     } else if (action === 'hit') {
-      statusEl.innerHTML = `<span style="color:#f43f5e;font-weight:700">💥 [TARGET HIT] ${esc(subtext || '承受打擊')}</span>`;
+      statusEl.innerHTML = `<span style="color:#f43f5e;font-weight:700">💥 【承受猛擊】 ${esc(subtext || '穩陣抗敵')}</span>`;
     } else {
-      statusEl.innerHTML = `<span style="color:#94a3b8">📡 [ACTIVE PATROL] ${esc(subtext || '戰場全景巡航')}</span>`;
+      statusEl.innerHTML = `<span style="color:#94a3b8">🚩 【臨陣督戰】 ${esc(subtext || '列陣督軍對壘')}</span>`;
     }
   }
 
@@ -5085,7 +5129,6 @@ function playFx(ln) {
   try {
     const fxLayer = $('#combatFxLayer');
     if (!fxLayer) return;
-    if (is3DVisible) return;
 
   const aEl = ln.auid ? $('#bu-' + ln.auid) : null;
   const tEl = ln.tuid ? $('#bu-' + ln.tuid) : null;
@@ -5095,25 +5138,25 @@ function playFx(ln) {
   const aUnit = aId ? UNIT_MAP[aId] : null;
   const tUnit = tId ? UNIT_MAP[tId] : null;
 
-  // 1. 即時動態切換左右兩半邊全景巨幕大圖與中央火控態勢！
+  // 1. 即時動態切換左右兩半邊全景巨幕大圖與中央態勢帶！
   if (aUnit && tUnit) {
     const sAtk = $('#stripAttacker'), sTgt = $('#stripTarget'), sVec = $('#stripVector');
     const isClashOfTitans = (aUnit.cost >= 4 && tUnit.cost >= 4);
 
     if (ln.side === 'A') {
-      // 我方開火攻擊 ➔ 左邊為攻擊武器大圖，右邊為受擊目標大圖
+      // 我方進擊 ➔ 左邊為主攻名將，右邊為受擊目標
       setSideHero('A', aUnit, 'fire', aUnit.weapon);
       setSideHero('B', tUnit, 'hit', ln.text);
       if (sAtk) sAtk.textContent = `${aUnit.flag} ${aUnit.name}`;
       if (sTgt) sTgt.textContent = `${tUnit.flag} ${tUnit.name}`;
-      if (sVec) sVec.textContent = isClashOfTitans ? `🎯 頂峰對決 // CLASH ➔` : `⚡ [${aUnit.weapon ? aUnit.weapon.split(' ')[0] : '開火'}] ➔`;
+      if (sVec) sVec.textContent = isClashOfTitans ? `⚔️ 宿命對決・名將交鋒 ➔` : `⚡ [${aUnit.weapon ? aUnit.weapon.split(' ')[0] : '出擊'}] ➔`;
     } else {
-      // 敵方開火攻擊 ➔ 右邊為攻擊武器大圖，左邊為受擊目標大圖
+      // 敵方進擊 ➔ 右邊為主攻名將，左邊為受擊目標
       setSideHero('B', aUnit, 'fire', aUnit.weapon);
       setSideHero('A', tUnit, 'hit', ln.text);
       if (sAtk) sAtk.textContent = `${tUnit.flag} ${tUnit.name}`;
       if (sTgt) sTgt.textContent = `${aUnit.flag} ${aUnit.name}`;
-      if (sVec) sVec.textContent = isClashOfTitans ? `🎯 頂峰對決 // CLASH ➔` : `⚡ [${aUnit.weapon ? aUnit.weapon.split(' ')[0] : '突襲'}] ➔`;
+      if (sVec) sVec.textContent = isClashOfTitans ? `⚔️ 宿命對決・名將交鋒 ➔` : `⚡ [${aUnit.weapon ? aUnit.weapon.split(' ')[0] : '突襲'}] ➔`;
     }
 
     // 連動古代沙盤戰報態勢帶
@@ -5158,8 +5201,8 @@ function playFx(ln) {
     }
 
     // 【以小博大・戰術奇蹟警報 (Tactical Upset Alarm)】
-    // 當低成本兵種 (<= $2) 成功擊毀高價值旗艦 (>= $4)
-    if (ln.kind === 'kill' && aUnit.cost <= 2 && tUnit.cost >= 4) {
+    // 當低成本兵種 (<= $2) 成功擊破高價值主將 (>= $4)
+    if ((ln.kind === 'kill' || ln.kind === 'capture') && aUnit.cost <= 2 && tUnit.cost >= 4) {
       spawnTacticalUpset(aUnit, tUnit);
     }
   }
@@ -5192,9 +5235,9 @@ function playFx(ln) {
     }
   }
 
-  // 觸發古代戰場音效 (帶陣營立體聲方位與戶外戰場殘響)
+  // 觸發古代戰場音效 (3D 模式下由 Battle3DEngine 負責空間音場，此處僅處理 2D 音效與震動)
   if (aUnit) {
-    if (typeof SoundEngine !== 'undefined' && typeof SoundEngine.play === 'function') {
+    if (!is3DVisible && typeof SoundEngine !== 'undefined' && typeof SoundEngine.play === 'function') {
       SoundEngine.play(sfxToPlay, ln.side);
     }
     const isSoundMuted = (typeof SoundEngine !== 'undefined' && typeof SoundEngine.isMuted === 'function')
@@ -5202,7 +5245,7 @@ function playFx(ln) {
       : (typeof SoundEngine !== 'undefined' && SoundEngine.enabled === false);
     if (typeof navigator !== 'undefined' && navigator.vibrate && !isSoundMuted) {
       try {
-        if (ln.kind === 'kill') navigator.vibrate(20);
+        if (ln.kind === 'kill' || ln.kind === 'capture') navigator.vibrate(20);
         else if (ln.kind === 'block') navigator.vibrate([14, 24, 14]);
       } catch (_) {}
     }
@@ -5226,6 +5269,17 @@ function playFx(ln) {
     void tEl.offsetWidth;
     tEl.classList.add('active-target');
     setTimeout(() => tEl.classList.remove('active-target'), 380 / speed);
+  }
+
+  if (is3DVisible) {
+    if (tEl && (ln.kind === 'kill' || ln.kind === 'capture')) {
+      tEl.classList.remove('hit-shake', 'kill-blast');
+      void tEl.offsetWidth;
+      if (ln.kind === 'capture') tEl.dataset.deadLabel = '🪢 生擒';
+      else delete tEl.dataset.deadLabel;
+      tEl.classList.add('kill-blast', 'destroyed-badge');
+    }
+    return;
   }
 
   if (!tEl) return;
@@ -5485,13 +5539,16 @@ function playFx(ln) {
   function triggerImpact() {
     if (skip) return;
     const targetSide = ln.side === 'A' ? 'B' : 'A';
-    if (ln.kind === 'kill') {
+    if (ln.kind === 'kill' || ln.kind === 'capture') {
+      const isCap = ln.kind === 'capture';
       tEl.classList.remove('hit-shake', 'kill-blast');
       void tEl.offsetWidth;
+      if (isCap) tEl.dataset.deadLabel = '🪢 生擒';
+      else delete tEl.dataset.deadLabel;
       tEl.classList.add('kill-blast', 'destroyed-badge');
       spawnExplosion(tx, ty, true, wType, 1.0);
-      spawnFloater(tx, ty, '⚔️ 陣亡潰敗!', 'kill');
-      SoundEngine.play('warlord_fall', targetSide);
+      spawnFloater(tx, ty, isCap ? '🪢 敵將生擒!' : '⚔️ 陣亡潰敗!', 'kill');
+      SoundEngine.play(isCap ? 'war_drum' : 'warlord_fall', targetSide);
 
     } else if (ln.kind === 'hit') {
       tEl.classList.remove('hit-shake');
@@ -7152,11 +7209,143 @@ $('#btnAudio')?.addEventListener('click', () => SoundEngine.toggle());
 $('#btnRerollMarket')?.addEventListener('click', rerollMarketPool);
 
 /* ---------- 🌐 線上真人雙人對戰 (Online PvP) 處理 ---------- */
+let pvpHostIsPublic = true;
+let lastPvpPublicRooms = [];
+let lastPvpPublicOffline = false;
+let pvpPublicWaitTimer = null;
+
+function formatPvpRulesSummary(maxGames, marketMode) {
+  const g = [3, 5, 7].includes(Number(maxGames)) ? Number(maxGames) : 5;
+  const winsNeeded = Math.ceil(g / 2);
+  const marketText = marketMode === 'free' ? '🎲 自由調撥 (Ban 2)' : '🔒 開戰鎖定 (Ban 1)';
+  return `⚔️ ${g}局${winsNeeded}勝 (BO${g}) · ${marketText}`;
+}
+
+function syncPvpVersusRulesUI() {
+  const maxG = [3, 5, 7].includes(Number(state.bo3?.maxGames)) ? Number(state.bo3.maxGames) : 5;
+  const mMode = state.bo3?.marketMode === 'free' ? 'free' : 'locked';
+  const rulesTextEl = $('#pvpVersusRulesText');
+  if (rulesTextEl) rulesTextEl.textContent = formatPvpRulesSummary(maxG, mMode);
+  const startBtn = $('#btnPvpStartBattle');
+  if (startBtn) startBtn.textContent = `⚔️ 正式開戰 (START BO${maxG})`;
+}
+
+function setPvpJoinControlsBusy(busy) {
+  const joinBtn = $('#btnSubmitJoinRoom');
+  const quickBtn = $('#btnPvpQuickMatch');
+  if (joinBtn) {
+    joinBtn.disabled = !!busy;
+    joinBtn.textContent = busy ? '連線中... ⏳' : '立即加入 ➔';
+  }
+  if (quickBtn && !quickBtn.dataset.quickBusy) {
+    quickBtn.disabled = !!busy;
+  }
+  document.querySelectorAll('.btnJoinPublicPvpRoom').forEach(b => {
+    b.disabled = !!busy;
+  });
+}
+
+function syncPvpHostConfigUI() {
+  const pubBtn = $('#btnPvpVisPublic');
+  const privBtn = $('#btnPvpVisPrivate');
+  const hint = $('#pvpVisibilityHint');
+  if (pubBtn) pubBtn.classList.toggle('active', !!pvpHostIsPublic);
+  if (privBtn) privBtn.classList.toggle('active', !pvpHostIsPublic);
+  if (hint) {
+    hint.classList.toggle('is-private', !pvpHostIsPublic);
+    hint.textContent = pvpHostIsPublic
+      ? '🌐 目前為公開招募：已刊登於線上大廳，玩家可直接點選加入（亦可複製代碼邀請好友）'
+      : '🔒 目前為私人密令：不會出現在公開大廳，僅限擁有 6 位代碼或邀請網址的好友加入';
+  }
+  const gamesSel = $('#pvpHostGamesSel');
+  const marketSel = $('#pvpHostMarketSel');
+  if (gamesSel && state.bo3) gamesSel.value = String(state.bo3.maxGames || 5);
+  if (marketSel && state.bo3) marketSel.value = state.bo3.marketMode || 'locked';
+  syncPvpVersusRulesUI();
+}
+
+function updatePvpHostWaitingText(code, prefixNote = '') {
+  const waitingStatus = $('#pvpWaitingStatus');
+  if (!waitingStatus || !code) return;
+  const prefix = prefixNote ? `${esc(prefixNote)} ` : '';
+  waitingStatus.innerHTML = pvpHostIsPublic
+    ? `<span class="radar-dot"></span><span>${prefix}公開房間 <b>${esc(code)}</b> 已刊登於線上大廳，等待線上玩家或好友連線加入...</span>`
+    : `<span class="radar-dot"></span><span>${prefix}私人房間 <b>${esc(code)}</b> 已就緒！請分享代碼或網址給好友加入...</span>`;
+}
+
+function formatPvpWaitAge(createdAt) {
+  const sec = Math.max(0, Math.floor((Date.now() - (createdAt || Date.now())) / 1000));
+  if (sec < 15) return '剛剛建立';
+  if (sec < 60) return `${sec} 秒前`;
+  return `${Math.floor(sec / 60)} 分前`;
+}
+
+function renderPvpPublicRoomsList() {
+  const listEl = $('#pvpPublicRoomsList');
+  if (!listEl) return;
+  if (!lastPvpPublicRooms || lastPvpPublicRooms.length === 0) {
+    listEl.innerHTML = lastPvpPublicOffline
+      ? '<div class="pvp-public-empty">⚠️ 雲端公開大廳暫時無法連線，仍可於下方輸入 6 位代碼與好友直連。</div>'
+      : '<div class="pvp-public-empty">🌐 目前沒有等待中的公開雙人房<br>點擊右上角 <b>【⚡ 快速配對】</b> 可立即開啟公開房等待對手！</div>';
+    return;
+  }
+  listEl.innerHTML = lastPvpPublicRooms.map(r => `
+    <div class="pvp-public-room-item" data-code="${esc(r.code)}">
+      <div class="pvp-room-info">
+        <div class="pvp-room-host-line">
+          <span>${esc(r.hostFlag || '🌐')}</span>
+          <span class="pvp-room-host-name">${esc(r.hostName || '本部特遣隊')}</span>
+          <span class="pvp-room-code-pill">#${esc(r.code)}</span>
+        </div>
+        <div class="pvp-room-meta-line">
+          <span>⚔️ BO${r.maxGames || 5}</span>
+          <span>·</span>
+          <span>${r.marketMode === 'free' ? '🎲 自由調撥 (Ban 2)' : '🔒 開戰鎖定 (Ban 1)'}</span>
+          <span>·</span>
+          <span>⏱️ ${formatPvpWaitAge(r.createdAt)}</span>
+        </div>
+      </div>
+      <button type="button" class="btn primary sm btnJoinPublicPvpRoom" data-code="${esc(r.code)}">一鍵加入 ➔</button>
+    </div>
+  `).join('');
+}
+
+function stopPvpPublicRoomsListener() {
+  if (pvpPublicWaitTimer) {
+    clearInterval(pvpPublicWaitTimer);
+    pvpPublicWaitTimer = null;
+  }
+  if (typeof OnlinePvPEngine !== 'undefined' && typeof OnlinePvPEngine.stopListeningPublicRooms === 'function') {
+    OnlinePvPEngine.stopListeningPublicRooms();
+  }
+}
+
+function startListeningPvpPublicRooms() {
+  stopPvpPublicRoomsListener();
+  const listEl = $('#pvpPublicRoomsList');
+  if (!listEl || typeof OnlinePvPEngine === 'undefined') return;
+  listEl.innerHTML = '<div class="pvp-public-empty">⏳ 正在同步線上公開待戰房間...</div>';
+  OnlinePvPEngine.listenPublicRooms((rooms, meta) => {
+    lastPvpPublicRooms = Array.isArray(rooms) ? rooms : [];
+    lastPvpPublicOffline = !!(meta && meta.offline);
+    renderPvpPublicRoomsList();
+  });
+  pvpPublicWaitTimer = setInterval(() => {
+    const joinPanel = $('#pvpPanelJoin');
+    if (joinPanel && !joinPanel.hidden && lastPvpPublicRooms.length > 0) {
+      renderPvpPublicRoomsList();
+    }
+  }, 15000);
+}
+
 function openOnlinePvpModal(forceJoinCode = null) {
   const modal = $('#onlinePvpModal');
   if (!modal) return;
   currentActiveModal = modal;
   modal.hidden = false;
+  if ($('#pvpTabsRow')) $('#pvpTabsRow').hidden = false;
+  pvpHostIsPublic = true;
+  syncPvpHostConfigUI();
 
   const player = LadderEngine.getState().player;
   const pUid = player.uid || LadderEngine.getPlayerUID();
@@ -7181,7 +7370,18 @@ function switchPvpTab(tab) {
   $('#pvpPanelHost').hidden = (tab !== 'host');
   $('#pvpPanelJoin').hidden = (tab !== 'join');
   $('#pvpVersusBox').hidden = true;
+  if ($('#pvpVersusRulesBar')) $('#pvpVersusRulesBar').hidden = true;
+  if ($('#pvpGuestWaitNotice')) $('#pvpGuestWaitNotice').hidden = true;
   $('#btnPvpStartBattle').hidden = true;
+  setPvpJoinControlsBusy(false);
+  if (tab === 'join') {
+    if (OnlinePvPEngine.isHostUser() && OnlinePvPEngine.getCurrentRoomCode() && !OnlinePvPEngine.getState().connected) {
+      OnlinePvPEngine.closeConnection();
+    }
+    startListeningPvpPublicRooms();
+  } else {
+    stopPvpPublicRoomsListener();
+  }
 }
 
 async function initHostRoom() {
@@ -7189,45 +7389,45 @@ async function initHostRoom() {
   const waitingStatus = $('#pvpWaitingStatus');
   if (!codeDisplay) return;
 
+  syncPvpHostConfigUI();
   codeDisplay.textContent = '連線配對中...';
-  waitingStatus.innerHTML = '<span class="radar-dot"></span><span>正在向 WebRTC 訊令伺服器註冊房間...</span>';
+  waitingStatus.innerHTML = '<span class="radar-dot"></span><span>正在向 WebRTC 與雲端大廳註冊房間...</span>';
 
   const player = LadderEngine.getState().player;
   const profile = { name: player.name, uid: player.uid || LadderEngine.getPlayerUID(), flag: player.flag };
 
   try {
-    const res = await OnlinePvPEngine.createRoom(profile);
+    const res = await OnlinePvPEngine.createRoom(profile, {
+      isPublic: pvpHostIsPublic,
+      maxGames: state.bo3?.maxGames || 5,
+      marketMode: state.bo3?.marketMode || 'locked'
+    });
     codeDisplay.textContent = res.roomCode;
-    waitingStatus.innerHTML = `<span class="radar-dot"></span><span>房間已就緒！請分享代碼 <b>${res.roomCode}</b> 給好友加入...</span>`;
+    updatePvpHostWaitingText(res.roomCode);
   } catch (err) {
     codeDisplay.textContent = '連線失敗';
     waitingStatus.innerHTML = `<span style="color:var(--red)">⚠️ 連線失敗：${err.message || '請檢查網路連線'}</span>`;
   }
 }
 
-async function joinTargetRoom() {
+async function joinTargetRoom(overrideCode = null) {
   const input = $('#pvpJoinCodeInput');
-  const btn = $('#btnSubmitJoinRoom');
   const waitingStatus = $('#pvpJoinWaitingStatus');
   const waitingText = $('#pvpJoinWaitingText');
 
-  const rawCode = (input?.value || '').trim().toUpperCase();
+  const rawCode = String(overrideCode != null ? overrideCode : (input?.value || '')).trim().toUpperCase();
   if (!rawCode) {
     toast('⚠️ 請輸入 6 位房間代碼！');
     if (input) input.focus();
     return;
   }
-  const cleanCode = rawCode.replace(/^(TOPWARLORDS-BO5-|TOPCLASH-BO5-)/, '');
+  const cleanCode = rawCode.replace(/^(TOPWARLORDS-BO5-|TOPCLASH-BO5-|WL_)/, '');
   if (cleanCode.length < 5) {
     toast('⚠️ 房間代碼格式不符，請輸入 6 位代碼！');
     return;
   }
 
-  // 立即提供視覺反饋與防連點防抖
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = '連線中... ⏳';
-  }
+  setPvpJoinControlsBusy(true);
   if (waitingStatus) waitingStatus.hidden = false;
   if (waitingText) waitingText.textContent = `正在連線至房間 [${cleanCode}]...`;
 
@@ -7238,10 +7438,7 @@ async function joinTargetRoom() {
   try {
     await OnlinePvPEngine.joinRoom(cleanCode, profile);
   } catch (err) {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = '立即加入 ➔';
-    }
+    setPvpJoinControlsBusy(false);
     if (waitingStatus) waitingStatus.hidden = true;
     toast(`⚠️ 加入失敗：${err.message || '找不到該房間'}`);
   }
@@ -7258,7 +7455,7 @@ $('#pvpJoinCodeInput')?.addEventListener('keydown', e => {
 // 綁定 onlinePvpModal 互動
 $('#pvpTabsRow')?.addEventListener('click', e => {
   const btn = e.target.closest('.pvp-tab');
-  if (!btn) return;
+  if (!btn || btn.classList.contains('active')) return;
   const tab = btn.dataset.tab;
   switchPvpTab(tab);
   if (tab === 'host') initHostRoom();
@@ -7289,18 +7486,95 @@ $('#btnCopyShareUrl')?.addEventListener('click', () => {
 
 $('#btnSubmitJoinRoom')?.addEventListener('click', joinTargetRoom);
 
-OnlinePvPEngine.on('error', err => {
-  const joinBtn = $('#btnSubmitJoinRoom');
-  if (joinBtn) {
-    joinBtn.disabled = false;
-    joinBtn.textContent = '立即加入 ➔';
+$('#pvpVisibilityToggle')?.addEventListener('click', e => {
+  const btn = e.target.closest('.pvp-vis-btn');
+  if (!btn) return;
+  const nextPublic = btn.dataset.vis === 'public';
+  if (pvpHostIsPublic === nextPublic) return;
+  pvpHostIsPublic = nextPublic;
+  syncPvpHostConfigUI();
+  updatePvpHostWaitingText(OnlinePvPEngine.getCurrentRoomCode());
+  if (typeof OnlinePvPEngine.updateRoomMeta === 'function') {
+    OnlinePvPEngine.updateRoomMeta({ isPublic: pvpHostIsPublic });
   }
+  toast(pvpHostIsPublic ? '🌐 已切換為【公開房間】，其他線上玩家可在大廳看到並加入' : '🔒 已切換為【私人房間】，已從公開大廳隱藏，僅限代碼加入');
+});
+
+function handlePvpHostRuleChange() {
+  const games = parseInt($('#pvpHostGamesSel')?.value || '5', 10);
+  const mMode = $('#pvpHostMarketSel')?.value || 'locked';
+  if (state.bo3) {
+    state.bo3.maxGames = [3, 5, 7].includes(games) ? games : 5;
+    state.bo3.marketMode = mMode === 'free' ? 'free' : 'locked';
+    syncPvpVersusRulesUI();
+    if (typeof OnlinePvPEngine.updateRoomMeta === 'function') {
+      OnlinePvPEngine.updateRoomMeta({ maxGames: state.bo3.maxGames, marketMode: state.bo3.marketMode });
+    }
+    renderMissionBar();
+    updateTopHud();
+    updateRerollMarketButtonState();
+    toast(`已設定對戰規則：BO${state.bo3.maxGames} · ${state.bo3.marketMode === 'free' ? '自由調撥 (Ban 2)' : '開戰鎖定 (Ban 1)'}`);
+  }
+}
+
+$('#pvpHostGamesSel')?.addEventListener('change', handlePvpHostRuleChange);
+$('#pvpHostMarketSel')?.addEventListener('change', handlePvpHostRuleChange);
+
+$('#pvpPublicRoomsList')?.addEventListener('click', e => {
+  const joinBtn = e.target.closest('.btnJoinPublicPvpRoom');
+  if (!joinBtn || joinBtn.disabled) return;
+  const code = (joinBtn.dataset.code || '').trim().toUpperCase();
+  if (!code) return;
+  const input = $('#pvpJoinCodeInput');
+  if (input) input.value = code;
+  joinTargetRoom(code);
+});
+
+$('#btnPvpQuickMatch')?.addEventListener('click', async () => {
+  const btn = $('#btnPvpQuickMatch');
+  if (!btn || btn.disabled) return;
+  btn.dataset.quickBusy = '1';
+  btn.disabled = true;
+  btn.textContent = '配對中... ⏳';
+  setPvpJoinControlsBusy(true);
+  const player = LadderEngine.getState().player;
+  const profile = { name: player.name, uid: player.uid || LadderEngine.getPlayerUID(), flag: player.flag };
+  try {
+    const res = await OnlinePvPEngine.quickMatch(profile, {
+      maxGames: state.bo3?.maxGames || 5,
+      marketMode: state.bo3?.marketMode || 'locked'
+    });
+    if (res && res.mode === 'created') {
+      pvpHostIsPublic = true;
+      syncPvpHostConfigUI();
+      switchPvpTab('host');
+      const codeDisplay = $('#pvpRoomCodeDisplay');
+      if (codeDisplay) codeDisplay.textContent = res.roomCode;
+      updatePvpHostWaitingText(res.roomCode);
+      toast(`🌐 大廳目前無空房，已為你建立公開房間 [${res.roomCode}] 等待線上玩家加入！`);
+    } else if (res && res.mode === 'joined') {
+      const input = $('#pvpJoinCodeInput');
+      if (input) input.value = res.roomCode;
+    }
+  } catch (err) {
+    toast(`⚠️ 快速配對失敗：${err.message || '請稍後再試'}`);
+  } finally {
+    delete btn.dataset.quickBusy;
+    btn.disabled = false;
+    btn.textContent = '⚡ 快速配對';
+    setPvpJoinControlsBusy(false);
+  }
+});
+
+OnlinePvPEngine.on('error', err => {
+  setPvpJoinControlsBusy(false);
   const joinStatus = $('#pvpJoinWaitingStatus');
   if (joinStatus) joinStatus.hidden = true;
   toast(`⚠️ 線上對戰提示：${err}`);
 });
 
 $('#btnPvpCancel')?.addEventListener('click', () => {
+  stopPvpPublicRoomsListener();
   OnlinePvPEngine.closeConnection();
   $('#onlinePvpModal').hidden = true;
   currentActiveModal = null;
@@ -7309,16 +7583,25 @@ $('#btnPvpCancel')?.addEventListener('click', () => {
 
 // 當對手連線加入時
 OnlinePvPEngine.on('opponent_joined', ({ opponent, isHost }) => {
-  const joinBtn = $('#btnSubmitJoinRoom');
-  if (joinBtn) {
-    joinBtn.disabled = false;
-    joinBtn.textContent = '立即加入 ➔';
-  }
+  stopPvpPublicRoomsListener();
+  setPvpJoinControlsBusy(false);
   const joinStatus = $('#pvpJoinWaitingStatus');
   if (joinStatus) joinStatus.hidden = true;
+  if ($('#pvpTabsRow')) $('#pvpTabsRow').hidden = true;
   $('#pvpPanelHost').hidden = true;
   $('#pvpPanelJoin').hidden = true;
   $('#pvpVersusBox').hidden = false;
+  if ($('#pvpVersusRulesBar')) $('#pvpVersusRulesBar').hidden = false;
+  if ($('#pvpGuestWaitNotice')) $('#pvpGuestWaitNotice').hidden = !!isHost;
+
+  if (!isHost && opponent && state.bo3) {
+    if ([3, 5, 7].includes(Number(opponent.maxGames))) state.bo3.maxGames = Number(opponent.maxGames);
+    if (opponent.marketMode === 'free' || opponent.marketMode === 'locked') state.bo3.marketMode = opponent.marketMode;
+    renderMissionBar();
+    updateTopHud();
+    updateRerollMarketButtonState();
+  }
+  syncPvpVersusRulesUI();
 
   const oppName = (opponent && opponent.name && opponent.name !== '我方聯合戰術作戰群') ? opponent.name : (isHost ? '挑戰突擊隊' : '本部特遣隊');
   $('#pvpEnemyFlag').textContent = opponent.flag || '🌐';
@@ -7640,17 +7923,42 @@ OnlinePvPEngine.on('opponent_ban_committed', payload => {
   renderAll();
 });
 
-OnlinePvPEngine.on('opponent_left', () => {
-  toast('⚠️ 對手已斷開連線！');
+OnlinePvPEngine.on('opponent_left', info => {
+  const beforeStart = !!(info && info.beforeStart);
+  const modalOpen = $('#onlinePvpModal') && !$('#onlinePvpModal').hidden;
+  const wasInMatch = state.isOnlinePvp;
+
   state.isOnlinePvp = false;
   state.pvpMyReady = false;
   state.pvpOpponentReady = false;
   state.pvpOpponentDeck = null;
   $('#pvpVersusBox').hidden = true;
+  if ($('#pvpVersusRulesBar')) $('#pvpVersusRulesBar').hidden = true;
+  if ($('#pvpGuestWaitNotice')) $('#pvpGuestWaitNotice').hidden = true;
   $('#btnPvpStartBattle').hidden = true;
+
+  if (!wasInMatch && modalOpen) {
+    if ($('#pvpTabsRow')) $('#pvpTabsRow').hidden = false;
+    if (OnlinePvPEngine.isHostUser() && typeof OnlinePvPEngine.reopenWaitingRoom === 'function' && OnlinePvPEngine.reopenWaitingRoom()) {
+      const code = OnlinePvPEngine.getCurrentRoomCode();
+      switchPvpTab('host');
+      if ($('#pvpRoomCodeDisplay') && code) $('#pvpRoomCodeDisplay').textContent = code;
+      updatePvpHostWaitingText(code, '對手已離開，');
+      toast('⚠️ 對手已離開房間，原房間已自動重新開放等待配對！');
+      return;
+    }
+    if (!OnlinePvPEngine.isHostUser()) {
+      OnlinePvPEngine.closeConnection();
+      switchPvpTab('join');
+      toast('⚠️ 房主已關閉房間，請選擇其他公開房間或重新加入。');
+      return;
+    }
+  }
+
+  PvPTimerManager.stop();
+  OnlinePvPEngine.closeConnection();
   renderAll();
-  switchPvpTab('host');
-  initHostRoom();
+  toast(beforeStart ? '⚠️ 對手已離房！' : '⚠️ 對手已斷開連線，本場線上對戰已結束！');
 });
 
 OnlinePvPEngine.on('player_forfeit_received', payload => {

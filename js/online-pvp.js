@@ -17,7 +17,68 @@ const OnlinePvPEngine = (function () {
   let useFirebaseRelay = false;
   let fbRoomRef = null;
   let fbMsgListener = null;
+  let publicRoomsUnsub = null;
+  let pendingJoinResolve = null;
+  let pendingJoinReject = null;
+  let activeGuestSenderId = null;
+  let claimedSeatCode = null;
+  let roomHasStarted = false;
+  let roomSettings = { isPublic: true, maxGames: 5, marketMode: 'locked' };
   const senderId = 'P-' + Math.random().toString(36).slice(2, 10);
+
+  function applyRoomSettingsOptions(options = {}) {
+    if (!options || typeof options !== 'object') return;
+    if (options.isPublic !== undefined) roomSettings.isPublic = !!options.isPublic;
+    if ([3, 5, 7].includes(Number(options.maxGames))) roomSettings.maxGames = Number(options.maxGames);
+    if (options.marketMode === 'free' || options.marketMode === 'locked') roomSettings.marketMode = options.marketMode;
+  }
+
+  async function releaseRoomSeat(codeToRelease) {
+    const clean = String(codeToRelease || '').trim().toUpperCase().replace(/^(TOPWARLORDS-BO5-|WL_)/, '');
+    if (!clean) return;
+    const db = getFbDb();
+    if (!db) return;
+    try {
+      await db.ref('pvp_rooms/WL_' + clean).transaction(cur => {
+        if (!cur || cur.status !== 'full' || cur.guestId !== senderId) return cur;
+        return Object.assign({}, cur, {
+          status: 'waiting',
+          guestId: null,
+          guestUid: null,
+          guestName: null,
+          updatedAt: Date.now()
+        });
+      });
+    } catch (_) { }
+  }
+
+  function filterPublicRoomsSnapshot(val) {
+    if (!val || typeof val !== 'object') return [];
+    const now = Date.now();
+    const list = [];
+    Object.keys(val).forEach(key => {
+      if (!key.startsWith('WL_') || /^(TC_|TOPCLASH-BO5-)/i.test(key)) return;
+      const r = val[key];
+      if (!r || r.gameId !== 'topwarlords') return;
+      const isPublic = r.isPublic === true;
+      const isWaiting = (r.status || 'waiting') === 'waiting' && !r.guestId;
+      const isRecent = r.createdAt && (now - r.createdAt < 15 * 60 * 1000);
+      const cleanCode = key.replace(/^WL_/, '');
+      if (!isPublic || !isWaiting || !isRecent) return;
+      if ((currentRoomId && cleanCode === currentRoomId) || (r.hostId && r.hostId === senderId)) return;
+      list.push({
+        code: cleanCode,
+        hostUid: r.hostUid || 'CMD-HOST',
+        hostName: r.hostName || '本部特遣隊',
+        hostFlag: r.hostFlag || '🌐',
+        maxGames: [3, 5, 7].includes(Number(r.maxGames)) ? Number(r.maxGames) : 5,
+        marketMode: r.marketMode === 'free' ? 'free' : 'locked',
+        createdAt: r.createdAt
+      });
+    });
+    list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    return list;
+  }
 
   const FIREBASE_CONFIG = (typeof window !== 'undefined' && window.TOPCLASH_FIREBASE_CONFIG) || {
     apiKey: "AIzaSyCcqIW2P88KMBTCkNJhneADRjdJzjBOcI0",
@@ -43,33 +104,97 @@ const OnlinePvPEngine = (function () {
     return null;
   }
 
-  function attachFirebaseRelay(code, hostFlag, playerProfile) {
+  function buildHandshakePayload(playerProfile, hostFlag) {
+    return {
+      gameId: 'topwarlords',
+      name: (playerProfile && playerProfile.name) || (hostFlag ? '本部特遣隊' : '挑戰突擊隊'),
+      uid: (playerProfile && playerProfile.uid) || 'CMD-ONLINE',
+      flag: (playerProfile && playerProfile.flag) || '🇹🇼',
+      isHost: !!hostFlag,
+      isPublic: roomSettings.isPublic,
+      maxGames: roomSettings.maxGames,
+      marketMode: roomSettings.marketMode
+    };
+  }
+
+  function attachFirebaseRelay(code, hostFlag, playerProfile, options = {}) {
     if (!code || /^(TC_|TOPCLASH-BO5-)/i.test(String(code).trim())) return false;
     const db = getFbDb();
     if (!db) return false;
     cleanupFirebaseRelay();
+    if (hostFlag) applyRoomSettingsOptions(options);
     fbRoomRef = db.ref('pvp_rooms/WL_' + code);
     if (hostFlag) {
-      fbRoomRef.set({ gameId: 'topwarlords', createdAt: Date.now(), hostId: senderId, status: 'waiting' }).catch(() => { });
+      fbRoomRef.set({
+        gameId: 'topwarlords',
+        code,
+        isPublic: roomSettings.isPublic,
+        status: 'waiting',
+        createdAt: Date.now(),
+        hostId: senderId,
+        hostUid: (playerProfile && playerProfile.uid) || 'CMD-HOST',
+        hostName: (playerProfile && playerProfile.name) || '本部特遣隊',
+        hostFlag: (playerProfile && playerProfile.flag) || '🇹🇼',
+        maxGames: roomSettings.maxGames,
+        marketMode: roomSettings.marketMode
+      }).catch(() => { });
       fbRoomRef.onDisconnect().remove();
     }
     const msgsRef = fbRoomRef.child('messages');
     fbMsgListener = msgsRef.on('child_added', snap => {
       const val = snap.val();
       if (!val || val.sender === senderId) return;
+      if (val.target && val.target !== senderId) return;
       if (val.type === '__RELAY_JOIN__' && hostFlag) {
+        if ((opponentInfo || activeGuestSenderId || roomHasStarted) && val.sender !== activeGuestSenderId) {
+          fbRoomRef.child('messages').push({
+            sender: senderId,
+            target: val.sender,
+            packet: { type: 'ROOM_FULL', payload: { message: '該房間已有對手進駐或已經開戰' }, timestamp: Date.now() },
+            ts: Date.now()
+          }).catch(() => { });
+          return;
+        }
+        activeGuestSenderId = val.sender;
         useFirebaseRelay = true;
         pvpState.connected = true;
-        sendPacket('HANDSHAKE', {
-          gameId: 'topwarlords',
-          name: playerProfile.name,
-          uid: playerProfile.uid,
-          flag: playerProfile.flag,
-          isHost: true
-        });
+        fbRoomRef.update({
+          status: 'full',
+          guestId: val.sender,
+          guestUid: val.uid || '',
+          guestName: val.name || '',
+          updatedAt: Date.now()
+        }).catch(() => { });
+        sendPacket('HANDSHAKE', buildHandshakePayload(playerProfile, true));
+        return;
+      }
+      if (val.type === '__GUEST_LEAVE__' && hostFlag) {
+        if (!roomHasStarted && (!activeGuestSenderId || val.sender === activeGuestSenderId)) {
+          activeGuestSenderId = null;
+          pvpState.connected = false;
+          opponentInfo = null;
+          useFirebaseRelay = false;
+          fbRoomRef.update({
+            status: 'waiting',
+            guestId: null,
+            guestUid: null,
+            guestName: null,
+            updatedAt: Date.now()
+          }).catch(() => { });
+          emit('opponent_left', { beforeStart: true });
+        }
         return;
       }
       if (val.packet) {
+        if (val.packet.type === 'ROOM_FULL') {
+          if (pendingJoinReject) {
+            pendingJoinReject(new Error((val.packet.payload && val.packet.payload.message) || '該房間人數已滿或已經開戰'));
+          }
+          return;
+        }
+        if (val.packet.type === 'HANDSHAKE' && hostFlag && (opponentInfo || activeGuestSenderId) && val.sender !== activeGuestSenderId) {
+          return;
+        }
         if (!pvpState.connected) {
           useFirebaseRelay = true;
           pvpState.connected = true;
@@ -147,13 +272,17 @@ const OnlinePvPEngine = (function () {
   }
 
   /* 本部特遣隊建立房間 */
-  async function createRoom(playerProfile) {
+  async function createRoom(playerProfile, options = {}) {
     await ensurePeerJS();
     closeConnection();
+    applyRoomSettingsOptions(options);
 
     const shortCode = generateRoomCode();
     currentRoomId = shortCode;
     isHost = true;
+    roomHasStarted = false;
+    activeGuestSenderId = null;
+    claimedSeatCode = null;
     pvpState.connected = false;
     pvpState.winsA = 0;
     pvpState.winsB = 0;
@@ -172,12 +301,32 @@ const OnlinePvPEngine = (function () {
       });
 
       peer.on('open', id => {
-        attachFirebaseRelay(shortCode, true, playerProfile);
-        emit('room_created', { roomCode: shortCode, shareUrl: getShareUrl(shortCode) });
-        resolve({ roomCode: shortCode, shareUrl: getShareUrl(shortCode) });
+        attachFirebaseRelay(shortCode, true, playerProfile, roomSettings);
+        const info = {
+          roomCode: shortCode,
+          shareUrl: getShareUrl(shortCode),
+          isPublic: roomSettings.isPublic,
+          maxGames: roomSettings.maxGames,
+          marketMode: roomSettings.marketMode
+        };
+        emit('room_created', info);
+        resolve(info);
       });
 
       peer.on('connection', incoming => {
+        if (opponentInfo || (conn && conn.open) || roomHasStarted) {
+          incoming.on('open', () => {
+            try {
+              incoming.send({
+                type: 'ROOM_FULL',
+                payload: { message: '該房間已有對手進駐或已經開戰' },
+                timestamp: Date.now()
+              });
+            } catch (_) { }
+            setTimeout(() => { try { incoming.close(); } catch (_) { } }, 80);
+          });
+          return;
+        }
         setupConnection(incoming, playerProfile);
       });
 
@@ -191,16 +340,66 @@ const OnlinePvPEngine = (function () {
 
   /* 挑戰突擊隊加入房間 */
   async function joinRoom(roomCode, playerProfile) {
-    await ensurePeerJS();
-    closeConnection();
-
     const rawCode = String(roomCode || '').trim().toUpperCase();
     if (rawCode.startsWith('TC_') || rawCode.startsWith('TOPCLASH-BO5-')) {
       throw new Error('此對戰代碼屬於其他遊戲專案，無法加入');
     }
     const cleanCode = rawCode.replace(/^(TOPWARLORDS-BO5-|WL_)/, '');
+
+    await ensurePeerJS();
+    closeConnection();
+
+    let claimedByMe = false;
+    const db = getFbDb();
+    if (db && cleanCode) {
+      const roomRef = db.ref('pvp_rooms/WL_' + cleanCode);
+      let snap = null;
+      try {
+        snap = await Promise.race([
+          roomRef.once('value'),
+          new Promise(resolve => setTimeout(() => resolve(null), 2000))
+        ]);
+      } catch (_) {
+        snap = null;
+      }
+
+      if (snap && typeof snap.exists === 'function' && snap.exists()) {
+        const meta = snap.val() || {};
+        if (meta.gameId && meta.gameId !== 'topwarlords') {
+          throw new Error('此對戰代碼屬於其他遊戲專案，無法加入');
+        }
+        if ((meta.status && meta.status !== 'waiting') || (meta.guestId && meta.guestId !== senderId)) {
+          throw new Error('該房間人數已滿或已經開戰，請選擇其他房間！');
+        }
+        try {
+          const txRes = await roomRef.transaction(cur => {
+            if (!cur) return cur;
+            if (cur.gameId && cur.gameId !== 'topwarlords') return;
+            if (cur.status && cur.status !== 'waiting') return;
+            if (cur.guestId && cur.guestId !== senderId) return;
+            return Object.assign({}, cur, {
+              status: 'full',
+              guestId: senderId,
+              guestUid: (playerProfile && playerProfile.uid) || '',
+              guestName: (playerProfile && playerProfile.name) || '',
+              updatedAt: Date.now()
+            });
+          });
+          if (!txRes.committed || !txRes.snapshot || !txRes.snapshot.val()) {
+            throw new Error('該房間剛被其他玩家搶先加入或已關閉，請選擇其他房間！');
+          }
+          claimedByMe = true;
+          claimedSeatCode = cleanCode;
+        } catch (txErr) {
+          if (txErr && /其他玩家|人數已滿|其他遊戲專案/.test(txErr.message || '')) throw txErr;
+        }
+      }
+    }
+
     currentRoomId = cleanCode;
     isHost = false;
+    roomHasStarted = false;
+    activeGuestSenderId = null;
     pvpState.connected = false;
     pvpState.winsA = 0;
     pvpState.winsB = 0;
@@ -216,6 +415,8 @@ const OnlinePvPEngine = (function () {
       const finishSuccess = () => {
         if (isSettled) return;
         isSettled = true;
+        pendingJoinResolve = null;
+        pendingJoinReject = null;
         clearTimeout(connectionTimeout);
         resolve({ roomCode: cleanCode });
       };
@@ -223,10 +424,21 @@ const OnlinePvPEngine = (function () {
       const finishError = (err) => {
         if (isSettled) return;
         isSettled = true;
+        pendingJoinResolve = null;
+        pendingJoinReject = null;
         clearTimeout(connectionTimeout);
-        emit('error', err.message || err);
-        reject(err);
+        if (claimedByMe) {
+          claimedByMe = false;
+          claimedSeatCode = null;
+          releaseRoomSeat(cleanCode);
+        }
+        const message = (err && err.message) ? err.message : String(err || '加入房間失敗');
+        emit('error', message);
+        reject(err instanceof Error ? err : new Error(message));
       };
+
+      pendingJoinResolve = finishSuccess;
+      pendingJoinReject = finishError;
 
       // 8 秒逾時防護
       const connectionTimeout = setTimeout(() => {
@@ -241,24 +453,15 @@ const OnlinePvPEngine = (function () {
         console.log('[PvP] 啟動 Firebase 雲端中繼直連房主:', cleanCode);
         if (attachFirebaseRelay(cleanCode, false, playerProfile) && fbRoomRef) {
           useFirebaseRelay = true;
-          fbRoomRef.child('messages').push({ sender: senderId, type: '__RELAY_JOIN__', ts: Date.now() }).catch(() => { });
-          sendPacket('HANDSHAKE', {
-            gameId: 'topwarlords',
-            name: playerProfile.name,
-            uid: playerProfile.uid,
-            flag: playerProfile.flag,
-            isHost: false
-          });
+          fbRoomRef.child('messages').push({
+            sender: senderId,
+            type: '__RELAY_JOIN__',
+            uid: (playerProfile && playerProfile.uid) || '',
+            name: (playerProfile && playerProfile.name) || '',
+            ts: Date.now()
+          }).catch(() => { });
+          sendPacket('HANDSHAKE', buildHandshakePayload(playerProfile, false));
         }
-      };
-
-      // 監聽握手成功
-      const onOpponentHandshake = () => {
-        pvpState.connected = true;
-        finishSuccess();
-      };
-      const unbindTemp = () => {
-        // 握手成功由 handleIncomingPacket 全域處理
       };
 
       // 挑戰者 PeerJS 初始化
@@ -315,13 +518,7 @@ const OnlinePvPEngine = (function () {
     conn.on('open', () => {
       pvpState.connected = true;
       // 發送身分握手封包 (Handshake)
-      sendPacket('HANDSHAKE', {
-        gameId: 'topwarlords',
-        name: playerProfile.name,
-        uid: playerProfile.uid,
-        flag: playerProfile.flag,
-        isHost
-      });
+      sendPacket('HANDSHAKE', buildHandshakePayload(playerProfile, isHost));
     });
 
     conn.on('data', data => {
@@ -329,8 +526,21 @@ const OnlinePvPEngine = (function () {
     });
 
     conn.on('close', () => {
+      const beforeStart = !roomHasStarted;
       pvpState.connected = false;
-      emit('opponent_left');
+      conn = null;
+      opponentInfo = null;
+      activeGuestSenderId = null;
+      if (isHost && fbRoomRef && beforeStart) {
+        fbRoomRef.update({
+          status: 'waiting',
+          guestId: null,
+          guestUid: null,
+          guestName: null,
+          updatedAt: Date.now()
+        }).catch(() => { });
+      }
+      emit('opponent_left', { beforeStart });
     });
 
     conn.on('error', err => {
@@ -344,13 +554,28 @@ const OnlinePvPEngine = (function () {
     if (!data || !data.type) return;
 
     switch (data.type) {
+      case 'ROOM_FULL':
+        if (pendingJoinReject) {
+          pendingJoinReject(new Error((data.payload && data.payload.message) || '該房間人數已滿或已經開戰'));
+        }
+        break;
+
       case 'HANDSHAKE':
         if (data.payload && data.payload.gameId && data.payload.gameId !== 'topwarlords') {
           closeConnection();
           emit('error', '對手來自不同遊戲專案，已自動中斷連線');
           return;
         }
+        if (isHost && fbRoomRef && !roomHasStarted) {
+          fbRoomRef.update({
+            status: 'full',
+            guestUid: (data.payload && data.payload.uid) || '',
+            guestName: (data.payload && data.payload.name) || '',
+            updatedAt: Date.now()
+          }).catch(() => { });
+        }
         opponentInfo = data.payload;
+        if (pendingJoinResolve) pendingJoinResolve();
         emit('opponent_joined', { opponent: opponentInfo, isHost });
         break;
 
@@ -359,6 +584,7 @@ const OnlinePvPEngine = (function () {
         break;
 
       case 'GAME_START_SESSION':
+        roomHasStarted = true;
         emit('game_session_started', data.payload);
         break;
 
@@ -395,6 +621,12 @@ const OnlinePvPEngine = (function () {
 
   /* 發送封包 */
   function sendPacket(type, payload) {
+    if (type === 'GAME_START_SESSION' && isHost) {
+      roomHasStarted = true;
+      if (fbRoomRef) {
+        fbRoomRef.update({ status: 'playing', updatedAt: Date.now() }).catch(() => { });
+      }
+    }
     const packet = { type, payload, timestamp: Date.now() };
     if (conn && conn.open) {
       conn.send(packet);
@@ -405,6 +637,112 @@ const OnlinePvPEngine = (function () {
     }
   }
 
+  function updateRoomMeta(patch = {}) {
+    applyRoomSettingsOptions(patch);
+    if (isHost && fbRoomRef) {
+      fbRoomRef.update({
+        isPublic: roomSettings.isPublic,
+        maxGames: roomSettings.maxGames,
+        marketMode: roomSettings.marketMode,
+        updatedAt: Date.now()
+      }).catch(() => { });
+    }
+    if ((patch.maxGames !== undefined || patch.marketMode !== undefined) && pvpState.connected) {
+      sendPacket('SETTINGS_UPDATE', {
+        maxGames: roomSettings.maxGames,
+        marketMode: roomSettings.marketMode
+      });
+    }
+  }
+
+  function reopenWaitingRoom() {
+    if (!isHost || !currentRoomId || roomHasStarted) return false;
+    if (conn) {
+      try { conn.close(); } catch (_) { }
+      conn = null;
+    }
+    pvpState.connected = false;
+    opponentInfo = null;
+    activeGuestSenderId = null;
+    useFirebaseRelay = false;
+    if (fbRoomRef) {
+      fbRoomRef.update({
+        status: 'waiting',
+        guestId: null,
+        guestUid: null,
+        guestName: null,
+        updatedAt: Date.now()
+      }).catch(() => { });
+    }
+    return true;
+  }
+
+  function stopListeningPublicRooms() {
+    if (typeof publicRoomsUnsub === 'function') {
+      try { publicRoomsUnsub(); } catch (_) { }
+      publicRoomsUnsub = null;
+    }
+  }
+
+  function listenPublicRooms(callback) {
+    stopListeningPublicRooms();
+    const cb = typeof callback === 'function' ? callback : () => { };
+    const db = getFbDb();
+    if (!db) {
+      cb([], { offline: true });
+      return () => { };
+    }
+    const roomsRef = db.ref('pvp_rooms').orderByChild('status').equalTo('waiting').limitToLast(30);
+    const handler = roomsRef.on(
+      'value',
+      snap => cb(filterPublicRoomsSnapshot(snap ? snap.val() : null)),
+      err => {
+        console.warn('[PvP] listenPublicRooms error:', err);
+        cb([], { offline: true });
+      }
+    );
+    publicRoomsUnsub = () => {
+      try { roomsRef.off('value', handler); } catch (_) { }
+    };
+    return stopListeningPublicRooms;
+  }
+
+  async function quickMatch(playerProfile, options = {}) {
+    const db = getFbDb();
+    let candidates = [];
+    if (db) {
+      try {
+        const roomsRef = db.ref('pvp_rooms').orderByChild('status').equalTo('waiting').limitToLast(30);
+        const snap = await Promise.race([
+          roomsRef.once('value'),
+          new Promise(resolve => setTimeout(() => resolve(null), 2500))
+        ]);
+        if (snap && typeof snap.val === 'function') {
+          candidates = filterPublicRoomsSnapshot(snap.val());
+          candidates.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        }
+      } catch (e) {
+        console.warn('[PvP] quickMatch query failed:', e);
+      }
+    }
+
+    for (const room of candidates) {
+      try {
+        await joinRoom(room.code, playerProfile);
+        return { mode: 'joined', roomCode: room.code, room };
+      } catch (_) {
+        // 該房可能剛被搶先加入或已斷開，嘗試下一個或自動轉建公開房
+      }
+    }
+
+    const created = await createRoom(playerProfile, {
+      isPublic: true,
+      maxGames: [3, 5, 7].includes(Number(options.maxGames)) ? Number(options.maxGames) : roomSettings.maxGames,
+      marketMode: options.marketMode === 'free' ? 'free' : 'locked'
+    });
+    return { mode: 'created', roomCode: created.roomCode, shareUrl: created.shareUrl };
+  }
+
   function getShareUrl(code) {
     const loc = window.location;
     const base = loc.protocol + '//' + loc.host + loc.pathname;
@@ -412,6 +750,22 @@ const OnlinePvPEngine = (function () {
   }
 
   function closeConnection() {
+    pendingJoinResolve = null;
+    pendingJoinReject = null;
+    if (!isHost && !roomHasStarted) {
+      if (useFirebaseRelay && fbRoomRef) {
+        try {
+          fbRoomRef.child('messages').push({ sender: senderId, type: '__GUEST_LEAVE__', ts: Date.now() }).catch(() => { });
+        } catch (_) { }
+      }
+      if (claimedSeatCode) {
+        const codeToRelease = claimedSeatCode;
+        claimedSeatCode = null;
+        releaseRoomSeat(codeToRelease);
+      }
+    } else {
+      claimedSeatCode = null;
+    }
     cleanupFirebaseRelay();
     if (conn) {
       try { conn.close(); } catch (e) { }
@@ -421,6 +775,9 @@ const OnlinePvPEngine = (function () {
       try { peer.destroy(); } catch (e) { }
       peer = null;
     }
+    currentRoomId = '';
+    activeGuestSenderId = null;
+    roomHasStarted = false;
     pvpState.connected = false;
     opponentInfo = null;
   }
@@ -478,10 +835,16 @@ const OnlinePvPEngine = (function () {
     createRoom,
     joinRoom,
     sendPacket,
+    updateRoomMeta,
+    reopenWaitingRoom,
+    getRoomSettings: () => Object.assign({}, roomSettings),
+    listenPublicRooms,
+    stopListeningPublicRooms,
+    quickMatch,
     generateSecureSalt,
     computeCommitHash,
     computeCommitHashAsync,
-    broadcastRoomSettings: (settings) => sendPacket('SETTINGS_UPDATE', settings),
+    broadcastRoomSettings: (settings) => updateRoomMeta(settings),
     closeConnection,
     getState: () => pvpState,
     getOpponent: () => opponentInfo,

@@ -34,9 +34,9 @@
   --battle-friendly: #e5b84b;
   --battle-enemy: #e6ad95;
   --battle-edge: #8c734b;
-  --skill-bg: linear-gradient(135deg, #2a2116, #17120c);
-  --skill-text: #f7e6bd;
-  --skill-edge: #b8924a;
+  --skill-bg: linear-gradient(135deg, #322719, #1b140d);
+  --skill-text: #fef3c7;
+  --skill-edge: #c99d4f;
 }
 
 [data-theme="light"] {
@@ -68,9 +68,9 @@
   --battle-friendly: #854d0e;
   --battle-enemy: #991b1b;
   --battle-edge: #a1804f;
-  --skill-bg: linear-gradient(135deg, #fdf5e2, #f1e0ba);
-  --skill-text: #432c0a;
-  --skill-edge: #a67c37;
+  --skill-bg: linear-gradient(135deg, #fffdf6, #f4e3bc);
+  --skill-text: #3d2405;
+  --skill-edge: #b08030;
 }
 
 * {
@@ -26495,10 +26495,12 @@ html:not([data-theme="light"]) .formation-slot-row {
 .m-form-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0 4px;
+  flex: 0 0 auto;
+  padding: 0 3px;
   border-radius: 3px;
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
+  line-height: 14px;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.14);
   border: 1px solid rgba(56, 189, 248, 0.35);
@@ -27181,48 +27183,60 @@ html:not([data-theme="light"]) .formation-slot-row {
   gap: 0 !important;
   justify-content: flex-start !important;
   overflow: visible !important;
-  border: 1px solid rgba(212, 168, 83, 0.26) !important;
+  border: 1px solid rgba(212, 168, 83, 0.24) !important;
   border-radius: 8px;
-  background: linear-gradient(135deg, rgba(33, 25, 18, 0.95) 0%, rgba(20, 15, 11, 0.98) 100%);
+  background: linear-gradient(135deg, rgba(31, 25, 19, 0.96) 0%, rgba(19, 15, 11, 0.99) 100%);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 235, 185, 0.07);
 }
 
 #matrixBoard .m-card[data-cost="5"] {
-  border-color: rgba(245, 158, 11, 0.58) !important;
-  background: linear-gradient(135deg, rgba(52, 33, 14, 0.96) 0%, rgba(25, 17, 10, 0.98) 100%);
-  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.18), inset 0 1px 0 rgba(253, 224, 71, 0.16);
+  border-color: rgba(251, 191, 36, 0.68) !important;
+  background: linear-gradient(135deg, rgba(64, 40, 14, 0.97) 0%, rgba(27, 17, 9, 0.99) 100%);
+  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.22), inset 0 1px 0 rgba(253, 224, 71, 0.22);
 }
 
 #matrixBoard .m-card[data-cost="4"] {
-  border-color: rgba(225, 29, 72, 0.45) !important;
-  background: linear-gradient(135deg, rgba(46, 22, 24, 0.95) 0%, rgba(22, 15, 12, 0.98) 100%);
+  border-color: rgba(192, 132, 252, 0.48) !important;
+  background: linear-gradient(135deg, rgba(50, 28, 62, 0.96) 0%, rgba(22, 14, 28, 0.99) 100%);
+  box-shadow: inset 0 1px 0 rgba(233, 213, 255, 0.1);
 }
 
 #matrixBoard .m-card[data-cost="3"] {
-  border-color: rgba(56, 189, 248, 0.36) !important;
-  background: linear-gradient(135deg, rgba(22, 31, 38, 0.95) 0%, rgba(16, 14, 12, 0.98) 100%);
+  border-color: rgba(45, 212, 191, 0.40) !important;
+  background: linear-gradient(135deg, rgba(19, 44, 42, 0.96) 0%, rgba(12, 22, 22, 0.99) 100%);
+}
+
+#matrixBoard .m-card[data-cost="2"] {
+  border-color: rgba(148, 163, 184, 0.36) !important;
+  background: linear-gradient(135deg, rgba(34, 41, 52, 0.95) 0%, rgba(17, 20, 26, 0.99) 100%);
 }
 
 [data-theme="light"] #matrixBoard .m-card {
-  background: linear-gradient(135deg, #fffdf7 0%, #f7f0e0 100%);
-  border: 1px solid rgba(146, 100, 36, 0.28) !important;
-  box-shadow: 0 2px 6px rgba(92, 64, 20, 0.08), inset 0 1px 0 #ffffff;
+  background: linear-gradient(135deg, #fffefb 0%, #f6f0e4 100%);
+  border: 1px solid rgba(146, 100, 36, 0.24) !important;
+  box-shadow: 0 2px 6px rgba(92, 64, 20, 0.07), inset 0 1px 0 #ffffff;
 }
 
 [data-theme="light"] #matrixBoard .m-card[data-cost="5"] {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 55%, #fde68a 100%);
-  border-color: rgba(180, 83, 9, 0.55) !important;
-  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.14), inset 0 1px 0 #ffffff;
+  background: linear-gradient(135deg, #fffdf4 0%, #fef3c7 58%, #fde394 100%);
+  border-color: rgba(180, 83, 9, 0.62) !important;
+  box-shadow: 0 2px 9px rgba(180, 83, 9, 0.16), inset 0 1px 0 #ffffff;
 }
 
 [data-theme="light"] #matrixBoard .m-card[data-cost="4"] {
-  background: linear-gradient(135deg, #fff8f6 0%, #fee2e2 100%);
-  border-color: rgba(185, 28, 28, 0.4) !important;
+  background: linear-gradient(135deg, #fcf9ff 0%, #efe6fc 100%);
+  border-color: rgba(126, 34, 206, 0.38) !important;
+  box-shadow: 0 2px 7px rgba(107, 33, 168, 0.09), inset 0 1px 0 #ffffff;
 }
 
 [data-theme="light"] #matrixBoard .m-card[data-cost="3"] {
-  background: linear-gradient(135deg, #f8fafc 0%, #e6f4f1 100%);
-  border-color: rgba(15, 118, 110, 0.34) !important;
+  background: linear-gradient(135deg, #f3fcf9 0%, #daf3ea 100%);
+  border-color: rgba(13, 148, 136, 0.36) !important;
+}
+
+[data-theme="light"] #matrixBoard .m-card[data-cost="2"] {
+  background: linear-gradient(135deg, #f8fafc 0%, #e8eef5 100%);
+  border-color: rgba(100, 116, 139, 0.34) !important;
 }
 
 #matrixBoard .m-card.sel {
@@ -27237,6 +27251,18 @@ html:not([data-theme="light"]) .formation-slot-row {
   border-color: #b45309 !important;
   background: linear-gradient(135deg, rgba(254, 243, 199, 0.98) 0%, rgba(253, 230, 138, 0.92) 55%, rgba(252, 211, 77, 0.82) 100%) !important;
   box-shadow: inset 0 0 0 1.5px #b45309, 0 0 14px rgba(180, 83, 9, 0.28) !important;
+}
+
+#matrixBoard .m-card.sel .m-top {
+  padding-right: 21px;
+}
+
+#matrixBoard .m-card.sel::after {
+  right: 4px;
+  top: 4px;
+  width: 15px;
+  height: 15px;
+  font-size: 9.5px;
 }
 
 #matrixBoard .m-card-main-row {
@@ -27266,7 +27292,7 @@ html:not([data-theme="light"]) .formation-slot-row {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  box-shadow: inset 0 0 14px rgba(12, 8, 4, 0.52), inset -1px 0 0 rgba(212, 168, 83, 0.32);
+  box-shadow: inset 0 0 12px rgba(12, 8, 4, 0.38), inset -1.5px 0 0 rgba(212, 168, 83, 0.45);
 }
 
 #matrixBoard .m-avatar-img {
@@ -27291,7 +27317,7 @@ html:not([data-theme="light"]) .formation-slot-row {
 
 #matrixBoard .m-card-info-col {
   min-width: 0;
-  padding: 5px 5px 3px 0;
+  padding: 5px 5px 4px 0;
   gap: 3px;
 }
 
@@ -27321,15 +27347,21 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 #matrixBoard .m-card[data-cost="4"] .m-avatar-cost {
-  background: linear-gradient(135deg, #9f1239, #4c0519);
-  color: #fecdd3;
-  border-color: #fb7185;
+  background: linear-gradient(135deg, #7e22ce, #4c1d95);
+  color: #f3e8ff;
+  border-color: #c084fc;
 }
 
 #matrixBoard .m-card[data-cost="3"] .m-avatar-cost {
-  background: linear-gradient(135deg, #115e59, #042f2e);
+  background: linear-gradient(135deg, #0f766e, #042f2e);
   color: #99f6e4;
   border-color: #2dd4bf;
+}
+
+#matrixBoard .m-card[data-cost="2"] .m-avatar-cost {
+  background: linear-gradient(135deg, #475569, #1e293b);
+  color: #e2e8f0;
+  border-color: #94a3b8;
 }
 
 #matrixBoard .m-top {
@@ -27338,6 +27370,11 @@ html:not([data-theme="light"]) .formation-slot-row {
   gap: 4px;
   padding-right: 0;
   flex-shrink: 0;
+}
+
+#matrixBoard .m-name-group {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 #matrixBoard .m-name {
@@ -27466,7 +27503,7 @@ html:not([data-theme="light"]) .formation-slot-row {
 #matrixBoard .m-skill-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
   width: 100%;
 }
@@ -27481,33 +27518,36 @@ html:not([data-theme="light"]) .formation-slot-row {
   min-height: 22px;
   padding: 2px 5px;
   margin-top: 0;
-  gap: 5px;
+  gap: 4px;
   border: 1px solid var(--skill-edge);
-  border-radius: 3px;
+  border-radius: 5px;
   background: var(--skill-bg);
   color: var(--skill-text);
   cursor: pointer;
-  box-shadow: inset 0 1px 0 #ffffff18, 0 1px 2px #14213026;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 3px rgba(20, 33, 48, 0.16);
   font: inherit;
   font-size: 12px;
   line-height: 1.3;
   text-align: left;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
 #matrixBoard .m-skill::before {
   content: '';
-  width: 5px;
-  height: 5px;
-  flex: 0 0 5px;
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  background: var(--c);
   border: 1px solid var(--skill-edge);
+  border-radius: 1px;
   transform: rotate(45deg);
 }
 
 #matrixBoard .m-skill strong {
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 800;
 }
 
 #matrixBoard .m-skill:hover,
@@ -27626,10 +27666,19 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 #matrixBoard .m-bot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-top: auto !important;
+  padding-top: 3px;
+  border-top: 1px dashed rgba(212, 168, 83, 0.24);
   flex-wrap: nowrap;
-  gap: 2px;
+  gap: 3px;
   width: 100%;
+}
+
+[data-theme="light"] #matrixBoard .m-bot {
+  border-top-color: rgba(120, 86, 34, 0.16);
 }
 
 #matrixBoard .m-stats {
@@ -27638,30 +27687,36 @@ html:not([data-theme="light"]) .formation-slot-row {
   min-width: 0;
   align-items: baseline;
   justify-content: flex-start;
-  gap: 6px !important;
-  font-size: 10.5px !important;
-  font-weight: 600;
+  gap: 5px !important;
+  font-size: 10px !important;
+  font-weight: 700;
   line-height: 16px;
 }
 
 #matrixBoard .m-stats span {
   display: inline-flex;
   align-items: baseline;
-  gap: 3px;
+  gap: 2.5px;
   white-space: nowrap;
 }
 
 #matrixBoard .m-stats b {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 16px;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 #matrixBoard .m-stats,
 #matrixBoard .m-stats b {
-  color: var(--muted) !important;
+  color: #dbe4f0 !important;
+}
+
+[data-theme="light"] #matrixBoard .m-stats,
+[data-theme="light"] #matrixBoard .m-stats b {
+  color: #3a2d1e !important;
 }
 
 #matrixBoard .m-avatar-wrap>span {
@@ -27826,8 +27881,9 @@ html:not([data-theme="light"]) .formation-slot-row {
     font-weight: 600;
   }
 
-  #matrixBoard .m-bot .m-env-badge,
-  #matrixBoard .m-bot .m-syn-pill {
+  #matrixBoard .m-top-badges .m-env-badge,
+  #matrixBoard .m-top-badges .m-syn-pill,
+  #matrixBoard .m-top-badges .m-form-badge {
     font-size: 8.5px;
     padding: 0 3px;
   }
@@ -27922,6 +27978,11 @@ html:not([data-theme="light"]) .formation-slot-row {
   #matrixBoard .m-syn-pill {
     font-size: 8.5px;
     padding: 0 3px;
+  }
+
+  #matrixBoard .m-bot {
+    padding-top: 1px;
+    border-top: 0;
   }
 
   #matrixBoard .m-stats {

@@ -1328,10 +1328,12 @@ function renderMatrix() {
       const isSynReady = candSyns.length > 0;
       const tacTags = getCardTacticalTags(u);
       const topBadgesHtml = [
-        isEquipped ? `<span class="m-form-badge${isRandForm ? ' is-rand' : ''}" title="本將目前出征陣型：${isRandForm ? '開戰隨機' : esc(slotForm.name) + '陣'}">${isRandForm ? '🎲隨機' : esc(slotForm.name) + '陣'}</span>` : '',
         candSyns.slice(0, 1).map(s => `<span class="m-syn-pill" title="${esc(s.title)}">✦${esc(s.label)}</span>`).join(''),
         envMod ? `<span class="m-env-badge env-${envMod.type}" title="${esc(envMod.tip)}" aria-label="${esc(envMod.tip)}">${envMod.shortHtml || esc(envMod.short)}</span>` : ''
       ].filter(Boolean).join('');
+      const selFormBadgeHtml = isEquipped
+        ? `<span class="m-form-badge${isRandForm ? ' is-rand' : ''}" title="本將目前出征陣型：${isRandForm ? '開戰隨機' : esc(slotForm.name) + '陣'}">${isRandForm ? '🎲隨機' : esc(slotForm.name)}</span>`
+        : '';
 
       return `<div class="m-card ${isEquipped ? 'sel' : ''} ${showWhy ? 'dis' : ''} ${isBanned ? 'banned' : ''} ${isSynReady ? 'syn-ready' : ''}"
                    style="--c:${c}" data-id="${u.id}" data-cat="${cat}" data-cost="${u.cost}">
@@ -1348,6 +1350,7 @@ function renderMatrix() {
               <div class="m-name-group">
                 <div class="m-name" title="${esc(u.name)}">${renderNationBadge(u)}<span class="m-name-text">${esc(u.name)}</span></div>
               </div>
+              ${topBadgesHtml ? `<div class="m-top-badges">${topBadgesHtml}</div>` : ''}
               <div class="m-actions">
                 <button class="m-info-btn" data-info-id="${u.id}" title="查看名將傳記與實戰數值">ℹ</button>
               </div>
@@ -1365,7 +1368,7 @@ function renderMatrix() {
                 <span title="打擊 ATK" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
                 <span title="${stat3.fullLabel}" aria-label="${stat3.fullLabel} ${stat3.val}">${stat3.label} <b>${stat3.val}</b></span>
               </div>
-              ${topBadgesHtml ? `<div class="m-top-badges">${topBadgesHtml}</div>` : ''}
+              ${selFormBadgeHtml}
             </div>
             <div class="m-mobile-brief">
               ${tacTags.slice(0, 2).map(t => `<span class="m-tac-chip ${t.cls}" title="${esc(t.title)}">${esc(t.text)}</span>`).join('')}

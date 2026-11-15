@@ -26039,10 +26039,17 @@ select:focus-visible,
 
 #missionContent {
   flex: 0 1 auto !important;
+  min-width: 0 !important;
 }
 
 #missionBar:has(.mission-actions) #missionContent {
   flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+#missionContent:has(.pvp-score-box) {
+  overflow: hidden !important;
+  gap: 6px !important;
 }
 
 #missionBar>#formationDropdown {
@@ -26061,11 +26068,79 @@ select:focus-visible,
 
 @media (min-width: 769px) {
   .mission-content:has(.daily-mission-item) .weather-pill,
-  .mission-content:has(.sandbox-mission-item) .weather-pill {
+  .mission-content:has(.sandbox-mission-item) .weather-pill,
+  #missionContent:has(.pvp-score-box) .weather-pill {
     width: auto !important;
     min-width: 0 !important;
     max-width: 108px !important;
     padding: 0 7px !important;
+    flex: 0 1 auto !important;
+  }
+
+  .mission-bar .mission-tag.pvp-online-tag {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    font-size: 12.5px !important;
+    padding: 0 7px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pvp-host-settings {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    gap: 4px !important;
+    margin-left: 0 !important;
+  }
+
+  .pvp-host-settings select {
+    flex: 0 1 auto;
+    min-width: 68px;
+    max-width: 104px;
+    text-overflow: ellipsis;
+  }
+
+  .pvp-score-box {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 3px 8px !important;
+    white-space: nowrap !important;
+  }
+
+  .pvp-opp-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .pvp-opp-name {
+    display: inline-block;
+    max-width: 112px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .pvp-ready-badge {
+    flex: 0 0 auto;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .pvp-online-actions {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+  }
+
+  .pvp-online-actions .btn {
+    white-space: nowrap;
   }
 
   .daily-mission-item,
@@ -26112,14 +26187,46 @@ select:focus-visible,
 
 @media (min-width: 769px) and (max-width: 1360px) {
   .daily-mission-item .mission-label-text,
-  .sandbox-mission-item .mission-label-text {
+  .sandbox-mission-item .mission-label-text,
+  .pvp-score-lbl {
     display: none;
+  }
+
+  .pvp-opp-name {
+    max-width: 88px;
+  }
+
+  #missionContent:has(.pvp-host-settings) .weather-pill .weather-name {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1220px) {
+  .pvp-host-settings select {
+    max-width: 84px;
+    font-size: 12px !important;
+  }
+
+  .pvp-opp-name {
+    max-width: 68px;
+  }
+
+  #missionContent:has(.pvp-score-box) .weather-pill {
+    max-width: 86px !important;
+    padding: 0 6px !important;
   }
 }
 
 @media (min-width: 769px) and (max-width: 1140px) {
   .daily-enemy-badge {
     max-width: 108px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1060px) {
+  #missionContent:has(.pvp-score-box) .weather-pill .weather-name,
+  .pvp-opp-wrap {
+    display: none;
   }
 }
 

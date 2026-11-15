@@ -797,6 +797,31 @@ try:
         })""", race_host_code)
         assert start_check["isOnlinePvp"] and start_check["mode"] == "bo3" and start_check["fbStatus"] == "playing", f"Host failed to start match: {start_check}"
 
+        for pw, ph in [(1280, 720), (1180, 720), (1024, 720)]:
+            pvp_page.set_viewport_size({"width": pw, "height": ph})
+            pvp_page.wait_for_timeout(120)
+            pvp_bar_check = pvp_page.evaluate("""() => {
+                const mc = document.querySelector('#missionContent')?.getBoundingClientRect();
+                const exitBtn = document.querySelector('#btnExitPvp')?.getBoundingClientRect();
+                const form = document.querySelector('#formationDropdown')?.getBoundingClientRect();
+                const right = document.querySelector('#missionRightTools')?.getBoundingClientRect();
+                return {
+                    mcRight: mc?.right || 0,
+                    exitRight: exitBtn?.right || 0,
+                    formLeft: form?.left || 0,
+                    formRight: form?.right || 0,
+                    rightLeft: right?.left || 0,
+                    bleedsForm: Boolean(exitBtn && form && exitBtn.right > form.left + 1),
+                    mcBleedsForm: Boolean(mc && form && mc.right > form.left + 1),
+                    formBleedsRight: Boolean(form && right && form.right > right.left + 1),
+                    overflow: document.documentElement.scrollWidth > window.innerWidth + 1
+                };
+            }""")
+            assert not pvp_bar_check["bleedsForm"] and not pvp_bar_check["mcBleedsForm"] and not pvp_bar_check["formBleedsRight"] and not pvp_bar_check["overflow"], \
+                f"Online PvP mission bar overlapped at {pw}x{ph}: {pvp_bar_check}"
+        pvp_page.set_viewport_size({"width": 1280, "height": 720})
+        pvp_page.wait_for_timeout(80)
+
         # 重置連線狀態並實測在輸入框輸入房號後點擊「立即加入」按鈕 (#btnSubmitJoinRoom) 與 P2P 失效防護
         pvp_page.evaluate("""() => {
             OnlinePvPEngine.closeConnection();

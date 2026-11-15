@@ -1031,30 +1031,30 @@ function renderMissionBar() {
       const isHost = OnlinePvPEngine.isHostUser();
 
       const hostSettingsHtml = (!isLockedState && isHost) ? `
-        <div class="mission-item" style="margin-left:4px">
+        <div class="mission-item pvp-host-settings">
           <select class="select sm" id="bo3PvpGamesSel" title="房主設定局數制">
             <option value="3" ${maxG === 3 ? 'selected' : ''}>⚡ 3局2勝</option>
             <option value="5" ${maxG === 5 ? 'selected' : ''}>⚔️ 5局3勝</option>
             <option value="7" ${maxG === 7 ? 'selected' : ''}>🔥 7局4勝</option>
           </select>
-          <select class="select sm" id="bo3PvpMarketSel" style="margin-left:3px" title="房主設定軍火庫模式">
+          <select class="select sm" id="bo3PvpMarketSel" title="房主設定軍火庫模式">
             <option value="locked" ${!isFree ? 'selected' : ''}>🔒 鎖定 (Ban 1)</option>
             <option value="free" ${isFree ? 'selected' : ''}>🎲 自由 (Ban 2)</option>
           </select>
         </div>` : '';
 
-      h = `<span class="mission-tag bo3-mission-tag" style="background:rgba(56,189,248,.18);color:#38bdf8;border-color:rgba(56,189,248,.4);font-weight:700;display:inline-flex;align-items:center;gap:6px">🌐 線上回合 <span style="opacity:0.4">▪</span> BO${maxG} (${isFree ? '自由調撥' : '開戰鎖定'}) <span style="opacity:0.4">▪</span> 第 ${b.round}/${maxG} 局</span>
+      h = `<span class="mission-tag bo3-mission-tag pvp-online-tag" style="background:rgba(56,189,248,.18);color:#38bdf8;border-color:rgba(56,189,248,.4);font-weight:700;display:inline-flex;align-items:center;gap:4px">🌐 BO${maxG}·${isFree ? '自由' : '鎖定'} <span style="opacity:0.4">▪</span> ${b.round}/${maxG}局</span>
         ${hostSettingsHtml}
         ${formatWeatherBadge(state.event)}
-        <div class="mission-item" style="background:rgba(255,255,255,.06);padding:3px 8px;border-radius:6px;border:1px solid var(--line2)">
-          <span style="font-family:var(--head);font-size:15px;font-weight:800;letter-spacing:.05em">比分：<b style="color:var(--cyan);font-size:16px">${b.winsA}</b> <span style="color:var(--muted)">-</span> <b style="color:var(--red);font-size:16px">${b.winsB}</b></span>
-          <span class="muted" style="margin-left:8px">VS <b style="color:var(--text);font-weight:700">${esc(oppDisplay)}</b></span>
-          <span class="badge ${state.pvpOpponentReady ? 'badge-ok' : 'badge-no'}" style="margin-left:6px;font-size:11px">${state.pvpOpponentReady ? '✔ 對手就緒' : '⏳ 配置中'}</span>
+        <div class="mission-item pvp-score-box" style="background:rgba(255,255,255,.06);border-radius:6px;border:1px solid var(--line2)">
+          <span class="pvp-score-val" style="font-family:var(--head);font-size:13.5px;font-weight:800;letter-spacing:.03em"><span class="pvp-score-lbl">比分：</span><b style="color:var(--cyan)">${b.winsA}</b> <span style="color:var(--muted)">-</span> <b style="color:var(--red)">${b.winsB}</b></span>
+          <span class="muted pvp-opp-wrap">VS <b class="pvp-opp-name" title="${esc(oppDisplay)}">${esc(oppDisplay)}</b></span>
+          <span class="badge pvp-ready-badge ${state.pvpOpponentReady ? 'badge-ok' : 'badge-no'}">${state.pvpOpponentReady ? '✔ 對手就緒' : '⏳ 配置中'}</span>
           ${banAHtml}
           ${banBHtml}
           <span id="pvpTimerBadge" class="mission-item pvp-timer-capsule" style="display:${PvPTimerManager.getRemaining() > 0 ? 'inline-flex' : 'none'};padding:2px 7px;border-radius:5px;font-size:11.5px;font-weight:700">⏰ <b id="pvpTimerSec">${PvPTimerManager.getRemaining()}</b>s</span>
         </div>
-        <div class="mission-actions">
+        <div class="mission-actions pvp-online-actions">
           <button class="btn ghost sm" id="btnExitPvp" style="color:var(--red);border-color:rgba(255,93,110,.3)" title="退出當前線上對戰房間">退出連線 ✕</button>
         </div>`;
     } else {

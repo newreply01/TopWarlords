@@ -27477,40 +27477,6 @@ html:not([data-theme="light"]) .formation-slot-row {
   border-color: rgba(217, 119, 6, 0.5);
 }
 
-#matrixBoard .m-info-btn {
-  display: inline-grid;
-  place-items: center;
-  width: 17px;
-  height: 17px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 10px;
-  line-height: 1;
-  background: rgba(56, 189, 248, 0.14);
-  color: #7dd3fc;
-  border: 1px solid rgba(56, 189, 248, 0.36);
-}
-
-#matrixBoard .m-info-btn:hover,
-#matrixBoard .m-info-btn:focus-visible {
-  background: rgba(56, 189, 248, 0.28);
-  color: #ffffff;
-  border-color: #38bdf8;
-}
-
-[data-theme="light"] #matrixBoard .m-info-btn {
-  background: #f0f9ff;
-  color: #0284c7;
-  border-color: rgba(2, 132, 199, 0.34);
-}
-
-[data-theme="light"] #matrixBoard .m-info-btn:hover,
-[data-theme="light"] #matrixBoard .m-info-btn:focus-visible {
-  background: #0284c7;
-  color: #ffffff;
-  border-color: #0369a1;
-}
-
 #matrixBoard .m-tag {
   font-size: 12px;
   line-height: 1.4;
@@ -27974,12 +27940,6 @@ html:not([data-theme="light"]) .formation-slot-row {
   #matrixBoard .m-nation {
     width: 13px;
     height: 13px;
-    font-size: 9px;
-  }
-
-  #matrixBoard .m-info-btn {
-    width: 15px;
-    height: 15px;
     font-size: 9px;
   }
 

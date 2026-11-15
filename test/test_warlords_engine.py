@@ -231,7 +231,7 @@ try:
             if (unitMap.XIAHOU_DUN && (unitMap.XIAHOU_DUN.cost !== 2 || unitMap.XIAHOU_DUN.cat !== 'armor')) {
                 errs.push('夏侯惇定位錯誤');
             }
-            if (unitMap.IINAOMASA && (unitMap.IINAOMASA.cost !== 3 || unitMap.IINAOMASA.cat !== 'armor')) {
+            if (unitMap.IINAOMASA && (unitMap.IINAOMASA.cost !== 2 || unitMap.IINAOMASA.cat !== 'armor')) {
                 errs.push('井伊直政費用／兵種錯誤');
             }
             if (!(unitMap.LUXUN.cost > unitMap.LUSU.cost && unitMap.LUXUN.ew > unitMap.LUSU.ew && unitMap.LUSU.ew >= unitMap.PANGTONG.ew)) {

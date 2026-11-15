@@ -163,7 +163,7 @@ const LADDER_PRESETS = [
     "rp": 51709,
     "doc": "defense",
     "deck": [
-      "YOSHITSUNE",
+      "YAMAGATA",
       "SHIMAZUY",
       "ASAKURA_SOT",
       "MOURI_MOTO",
@@ -283,7 +283,7 @@ const LADDER_PRESETS = [
     "rp": 47141,
     "doc": "strike",
     "deck": [
-      "DENGAI",
+      "XIAHOUYUAN",
       "DIANWEI",
       "ZHANGHE",
       "JANGPOGO",
@@ -553,9 +553,9 @@ const LADDER_PRESETS = [
     "rp": 36347,
     "doc": "defense",
     "deck": [
-      "SUNCE",
+      "XIAHOUYUAN",
       "MENGTIAN",
-      "TANDAOJI",
+      "FENGYI",
       "XUHUANG",
       "LUXUN"
     ],
@@ -598,7 +598,7 @@ const LADDER_PRESETS = [
     "rp": 34673,
     "doc": "defense",
     "deck": [
-      "CHENQINGZHI",
+      "PANGDE",
       "CAOREN",
       "TAISHICI",
       "GANNING",
@@ -643,7 +643,7 @@ const LADDER_PRESETS = [
     "rp": 32846,
     "doc": "defense",
     "deck": [
-      "TACHIBANA",
+      "DATE",
       "SHIMAZUY",
       "ASAKURA_SOT",
       "MOURI_MOTO",
@@ -658,7 +658,7 @@ const LADDER_PRESETS = [
     "rp": 32148,
     "doc": "defense",
     "deck": [
-      "TACHIBANA",
+      "DATE",
       "HOJO_UJIYASU",
       "SAIKA",
       "MURAKAMI",
@@ -973,10 +973,10 @@ const LADDER_PRESETS = [
     "rp": 20283,
     "doc": "deception",
     "deck": [
-      "DENGAI",
+      "XIAHOUYUAN",
       "YUEFEI",
-      "HULUGUANG",
-      "XUHUANG",
+      "ZONGZE",
+      "CAOBIN",
       "LEYI"
     ],
     "title": "伏波龍骨水陸破暗"
@@ -1003,11 +1003,11 @@ const LADDER_PRESETS = [
     "rp": 19098,
     "doc": "strike",
     "deck": [
-      "CHENQINGZHI",
+      "LINGTONG",
       "ZHANGFEI",
       "FENGYI",
       "XIEXUAN",
-      "LUSU"
+      "FAZHENG"
     ],
     "title": "先制斬首千里破陣"
   },
@@ -1108,7 +1108,7 @@ const LADDER_PRESETS = [
     "rp": 14904,
     "doc": "deception",
     "deck": [
-      "CHENQINGZHI",
+      "MACHO",
       "CAOREN",
       "ZONGZE",
       "YUEJIN",
@@ -1123,10 +1123,10 @@ const LADDER_PRESETS = [
     "rp": 14155,
     "doc": "defense",
     "deck": [
-      "LUBU",
+      "XIAHOUYUAN",
       "YUEFEI",
-      "FENGYI",
-      "DINGFENG",
+      "KUANGZHANG",
+      "CAOBIN",
       "SUNWU"
     ],
     "title": "重鎧陣線寸步不讓"
@@ -1213,7 +1213,7 @@ const LADDER_PRESETS = [
     "rp": 10084,
     "doc": "strike",
     "deck": [
-      "YOSHITSUNE",
+      "YAMAGATA",
       "SHIMAZUY",
       "ASAKURA_SOT",
       "MOURI_MOTO",
@@ -1258,7 +1258,7 @@ const LADDER_PRESETS = [
     "rp": 8200,
     "doc": "deception",
     "deck": [
-      "DENGAI",
+      "ZHAOSHE",
       "DIANWEI",
       "ZONGZE",
       "KUKI",
@@ -1380,8 +1380,8 @@ const LADDER_PRESETS = [
     "deck": [
       "LINGTONG",
       "WANGJIAN",
-      "LIGUANG",
-      "DINGFENG",
+      "ZONGZE",
+      "YUEJIN",
       "SUNWU"
     ],
     "title": "先登奇兵暗夜刺殺"
@@ -1440,7 +1440,7 @@ const LADDER_PRESETS = [
     "deck": [
       "PANGDE",
       "CAOREN",
-      "YANGYOUJI",
+      "TAISHICI",
       "XIEXUAN",
       "SUNBIN"
     ],
@@ -1455,7 +1455,7 @@ const LADDER_PRESETS = [
     "deck": [
       "GONGSUNDU",
       "DIANWEI",
-      "YANGYOUJI",
+      "ZHANGHE",
       "XIEXUAN",
       "LEYI"
     ],
@@ -1498,7 +1498,7 @@ const LADDER_PRESETS = [
     "rp": 100,
     "doc": "deception",
     "deck": [
-      "DENGAI",
+      "ZHAOSHE",
       "YANGYE",
       "GENGYAN",
       "LUMENG",

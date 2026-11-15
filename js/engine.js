@@ -495,7 +495,11 @@ function resolveBattle(deckA, deckB, opts) {
         addKey(3, `${t.name} 的重盾格擋阻斷了 ${at.name} 的首波攻勢`, t.side);
         continue;
       }
-      const d = r.raw * (a.trueDmg ? 1 : (1 - Math.min(0.9, t.def * t.formationDefense * (1 - r.skillModifiers.armorPierce)))) * S[t.side].taken * t.formationDamageTaken * (1 - Math.max(t.skillGuard, S[t.side].skillGuard || 0));
+      const effectiveDef = Math.min(0.9, t.def * t.formationDefense);
+      const heavyFloor = t.traits.includes('HEAVY') ? 0.25 : 0;
+      const pierceFrac = a.trueDmg ? 1 : clamp(r.skillModifiers.armorPierce || 0, 0, 1);
+      const defAfterPierce = effectiveDef * (1 - pierceFrac * (1 - heavyFloor));
+      const d = r.raw * (1 - defAfterPierce) * S[t.side].taken * t.formationDamageTaken * (1 - Math.max(t.skillGuard, S[t.side].skillGuard || 0));
       t.hp -= d;
       at.dmgDone += d;
       if (t.hp <= 0) {
@@ -804,7 +808,7 @@ function resolveBattle(deckA, deckB, opts) {
           at.push({
             att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
             hit: hitP(u, t, 0.85, 0.2, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-            dmg: u.atk * (isTrueAt ? 1.65 : 1.45) * S[s].landMult * m.armorDmg * (t.cat === 'armor' ? (isTrueAt ? 1.25 : 1.1) : 0.9) * ammo.dmgMult
+            dmg: u.atk * (isTrueAt ? 1.54 : 1.46) * S[s].landMult * m.armorDmg * (t.cat === 'armor' ? (isTrueAt ? 1.16 : 1.1) : 0.9) * ammo.dmgMult
           });
         } else if (u.cat === 'support') {
           // 軍師奇計／火器攻城

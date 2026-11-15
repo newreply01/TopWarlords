@@ -7329,6 +7329,7 @@ body:has(.battle:not([hidden])) .command-deck,
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 18%;
   display: block;
   transition: transform 0.3s ease;
 }
@@ -26281,9 +26282,11 @@ html:not([data-theme="light"]) .formation-slot-row {
     flex: 0 0 70px;
     width: 70px;
   }
+
   .formation-slot-chips {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+
   .formation-slot-chip {
     font-size: 11.5px;
   }
@@ -26495,12 +26498,10 @@ html:not([data-theme="light"]) .formation-slot-row {
 .m-form-badge {
   display: inline-flex;
   align-items: center;
-  flex: 0 0 auto;
-  padding: 0 3px;
+  padding: 0 4px;
   border-radius: 3px;
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 800;
-  line-height: 14px;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.14);
   border: 1px solid rgba(56, 189, 248, 0.35);
@@ -27254,15 +27255,7 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 #matrixBoard .m-card.sel .m-top {
-  padding-right: 21px;
-}
-
-#matrixBoard .m-card.sel::after {
-  right: 4px;
-  top: 4px;
-  width: 15px;
-  height: 15px;
-  font-size: 9.5px;
+  padding-right: 24px;
 }
 
 #matrixBoard .m-card-main-row {
@@ -27317,7 +27310,7 @@ html:not([data-theme="light"]) .formation-slot-row {
 
 #matrixBoard .m-card-info-col {
   min-width: 0;
-  padding: 5px 5px 4px 0;
+  padding: 5px 7px 4px 0;
   gap: 3px;
 }
 
@@ -27503,7 +27496,7 @@ html:not([data-theme="light"]) .formation-slot-row {
 #matrixBoard .m-skill-row {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
   width: 100%;
 }
@@ -27516,9 +27509,9 @@ html:not([data-theme="light"]) .formation-slot-row {
   width: fit-content;
   max-width: 100%;
   min-height: 22px;
-  padding: 2px 5px;
+  padding: 2px 6px;
   margin-top: 0;
-  gap: 4px;
+  gap: 5px;
   border: 1px solid var(--skill-edge);
   border-radius: 5px;
   background: var(--skill-bg);
@@ -27529,7 +27522,7 @@ html:not([data-theme="light"]) .formation-slot-row {
   font-size: 12px;
   line-height: 1.3;
   text-align: left;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
@@ -27666,14 +27659,11 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 #matrixBoard .m-bot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   margin-top: auto !important;
   padding-top: 3px;
   border-top: 1px dashed rgba(212, 168, 83, 0.24);
   flex-wrap: nowrap;
-  gap: 3px;
+  gap: 2px;
   width: 100%;
 }
 
@@ -27687,7 +27677,7 @@ html:not([data-theme="light"]) .formation-slot-row {
   min-width: 0;
   align-items: baseline;
   justify-content: flex-start;
-  gap: 5px !important;
+  gap: 9px !important;
   font-size: 10px !important;
   font-weight: 700;
   line-height: 16px;
@@ -28256,15 +28246,16 @@ html:not([data-theme="light"]) .formation-slot-row {
   opacity: 0;
   transform: translateY(-4px);
 }
-  padding: 5px 10px;
-  border-radius: 3px;
-  border: 1px solid var(--skill-edge);
-  border-left: 4px solid #fbbf24;
-  background: linear-gradient(100deg, rgba(20, 15, 11, 0.96) 0%, rgba(42, 33, 22, 0.96) 100%);
-  color: #fef3c7;
-  font-size: 12px;
-  line-height: 1.3;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+
+padding: 5px 10px;
+border-radius: 3px;
+border: 1px solid var(--skill-edge);
+border-left: 4px solid #fbbf24;
+background: linear-gradient(100deg, rgba(20, 15, 11, 0.96) 0%, rgba(42, 33, 22, 0.96) 100%);
+color: #fef3c7;
+font-size: 12px;
+line-height: 1.3;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
 }
 
 .battle-skill-ticker[hidden] {
@@ -28559,5 +28550,227 @@ html:not([data-theme="light"]) .formation-slot-row {
 
   #battleIntelDialog {
     margin: auto;
+  }
+}
+
+/* =====================================================
+   名將詳細情報檔案卡優化 (1:1 完整人像 + 桌機置中雙欄/行動底抽屜)
+   ===================================================== */
+@media (min-width: 769px) {
+  #unitDetailModal.mobile-sheet-modal {
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  #unitDetailModal .unit-sheet-card {
+    width: min(760px, 100%);
+    max-width: 760px;
+    max-height: 88vh;
+    border-radius: 18px;
+    border: 1px solid var(--line2);
+    padding: 18px 22px 20px;
+    margin: auto;
+    box-shadow: 0 24px 64px rgba(2, 6, 23, 0.48);
+    animation: pop 0.22s cubic-bezier(0.2, 1.15, 0.4, 1);
+  }
+
+  #unitDetailModal .modal-card::before {
+    display: none;
+  }
+}
+
+#unitDetailModal .sheet-head {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+}
+
+.sheet-hero-grid {
+  display: grid;
+  grid-template-columns: 164px minmax(0, 1fr);
+  grid-template-areas:
+    "portrait meta"
+    "portrait stats"
+    "portrait desc";
+  gap: 8px 16px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.sheet-hero-grid.no-portrait {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "meta"
+    "stats"
+    "desc";
+}
+
+.sheet-portrait-frame {
+  grid-area: portrait;
+  width: 164px;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--c, var(--cyan)) 55%, transparent);
+  background: radial-gradient(circle at 50% 25%, rgba(30, 41, 59, 0.72), #020617 85%);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.sheet-portrait-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  display: block;
+}
+
+.sheet-hero-grid .sheet-unit-meta {
+  grid-area: meta;
+  margin-bottom: 0;
+  align-items: flex-start;
+}
+
+.sheet-unit-identity {
+  min-width: 0;
+  flex: 1;
+}
+
+.sheet-unit-tag {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+.sheet-banned-tag {
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sheet-stats-strip {
+  grid-area: stats;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.sheet-stats-strip .sheet-stat-box {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 8px;
+}
+
+.sheet-stats-strip .sheet-stat-box span {
+  font-size: 10.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sheet-stats-strip .sheet-stat-box b {
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+.sheet-hero-grid .sheet-unit-desc {
+  grid-area: desc;
+  margin-bottom: 0;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.sheet-combat-meta {
+  margin-bottom: 10px;
+}
+
+.sheet-extras-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px 14px;
+  margin-bottom: 4px;
+}
+
+.sheet-extras-grid.is-dual {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.sheet-extra-col {
+  min-width: 0;
+}
+
+.sheet-extra-col .sheet-traits-list,
+.sheet-extra-col .sheet-synergy-hints {
+  margin-bottom: 0;
+}
+
+.sheet-footer-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+[data-theme="light"] #unitDetailModal .unit-sheet-card {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.2);
+}
+
+[data-theme="light"] .sheet-portrait-frame {
+  background: radial-gradient(circle at 50% 25%, #f1f5f9, #cbd5e1 92%);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+}
+
+@media (max-width: 768px) {
+  #unitDetailModal .unit-sheet-card {
+    margin: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  #unitDetailModal .unit-sheet-card {
+    max-height: 88dvh !important;
+    padding: 14px 14px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .sheet-hero-grid {
+    grid-template-columns: 108px minmax(0, 1fr);
+    grid-template-areas:
+      "portrait meta"
+      "stats stats"
+      "desc desc";
+    gap: 10px 12px;
+  }
+
+  .sheet-portrait-frame {
+    width: 108px;
+    border-radius: 10px;
+  }
+
+  .sheet-hero-grid .sheet-unit-name {
+    font-size: 17px;
+  }
+
+  .sheet-hero-grid .sheet-unit-cost {
+    font-size: 18px;
+    padding: 2px 8px;
+  }
+
+  .sheet-stats-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sheet-stats-strip .sheet-stat-box.sheet-stat-def {
+    grid-column: span 2;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sheet-extras-grid.is-dual {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

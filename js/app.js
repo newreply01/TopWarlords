@@ -2426,44 +2426,60 @@ function openUnitDetailModal(u) {
   const c = CATS[u.cat].color;
   const envMod = getUnitWeatherMod(u);
 
+  const synHints = typeof getUnitSynergyHints === 'function' ? getUnitSynergyHints(u) : [];
+  const hasTraits = Boolean(u.traits && u.traits.length);
+  const hasExtras = hasTraits || synHints.length > 0;
+
   card.innerHTML = `
     <div class="sheet-head" style="--c:${c}">
       <div class="sheet-unit-title">
         <span style="display:inline-flex;width:20px;height:20px;color:${c}">${ICON[u.cat]}</span>
         <h3>${CATS[u.cat].label} · 詳細情報</h3>
       </div>
-      <button class="sheet-close" id="btnUnitSheetClose">✕</button>
+      <button class="sheet-close" id="btnUnitSheetClose" aria-label="關閉詳細情報">✕</button>
     </div>
-    <div class="sheet-unit-meta" style="--c:${c}">
-      <div>
-        <div class="sheet-unit-name">${renderNationBadge(u)} ${esc(u.name)} ${isBanned ? '<span style="color:var(--red);font-size:12px">[BANNED]</span>' : ''}</div>
-        <div class="sheet-unit-tag">${esc(u.origin || '')} · $${u.cost} · ${esc(u.tag)}</div>
+    <div class="sheet-hero-grid${u.img ? '' : ' no-portrait'}" style="--c:${c}">
+      ${u.img ? `
+        <div class="sheet-portrait-frame" style="--c:${c}">
+          <img src="${u.img}" decoding="async" alt="${esc(u.name)}" onerror="this.parentElement.style.display='none';this.closest('.sheet-hero-grid')?.classList.add('no-portrait')" />
+        </div>
+      ` : ''}
+      <div class="sheet-unit-meta" style="--c:${c}">
+        <div class="sheet-unit-identity">
+          <div class="sheet-unit-name">${renderNationBadge(u)} ${esc(u.name)} ${isBanned ? '<span class="sheet-banned-tag">[BANNED]</span>' : ''}</div>
+          <div class="sheet-unit-tag">${esc(u.origin || '')} · $${u.cost} · ${esc(u.tag)}</div>
+        </div>
+        <span class="sheet-unit-cost">$${u.cost}</span>
       </div>
-      <span class="sheet-unit-cost">$${u.cost}</span>
+      <div class="sheet-stats-strip" aria-label="作戰參數評級">
+        <div class="sheet-stat-box"><span>耐久 HP</span><b>${u.hp}</b></div>
+        <div class="sheet-stat-box"><span>打擊 ATK</span><b>${u.atk}</b></div>
+        <div class="sheet-stat-box"><span>奇襲隱匿</span><b>${u.st}</b></div>
+        <div class="sheet-stat-box"><span>謀略值</span><b>${u.ew}</b></div>
+        <div class="sheet-stat-box sheet-stat-def"><span>護甲減傷</span><b>${Math.round(u.def * 100)}%</b></div>
+      </div>
+      <div class="sheet-unit-desc" style="--c:${c}">${esc(u.desc)}</div>
     </div>
-    ${u.img ? `<div style="height:120px;border-radius:8px;overflow:hidden;margin:8px 0 10px;border:1px solid var(--line2);background:#020617"><img src="${u.img}" decoding="async" style="width:100%;height:100%;object-fit:cover" alt="${esc(u.name)}" onerror="this.parentElement.style.display='none'"/></div>` : ''}
-    ${renderUnitCommonMeta(u, envMod, { compact: false })}
-    <div class="sheet-unit-desc" style="--c:${c}">${esc(u.desc)}</div>
-    <div class="sheet-label">作戰參數評級</div>
-    <div class="sheet-stats-grid">
-      <div class="sheet-stat-box"><span>耐久 HP</span><b>${u.hp}</b></div>
-      <div class="sheet-stat-box"><span>打擊 ATK</span><b>${u.atk}</b></div>
-      <div class="sheet-stat-box"><span>奇襲隱匿</span><b>${u.st}</b></div>
-      <div class="sheet-stat-box"><span>謀略值</span><b>${u.ew}</b></div>
-      <div class="sheet-stat-box" style="grid-column:span 2"><span>護甲減傷</span><b>${Math.round(u.def * 100)}%</b></div>
+    <div class="sheet-combat-meta">
+      ${renderUnitCommonMeta(u, envMod, { compact: false })}
     </div>
-    ${u.traits && u.traits.length ? `
-      <div class="sheet-label">特長能力 (TRAITS)</div>
-      <div class="sheet-traits-list">
-        ${u.traits.map(t => `<div class="sheet-trait-item"><b>▸</b>${esc(TRAITS[t])}</div>`).join('')}
-      </div>` : ''}
-    ${(() => {
-      const synHints = typeof getUnitSynergyHints === 'function' ? getUnitSynergyHints(u) : [];
-      if (!synHints.length) return '';
-      return `<div class="sheet-label">聯合作戰體系羈絆搭檔</div>
-      <div class="sheet-synergy-hints">${synHints.map(h => `<div class="sheet-syn-hint-item"><b>${h.icon} ${esc(h.name)}</b><span>${esc(h.hint)}</span></div>`).join('')}</div>`;
-    })()}
-    <div style="display:flex;gap:8px;margin-top:16px">
+    ${hasExtras ? `
+      <div class="sheet-extras-grid${hasTraits && synHints.length ? ' is-dual' : ''}">
+        ${hasTraits ? `
+          <div class="sheet-extra-col">
+            <div class="sheet-label">特長能力 (TRAITS)</div>
+            <div class="sheet-traits-list">
+              ${u.traits.map(t => `<div class="sheet-trait-item"><b>▸</b>${esc(TRAITS[t])}</div>`).join('')}
+            </div>
+          </div>` : ''}
+        ${synHints.length ? `
+          <div class="sheet-extra-col">
+            <div class="sheet-label">聯合作戰體系羈絆搭檔</div>
+            <div class="sheet-synergy-hints">${synHints.map(h => `<div class="sheet-syn-hint-item"><b>${h.icon} ${esc(h.name)}</b><span>${esc(h.hint)}</span></div>`).join('')}</div>
+          </div>` : ''}
+      </div>
+    ` : ''}
+    <div class="sheet-footer-actions">
       ${isEquipped ? `
         <button class="btn ghost sm" id="btnSheetEquip" data-id="${u.id}" style="flex:1;color:var(--red);border-color:rgba(255,93,110,.4)">
           從編制卸下 (回收 $${u.cost})

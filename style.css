@@ -25931,7 +25931,7 @@ html:not([data-theme="light"]) .custom-weather-menu {
   left: 0;
   right: auto;
   z-index: 120;
-  width: min(430px, calc(100vw - 24px));
+  width: min(504px, calc(100vw - 20px));
   max-height: min(78vh, 660px);
   overflow-y: auto;
   background: #ffffff;
@@ -26153,7 +26153,8 @@ html:not([data-theme="light"]) .formation-slot-row {
   display: flex;
   align-items: center;
   gap: 4px;
-  flex: 0 0 68px;
+  flex: 0 0 78px;
+  width: 78px;
   min-width: 0;
 }
 
@@ -26173,7 +26174,7 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 .formation-slot-who {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--text);
   white-space: nowrap;
@@ -26182,37 +26183,53 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 .formation-slot-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
+  display: grid;
+  grid-template-columns: repeat(var(--form-cols, 7), minmax(0, 1fr));
+  gap: 4px;
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .formation-slot-chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 1px;
-  padding: 2px 5px;
-  border-radius: 4px;
+  justify-content: center;
+  width: 100%;
+  height: 26px;
+  padding: 2px;
+  border-radius: 5px;
   border: 1px solid var(--line);
   background: transparent;
   color: var(--muted);
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.12s ease;
 }
 
+.formation-slot-chip .slot-chip-label {
+  display: block;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
 .formation-slot-chip.is-rec {
-  border-color: rgba(245, 158, 11, 0.45);
+  border-color: rgba(245, 158, 11, 0.48);
   color: var(--text);
 }
 
 .formation-slot-chip .slot-rec-star {
+  position: absolute;
+  top: 1px;
+  right: 2px;
   color: #f59e0b;
-  font-size: 9px;
+  font-size: 8px;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .formation-slot-chip:hover:not(:disabled) {
@@ -26236,6 +26253,19 @@ html:not([data-theme="light"]) .formation-slot-row {
 
 [data-theme="light"] .formation-slot-chip.active .slot-rec-star {
   color: #fde047;
+}
+
+@media (max-width: 520px) {
+  .formation-slot-meta {
+    flex: 0 0 70px;
+    width: 70px;
+  }
+  .formation-slot-chips {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .formation-slot-chip {
+    font-size: 11.5px;
+  }
 }
 
 /* 5x5 點將看板欄位標題上的單將陣型快選膠囊與彈窗 */

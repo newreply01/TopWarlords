@@ -1698,12 +1698,12 @@ function renderFormationEditor() {
             <span class="formation-slot-icon">${ICON[cat]}</span>
             <span class="formation-slot-who">${esc(unit ? unit.name : slotShortNames[cat])}</span>
           </div>
-          <div class="formation-slot-chips">
+          <div class="formation-slot-chips" style="--form-cols:${availableFormations.length}">
             ${availableFormations.map(option => {
               const isSlotActive = !isRandom && currentSlotId === option.id;
               const isRec = recSet.has(option.id);
               return `<button type="button" class="formation-slot-chip ${isSlotActive ? 'active' : ''} ${isRec ? 'is-rec' : ''}" data-slot-idx="${idx}" data-slot-val="${option.id}" ${formationEditingLocked ? 'disabled' : ''} title="${esc(option.name)}陣${isRec ? '（★兵種推薦）' : ''}：${esc(option.desc)}">
-                ${isRec ? '<span class="slot-rec-star">★</span>' : ''}${esc(option.name)}
+                <span class="slot-chip-label">${esc(option.name)}</span>${isRec ? '<span class="slot-rec-star" aria-hidden="true">★</span>' : ''}
               </button>`;
             }).join('')}
           </div>

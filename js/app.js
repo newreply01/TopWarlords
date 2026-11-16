@@ -1405,7 +1405,7 @@ function renderMatrix() {
               <div class="m-name-group">
                 <div class="m-name" title="${esc(u.name)}">${renderNationBadge(u)}<span class="m-name-text">${esc(u.name)}</span></div>
               </div>
-              ${topBadgesHtml ? `<div class="m-top-badges">${topBadgesHtml}</div>` : ''}
+              ${(topBadgesHtml || phase) ? `<div class="m-top-badges">${topBadgesHtml}${phase ? `<span class="m-skill-phase phase-${phase.toLowerCase()}" data-info-id="${u.id}" title="${esc(PHASE_TIPS[phase] || '')}（點擊查看詳情）">${esc(phase)}</span>` : ''}</div>` : ''}
               <div class="m-actions">
                 <button type="button" class="m-info-btn" data-info-id="${u.id}" title="查看 ${esc(u.name)} 詳細情報（傳記、數值、特長與羈絆）" aria-label="查看 ${esc(u.name)} 詳細情報">ℹ</button>
               </div>
@@ -1418,11 +1418,10 @@ function renderMatrix() {
             </div>
             <div class="m-bot">
               <div class="m-stats" aria-label="基本數值">
-                <span title="耐久 HP" aria-label="生命 ${u.hp}">生 <b>${u.hp}</b></span>
-                <span title="打擊 ATK" aria-label="攻擊 ${u.atk}">攻 <b>${u.atk}</b></span>
-                <span title="${stat3.fullLabel}" aria-label="${stat3.fullLabel} ${stat3.val}">${stat3.label} <b>${stat3.val}</b></span>
+                <span title="耐久 HP" aria-label="生命 ${u.hp}"><em class="m-stat-lbl">生</em><b>${u.hp}</b></span>
+                <span title="打擊 ATK" aria-label="攻擊 ${u.atk}"><em class="m-stat-lbl">攻</em><b>${u.atk}</b></span>
+                <span title="${stat3.fullLabel}" aria-label="${stat3.fullLabel} ${stat3.val}"><em class="m-stat-lbl">${stat3.label}</em><b>${stat3.val}</b></span>
               </div>
-              ${phase ? `<div class="m-bot-right"><span class="m-skill-phase phase-${phase.toLowerCase()}" data-info-id="${u.id}" title="${esc(PHASE_TIPS[phase] || '')}（點擊查看詳情）">${esc(phase)}</span></div>` : ''}
             </div>
             <div class="m-mobile-brief">
               ${selFormBadgeHtml}

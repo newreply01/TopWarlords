@@ -29785,3 +29785,296 @@ html:not([data-theme="light"]) .formation-slot-row {
     text-align: right;
   }
 }
+
+/* =====================================================
+   武將卡片精品重構：減法降噪、肖像羽化融合、右上徽章對齊與等距三維數值欄 (v7.11.55)
+   ===================================================== */
+#matrixBoard .m-card {
+  border: 1px solid rgba(212, 168, 83, 0.2) !important;
+  border-radius: 9px !important;
+  background: linear-gradient(135deg, #1b1713 0%, #12100d 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 240, 200, 0.05);
+  overflow: hidden !important;
+}
+
+#matrixBoard .m-card::before {
+  width: 2.5px;
+  opacity: 0.72;
+}
+
+#matrixBoard .m-card[data-cost="5"] {
+  border-color: rgba(245, 158, 11, 0.55) !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.09) 0%, #181410 42%, #12100d 100%);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.14), inset 0 1px 0 rgba(253, 224, 71, 0.14);
+}
+
+#matrixBoard .m-card[data-cost="4"] {
+  border-color: rgba(168, 85, 247, 0.42) !important;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, #17131b 42%, #12100d 100%);
+}
+
+#matrixBoard .m-card[data-cost="3"] {
+  border-color: rgba(20, 184, 166, 0.36) !important;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.07) 0%, #121818 42%, #11100e 100%);
+}
+
+#matrixBoard .m-card[data-cost="2"] {
+  border-color: rgba(148, 163, 184, 0.28) !important;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.05) 0%, #17191e 42%, #12100d 100%);
+}
+
+[data-theme="light"] #matrixBoard .m-card {
+  border: 1px solid rgba(120, 88, 42, 0.2) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #faf6ee 100%);
+  box-shadow: 0 1px 4px rgba(60, 42, 14, 0.06), inset 0 1px 0 #ffffff;
+}
+
+[data-theme="light"] #matrixBoard .m-card[data-cost="5"] {
+  border-color: rgba(217, 119, 6, 0.56) !important;
+  background: linear-gradient(135deg, #fffaf0 0%, #fff4db 38%, #ffffff 100%);
+  box-shadow: 0 2px 7px rgba(180, 83, 9, 0.11), inset 0 1px 0 #ffffff;
+}
+
+[data-theme="light"] #matrixBoard .m-card[data-cost="4"] {
+  border-color: rgba(147, 51, 234, 0.38) !important;
+  background: linear-gradient(135deg, #fcfaff 0%, #f5edfd 38%, #ffffff 100%);
+  box-shadow: 0 1px 5px rgba(107, 33, 168, 0.08), inset 0 1px 0 #ffffff;
+}
+
+[data-theme="light"] #matrixBoard .m-card[data-cost="3"] {
+  border-color: rgba(13, 148, 136, 0.36) !important;
+  background: linear-gradient(135deg, #f6fdfb 0%, #eaf8f3 38%, #ffffff 100%);
+}
+
+[data-theme="light"] #matrixBoard .m-card[data-cost="2"] {
+  border-color: rgba(100, 116, 139, 0.3) !important;
+  background: linear-gradient(135deg, #fafcfe 0%, #f1f5f9 100%);
+}
+
+#matrixBoard .m-card.sel {
+  border-color: #fbbf24 !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(34, 24, 14, 0.97)) !important;
+  box-shadow: inset 0 0 0 1.5px #fbbf24, 0 0 14px rgba(245, 158, 11, 0.32) !important;
+}
+
+[data-theme="light"] #matrixBoard .m-card.sel {
+  border-color: #b45309 !important;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 52%, #fde68a 100%) !important;
+  box-shadow: inset 0 0 0 1.5px #b45309, 0 2px 10px rgba(180, 83, 9, 0.22) !important;
+}
+
+#matrixBoard .m-card.sel::after {
+  right: 4px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  font-size: 9px;
+}
+
+#matrixBoard .m-card.sel .m-top {
+  padding-right: 17px;
+}
+
+/* 肖像柔邊融圖 + 內暗角收斂（消除古畫白底／亮黃底切割感） */
+#matrixBoard .m-card-main-row {
+  gap: 2px;
+}
+
+#matrixBoard .m-avatar-wrap {
+  width: auto;
+  max-width: 35%;
+  border-radius: 8px 0 0 8px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, #000 72%, rgba(0, 0, 0, 0.68) 88%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 72%, rgba(0, 0, 0, 0.68) 88%, transparent 100%);
+}
+
+#matrixBoard .m-avatar-wrap::after {
+  box-shadow: inset 0 0 12px rgba(18, 12, 6, 0.28);
+}
+
+/* 左上角貼邊軍令角標（不再懸空擋住頭盔臉部） */
+#matrixBoard .m-avatar-cost {
+  top: 0;
+  left: 0;
+  border-top: 0;
+  border-left: 0;
+  border-radius: 8px 0 6px 0;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 16px;
+  padding: 0 5px;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.42);
+}
+
+/* 右側資訊欄：寬敞留白、主次分明 */
+#matrixBoard .m-card-info-col {
+  padding: 5px 8px 4px 3px;
+  gap: 2px;
+  justify-content: space-between;
+}
+
+#matrixBoard .m-top {
+  gap: 4px;
+}
+
+#matrixBoard .m-name {
+  font-size: 14px !important;
+  line-height: 1.25;
+}
+
+#matrixBoard .m-nation {
+  width: 14px;
+  height: 14px;
+  font-size: 9px;
+  opacity: 0.88;
+}
+
+#matrixBoard .m-top-badges {
+  gap: 3px;
+}
+
+#matrixBoard .m-top-badges .m-skill-phase {
+  font-size: 8.5px;
+  padding: 0 4px;
+  line-height: 1.35;
+  border-radius: 3px;
+}
+
+/* 戰法列：去除厚白框按鈕，改為無框精簡文字 + 微細圖示 */
+#matrixBoard .m-skill-row {
+  gap: 4px;
+}
+
+#matrixBoard .m-skill {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 1px 0 !important;
+  min-height: 17px;
+  border-radius: 4px;
+  gap: 4px;
+  color: #e2e8f0;
+  font-size: 11.5px;
+  line-height: 1.25;
+}
+
+[data-theme="light"] #matrixBoard .m-skill {
+  color: #334155;
+}
+
+#matrixBoard .m-skill:hover {
+  background: rgba(212, 168, 83, 0.12) !important;
+  padding: 1px 4px !important;
+}
+
+#matrixBoard .m-skill strong {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+#matrixBoard .m-ap-chip {
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 0 4px;
+  line-height: 1.35;
+  border-radius: 3px;
+  opacity: 0.9;
+}
+
+/* 數值底欄：3 欄均分對齊，徹底告別字母負字距黏連 */
+#matrixBoard .m-bot {
+  border-top: 1px solid rgba(212, 168, 83, 0.14);
+  padding-top: 3px;
+}
+
+[data-theme="light"] #matrixBoard .m-bot {
+  border-top-color: rgba(120, 86, 34, 0.12);
+}
+
+#matrixBoard .m-stats {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  gap: 4px !important;
+  align-items: baseline !important;
+  font-size: 10px !important;
+  letter-spacing: 0 !important;
+}
+
+#matrixBoard .m-stats span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  min-width: 0;
+}
+
+#matrixBoard .m-stats span:nth-child(2) {
+  justify-content: center;
+}
+
+#matrixBoard .m-stats span:nth-child(3) {
+  justify-content: flex-end;
+}
+
+#matrixBoard .m-stats .m-stat-lbl {
+  font-style: normal;
+  font-size: 9.5px !important;
+  font-weight: 600;
+  opacity: 0.65;
+  letter-spacing: 0 !important;
+}
+
+#matrixBoard .m-stats b {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.2;
+}
+
+@media (min-width: 769px) and (max-width: 1220px) {
+  #matrixBoard .m-avatar-wrap {
+    max-width: 33%;
+  }
+
+  #matrixBoard .m-card-info-col {
+    padding: 4px 5px 3px 2px;
+  }
+
+  #matrixBoard .m-name {
+    gap: 3px;
+    font-size: 13px !important;
+  }
+
+  #matrixBoard .m-name-text {
+    letter-spacing: 0;
+  }
+
+  #matrixBoard .m-stats {
+    gap: 2px !important;
+    font-size: 9.5px !important;
+    letter-spacing: 0 !important;
+  }
+
+  #matrixBoard .m-stats b {
+    font-size: 11.5px !important;
+    letter-spacing: 0 !important;
+    font-weight: 800 !important;
+  }
+}
+
+@media (min-width: 769px) and (max-height: 760px) {
+  #matrixBoard .m-card-info-col {
+    padding: 3px 6px 2px 2px;
+    gap: 1px;
+  }
+
+  #matrixBoard .m-name {
+    font-size: 13px !important;
+  }
+
+  #matrixBoard .m-skill {
+    min-height: 15px;
+    font-size: 11px;
+  }
+}

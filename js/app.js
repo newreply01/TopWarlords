@@ -1309,6 +1309,49 @@ function renderSkillSvgIcon(u) {
   return `<span class="m-skill-ico ico-${key}" aria-hidden="true">${svg}</span>`;
 }
 
+const CARD_STAT_SVGS = {
+  hp: '<svg class="m-stat-ico ico-hp" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 14s-6-4.3-6-8.3A3.5 3.5 0 0 1 8 3.6 3.5 3.5 0 0 1 14 5.7C14 9.7 8 14 8 14z"/></svg>',
+  atk: '<svg class="m-stat-ico ico-atk" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M13.5 2.5 6 10l-2-2-1.5 1.5 2 2-2 2L4 15l2-2 2 2 1.5-1.5-2-2L15 4z"/></svg>',
+  def: '<svg class="m-stat-ico ico-def" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1 2 3.5v4.3c0 3.7 2.5 6.8 6 7.7 3.5-.9 6-4 6-7.7V3.5L8 1z"/></svg>',
+  ew: '<svg class="m-stat-ico ico-ew" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1a5 5 0 0 0-3 9v2h6v-2a5 5 0 0 0-3-9zm-2 12v1.5h4V13H6z"/></svg>',
+  st: '<svg class="m-stat-ico ico-st" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 3C4 3 1.2 8 1.2 8S4 13 8 13s6.8-5 6.8-5S12 3 8 3zm0 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>'
+};
+
+function getCardSkillEffectBadge(u, hasAp) {
+  const e = u?.skill?.effects || {};
+  const dmg = e.damage ? Number(e.damage.toFixed(2)) : 0;
+  const apSuffix = hasAp ? '·破' : '';
+  if (e.commandAttack) {
+    const cmd = Math.round(e.commandAttack * 100);
+    if ((e.teamGuard || 0) >= 0.08) return `攻+${cmd}%守`;
+    if ((e.enemyHit || 0) >= 0.04) return `攻+${cmd}%擾`;
+    return `全攻+${cmd}%`;
+  }
+  const vsEntries = Object.entries(e.bonusVs || {});
+  if (vsEntries.length) {
+    const shortCat = { air: '騎', armor: '甲', air_defense: '射', naval: '奇', support: '謀' };
+    const [cat, val] = vsEntries[0];
+    return `克${shortCat[cat] || '軍'}${Math.round(val * 100)}%`;
+  }
+  if (e.woundedTargetDamage) return `斬${Math.round(e.woundedTargetDamage * 100)}%${apSuffix}`;
+  if (e.missingHpDamage) {
+    const mh = Math.round(e.missingHpDamage * 100);
+    return dmg >= 1.18 ? `×${dmg}殘` : `殘血+${mh}%`;
+  }
+  if (e.highCostDamage) return `抗強${Math.round(e.highCostDamage * 100)}%`;
+  if ((e.armorPierce || 0) >= 0.45) return dmg >= 1.18 ? `×${dmg}破` : `貫甲${Math.round(e.armorPierce * 100)}%`;
+  if (hasAp) return dmg >= 1.16 ? `×${dmg}破` : '破甲擊';
+  if ((e.hit || 0) >= 0.14) return `命中${Math.round(e.hit * 100)}%`;
+  if (e.heal) return `回血${Math.round(e.heal * 100)}%`;
+  if ((e.guard || 0) >= 0.1) return `減傷${Math.round(e.guard * 100)}%`;
+  if ((e.teamGuard || 0) >= 0.06) return `護軍${Math.round(e.teamGuard * 100)}%`;
+  if (dmg >= 1.16) return `強×${dmg}`;
+  if (e.enemyHit) return `擾敵-${Math.round(e.enemyHit * 100)}%`;
+  if (e.teamHit) return `全命+${Math.round(e.teamHit * 100)}%`;
+  if (e.hit) return `命中+${Math.round(e.hit * 100)}%`;
+  return dmg > 1 ? `傷×${dmg}` : '';
+}
+
 /* ---------- 渲染：5x5 全景矩陣看板 (Matrix Board) ---------- */
 function renderMatrix() {
   renderMobileCatNav();
@@ -1389,6 +1432,9 @@ function renderMatrix() {
       const selFormBadgeHtml = isEquipped
         ? `<span class="m-form-badge${isRandForm ? ' is-rand' : ''}" title="本將目前出征陣型：${isRandForm ? '開戰隨機' : esc(slotForm.name) + '陣'}">${isRandForm ? '🎲隨機' : esc(slotForm.name)}</span>`
         : '';
+      const skillFxKey = u.skill?.fx || 'overlord_cleave';
+      const skillBadge = getCardSkillEffectBadge(u, hasAp);
+      const stat3Key = u.cat === 'armor' ? 'def' : ((u?.ew || 0) > (u?.st || 0) ? 'ew' : 'st');
 
       return `<div class="m-card ${isEquipped ? 'sel' : ''} ${showWhy ? 'dis' : ''} ${isBanned ? 'banned' : ''} ${isSynReady ? 'syn-ready' : ''}"
                    style="--c:${c}" data-id="${u.id}" data-cat="${cat}" data-cost="${u.cost}">
@@ -1403,7 +1449,7 @@ function renderMatrix() {
           <div class="m-card-info-col">
             <div class="m-top">
               <div class="m-name-group">
-                <div class="m-name" title="${esc(u.name)}">${renderNationBadge(u)}<span class="m-name-text">${esc(u.name)}</span></div>
+                <div class="m-name" title="${esc(u.name)}"><span class="m-name-text">${esc(u.name)}</span>${renderNationBadge(u)}</div>
               </div>
               ${(topBadgesHtml || phase) ? `<div class="m-top-badges">${topBadgesHtml}${phase ? `<span class="m-skill-phase phase-${phase.toLowerCase()}" data-info-id="${u.id}" title="${esc(PHASE_TIPS[phase] || '')}（點擊查看詳情）">${esc(phase)}</span>` : ''}</div>` : ''}
               <div class="m-actions">
@@ -1411,16 +1457,15 @@ function renderMatrix() {
               </div>
             </div>
             <div class="m-skill-row">
-              <button type="button" class="m-skill" data-info-id="${u.id}" title="點擊查看詳細情報" aria-label="${esc(u.name)}：${phase ? phase + ' ' : ''}${esc(u.skill?.name || '未配置戰法')}，查看詳情">
-                ${renderSkillSvgIcon(u)}<strong>${esc(u.skill?.name || '未配置戰法')}</strong>
+              <button type="button" class="m-skill fx-${skillFxKey}" data-info-id="${u.id}" title="點擊查看詳細情報：${esc(u.skill?.desc || '')}" aria-label="${esc(u.name)}：${phase ? phase + ' ' : ''}${esc(u.skill?.name || '未配置戰法')}，${esc(skillBadge)}，查看詳情">
+                ${renderSkillSvgIcon(u)}<strong>${esc(u.skill?.name || '未配置戰法')}</strong>${skillBadge ? `<span class="m-skill-fx">${esc(skillBadge)}</span>` : ''}
               </button>
-              ${hasAp ? `<span class="m-ap-chip" data-info-id="${u.id}" title="具備破甲重擊或戰法破甲效果（點擊查看詳情）">破甲</span>` : ''}
             </div>
             <div class="m-bot">
               <div class="m-stats" aria-label="基本數值">
-                <span title="耐久 HP" aria-label="生命 ${u.hp}"><em class="m-stat-lbl">生</em><b>${u.hp}</b></span>
-                <span title="打擊 ATK" aria-label="攻擊 ${u.atk}"><em class="m-stat-lbl">攻</em><b>${u.atk}</b></span>
-                <span title="${stat3.fullLabel}" aria-label="${stat3.fullLabel} ${stat3.val}"><em class="m-stat-lbl">${stat3.label}</em><b>${stat3.val}</b></span>
+                <span title="生命 ${u.hp}" aria-label="生命 ${u.hp}">${CARD_STAT_SVGS.hp}<b>${u.hp}</b></span>
+                <span title="攻擊 ${u.atk}" aria-label="攻擊 ${u.atk}">${CARD_STAT_SVGS.atk}<b>${u.atk}</b></span>
+                <span title="${stat3.fullLabel} ${stat3.val}" aria-label="${stat3.fullLabel} ${stat3.val}">${CARD_STAT_SVGS[stat3Key]}<b>${stat3.val}</b></span>
               </div>
             </div>
             <div class="m-mobile-brief">

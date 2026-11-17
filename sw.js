@@ -1,4 +1,4 @@
-const APP_VERSION = '7.11.74';
+const APP_VERSION = '7.11.75';
 const CACHE_NAME = `topwarlords-v${APP_VERSION}`;
 const CORE_ASSETS = [
   './',
@@ -41,6 +41,7 @@ const CORE_ASSETS = [
   `./js/musou-vfx.js?v=${APP_VERSION}`,
   `./js/musou-signatures-t5.js?v=${APP_VERSION}`,
   `./js/musou-signatures-t4.js?v=${APP_VERSION}`,
+  `./js/musou-signatures-t13.js?v=${APP_VERSION}`,
   `./js/musou-cutin.js?v=${APP_VERSION}`,
   `./js/battle-3d.js?v=${APP_VERSION}`,
   `./js/battle-figures.js?v=${APP_VERSION}`,

@@ -166,7 +166,11 @@
 
     try {
       window.Battle3DEngine?.setCutinFreeze?.(true, focusToken);
-      if (meta?.sfx) window.SoundEngine?.play?.(meta.sfx);
+      if (window.SoundEngine?.playSkillActivation) {
+        window.SoundEngine.playSkillActivation(fxKey, sideKey, meta?.sfx);
+      } else if (meta?.sfx) {
+        window.SoundEngine?.play?.(meta.sfx, sideKey);
+      }
     } catch (_) {}
 
     const card = document.createElement('div');

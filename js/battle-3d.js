@@ -2491,6 +2491,7 @@ const Battle3DEngine = (function () {
       }
     }
     performWarlordSkillVfx(aToken, tToken, fxKey || aToken?.skillFx, ln, true);
+    playSkillImpactSound(fxKey || aToken?.skillFx, aToken, tToken, 0.96);
     triggerCameraShake(0.26);
   }
 
@@ -2554,7 +2555,11 @@ const Battle3DEngine = (function () {
 
     if (ln.kind === 'info') {
       if (aToken && (ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation)) {
-        playFieldSound(ln.sfxOverride || 'strategy_gong', aToken, 0.58);
+        if (!audioPaused && !document.hidden && window.SoundEngine?.playSkillActivation) {
+          window.SoundEngine.playSkillActivation(ln.skillFx || aToken.skillFx, aToken.side, ln.sfxOverride || 'strategy_gong');
+        } else {
+          playFieldSound(ln.sfxOverride || 'strategy_gong', aToken, 0.58);
+        }
       }
       finishEffects();
       return effectsFinished;
@@ -2658,6 +2663,7 @@ const Battle3DEngine = (function () {
               window.MusouVfx?.spawnShockRing?.(scene, aToken.mesh.position, 0xfbbf24, 2.2, 480);
               window.MusouVfx?.spawnSlashArc?.(scene, tToken.mesh.position, aToken.side === 'A' ? 1 : -1, 0xfbbf24, 2.8, 420);
               window.MusouVfx?.createGpuBurst?.({ scene, origin: tToken.mesh.position.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 420, color: 0xfbbf24, speed: 5.5, life: 780, size: 18 });
+              playSkillImpactSound(ln.skillFx || aToken.skillFx, aToken, tToken, 0.88);
               triggerCameraShake(0.24);
             }
           }
@@ -4815,14 +4821,25 @@ const Battle3DEngine = (function () {
     });
   }
 
-  function playFieldSound(type, token, gain = 1) {
-    if (!token || audioPaused || document.hidden || !window.SoundEngine?.playSpatial) return;
+  function getTokenSpatialOpts(token, gain = 1) {
     const position = token.mesh.position.clone().project(camera);
-    window.SoundEngine.playSpatial(type, token.side, {
+    return {
       distance: camera.position.distanceTo(token.mesh.position),
       pan: Math.max(-0.85, Math.min(0.85, position.x)),
       gain
-    });
+    };
+  }
+
+  function playFieldSound(type, token, gain = 1) {
+    if (!token || audioPaused || document.hidden || !window.SoundEngine?.playSpatial) return;
+    window.SoundEngine.playSpatial(type, token.side, getTokenSpatialOpts(token, gain));
+  }
+
+  function playSkillImpactSound(fxKey, aToken, tToken, gain = 0.95) {
+    if (audioPaused || document.hidden || !window.SoundEngine?.playSkillImpact) return;
+    const anchor = tToken?.mesh ? tToken : (aToken?.mesh ? aToken : null);
+    const spatialOpts = anchor ? getTokenSpatialOpts(anchor, gain) : null;
+    window.SoundEngine.playSkillImpact(fxKey, aToken?.side || 'A', spatialOpts);
   }
 
   function updateFieldAudio(now) {

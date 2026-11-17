@@ -1,7 +1,8 @@
 'use strict';
 /* =====================================================
    頂尖對戰：15元名將聯合作戰 (TopWarlords)
-   Level 1 無雙切入演出模組 (musou-cutin.js)
+   Level 1 無雙側邊切入演出模組 (musou-cutin.js)
+   於戰場左／右側邊緣呈現，保留中央 3D 戰場視野
    ===================================================== */
 (function () {
   const STORAGE_KEY = 'wl15_musou_mode'; // 'full' | 'lite' | 'off'
@@ -28,9 +29,7 @@
     }
   })();
 
-  let queue = [];
-  let activeItem = null;
-  let activeTimers = [];
+  let activeBySide = { A: null, B: null };
   let playedThisBattle = new Set();
 
   function getMode() {
@@ -61,7 +60,7 @@
   }
 
   function isPlaying() {
-    return Boolean(activeItem);
+    return Boolean(activeBySide.A || activeBySide.B);
   }
 
   function resetBattle() {
@@ -69,70 +68,70 @@
     clearAll();
   }
 
-  function clearTimers() {
-    activeTimers.forEach(t => clearTimeout(t));
-    activeTimers = [];
+  function removeSideDom(sideKey) {
+    document.querySelectorAll(`.musou-cutin-card.side-${sideKey.toLowerCase()}`).forEach(el => el.remove());
   }
 
-  function removeOverlayDom() {
-    document.querySelectorAll('.musou-cutin-overlay').forEach(el => el.remove());
+  function clearSide(sideKey) {
+    const cur = activeBySide[sideKey];
+    if (cur) {
+      cur.timers.forEach(t => clearTimeout(t));
+      cur.timers = [];
+      cur.el?.remove();
+      activeBySide[sideKey] = null;
+      cur.resolve?.();
+    } else {
+      removeSideDom(sideKey);
+    }
   }
 
-  function unfreezeEngine() {
+  function clearAll() {
+    clearSide('A');
+    clearSide('B');
+    document.querySelectorAll('.musou-cutin-overlay, .musou-cutin-card').forEach(el => el.remove());
     try {
       window.Battle3DEngine?.setCutinFreeze?.(false, null);
     } catch (_) {}
   }
 
-  function clearAll() {
-    clearTimers();
-    removeOverlayDom();
-    unfreezeEngine();
-    if (activeItem) {
-      const resolve = activeItem.resolve;
-      activeItem = null;
-      resolve?.();
-    }
-    while (queue.length) {
-      const item = queue.shift();
-      item.resolve?.();
-    }
-  }
-
-  function computeDurationMs(tempo = 1, isQueuedThirdOrMore = false) {
+  function computeDurationMs(tempo = 1, activeCount = 0) {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return 600;
+      return { total: 600, lead: 200 };
     }
-    let base = (mode === 'lite' || isQueuedThirdOrMore) ? 900 : 1500;
-    if (tempo >= 3) base = Math.min(base, 750);
-    else if (tempo >= 2) base = Math.min(base, 1000);
-    return base;
+    let total = (mode === 'lite' || activeCount >= 2) ? 950 : 1500;
+    let lead = (mode === 'lite' || activeCount >= 2) ? 260 : 420;
+    if (tempo >= 3) {
+      total = Math.min(total, 800);
+      lead = Math.min(lead, 220);
+    } else if (tempo >= 2) {
+      total = Math.min(total, 1050);
+      lead = Math.min(lead, 300);
+    }
+    return { total, lead };
   }
 
-  function computeSafeTopPx(wrapper) {
+  function computeSideTopPx(wrapper, sideKey) {
     const wrapRect = wrapper.getBoundingClientRect();
-    let minTop = 12;
-    const selectors = ['#holoRadarStrip', '.log-header-hud', '.battle-3d-overlay-hud'];
+    let minTop = 48;
+    const tickerId = sideKey === 'B' ? '#battleSkillTickerB' : '#battleSkillTickerA';
+    const selectors = [tickerId, '.battle-3d-overlay-hud', '#holoRadarStrip', '.log-header-hud'];
     selectors.forEach(sel => {
       const el = document.querySelector(sel);
       if (!el) return;
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) return;
-      // Only avoid if element overlaps horizontally & vertically with wrapper top area
-      const overlapsX = r.right > wrapRect.left && r.left < wrapRect.right;
-      const inUpperZone = r.bottom > wrapRect.top && r.top < wrapRect.top + wrapRect.height * 0.45;
-      if (overlapsX && inUpperZone) {
+      const inTopHalf = r.bottom > wrapRect.top && r.top < wrapRect.top + wrapRect.height * 0.55;
+      if (inTopHalf) {
         minTop = Math.max(minTop, Math.round(r.bottom - wrapRect.top + 8));
       }
     });
-    const maxSafe = Math.max(12, Math.round(wrapRect.height * 0.42));
-    return Math.min(minTop, maxSafe);
+    const maxTop = Math.max(48, Math.round(wrapRect.height - 132));
+    return Math.min(minTop, maxTop);
   }
 
   function buildCharSpans(text, charDelayMs) {
     const frag = document.createDocumentFragment();
-    const chars = Array.from(text || '');
-    chars.forEach((ch, idx) => {
+    Array.from(text || '').forEach((ch, idx) => {
       const span = document.createElement('span');
       span.className = 'musou-cutin-char';
       span.textContent = ch;
@@ -143,57 +142,42 @@
   }
 
   function runItem(item) {
-    activeItem = item;
-    const { uid, side = 'A', fxKey = 'overlord_cleave', tempo = 1, focusToken = null, queuePos = 0, resolve } = item;
-
+    const { uid, side = 'A', fxKey = 'overlord_cleave', tempo = 1, focusToken = null, activeCount = 0, resolve } = item;
+    const sideKey = side === 'B' ? 'B' : 'A';
     const wrapper = document.getElementById('battle3DWrapper');
     if (!wrapper || mode === 'off') {
-      activeItem = null;
       resolve();
-      pumpQueue();
       return;
     }
+
+    if (activeBySide[sideKey]) clearSide(sideKey);
 
     const unit = (typeof UNIT_MAP !== 'undefined' && UNIT_MAP[uid]) ? UNIT_MAP[uid] : null;
     const meta = (typeof UNIT_META !== 'undefined' && UNIT_META[uid]) ? UNIT_META[uid] : null;
     const move = (typeof getMusouMove === 'function') ? getMusouMove(uid) : null;
     const pal = ARCHETYPE_PALETTES[fxKey] || ARCHETYPE_PALETTES.overlord_cleave;
 
-    const duration = computeDurationMs(tempo, queuePos >= 2);
-    const scale = duration / 1500;
+    const { total, lead } = computeDurationMs(tempo, activeCount);
+    const scale = total / 1500;
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
 
-    // 凍結戰鬥時鐘 & 鏡頭推近 + 播放音效
     try {
       window.Battle3DEngine?.setCutinFreeze?.(true, focusToken);
       if (meta?.sfx) window.SoundEngine?.play?.(meta.sfx);
     } catch (_) {}
 
-    removeOverlayDom();
-    const overlay = document.createElement('div');
-    overlay.className = `musou-cutin-overlay side-${side === 'B' ? 'b' : 'a'}${reduced ? ' is-reduced' : ''}${isLight ? ' is-light' : ''}`;
-    overlay.style.setProperty('--musou-dur', `${duration}ms`);
-    overlay.style.setProperty('--musou-primary', pal.primary);
-    overlay.style.setProperty('--musou-accent', pal.accent);
-    overlay.style.setProperty('--musou-dark', pal.dark);
-    overlay.style.setProperty('--musou-border', isLight ? '#f59e0b' : pal.border);
-
-    const vignette = document.createElement('div');
-    vignette.className = 'musou-cutin-vignette';
-
-    const flash = document.createElement('div');
-    flash.className = 'musou-cutin-flash';
-
-    const band = document.createElement('div');
-    band.className = 'musou-cutin-band';
-    const safeTop = computeSafeTopPx(wrapper);
-    const idealTop = Math.round(wrapper.clientHeight * 0.28);
-    band.style.top = `${Math.max(safeTop, idealTop)}px`;
+    const card = document.createElement('div');
+    card.className = `musou-cutin-card side-${sideKey.toLowerCase()}${reduced ? ' is-reduced' : ''}${isLight ? ' is-light' : ''}`;
+    card.style.top = `${computeSideTopPx(wrapper, sideKey)}px`;
+    card.style.setProperty('--musou-primary', pal.primary);
+    card.style.setProperty('--musou-accent', pal.accent);
+    card.style.setProperty('--musou-dark', pal.dark);
+    card.style.setProperty('--musou-border', isLight ? '#f59e0b' : pal.border);
 
     const speedlines = document.createElement('div');
     speedlines.className = 'musou-cutin-speedlines';
-    band.appendChild(speedlines);
+    card.appendChild(speedlines);
 
     const inner = document.createElement('div');
     inner.className = 'musou-cutin-inner';
@@ -208,15 +192,13 @@
     img.onerror = () => { img.style.display = 'none'; };
     portraitWrap.appendChild(img);
 
-    if (meta?.flag) {
-      const flag = document.createElement('span');
-      flag.className = 'musou-cutin-flag';
-      flag.textContent = meta.flag;
-      portraitWrap.appendChild(flag);
-    }
-
     const textCol = document.createElement('div');
     textCol.className = 'musou-cutin-text';
+
+    const subEl = document.createElement('div');
+    subEl.className = 'musou-cutin-sub';
+    const sideLabel = sideKey === 'B' ? '敵將無雙' : '我軍無雙';
+    subEl.textContent = `${sideLabel} · ${unit?.name || uid}｜${move?.tag || '名將奧義'}`;
 
     const titleRow = document.createElement('div');
     titleRow.className = 'musou-cutin-title-row';
@@ -226,7 +208,7 @@
     const moveText = move?.name || unit?.title || '無雙奧義';
     const charCount = Array.from(moveText).length;
     if (charCount >= 11) titleEl.classList.add('is-long');
-    const charDelay = Math.max(24, Math.min(60, Math.round((560 * scale) / Math.max(1, charCount))));
+    const charDelay = Math.max(18, Math.min(45, Math.round((420 * scale) / Math.max(1, charCount))));
     if (reduced) {
       titleEl.textContent = moveText;
     } else {
@@ -236,81 +218,72 @@
     const seal = document.createElement('span');
     seal.className = 'musou-cutin-seal';
     seal.textContent = pal.icon;
-    seal.style.animationDelay = `${Math.round(900 * scale)}ms`;
+    seal.style.animationDelay = `${Math.round(480 * scale)}ms`;
 
     titleRow.appendChild(titleEl);
     titleRow.appendChild(seal);
-
-    const subEl = document.createElement('div');
-    subEl.className = 'musou-cutin-sub';
-    const sideLabel = side === 'B' ? '敵將無雙' : '我軍無雙';
-    subEl.textContent = `${sideLabel}｜${unit?.name || uid}・${move?.tag || '名將奧義'}`;
-
-    textCol.appendChild(titleRow);
     textCol.appendChild(subEl);
+    textCol.appendChild(titleRow);
 
-    if (side === 'B') {
+    if (sideKey === 'B') {
       inner.appendChild(textCol);
       inner.appendChild(portraitWrap);
     } else {
       inner.appendChild(portraitWrap);
       inner.appendChild(textCol);
     }
+    card.appendChild(inner);
 
-    band.appendChild(inner);
-    overlay.appendChild(vignette);
-    overlay.appendChild(band);
-    overlay.appendChild(flash);
+    const state = { el: card, timers: [], resolve, resolved: false };
+    activeBySide[sideKey] = state;
 
-    const finishNow = () => {
-      if (activeItem !== item) return;
-      clearTimers();
-      overlay.remove();
-      unfreezeEngine();
-      activeItem = null;
+    const resolveLead = () => {
+      if (state.resolved) return;
+      state.resolved = true;
+      try {
+        window.Battle3DEngine?.setCutinFreeze?.(false, null);
+      } catch (_) {}
       resolve();
-      pumpQueue();
     };
 
-    overlay.addEventListener('click', finishNow);
-    wrapper.appendChild(overlay);
+    const finishCard = () => {
+      state.timers.forEach(t => clearTimeout(t));
+      state.timers = [];
+      card.remove();
+      if (activeBySide[sideKey] === state) activeBySide[sideKey] = null;
+      resolveLead();
+    };
 
-    // 觸發進場狀態
+    card.addEventListener('click', finishCard);
+    wrapper.appendChild(card);
+
     requestAnimationFrame(() => {
-      if (activeItem !== item) return;
-      overlay.classList.add('is-enter');
+      if (activeBySide[sideKey] !== state) return;
+      card.classList.add('is-enter');
     });
 
+    state.timers.push(setTimeout(resolveLead, lead));
+
     if (!reduced) {
-      // 1100ms (scaled) 開始斜向擦除退場 + 閃光
-      const exitAt = Math.round(1100 * scale);
-      activeTimers.push(setTimeout(() => {
-        if (activeItem !== item) return;
-        overlay.classList.add('is-exit');
-      }, exitAt));
+      state.timers.push(setTimeout(() => {
+        if (activeBySide[sideKey] !== state) return;
+        card.classList.add('is-exit');
+      }, Math.max(lead + 120, Math.round(1150 * scale))));
     }
 
-    activeTimers.push(setTimeout(finishNow, duration));
-  }
-
-  function pumpQueue() {
-    if (activeItem || !queue.length) return;
-    const next = queue.shift();
-    runItem(next);
+    state.timers.push(setTimeout(finishCard, total));
   }
 
   function play({ uid, side = 'A', fxKey = 'overlord_cleave', tempo = 1, focusToken = null } = {}) {
     if (!uid || mode === 'off') return Promise.resolve();
     if (playedThisBattle.has(uid)) return Promise.resolve();
-    // 檢查 app.js 全域 skip
     const btnSkip = document.getElementById('btnSkip');
     if (btnSkip && btnSkip.disabled) return Promise.resolve();
 
     playedThisBattle.add(uid);
     return new Promise(resolve => {
-      const queuePos = (activeItem ? 1 : 0) + queue.length;
-      queue.push({ uid, side, fxKey, tempo, focusToken, queuePos, resolve });
-      pumpQueue();
+      const activeCount = (activeBySide.A ? 1 : 0) + (activeBySide.B ? 1 : 0);
+      runItem({ uid, side, fxKey, tempo, focusToken, activeCount, resolve });
     });
   }
 

@@ -140,7 +140,7 @@
             if (
               this.enabled && this.bgmEnabled &&
               ((key === 'bgm_prep' && this.currentBgmMode === 'prep' && !this.currentBgmNode) ||
-              (key === 'bgm_battle' && this.currentBgmMode === 'battle' && !this.currentBgmNode))
+                (key === 'bgm_battle' && this.currentBgmMode === 'battle' && !this.currentBgmNode))
             ) {
               this._startBgmSource(this.currentBgmMode);
             }

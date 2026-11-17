@@ -2482,6 +2482,14 @@ const Battle3DEngine = (function () {
       });
     }
     if (epoch !== battleEpoch || battleSettled) return;
+    if (aToken) {
+      const tAct = combatNow();
+      aToken.musouActionStartedAt = tAct;
+      aToken.musouActionUntil = tAct + 750;
+      if (aToken.mesh) {
+        window.MusouVfx?.spawnShockRing?.(scene, aToken.mesh.position, 0xfbbf24, 2.4, 520);
+      }
+    }
     performWarlordSkillVfx(aToken, tToken, fxKey || aToken?.skillFx, ln, true);
     triggerCameraShake(0.26);
   }
@@ -2644,6 +2652,10 @@ const Battle3DEngine = (function () {
               focusToken: aToken
             });
             if (!battleSettled && tToken?.mesh) {
+              const tAct = combatNow();
+              aToken.musouActionStartedAt = tAct;
+              aToken.musouActionUntil = tAct + 750;
+              window.MusouVfx?.spawnShockRing?.(scene, aToken.mesh.position, 0xfbbf24, 2.2, 480);
               window.MusouVfx?.spawnSlashArc?.(scene, tToken.mesh.position, aToken.side === 'A' ? 1 : -1, 0xfbbf24, 2.8, 420);
               window.MusouVfx?.createGpuBurst?.({ scene, origin: tToken.mesh.position.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 420, color: 0xfbbf24, speed: 5.5, life: 780, size: 18 });
               triggerCameraShake(0.24);

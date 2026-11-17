@@ -586,7 +586,47 @@ const BattleFigures = (() => {
       token.mesh.position.z + frontZ * Math.cos(yaw)
     ) - token.mesh.position.y;
     const attack = token.attackUntil > now;
+    const musouActive = Boolean(token.musouActionUntil && now < token.musouActionUntil);
     const pulse = now * 0.011 + (token.attackPhaseOffset || 0);
+
+    if (musouActive) {
+      const dur = Math.max(200, (token.musouActionUntil - (token.musouActionStartedAt || (now - 100))));
+      const mp = Math.min(1, Math.max(0, (now - (token.musouActionStartedAt || now)) / dur));
+      const arc = Math.sin(mp * Math.PI);
+      hero.scale.setScalar(1 + arc * 0.42);
+      capePivot.rotation.x = 0.45 + arc * 0.55;
+      if (token.cat === 'air') {
+        hero.position.set(0, localGround + arc * 0.65, frontZ + arc * 0.9);
+        if (horseGrp) horseGrp.rotation.x = -0.35 * arc;
+        bodyGrp.rotation.x = 0;
+        bodyGrp.rotation.y = mp * Math.PI * 2;
+        rightArm.rotation.x = -1.65;
+        leftArm.rotation.x = -0.5;
+      } else if (token.cat === 'air_defense') {
+        hero.position.set(0, localGround + arc * 0.45, frontZ);
+        bodyGrp.rotation.x = -0.25 * arc;
+        bodyGrp.rotation.y = (token.individualYawOffset || 0);
+        leftArm.rotation.x = -1.55;
+        rightArm.rotation.x = -1.35 - arc * 0.45;
+      } else if (token.cat === 'support') {
+        hero.position.set(0, localGround + arc * 0.85, frontZ);
+        bodyGrp.rotation.x = 0;
+        bodyGrp.rotation.y = Math.sin(mp * Math.PI * 2) * 0.45;
+        rightArm.rotation.x = -2.4 * arc;
+        leftArm.rotation.x = -1.2 * arc;
+      } else {
+        // armor & naval：高躍重劈
+        hero.position.set(0, localGround + arc * 1.15, frontZ + arc * 0.65);
+        bodyGrp.rotation.x = arc * 0.28;
+        bodyGrp.rotation.y = (token.individualYawOffset || 0);
+        rightArm.rotation.x = -2.35 + mp * 3.15;
+        leftArm.rotation.x = -0.95;
+      }
+      return;
+    }
+
+    hero.scale.setScalar(1);
+    bodyGrp.rotation.x = 0;
     hero.position.y = localGround + (horseGrp && (moving || fighting) ? Math.abs(Math.sin(pulse)) * (attack ? 0.14 : 0.04) : 0);
     if (horseGrp && attack) horseGrp.rotation.x = -0.18 + Math.sin(pulse * 1.4) * 0.12;
     else if (horseGrp) horseGrp.rotation.x = moving ? Math.sin(pulse) * 0.06 : 0;

@@ -1,4 +1,4 @@
-const APP_VERSION = '7.11.69';
+const APP_VERSION = '7.11.70';
 const CACHE_NAME = `topwarlords-v${APP_VERSION}`;
 const CORE_ASSETS = [
   './',
@@ -32,6 +32,13 @@ const CORE_ASSETS = [
   `./js/libs/three.min.js?v=${APP_VERSION}`,
   `./js/libs/GLTFLoader.js?v=${APP_VERSION}`,
   `./js/libs/SkeletonUtils.js?v=${APP_VERSION}`,
+  `./js/libs/postprocessing/CopyShader.js?v=${APP_VERSION}`,
+  `./js/libs/postprocessing/LuminosityHighPassShader.js?v=${APP_VERSION}`,
+  `./js/libs/postprocessing/EffectComposer.js?v=${APP_VERSION}`,
+  `./js/libs/postprocessing/RenderPass.js?v=${APP_VERSION}`,
+  `./js/libs/postprocessing/ShaderPass.js?v=${APP_VERSION}`,
+  `./js/libs/postprocessing/UnrealBloomPass.js?v=${APP_VERSION}`,
+  `./js/musou-vfx.js?v=${APP_VERSION}`,
   `./js/musou-cutin.js?v=${APP_VERSION}`,
   `./js/battle-3d.js?v=${APP_VERSION}`,
   `./js/battle-figures.js?v=${APP_VERSION}`,

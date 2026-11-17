@@ -1,4 +1,4 @@
-const APP_VERSION = '7.11.68';
+const APP_VERSION = '7.11.69';
 const CACHE_NAME = `topwarlords-v${APP_VERSION}`;
 const CORE_ASSETS = [
   './',
@@ -17,6 +17,7 @@ const CORE_ASSETS = [
   `./assets/models/rock_a.glb?v=${APP_VERSION}`,
   `./assets/models/rock_b.glb?v=${APP_VERSION}`,
   `./js/data.js?v=${APP_VERSION}`,
+  `./js/musou-data.js?v=${APP_VERSION}`,
   `./js/ladder-data.js?v=${APP_VERSION}`,
   `./js/engine.js?v=${APP_VERSION}`,
   `./js/firebase-config.js?v=${APP_VERSION}`,
@@ -31,6 +32,7 @@ const CORE_ASSETS = [
   `./js/libs/three.min.js?v=${APP_VERSION}`,
   `./js/libs/GLTFLoader.js?v=${APP_VERSION}`,
   `./js/libs/SkeletonUtils.js?v=${APP_VERSION}`,
+  `./js/musou-cutin.js?v=${APP_VERSION}`,
   `./js/battle-3d.js?v=${APP_VERSION}`,
   `./js/battle-figures.js?v=${APP_VERSION}`,
   `./js/app.js?v=${APP_VERSION}`,

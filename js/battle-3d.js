@@ -104,6 +104,7 @@ const Battle3DEngine = (function () {
   let baguaTexCache = new Map();
   let vfxTexCache = new Map();
   let hitStopUntil = 0;
+  let cutinFrozen = false;
   let shakePower = 0;
   const camShakeOffset = new THREE.Vector3(0, 0, 0);
   let camZoomOffset = 0;
@@ -2158,6 +2159,7 @@ const Battle3DEngine = (function () {
   function loadBattle(res) {
     if (!isInitialized) return;
     clearAllTokens();
+    window.MusouCutin?.resetBattle?.();
     battleSettled = false;
     setAudioPaused(false);
     activeAttackers.clear();
@@ -2467,6 +2469,22 @@ const Battle3DEngine = (function () {
     completedVolleys++;
   }
 
+  async function runWarlordSkillWithCutin(aToken, tToken, fxKey, ln, tempo = 1) {
+    const epoch = battleEpoch;
+    if (!ln?.finale && aToken && window.MusouCutin) {
+      await window.MusouCutin.play({
+        uid: aToken.id,
+        side: aToken.side,
+        fxKey: fxKey || aToken.skillFx,
+        tempo,
+        focusToken: aToken
+      });
+    }
+    if (epoch !== battleEpoch || battleSettled) return;
+    performWarlordSkillVfx(aToken, tToken, fxKey || aToken?.skillFx, ln, true);
+    triggerCameraShake(0.26);
+  }
+
   async function playEvent(ln, options = {}) {
     if (!isInitialized || battleSettled || !ln) return;
 
@@ -2494,7 +2512,7 @@ const Battle3DEngine = (function () {
         );
       }
       if (!tToken) {
-        performWarlordSkillVfx(aToken, null, ln.skillFx || aToken.skillFx, ln, true);
+        await runWarlordSkillWithCutin(aToken, null, ln.skillFx || aToken.skillFx, ln, options.tempo || 1);
       }
     }
 
@@ -2607,13 +2625,13 @@ const Battle3DEngine = (function () {
           performShieldBlockDome(tToken);
           spawnFloatingDamagePopup(tToken.mesh.position, '🛡️ 鐵壁格擋', '#fbbf24', false);
           if (ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation) {
-            performWarlordSkillVfx(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, true);
+            await runWarlordSkillWithCutin(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, options.tempo || 1);
           }
         } else if (ln.dmg && ln.dmg > 0) {
           if (!ln.duel) triggerSquadAnim(tToken, 'hit', 1.2);
           const isSkillOrAmbush = Boolean(ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation);
           if (isSkillOrAmbush) {
-            performWarlordSkillVfx(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, true);
+            await runWarlordSkillWithCutin(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, options.tempo || 1);
           }
           if (ln.skillTriggered && !ln.finale) {
             const tagSuffix = ln.skillTag ? `・${ln.skillTag}` : '';
@@ -4165,6 +4183,19 @@ const Battle3DEngine = (function () {
     hitStopUntil = Math.max(hitStopUntil, combatNow() + ms);
   }
 
+  function setCutinFreeze(active, focusToken = null) {
+    cutinFrozen = Boolean(active);
+    if (cutinFrozen && !battleSettled) {
+      if (focusToken?.mesh) {
+        camFocusTarget.set(focusToken.mesh.position.x * 0.28, 0, focusToken.mesh.position.z * 0.28);
+        lastFocusAt = combatNow();
+      }
+      if (cameraShakeEnabled) camZoomTarget = -0.9;
+    } else {
+      camZoomTarget = 0;
+    }
+  }
+
   function getBaguaTexture(colorHex = '#fbbf24') {
     const key = colorHex;
     if (baguaTexCache.has(key)) return baguaTexCache.get(key);
@@ -4737,7 +4768,7 @@ const Battle3DEngine = (function () {
       const dt = Math.min(0.05, Math.max(0.001, (now - lastTimestamp) / 1000));
       lastTimestamp = now;
       const elapsed = now * 0.001;
-      const inHitStop = now < hitStopUntil;
+      const inHitStop = now < hitStopUntil || cutinFrozen;
       const animDt = inHitStop ? dt * 0.12 : dt;
 
       // 1. 更新所有 3D 士兵與戰馬的骨骼動畫 (Hit-Stop 時極短頓幀增強衝擊感)
@@ -4938,7 +4969,7 @@ const Battle3DEngine = (function () {
       const focusAlpha = 1 - Math.exp(-3.8 * dt);
       camFocusOffset.lerp(camFocusTarget, focusAlpha);
       camZoomOffset += (camZoomTarget - camZoomOffset) * (1 - Math.exp(-5.0 * dt));
-      camZoomTarget *= Math.exp(-2.2 * dt);
+      if (!cutinFrozen) camZoomTarget *= Math.exp(-2.2 * dt);
       if (shakePower > 0.002) {
         camShakeOffset.set(
           (Math.random() - 0.5) * shakePower,
@@ -5265,6 +5296,8 @@ const Battle3DEngine = (function () {
   }
 
   function clearBattleEffects() {
+    cutinFrozen = false;
+    window.MusouCutin?.clearAll?.();
     cutinQueue = [];
     if (cutinTimer) { clearTimeout(cutinTimer); cutinTimer = null; }
     projectiles.forEach(p => {
@@ -5461,6 +5494,7 @@ const Battle3DEngine = (function () {
     clearAllTokens,
     resetCamera,
     setCameraShakeEnabled,
+    setCutinFreeze,
     isCameraShakeEnabled: () => cameraShakeEnabled,
     getDebugState,
     whenModelsReady: ensureModelsLoaded

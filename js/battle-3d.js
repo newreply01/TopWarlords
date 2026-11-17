@@ -4607,9 +4607,9 @@ const Battle3DEngine = (function () {
     camPhi = cameraView === 'cinematic' ? 1.04 : 0.78;
     const wideShort = Boolean(container && container.clientHeight > 0 && (container.clientWidth / container.clientHeight) >= 2.15);
     camRadius = (container && container.clientWidth < 720)
-      ? (cameraView === 'cinematic' ? 14.5 : 19.5)
-      : (cameraView === 'cinematic' ? (wideShort ? 13.0 : 12.2) : 20.5);
-    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 14.5);
+      ? (cameraView === 'cinematic' ? 11.5 : 16.5)
+      : (cameraView === 'cinematic' ? (wideShort ? 9.6 : 9.0) : 16.5);
+    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 10.8);
     camFocusOffset.set(0, 0, 0);
     camFocusTarget.set(0, 0, 0);
     camZoomOffset = 0;
@@ -5388,7 +5388,7 @@ const Battle3DEngine = (function () {
 
   function playFinaleCelebration(winnerSide) {
     if (!isInitialized || !scene) return;
-    camZoomTarget = 2.4;
+    camZoomTarget = 0.8;
     if (winnerSide === 'A' || winnerSide === 'B') {
       unitsMap.forEach(token => {
         if (token.alive && token.side === winnerSide && token.mesh) {

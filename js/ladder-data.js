@@ -542,7 +542,7 @@ const LADDER_PRESETS = [
       "HOJO_UJIYASU",
       "GENGYAN",
       "JEONGJI",
-      "LUXUN"
+      "GUOJIA"
     ],
     "title": "十面埋伏天羅地網"
   },
@@ -557,7 +557,7 @@ const LADDER_PRESETS = [
       "ZHOUYAFU",
       "FENGYI",
       "XUHUANG",
-      "LUXUN"
+      "GUOJIA"
     ],
     "title": "玄甲重盾正面死鬥"
   },
@@ -707,7 +707,7 @@ const LADDER_PRESETS = [
       "LIANPO",
       "HULUGUANG",
       "YUEJIN",
-      "GUOJIA"
+      "LUXUN"
     ],
     "title": "步騎火砲協同合圍"
   },
@@ -1022,7 +1022,7 @@ const LADDER_PRESETS = [
       "YANGYE",
       "HANSHIZHONG",
       "WEIYAN",
-      "GUOJIA"
+      "LUXUN"
     ],
     "title": "玄甲重盾正面死鬥"
   },
@@ -1067,7 +1067,7 @@ const LADDER_PRESETS = [
       "XUCHU",
       "HANSHIZHONG",
       "XUHUANG",
-      "GUOJIA"
+      "LUXUN"
     ],
     "title": "伏波龍骨水陸破暗"
   },

@@ -95,8 +95,15 @@ function getCombatMatchup(attacker, target, phase, trueDamage = false, skillProc
   return '';
 }
 
+function canTriggerUnitSkill(unit, phase) {
+  if (!unit || !unit.skill) return false;
+  const skillPhase = Number(String(unit.skill.phase || '').replace('P', ''));
+  if (!unit.skillUsed) return skillPhase === phase;
+  return Boolean(unit.skillAwakenedReady && unit.cat !== 'support' && (unit.skillCount || 0) < 2 && phase >= skillPhase);
+}
+
 function getSkillAttackModifiers(attacker, target, phase, terrain = 'plain') {
-  const active = !attacker.skillUsed && attacker.skill?.phase === `P${phase}`;
+  const active = canTriggerUnitSkill(attacker, phase);
   const effects = active ? attacker.skill.effects : null;
   const missingHp = clamp(1 - attacker.hp / attacker.hpMax, 0, 1);
   const targetMissingHp = clamp(1 - target.hp / target.hpMax, 0, 1);
@@ -275,7 +282,7 @@ function makeTeam(ids, side, formationIds, terrain) {
       uid: `${id}-${side}${i}`, side, id, name: d.name, cat: d.cat, cost: d.cost, v: d.v,
       traits: d.traits || [], roleFlags: d.roleFlags || [], hpMax: d.hp, hp: d.hp, atk: d.atk, def: d.def,
       stealth: d.st || 0, ew: d.ew || 0, skill: d.skill || null, alive: true, apsUsed: false, abmUsed: false,
-      skillUsed: false, ambushUsed: false, skillGuard: 0,
+      skillUsed: false, skillCount: 0, skillAwakened: false, skillAwakenedReady: false, ambushUsed: false, skillGuard: 0,
       shots: 0, dmgDone: 0, killedBy: null,
       formation: formation.id,
       formationName: formation.name,
@@ -388,13 +395,20 @@ function resolveBattle(deckA, deckB, opts) {
     const rolled = [];
     for (const a of attacks) {
       if (!a.tgt) continue;
+      if (a.att.skillUsed && a.att.cat !== 'support' && (a.att.skillCount || 0) < 2 && !a.att.skillAwakened && a.att.hp > 0 && (a.att.hp / a.att.hpMax) < 0.4) {
+        a.att.skillAwakened = true;
+        a.att.skillAwakenedReady = true;
+      }
       const skillModifiers = getSkillAttackModifiers(a.att, a.tgt, vOpts.phase, terrain);
       const p = clamp(a.hit + skillModifiers.hit + (S[a.att.side].skillHit || 0) - (S[a.att.side].skillHitPen || 0), 0.08, 0.96);
       const ok = rng() < p;
-      const skillPhase = Number(String(a.att.skill?.phase || '').replace('P', ''));
-      const skillProc = Boolean(ok && !a.att.skillUsed && skillPhase === vOpts.phase);
+      const skillProc = Boolean(ok && canTriggerUnitSkill(a.att, vOpts.phase));
       const ambushProc = Boolean(ok && !a.att.ambushUsed && a.att.traits.includes('AMBUSH') && (a.tgt.cost >= a.att.cost + 2 || (a.att.cost >= 4 && a.tgt.cost >= 4)));
-      if (skillProc) a.att.skillUsed = true;
+      if (skillProc) {
+        a.att.skillUsed = true;
+        a.att.skillCount = (a.att.skillCount || 0) + 1;
+        a.att.skillAwakenedReady = false;
+      }
       if (ambushProc) a.att.ambushUsed = true;
       const tacticProc = ok && a.att.formationTacticChance > 0 && rng() < a.att.formationTacticChance;
       const canDuel = vOpts.allowDuels && ok && ['air', 'armor', 'naval'].includes(a.att.cat) && ['air', 'armor', 'naval'].includes(a.tgt.cat)
@@ -554,6 +568,10 @@ function resolveBattle(deckA, deckB, opts) {
         addKey(t.cost * 2 + Math.max(0, t.cost - at.cost) * 2, captured
           ? `${at.name}（$${at.cost}）擒獲 ${t.name}（$${t.cost}）`
           : `${at.name}（$${at.cost}）陣斬 ${t.name}（$${t.cost}）`, at.side);
+        if (at.cat !== 'support' && (at.skillCount || 0) < 2 && !at.skillAwakened) {
+          at.skillAwakened = true;
+          at.skillAwakenedReady = true;
+        }
       } else {
         const hitArrow = meta.isC4isr ? '調兵圍攻 →' : '→';
         lines.push({

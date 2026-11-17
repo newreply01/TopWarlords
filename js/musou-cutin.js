@@ -30,7 +30,9 @@
   })();
 
   let activeBySide = { A: null, B: null };
-  let playedThisBattle = new Set();
+  let playStats = new Map(); // uid -> { count, lastAt }
+  const MAX_CUTINS_PER_UNIT = 3;
+  const CUTIN_UNIT_COOLDOWN_MS = 2500;
 
   function getMode() {
     return mode;
@@ -64,7 +66,7 @@
   }
 
   function resetBattle() {
-    playedThisBattle.clear();
+    playStats.clear();
     clearAll();
   }
 
@@ -276,11 +278,14 @@
 
   function play({ uid, side = 'A', fxKey = 'overlord_cleave', tempo = 1, focusToken = null } = {}) {
     if (!uid || mode === 'off') return Promise.resolve();
-    if (playedThisBattle.has(uid)) return Promise.resolve();
+    const now = performance.now();
+    const st = playStats.get(uid) || { count: 0, lastAt: 0 };
+    if (st.count >= MAX_CUTINS_PER_UNIT) return Promise.resolve();
+    if (st.lastAt > 0 && now - st.lastAt < CUTIN_UNIT_COOLDOWN_MS) return Promise.resolve();
     const btnSkip = document.getElementById('btnSkip');
     if (btnSkip && btnSkip.disabled) return Promise.resolve();
 
-    playedThisBattle.add(uid);
+    playStats.set(uid, { count: st.count + 1, lastAt: now });
     return new Promise(resolve => {
       const activeCount = (activeBySide.A ? 1 : 0) + (activeBySide.B ? 1 : 0);
       runItem({ uid, side, fxKey, tempo, focusToken, activeCount, resolve });

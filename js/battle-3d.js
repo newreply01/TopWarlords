@@ -2631,8 +2631,23 @@ const Battle3DEngine = (function () {
         } else if (ln.dmg && ln.dmg > 0) {
           if (!ln.duel) triggerSquadAnim(tToken, 'hit', 1.2);
           const isSkillOrAmbush = Boolean(ln.skillTriggered || ln.ambushTriggered || ln.ambushActivation);
+          const isKillOrCapture = ln.kind === 'kill' || ln.kind === 'capture';
+          const isDesperate = Boolean(aToken && aToken.maxHp > 0 && (aToken.currentHp / aToken.maxHp) < 0.35);
           if (isSkillOrAmbush) {
             await runWarlordSkillWithCutin(aToken, tToken, ln.skillFx || aToken?.skillFx, ln, options.tempo || 1);
+          } else if ((isKillOrCapture || isDesperate || ln.duel) && aToken && !ln.finale && window.MusouCutin) {
+            await window.MusouCutin.play({
+              uid: aToken.id,
+              side: aToken.side,
+              fxKey: ln.skillFx || aToken.skillFx,
+              tempo: options.tempo || 1,
+              focusToken: aToken
+            });
+            if (!battleSettled && tToken?.mesh) {
+              window.MusouVfx?.spawnSlashArc?.(scene, tToken.mesh.position, aToken.side === 'A' ? 1 : -1, 0xfbbf24, 2.8, 420);
+              window.MusouVfx?.createGpuBurst?.({ scene, origin: tToken.mesh.position.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 420, color: 0xfbbf24, speed: 5.5, life: 780, size: 18 });
+              triggerCameraShake(0.24);
+            }
           }
           if (ln.skillTriggered && !ln.finale) {
             const tagSuffix = ln.skillTag ? `・${ln.skillTag}` : '';

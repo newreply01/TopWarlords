@@ -62,6 +62,29 @@
     } catch (e) { }
   }
 
+  function readBgmPref() {
+    try {
+      if (window.LS && typeof window.LS.get === 'function') {
+        const wl = window.LS.get('wl15_bgm', null);
+        return wl !== null && wl !== undefined ? Boolean(wl) : false;
+      }
+      const raw = localStorage.getItem('wl15_bgm');
+      return raw !== null ? Boolean(JSON.parse(raw)) : false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function writeBgmPref(val) {
+    try {
+      if (window.LS && typeof window.LS.set === 'function') {
+        window.LS.set('wl15_bgm', val);
+      } else {
+        localStorage.setItem('wl15_bgm', JSON.stringify(val));
+      }
+    } catch (e) { }
+  }
+
   const SoundEngine = {
     ctx: null,
     masterGain: null,
@@ -81,6 +104,7 @@
     unlocked: false,
     spatialSources: new Set(),
     enabled: readSoundPref(),
+    bgmEnabled: readBgmPref(),
 
     // 預先抓取二進位音訊檔（不需等待使用者點擊即可透過網路快取下載）
     prefetchAll() {
@@ -114,8 +138,9 @@
           (audioBuf) => {
             this.buffers[key] = audioBuf;
             if (
-              (key === 'bgm_prep' && this.currentBgmMode === 'prep' && !this.currentBgmNode) ||
-              (key === 'bgm_battle' && this.currentBgmMode === 'battle' && !this.currentBgmNode)
+              this.enabled && this.bgmEnabled &&
+              ((key === 'bgm_prep' && this.currentBgmMode === 'prep' && !this.currentBgmNode) ||
+              (key === 'bgm_battle' && this.currentBgmMode === 'battle' && !this.currentBgmNode))
             ) {
               this._startBgmSource(this.currentBgmMode);
             }
@@ -187,7 +212,7 @@
       if (this.ctx && this.ctx.state === 'suspended') {
         this.ctx.resume().then(() => {
           this.unlocked = true;
-          if (this.enabled && this.currentBgmMode && !this.currentBgmNode) {
+          if (this.enabled && this.bgmEnabled && this.currentBgmMode && !this.currentBgmNode) {
             this._startBgmSource(this.currentBgmMode);
           }
         }).catch(() => { });
@@ -213,7 +238,7 @@
           this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
           this.masterGain.gain.setTargetAtTime(0.92, this.ctx.currentTime, 0.04);
         }
-        if (this.currentBgmMode && !this.currentBgmNode) {
+        if (this.bgmEnabled && this.currentBgmMode && !this.currentBgmNode) {
           this._startBgmSource(this.currentBgmMode);
         }
       } else {
@@ -223,6 +248,36 @@
           this.masterGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.03);
         }
       }
+    },
+
+    syncBgmButton() {
+      const btn = document.querySelector('#btnBgm');
+      const ico = document.querySelector('#bgmIcon');
+      if (btn) {
+        btn.setAttribute('aria-pressed', String(this.bgmEnabled));
+        btn.title = this.bgmEnabled ? '背景音樂已開啟（點擊關閉）' : '背景音樂已關閉（點擊開啟）';
+      }
+      if (ico) ico.textContent = this.bgmEnabled ? '🎵' : '🎵';
+    },
+
+    toggleBgm() {
+      this.bgmEnabled = !this.bgmEnabled;
+      writeBgmPref(this.bgmEnabled);
+      this.syncBgmButton();
+      if (typeof window.toast === 'function') {
+        window.toast(this.bgmEnabled ? '🎵 背景音樂已開啟' : '🔇 背景音樂已關閉');
+      }
+      if (this.bgmEnabled) {
+        this.init();
+        if (this.enabled) {
+          this._startBgmSource(this.currentBgmMode || 'prep');
+        }
+      } else {
+        const savedMode = this.currentBgmMode;
+        this.stopBgm(0.35);
+        this.currentBgmMode = savedMode;
+      }
+      return this.bgmEnabled;
     },
 
     isMuted() {
@@ -241,7 +296,7 @@
       const normalized = mode === 'battle' ? 'battle' : 'prep';
       if (this.currentBgmMode === normalized && this.currentBgmNode) return;
       this.currentBgmMode = normalized;
-      if (!this.enabled) return;
+      if (!this.enabled || !this.bgmEnabled) return;
       this.init();
       this._startBgmSource(normalized);
     },
@@ -264,7 +319,7 @@
     },
 
     _startBgmSource(mode) {
-      if (!this.ctx || !this.enabled) return;
+      if (!this.ctx || !this.enabled || !this.bgmEnabled) return;
       const clipKey = mode === 'battle' ? 'bgm_battle' : 'bgm_prep';
       const buf = this.buffers[clipKey];
       if (!buf) {
@@ -503,6 +558,13 @@
   // 頁面載入後立即背景預抓真實音效檔，並在首次互動時自動解鎖 WebAudio
   if (typeof window !== 'undefined') {
     window.SoundEngine = SoundEngine;
+    if (typeof document !== 'undefined') {
+      document.addEventListener('DOMContentLoaded', () => {
+        SoundEngine.syncBgmButton();
+        const bgmBtn = document.getElementById('btnBgm');
+        if (bgmBtn) bgmBtn.addEventListener('click', () => SoundEngine.toggleBgm());
+      });
+    }
     const schedulePrefetch = window.requestIdleCallback || function (cb) { setTimeout(cb, 120); };
     schedulePrefetch(() => SoundEngine.prefetchAll());
 

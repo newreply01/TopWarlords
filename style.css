@@ -30564,3 +30564,20 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
 .battle-finale-banner.is-draw .battle-finale-sub {
   color: #e2e8f0;
 }
+
+#btnBgm[aria-pressed="false"] {
+  opacity: 0.45;
+  position: relative;
+}
+
+#btnBgm[aria-pressed="false"]::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 50%;
+  height: 2px;
+  background: #ef4444;
+  transform: rotate(-35deg);
+  pointer-events: none;
+}

@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.11.84">
+<link rel="stylesheet" href="style.css?v=7.11.85">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
@@ -110,6 +110,7 @@
     <a href="armory.html" class="nav-armory-btn" id="btnArmory" title="瀏覽 125 位日韓中歷史名將錄" target="_blank">📜 名將錄</a>
     <div class="hud-icon-group" id="hudUtilityGroup">
       <button class="icon-btn" id="btnAudio" aria-label="切換戰場音效" title="開啟/關閉真實戰場音效"><span id="audioIcon">🔊</span></button>
+      <button class="icon-btn" id="btnBgm" aria-label="切換背景音樂" aria-pressed="false" title="背景音樂已關閉（點擊開啟）"><span id="bgmIcon">🎵</span></button>
       <button class="icon-btn" id="btnTheme" aria-label="切換深淺色主題" title="切換為深色模式 (夜間指揮所)"><span id="themeIcon">🌙</span></button>
       <button class="icon-btn" id="btnHelp" aria-label="遊戲說明">?</button>
     </div>
@@ -1117,40 +1118,40 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script defer src="js/data.js?v=7.11.84"></script>
-<script defer src="js/musou-data.js?v=7.11.84"></script>
-<script defer src="js/ladder-data.js?v=7.11.84"></script>
-<script defer src="js/ladder.js?v=7.11.84"></script>
-<script defer src="js/engine.js?v=7.11.84"></script>
+<script defer src="js/data.js?v=7.11.85"></script>
+<script defer src="js/musou-data.js?v=7.11.85"></script>
+<script defer src="js/ladder-data.js?v=7.11.85"></script>
+<script defer src="js/ladder.js?v=7.11.85"></script>
+<script defer src="js/engine.js?v=7.11.85"></script>
 <!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script defer src="js/firebase-config.js?v=7.11.84"></script>
-<script defer src="js/firebase-tourney.js?v=7.11.84"></script>
-<script defer src="js/tournament.js?v=7.11.84"></script>
-<script defer src="js/online-pvp.js?v=7.11.84"></script>
-<script defer src="js/telemetry.js?v=7.11.84"></script>
-<script defer src="js/cloud-sync.js?v=7.11.84"></script>
-<script defer src="js/sound.js?v=7.11.84"></script>
-<script defer src="js/poster-help.js?v=7.11.84"></script>
-<script defer src="js/libs/three.min.js?v=7.11.84"></script>
-<script defer src="js/libs/GLTFLoader.js?v=7.11.84"></script>
-<script defer src="js/libs/SkeletonUtils.js?v=7.11.84"></script>
-<script defer src="js/libs/postprocessing/CopyShader.js?v=7.11.84"></script>
-<script defer src="js/libs/postprocessing/LuminosityHighPassShader.js?v=7.11.84"></script>
-<script defer src="js/libs/postprocessing/EffectComposer.js?v=7.11.84"></script>
-<script defer src="js/libs/postprocessing/RenderPass.js?v=7.11.84"></script>
-<script defer src="js/libs/postprocessing/ShaderPass.js?v=7.11.84"></script>
-<script defer src="js/libs/postprocessing/UnrealBloomPass.js?v=7.11.84"></script>
-<script defer src="js/battle-figures.js?v=7.11.84"></script>
-<script defer src="js/musou-vfx.js?v=7.11.84"></script>
-<script defer src="js/musou-signatures-t5.js?v=7.11.84"></script>
-<script defer src="js/musou-signatures-t4.js?v=7.11.84"></script>
-<script defer src="js/musou-signatures-t13.js?v=7.11.84"></script>
-<script defer src="js/musou-cutin.js?v=7.11.84"></script>
-<script defer src="js/battle-3d.js?v=7.11.84"></script>
-<script defer src="js/app.js?v=7.11.84"></script>
+<script defer src="js/firebase-config.js?v=7.11.85"></script>
+<script defer src="js/firebase-tourney.js?v=7.11.85"></script>
+<script defer src="js/tournament.js?v=7.11.85"></script>
+<script defer src="js/online-pvp.js?v=7.11.85"></script>
+<script defer src="js/telemetry.js?v=7.11.85"></script>
+<script defer src="js/cloud-sync.js?v=7.11.85"></script>
+<script defer src="js/sound.js?v=7.11.85"></script>
+<script defer src="js/poster-help.js?v=7.11.85"></script>
+<script defer src="js/libs/three.min.js?v=7.11.85"></script>
+<script defer src="js/libs/GLTFLoader.js?v=7.11.85"></script>
+<script defer src="js/libs/SkeletonUtils.js?v=7.11.85"></script>
+<script defer src="js/libs/postprocessing/CopyShader.js?v=7.11.85"></script>
+<script defer src="js/libs/postprocessing/LuminosityHighPassShader.js?v=7.11.85"></script>
+<script defer src="js/libs/postprocessing/EffectComposer.js?v=7.11.85"></script>
+<script defer src="js/libs/postprocessing/RenderPass.js?v=7.11.85"></script>
+<script defer src="js/libs/postprocessing/ShaderPass.js?v=7.11.85"></script>
+<script defer src="js/libs/postprocessing/UnrealBloomPass.js?v=7.11.85"></script>
+<script defer src="js/battle-figures.js?v=7.11.85"></script>
+<script defer src="js/musou-vfx.js?v=7.11.85"></script>
+<script defer src="js/musou-signatures-t5.js?v=7.11.85"></script>
+<script defer src="js/musou-signatures-t4.js?v=7.11.85"></script>
+<script defer src="js/musou-signatures-t13.js?v=7.11.85"></script>
+<script defer src="js/musou-cutin.js?v=7.11.85"></script>
+<script defer src="js/battle-3d.js?v=7.11.85"></script>
+<script defer src="js/app.js?v=7.11.85"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   const hadController = Boolean(navigator.serviceWorker.controller);
@@ -1162,7 +1163,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.11.84').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.11.85').then(r => r.update()).catch(() => {});
   });
 }
 </script>

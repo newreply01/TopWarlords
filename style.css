@@ -30260,9 +30260,10 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   position: absolute;
   left: 14px;
   z-index: 42;
-  width: min(430px, 43vw);
-  max-width: 92%;
-  padding: 10px 22px 10px 12px;
+  width: fit-content;
+  min-width: 230px;
+  max-width: min(330px, 31vw);
+  padding: 8px 18px 8px 10px;
   border-radius: 10px;
   border: 2px solid var(--musou-border, #fbbf24);
   border-left: 5px solid var(--musou-border, #fbbf24);
@@ -30280,7 +30281,7 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
 .musou-cutin-card.side-b {
   left: auto;
   right: 14px;
-  padding: 10px 12px 10px 22px;
+  padding: 8px 10px 8px 18px;
   border-left: 2px solid var(--musou-border, #fbbf24);
   border-right: 5px solid var(--musou-border, #fbbf24);
   background: linear-gradient(100deg, rgba(15, 23, 42, 0.94) 0%, var(--musou-primary, #e11d48) 35%, var(--musou-dark, #4c0519) 100%);
@@ -30347,8 +30348,8 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
 }
 
 .musou-cutin-portrait {
-  width: 82px;
-  height: 82px;
+  width: 66px;
+  height: 66px;
   border-radius: 10px;
   object-fit: cover;
   object-position: center 15%;
@@ -30390,17 +30391,17 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
 
 .musou-cutin-title {
   font-family: 'Noto Serif TC', Georgia, serif;
-  font-size: clamp(17px, 1.75vw, 23px);
+  font-size: clamp(15px, 1.45vw, 19px);
   font-weight: 900;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 2px 10px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
 }
 
 .musou-cutin-title.is-long {
-  font-size: clamp(14.5px, 1.45vw, 19px);
-  letter-spacing: 0.3px;
+  font-size: clamp(13px, 1.25vw, 16.5px);
+  letter-spacing: 0.2px;
 }
 
 .musou-cutin-char {
@@ -30440,14 +30441,15 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
 @media (max-width: 719px) {
   .musou-cutin-card {
     left: 6px;
-    width: min(295px, 76vw);
-    padding: 7px 14px 7px 8px;
+    min-width: 190px;
+    max-width: min(245px, 66vw);
+    padding: 6px 12px 6px 8px;
   }
 
   .musou-cutin-card.side-b {
     left: auto;
     right: 6px;
-    padding: 7px 8px 7px 14px;
+    padding: 6px 8px 6px 12px;
   }
 
   .musou-cutin-inner {
@@ -30455,8 +30457,8 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   }
 
   .musou-cutin-portrait {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-width: 2px;
   }
 

@@ -286,7 +286,7 @@ const LADDER_PRESETS = [
       "XIAHOUYUAN",
       "XIAHOU_DUN",
       "MALONG",
-      "JANGPOGO",
+      "YUNGWAN",
       "SUNWU"
     ],
     "title": "先登奇兵暗夜刺殺"
@@ -856,7 +856,7 @@ const LADDER_PRESETS = [
       "XIAHOUYUAN",
       "YANGYE",
       "LIGUANG",
-      "JANGPOGO",
+      "YUNGWAN",
       "ZHOUYU"
     ],
     "title": "先制斬首千里破陣"
@@ -946,7 +946,7 @@ const LADDER_PRESETS = [
       "WEI",
       "GUANYU",
       "GENGYAN",
-      "JANGPOGO",
+      "YUNGWAN",
       "FAZHENG"
     ],
     "title": "十面埋伏天羅地網"
@@ -1321,7 +1321,7 @@ const LADDER_PRESETS = [
       "ZHAOSHE",
       "ZHOUTAI",
       "YANGYOUJI",
-      "JANGPOGO",
+      "YUNGWAN",
       "LEYI"
     ],
     "title": "重鎧陣線寸步不讓"

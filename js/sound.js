@@ -5,7 +5,7 @@
    支援左右陣營立體聲定位、多取樣輪替防機械感、戶外山谷空間殘響與平滑 BGM 交叉淡入淡出
    ===================================================== */
 (function () {
-  const AUDIO_VER = '7.11.88';
+  const AUDIO_VER = '7.11.89';
   const BASE_PATH = 'assets/audio/';
 
   const CLIP_MANIFEST = {
@@ -44,16 +44,16 @@
     'bgm_battle', 'bgm_prep'
   ];
 
-  // 8 大無雙技能流派：兩段式真實音效組合（起手切入 + 3D 特效爆發）
+  // 8 大無雙技能流派：單一清脆起手辨識音 + 3D 特效爆發打擊音（避免雙長音重疊混濁）
   const SKILL_AUDIO_PROFILES = {
-    fire_storm:      { open: 'war_drum',        openLayer: 'war_horn',      impact: 'fire_attack',     impactLayer: 'heavy_strike' },
-    thunder_strike:  { open: 'war_drum',        openLayer: 'strategy_gong', impact: 'thunder_strike',  impactLayer: 'heavy_strike' },
-    bagua_array:     { open: 'bagua_resonance', openLayer: 'strategy_gong', impact: 'strategy_gong',   impactLayer: 'bagua_resonance' },
-    overlord_cleave: { open: 'war_drum',        openLayer: 'blade_clash_2', impact: 'heavy_strike',    impactLayer: 'blade_clash_3' },
-    piercing_volley: { open: 'war_horn',        openLayer: 'war_drum',      impact: 'arrow_volley',    impactLayer: 'heavy_strike' },
-    tidal_surge:     { open: 'war_drum',        openLayer: 'war_horn',      impact: 'tidal_surge',     impactLayer: 'heavy_strike' },
-    aegis_command:   { open: 'shield_block',    openLayer: 'strategy_gong', impact: 'shield_block',    impactLayer: 'war_drum' },
-    shadow_ambush:   { open: 'shadow_ambush',   openLayer: null,            impact: 'shadow_ambush',   impactLayer: 'blade_clash_1' }
+    fire_storm:      { open: 'fire_attack',     impact: 'heavy_strike' },
+    thunder_strike:  { open: 'thunder_strike',  impact: 'heavy_strike' },
+    bagua_array:     { open: 'bagua_resonance', impact: 'strategy_gong' },
+    overlord_cleave: { open: 'shadow_ambush',   impact: 'heavy_strike' },
+    piercing_volley: { open: 'arrow_volley',    impact: 'heavy_strike' },
+    tidal_surge:     { open: 'tidal_surge',     impact: 'heavy_strike' },
+    aegis_command:   { open: 'shield_block',    impact: 'bagua_resonance' },
+    shadow_ambush:   { open: 'shadow_ambush',   impact: 'blade_clash_3' }
   };
 
   function readSoundPref() {
@@ -584,40 +584,30 @@
       } catch (e) { }
     },
 
-    /** 技能發動起手音效：依 8 大無雙流派播放在位起手音並壓低背景音樂 */
+    /** 技能發動起手音效：直接播放該流派的清脆專屬音效（不疊加戰鼓/號角避免混濁） */
     playSkillActivation(fxKey, side = 'A', fallbackSfx = null) {
       if (!this.enabled) return;
       this.init();
       if (!this.ctx) return;
       try {
         const profile = SKILL_AUDIO_PROFILES[fxKey];
-        const openKey = profile?.open || (fallbackSfx ? this._resolveEvent(fallbackSfx).key : 'war_drum');
+        const openKey = profile?.open || (fallbackSfx ? this._resolveEvent(fallbackSfx).key : 'shadow_ambush');
         const nowMs = performance.now();
         const gateKey = `skill_open_${fxKey || openKey}_${side}`;
-        if (nowMs - (this.lastPlayAt[gateKey] || 0) < 140) return;
+        if (nowMs - (this.lastPlayAt[gateKey] || 0) < 220) return;
         this.lastPlayAt[gateKey] = nowMs;
 
-        this._duckBgm(0.18, 1.8);
-        const ok = this._triggerBuffer(openKey, {
+        this._triggerBuffer(openKey, {
           side,
-          gain: 0.84,
-          rateJitter: 0.04,
+          gain: 0.90,
+          rateJitter: 0.03,
           delay: 0,
-          panScale: 0.85
+          panScale: 0.65
         });
-        if (ok && profile?.openLayer) {
-          this._triggerBuffer(profile.openLayer, {
-            side,
-            gain: 0.56,
-            rateJitter: 0.05,
-            delay: 0.07,
-            panScale: 0.75
-          });
-        }
       } catch (e) { }
     },
 
-    /** 3D 技能特效爆發命中音效：對應粒子／衝擊波落下瞬間的多層真實打擊音 */
+    /** 3D 技能特效爆發命中音效：對應粒子／衝擊波落下瞬間的俐落打擊音 */
     playSkillImpact(fxKey, side = 'A', spatialOpts = null) {
       if (!this.enabled) return;
       this.init();
@@ -626,29 +616,22 @@
         const profile = SKILL_AUDIO_PROFILES[fxKey] || SKILL_AUDIO_PROFILES.overlord_cleave;
         const nowMs = performance.now();
         const gateKey = `skill_impact_${fxKey || 'default'}_${side}`;
-        if (nowMs - (this.lastPlayAt[gateKey] || 0) < 120) return;
+        if (nowMs - (this.lastPlayAt[gateKey] || 0) < 160) return;
         this.lastPlayAt[gateKey] = nowMs;
 
         const useSpatial = spatialOpts && Number.isFinite(spatialOpts.distance) && Number.isFinite(spatialOpts.pan);
         const baseOpts = useSpatial
           ? {
               side,
-              distance: Math.max(0, spatialOpts.distance),
+              distance: Math.max(0, spatialOpts.distance * 0.25),
               pan: Math.max(-1, Math.min(1, spatialOpts.pan)),
-              gain: Math.min(1, spatialOpts.gain ?? 0.95) * 0.92,
-              rateJitter: 0.05,
+              gain: Math.min(1, spatialOpts.gain ?? 0.92) * 0.86,
+              rateJitter: 0.04,
               spatial: true
             }
-          : { side, gain: 0.92, rateJitter: 0.05, panScale: 0.9 };
+          : { side, gain: 0.86, rateJitter: 0.04, panScale: 0.75 };
 
-        const ok = this._triggerBuffer(profile.impact, { ...baseOpts, delay: 0 });
-        if (ok && profile.impactLayer) {
-          this._triggerBuffer(profile.impactLayer, {
-            ...baseOpts,
-            gain: baseOpts.gain * 0.62,
-            delay: 0.05
-          });
-        }
+        this._triggerBuffer(profile.impact, { ...baseOpts, delay: 0 });
       } catch (e) { }
     }
   };

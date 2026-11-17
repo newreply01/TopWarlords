@@ -610,7 +610,7 @@ function rerollMarketPool() {
       toast('🎲 多局鏖戰軍火庫已重新調配！首局開戰後將正式鎖定全系列賽。');
     }
   } else {
-    toast('🎲 已重新徵召點將！已清除當前選取，請由新軍火庫重新選配。');
+    toast('🎲 已重新徵召點將！請重新選配。');
   }
   renderAll();
 }

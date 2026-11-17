@@ -30258,11 +30258,12 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
    ===================================================== */
 .musou-cutin-card {
   position: absolute;
-  left: 14px;
+  left: 12px;
   z-index: 42;
-  width: fit-content;
-  min-width: 230px;
-  max-width: min(330px, 31vw);
+  width: min(350px, calc((100% - 316px) / 2));
+  min-width: 240px;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 8px 18px 8px 10px;
   border-radius: 10px;
   border: 2px solid var(--musou-border, #fbbf24);
@@ -30280,7 +30281,7 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
 
 .musou-cutin-card.side-b {
   left: auto;
-  right: 14px;
+  right: 12px;
   padding: 8px 10px 8px 18px;
   border-left: 2px solid var(--musou-border, #fbbf24);
   border-right: 5px solid var(--musou-border, #fbbf24);

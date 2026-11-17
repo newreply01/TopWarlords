@@ -96,15 +96,15 @@
 
   function computeDurationMs(tempo = 1, activeCount = 0) {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return { total: 600, lead: 200 };
+      return { total: 900, lead: 200 };
     }
-    let total = (mode === 'lite' || activeCount >= 2) ? 950 : 1500;
+    let total = (mode === 'lite' || activeCount >= 2) ? 1600 : 2400;
     let lead = (mode === 'lite' || activeCount >= 2) ? 260 : 420;
     if (tempo >= 3) {
-      total = Math.min(total, 800);
+      total = Math.min(total, 1300);
       lead = Math.min(lead, 220);
     } else if (tempo >= 2) {
-      total = Math.min(total, 1050);
+      total = Math.min(total, 1750);
       lead = Math.min(lead, 300);
     }
     return { total, lead };
@@ -268,7 +268,7 @@
       state.timers.push(setTimeout(() => {
         if (activeBySide[sideKey] !== state) return;
         card.classList.add('is-exit');
-      }, Math.max(lead + 120, Math.round(1150 * scale))));
+      }, Math.max(lead + 200, total - 320)));
     }
 
     state.timers.push(setTimeout(finishCard, total));

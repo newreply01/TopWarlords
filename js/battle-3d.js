@@ -3802,6 +3802,23 @@ const Battle3DEngine = (function () {
       return;
     }
 
+    // Phase 5：其餘 75 位武將依兵種 cat 做 ±12° 色相微調並疊加 Phase 2 華麗元件
+    const catHueMap = { air: -0.033, armor: 0.033, air_defense: 0.017, naval: -0.017, support: 0 };
+    const tintByCat = (hex) => {
+      const shift = catHueMap[aToken?.cat] || 0;
+      if (!shift) return hex;
+      return new THREE.Color(hex).offsetHSL(shift, 0.04, 0).getHex();
+    };
+    const basePalHex = parseInt((VFX_PALETTES[key] || VFX_PALETTES.overlord_cleave).primary.slice(1), 16);
+    const tintedHex = tintByCat(basePalHex);
+    if (aToken?.cat === 'air' || aToken?.cat === 'naval') {
+      window.MusouVfx?.spawnSlashArc?.(scene, fxPos, aToken.side === 'A' ? 1 : -1, tintedHex, 2.9, 440);
+    } else if (aToken?.cat === 'armor' || aToken?.cat === 'support') {
+      window.MusouVfx?.spawnPillar?.(scene, fxPos, tintedHex, 4.8, 660);
+    } else {
+      window.MusouVfx?.spawnShockRing?.(scene, fxPos, tintedHex, 3.8, 640);
+    }
+
     if (key === 'fire_storm') {
       // 紅蓮火陣 + 高聳烈焰火柱 + 天降赤壁火流星 + 環繞炎舌
       addTexPlane('fire_lotus', 5.8, 5.8, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {

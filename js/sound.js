@@ -5,7 +5,7 @@
    支援左右陣營立體聲定位、多取樣輪替防機械感、戶外山谷空間殘響與平滑 BGM 交叉淡入淡出
    ===================================================== */
 (function () {
-  const AUDIO_VER = '7.11.89';
+  const AUDIO_VER = '7.11.90';
   const BASE_PATH = 'assets/audio/';
 
   const CLIP_MANIFEST = {
@@ -23,10 +23,6 @@
     arrow_volley: `${BASE_PATH}arrow_volley.mp3?v=${AUDIO_VER}`,
     fire_attack: `${BASE_PATH}fire_attack.mp3?v=${AUDIO_VER}`,
     strategy_gong: `${BASE_PATH}strategy_gong.mp3?v=${AUDIO_VER}`,
-    thunder_strike: `${BASE_PATH}thunder_strike.mp3?v=${AUDIO_VER}`,
-    tidal_surge: `${BASE_PATH}tidal_surge.mp3?v=${AUDIO_VER}`,
-    shadow_ambush: `${BASE_PATH}shadow_ambush.mp3?v=${AUDIO_VER}`,
-    bagua_resonance: `${BASE_PATH}bagua_resonance.mp3?v=${AUDIO_VER}`,
     warlord_fall: `${BASE_PATH}warlord_fall.mp3?v=${AUDIO_VER}`,
     ui_click: `${BASE_PATH}ui_click.mp3?v=${AUDIO_VER}`,
     equip: `${BASE_PATH}equip.mp3?v=${AUDIO_VER}`,
@@ -39,21 +35,20 @@
     'ui_click', 'equip', 'war_drum', 'war_horn',
     'blade_clash_1', 'blade_clash_2', 'blade_clash_3', 'heavy_strike',
     'shield_block', 'cavalry_charge', 'cavalry_hooves', 'arrow_volley',
-    'fire_attack', 'strategy_gong', 'thunder_strike', 'tidal_surge',
-    'shadow_ambush', 'bagua_resonance', 'warlord_fall', 'victory', 'defeat',
+    'fire_attack', 'strategy_gong', 'warlord_fall', 'victory', 'defeat',
     'bgm_battle', 'bgm_prep'
   ];
 
-  // 8 大無雙技能流派：單一清脆起手辨識音 + 3D 特效爆發打擊音（避免雙長音重疊混濁）
+  // 8 大無雙技能流派：全數採用真實樂器與冷兵器錄音（單一清脆起手音 + 3D 爆發實音，無合成音色）
   const SKILL_AUDIO_PROFILES = {
-    fire_storm:      { open: 'fire_attack',     impact: 'heavy_strike' },
-    thunder_strike:  { open: 'thunder_strike',  impact: 'heavy_strike' },
-    bagua_array:     { open: 'bagua_resonance', impact: 'strategy_gong' },
-    overlord_cleave: { open: 'shadow_ambush',   impact: 'heavy_strike' },
-    piercing_volley: { open: 'arrow_volley',    impact: 'heavy_strike' },
-    tidal_surge:     { open: 'tidal_surge',     impact: 'heavy_strike' },
-    aegis_command:   { open: 'shield_block',    impact: 'bagua_resonance' },
-    shadow_ambush:   { open: 'shadow_ambush',   impact: 'blade_clash_3' }
+    fire_storm:      { open: 'fire_attack',    impact: 'heavy_strike' },
+    thunder_strike:  { open: 'cavalry_charge', impact: 'heavy_strike' },
+    bagua_array:     { open: 'strategy_gong',  impact: 'war_drum' },
+    overlord_cleave: { open: 'blade_clash_2',  impact: 'heavy_strike' },
+    piercing_volley: { open: 'arrow_volley',   impact: 'heavy_strike' },
+    tidal_surge:     { open: 'war_horn',       impact: 'war_drum' },
+    aegis_command:   { open: 'shield_block',   impact: 'war_drum' },
+    shadow_ambush:   { open: 'blade_clash_1',  impact: 'blade_clash_3' }
   };
 
   function readSoundPref() {
@@ -449,19 +444,6 @@
         case 'radar':
           return { key: 'strategy_gong', gain: 0.78, rateJitter: 0.04, minGapMs: 90, panScale: 0.7 };
 
-        case 'thunder_strike':
-          return { key: 'thunder_strike', gain: 0.94, rateJitter: 0.05, minGapMs: 80, panScale: 0.9 };
-
-        case 'tidal_surge':
-          return { key: 'tidal_surge', gain: 0.92, rateJitter: 0.05, minGapMs: 80, panScale: 0.9 };
-
-        case 'shadow_ambush':
-          return { key: 'shadow_ambush', gain: 0.90, rateJitter: 0.06, minGapMs: 70, panScale: 1.0 };
-
-        case 'bagua_resonance':
-        case 'bagua_array':
-          return { key: 'bagua_resonance', gain: 0.88, rateJitter: 0.03, minGapMs: 80, panScale: 0.75 };
-
         case 'warlord_fall':
         case 'fall':
         case 'kill':
@@ -591,7 +573,7 @@
       if (!this.ctx) return;
       try {
         const profile = SKILL_AUDIO_PROFILES[fxKey];
-        const openKey = profile?.open || (fallbackSfx ? this._resolveEvent(fallbackSfx).key : 'shadow_ambush');
+        const openKey = profile?.open || (fallbackSfx ? this._resolveEvent(fallbackSfx).key : 'blade_clash_2');
         const nowMs = performance.now();
         const gateKey = `skill_open_${fxKey || openKey}_${side}`;
         if (nowMs - (this.lastPlayAt[gateKey] || 0) < 220) return;

@@ -707,7 +707,7 @@ const LADDER_PRESETS = [
       "LIANPO",
       "HULUGUANG",
       "YUEJIN",
-      "LUXUN"
+      "XUNYU"
     ],
     "title": "步騎火砲協同合圍"
   },
@@ -826,7 +826,7 @@ const LADDER_PRESETS = [
       "GAOCHANGGONG",
       "BAIQI",
       "ZONGZE",
-      "CHOSOKABE",
+      "LUXUN",
       "FAZHENG"
     ],
     "title": "先登奇兵暗夜刺殺"
@@ -871,7 +871,7 @@ const LADDER_PRESETS = [
       "YOSHITSUNE",
       "SHIMAZUY",
       "TORII",
-      "CHOSOKABE",
+      "LUXUN",
       "SANADAMASA"
     ],
     "title": "十面埋伏天羅地網"
@@ -1022,7 +1022,7 @@ const LADDER_PRESETS = [
       "YANGYE",
       "HANSHIZHONG",
       "WEIYAN",
-      "LUXUN"
+      "XUNYU"
     ],
     "title": "玄甲重盾正面死鬥"
   },
@@ -1067,7 +1067,7 @@ const LADDER_PRESETS = [
       "XUCHU",
       "HANSHIZHONG",
       "XUHUANG",
-      "LUXUN"
+      "XUNYU"
     ],
     "title": "伏波龍骨水陸破暗"
   },

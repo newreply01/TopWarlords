@@ -29787,113 +29787,133 @@ html:not([data-theme="light"]) .formation-slot-row {
 }
 
 /* =====================================================
-   風格一：典藏黑金將印卡 (v7.11.56)
-   深曜石戰棋牌匾 + 肖像全高左融暗角 + 彩色絕技焦點條 + 圖示三欄分格數值
+   宣紙名鑑 × 三戰極簡武將卡（淺色回歸、三列等高置中、無黑塊暗角、圖示分欄）
    ===================================================== */
 #matrixBoard .m-card {
   position: relative;
-  border: 1px solid rgba(212, 168, 83, 0.28) !important;
-  border-radius: 10px !important;
-  background: linear-gradient(135deg, #1d1814 0%, #110e0b 100%) !important;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 240, 195, 0.1) !important;
+  border: 1px solid rgba(212, 168, 83, 0.24) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #1f1b18 0%, #151210 100%) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 240, 200, 0.06) !important;
   color: #f8fafc !important;
   overflow: hidden !important;
 }
 
-#matrixBoard .m-card::before {
-  display: none !important;
+[data-theme="light"] #matrixBoard .m-card {
+  border: 1px solid rgba(130, 96, 48, 0.22) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #faf6ed 100%) !important;
+  box-shadow: 0 1px 4px rgba(60, 42, 14, 0.06), inset 0 1px 0 #ffffff !important;
+  color: #1c1917 !important;
 }
+
+#matrixBoard .m-card::before {
+  display: block !important;
+  width: 3px !important;
+  opacity: 0.9 !important;
+  z-index: 3;
+}
+
+#matrixBoard .m-card[data-cost="5"]::before { background: #f59e0b !important; }
+#matrixBoard .m-card[data-cost="4"]::before { background: #a855f7 !important; }
+#matrixBoard .m-card[data-cost="3"]::before { background: #14b8a6 !important; }
+#matrixBoard .m-card[data-cost="2"]::before { background: #64748b !important; }
+#matrixBoard .m-card[data-cost="1"]::before { background: #a88766 !important; }
 
 #matrixBoard .m-card[data-cost="5"] {
-  border-color: rgba(245, 158, 11, 0.76) !important;
-  background: linear-gradient(135deg, #2a1d0e 0%, #16100b 62%, #110d09 100%) !important;
-  box-shadow: 0 3px 14px rgba(180, 83, 9, 0.28), inset 0 1px 0 rgba(253, 224, 71, 0.26) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, #1f1b17 42%, #151210 100%) !important;
 }
 
-#matrixBoard .m-card[data-cost="4"] {
-  border-color: rgba(192, 132, 252, 0.56) !important;
-  background: linear-gradient(135deg, #22162d 0%, #130f18 100%) !important;
-  box-shadow: 0 2px 10px rgba(126, 34, 206, 0.16), inset 0 1px 0 rgba(233, 213, 255, 0.14) !important;
+[data-theme="light"] #matrixBoard .m-card[data-cost="5"] {
+  border-color: rgba(217, 119, 6, 0.48) !important;
+  background: linear-gradient(135deg, #fffaf0 0%, #fff6e3 36%, #ffffff 100%) !important;
 }
 
-#matrixBoard .m-card[data-cost="3"] {
-  border-color: rgba(45, 212, 191, 0.48) !important;
-  background: linear-gradient(135deg, #102423 0%, #0d1515 100%) !important;
-  box-shadow: 0 2px 9px rgba(13, 148, 136, 0.14), inset 0 1px 0 rgba(153, 246, 228, 0.12) !important;
+[data-theme="light"] #matrixBoard .m-card[data-cost="4"] {
+  border-color: rgba(147, 51, 234, 0.34) !important;
+  background: linear-gradient(135deg, #fcfaff 0%, #f6effd 36%, #ffffff 100%) !important;
 }
 
-#matrixBoard .m-card[data-cost="2"] {
-  border-color: rgba(148, 163, 184, 0.36) !important;
-  background: linear-gradient(135deg, #1a2029 0%, #111419 100%) !important;
+[data-theme="light"] #matrixBoard .m-card[data-cost="3"] {
+  border-color: rgba(13, 148, 136, 0.34) !important;
+  background: linear-gradient(135deg, #f6fdfb 0%, #edf9f4 36%, #ffffff 100%) !important;
 }
 
-#matrixBoard .m-card[data-cost="1"] {
-  border-color: rgba(168, 140, 108, 0.34) !important;
-  background: linear-gradient(135deg, #1c1815 0%, #110f0d 100%) !important;
+[data-theme="light"] #matrixBoard .m-card[data-cost="2"] {
+  border-color: rgba(100, 116, 139, 0.28) !important;
+  background: linear-gradient(135deg, #fafcfe 0%, #f2f5f9 100%) !important;
 }
 
 #matrixBoard .m-card:hover:not(.dis) {
-  border-color: #fbbf24 !important;
-  box-shadow: 0 5px 16px rgba(217, 119, 6, 0.26), inset 0 1px 0 rgba(254, 240, 138, 0.22) !important;
+  border-color: #d97706 !important;
+  box-shadow: 0 3px 10px rgba(180, 83, 9, 0.16) !important;
 }
 
-#matrixBoard .m-card.sel,
-[data-theme="light"] #matrixBoard .m-card.sel {
+#matrixBoard .m-card.sel {
   border-color: #fbbf24 !important;
-  background: linear-gradient(135deg, #33220d 0%, #1b1309 65%, #130e07 100%) !important;
-  box-shadow: 0 0 0 2px #fbbf24, 0 6px 18px rgba(245, 158, 11, 0.42) !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(34, 24, 14, 0.96)) !important;
+  box-shadow: inset 0 0 0 1.5px #fbbf24, 0 0 12px rgba(245, 158, 11, 0.28) !important;
+}
+
+[data-theme="light"] #matrixBoard .m-card.sel {
+  border-color: #b45309 !important;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 55%, #fde68a 100%) !important;
+  box-shadow: inset 0 0 0 1.5px #b45309, 0 2px 8px rgba(180, 83, 9, 0.18) !important;
 }
 
 #matrixBoard .m-card.sel::after {
-  content: '✓ 已選';
-  left: 4px;
-  right: auto;
-  top: auto;
-  bottom: 4px;
-  width: auto;
+  content: '✓';
+  left: auto;
+  right: 4px;
+  top: 4px;
+  bottom: auto;
+  width: 15px;
   height: 15px;
-  padding: 0 5px;
-  border-radius: 4px;
-  font-size: 9px;
-  letter-spacing: 0.02em;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(251, 191, 36, 0.85);
+  padding: 0;
+  border-radius: 50%;
+  font-size: 9.5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 #matrixBoard .m-card.sel .m-top {
-  padding-right: 0;
+  padding-right: 18px;
 }
 
 #matrixBoard .m-card.dis {
-  opacity: 0.46;
-  filter: grayscale(0.55);
+  opacity: 0.48;
+  filter: grayscale(0.5);
 }
 
 #matrixBoard .m-card.banned {
   border: 1.5px solid var(--red) !important;
   opacity: 0.88 !important;
   filter: none !important;
-  background: repeating-linear-gradient(45deg, rgba(255, 93, 110, .09), rgba(255, 93, 110, .09) 8px, rgba(255, 93, 110, .2) 8px, rgba(255, 93, 110, .2) 16px), #160c10 !important;
 }
 
-/* 肖像左全高融圖 + 壓暗古畫刺眼底色 */
+/* 肖像：保持原本明亮清晰，不使用黑色暗角 */
 #matrixBoard .m-card-main-row {
   position: relative;
-  gap: 0;
+  gap: 6px;
 }
 
 #matrixBoard .m-avatar-wrap {
-  position: absolute !important;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 78px !important;
-  max-width: none !important;
+  position: relative !important;
+  left: auto;
+  top: auto;
+  bottom: auto;
+  width: auto !important;
+  max-width: 34% !important;
   height: 100% !important;
-  aspect-ratio: auto !important;
-  border-radius: 9px 0 0 9px;
+  aspect-ratio: 1 !important;
+  flex: 0 0 auto !important;
+  border-radius: 6px 0 0 6px;
   overflow: hidden;
-  background: #14100c;
+  background: #ebe4d5;
   pointer-events: none;
+}
+
+html:not([data-theme="light"]) #matrixBoard .m-avatar-wrap {
+  background: #1b1713;
 }
 
 #matrixBoard .m-avatar-img {
@@ -29901,18 +29921,16 @@ html:not([data-theme="light"]) .formation-slot-row {
   height: 100%;
   object-fit: cover !important;
   object-position: center 15% !important;
-  filter: contrast(1.05) saturate(0.92);
-  -webkit-mask-image: linear-gradient(90deg, #000 54%, transparent 100%);
-  mask-image: linear-gradient(90deg, #000 54%, transparent 100%);
+  filter: none;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 #matrixBoard .m-avatar-wrap::after {
-  background: radial-gradient(circle at 42% 38%, transparent 30%, rgba(15, 11, 8, 0.56) 100%),
-              linear-gradient(180deg, rgba(15, 11, 8, 0.16) 0%, rgba(15, 11, 8, 0.5) 100%) !important;
-  box-shadow: none !important;
+  display: none !important;
 }
 
-/* 左上貼角軍令等級印記 */
+/* 左上貼角價位印記 */
 #matrixBoard .m-avatar-cost {
   position: absolute;
   top: 0;
@@ -29920,96 +29938,101 @@ html:not([data-theme="light"]) .formation-slot-row {
   right: auto;
   bottom: auto;
   z-index: 4;
-  min-width: 24px;
-  height: 18px;
+  min-width: 22px;
+  height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
+  padding: 0 4px;
   border: 0;
-  border-right: 1px solid rgba(251, 191, 36, 0.55);
-  border-bottom: 1px solid rgba(251, 191, 36, 0.55);
-  border-radius: 9px 0 8px 0;
+  border-radius: 7px 0 6px 0;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
   line-height: 1;
   background: linear-gradient(135deg, #d97706, #92400e);
   color: #fef9c3;
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 #matrixBoard .m-card[data-cost="4"] .m-avatar-cost {
-  background: linear-gradient(135deg, #9333ea, #581c87);
+  background: linear-gradient(135deg, #9333ea, #6b21a8);
   color: #f3e8ff;
-  border-color: rgba(192, 132, 252, 0.6);
 }
 
 #matrixBoard .m-card[data-cost="3"] .m-avatar-cost {
   background: linear-gradient(135deg, #0d9488, #115e59);
   color: #ccfbf1;
-  border-color: rgba(45, 212, 191, 0.52);
 }
 
 #matrixBoard .m-card[data-cost="2"] .m-avatar-cost {
-  background: linear-gradient(135deg, #475569, #1e293b);
-  color: #e2e8f0;
-  border-color: rgba(148, 163, 184, 0.45);
+  background: linear-gradient(135deg, #64748b, #334155);
+  color: #f1f5f9;
 }
 
 #matrixBoard .m-card[data-cost="1"] .m-avatar-cost {
-  background: linear-gradient(135deg, #57534e, #292524);
+  background: linear-gradient(135deg, #78716c, #44403c);
   color: #f5f5f4;
-  border-color: rgba(168, 162, 158, 0.42);
 }
 
-/* 右側資訊艙 */
+/* 右側三列等高垂直置中（徹底解決上擠下留白斷層） */
 #matrixBoard .m-card-info-col {
   position: relative;
   z-index: 2;
-  margin-left: 62px;
+  margin-left: 0 !important;
   flex: 1 1 0;
   min-width: 0;
-  padding: 5px 7px 4px 2px;
-  gap: 2px;
-  justify-content: space-between;
+  overflow: hidden;
+  height: 100%;
+  padding: 3px 7px 3px 0 !important;
+  display: grid !important;
+  grid-template-rows: 1fr 1fr 1fr !important;
+  align-items: center !important;
+  gap: 1px !important;
 }
 
 #matrixBoard .m-top {
   gap: 4px;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 #matrixBoard .m-name {
   display: flex;
   align-items: baseline;
   gap: 4px;
-  font-size: 14.5px !important;
-  line-height: 1.2;
+  font-size: 14px !important;
+  line-height: 1.15;
 }
 
 #matrixBoard .m-name-text {
   color: #fef3c7 !important;
   font-family: var(--serif);
   font-weight: 900;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 
-#matrixBoard .m-card.sel .m-name-text {
-  color: #fde68a !important;
+[data-theme="light"] #matrixBoard .m-name-text {
+  color: #1c1917 !important;
 }
 
-/* 國籍改為內斂暗色小字，不再用搶眼方塊框 */
 #matrixBoard .m-nation {
   width: auto !important;
   height: auto !important;
-  padding: 0 3px !important;
-  border-radius: 3px !important;
-  font-size: 9px !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-size: 9.5px !important;
   font-weight: 700 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
   color: #94a3b8 !important;
   border: 0 !important;
-  line-height: 1.35 !important;
+  line-height: 1.2 !important;
+}
+
+[data-theme="light"] #matrixBoard .m-nation {
+  color: #78716c !important;
 }
 
 #matrixBoard .m-top-badges {
@@ -30018,130 +30041,117 @@ html:not([data-theme="light"]) .formation-slot-row {
 
 #matrixBoard .m-top-badges .m-skill-phase {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.07) !important;
+  padding: 0 4px;
+  line-height: 1.35;
+  border-radius: 3px;
 }
 
-[data-theme="light"] #matrixBoard .m-top-badges .m-skill-phase.phase-p1 {
-  color: #7dd3fc !important;
-  border-color: rgba(56, 189, 248, 0.42) !important;
-}
-
-[data-theme="light"] #matrixBoard .m-top-badges .m-skill-phase.phase-p2 {
-  color: #fbbf24 !important;
-  border-color: rgba(251, 191, 36, 0.42) !important;
-}
-
-[data-theme="light"] #matrixBoard .m-top-badges .m-skill-phase.phase-p3 {
-  color: #fda4af !important;
-  border-color: rgba(251, 113, 133, 0.44) !important;
-}
-
-/* 絕技焦點橫幅：分色發光左條 + 完整技名 + 精煉實戰效應標籤 */
+/* 第 2 列：淺色柔和戰法膠囊（整列居中、完整顯示技名） */
 #matrixBoard .m-skill-row {
   width: 100%;
   min-width: 0;
+  display: flex;
+  align-items: center;
 }
 
 #matrixBoard .m-skill {
-  display: flex !important;
+  display: inline-flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important;
-  min-height: 21px;
-  padding: 2px 6px !important;
+  justify-content: flex-start !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-height: 19px;
+  padding: 1px 7px !important;
   gap: 4px !important;
-  border: 0 !important;
-  border-left: 3px solid #f59e0b !important;
   border-radius: 4px !important;
-  background: linear-gradient(90deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.05)) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
+  color: #f8fafc !important;
   font-size: 11.5px;
   line-height: 1.25;
 }
 
-#matrixBoard .m-skill:hover {
-  filter: brightness(1.14);
+[data-theme="light"] #matrixBoard .m-skill {
+  border-color: rgba(180, 83, 9, 0.2) !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: #92400e !important;
 }
 
-#matrixBoard .m-skill.fx-overlord_cleave {
-  background: linear-gradient(90deg, rgba(244, 63, 94, 0.26), rgba(244, 63, 94, 0.06)) !important;
-  border-left-color: #fb7185 !important;
+[data-theme="light"] #matrixBoard .m-skill.fx-overlord_cleave {
+  background: rgba(225, 29, 72, 0.08) !important;
+  border-color: rgba(225, 29, 72, 0.22) !important;
+  color: #9f1239 !important;
 }
 
-#matrixBoard .m-skill.fx-fire_storm {
-  background: linear-gradient(90deg, rgba(249, 115, 22, 0.26), rgba(249, 115, 22, 0.06)) !important;
-  border-left-color: #fb923c !important;
+[data-theme="light"] #matrixBoard .m-skill.fx-fire_storm {
+  background: rgba(234, 88, 12, 0.09) !important;
+  border-color: rgba(234, 88, 12, 0.22) !important;
+  color: #9a3412 !important;
 }
 
-#matrixBoard .m-skill.fx-thunder_strike {
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.24), rgba(56, 189, 248, 0.05)) !important;
-  border-left-color: #38bdf8 !important;
+[data-theme="light"] #matrixBoard .m-skill.fx-thunder_strike {
+  background: rgba(2, 132, 199, 0.08) !important;
+  border-color: rgba(2, 132, 199, 0.22) !important;
+  color: #075985 !important;
 }
 
-#matrixBoard .m-skill.fx-bagua_array {
-  background: linear-gradient(90deg, rgba(250, 204, 21, 0.22), rgba(168, 85, 247, 0.08)) !important;
-  border-left-color: #fbbf24 !important;
+[data-theme="light"] #matrixBoard .m-skill.fx-bagua_array {
+  background: rgba(180, 83, 9, 0.09) !important;
+  border-color: rgba(180, 83, 9, 0.22) !important;
+  color: #92400e !important;
 }
 
-#matrixBoard .m-skill.fx-piercing_volley {
-  background: linear-gradient(90deg, rgba(168, 85, 247, 0.26), rgba(168, 85, 247, 0.06)) !important;
-  border-left-color: #c084fc !important;
+[data-theme="light"] #matrixBoard .m-skill.fx-piercing_volley {
+  background: rgba(124, 58, 237, 0.08) !important;
+  border-color: rgba(124, 58, 237, 0.22) !important;
+  color: #5b21b6 !important;
 }
 
-#matrixBoard .m-skill.fx-tidal_surge {
-  background: linear-gradient(90deg, rgba(20, 184, 166, 0.25), rgba(20, 184, 166, 0.05)) !important;
-  border-left-color: #2dd4bf !important;
+[data-theme="light"] #matrixBoard .m-skill.fx-tidal_surge {
+  background: rgba(13, 148, 136, 0.09) !important;
+  border-color: rgba(13, 148, 136, 0.22) !important;
+  color: #115e59 !important;
 }
 
-#matrixBoard .m-skill.fx-aegis_command {
-  background: linear-gradient(90deg, rgba(16, 185, 129, 0.24), rgba(16, 185, 129, 0.05)) !important;
-  border-left-color: #34d399 !important;
+[data-theme="light"] #matrixBoard .m-skill.fx-aegis_command {
+  background: rgba(5, 150, 105, 0.09) !important;
+  border-color: rgba(5, 150, 105, 0.22) !important;
+  color: #065f46 !important;
 }
 
-#matrixBoard .m-skill.fx-shadow_ambush {
-  background: linear-gradient(90deg, rgba(129, 140, 248, 0.24), rgba(129, 140, 248, 0.06)) !important;
-  border-left-color: #a78bfa !important;
+[data-theme="light"] #matrixBoard .m-skill.fx-shadow_ambush {
+  background: rgba(79, 70, 229, 0.08) !important;
+  border-color: rgba(79, 70, 229, 0.22) !important;
+  color: #3730a3 !important;
 }
 
 #matrixBoard .m-skill strong {
-  color: #ffffff !important;
-  font-weight: 800;
+  color: inherit !important;
+  font-weight: 700;
   letter-spacing: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-#matrixBoard .m-skill-fx {
-  margin-left: auto;
-  flex: 0 0 auto;
-  font-family: var(--mono);
-  font-size: 9.5px;
-  font-weight: 800;
-  color: #fde68a;
-  white-space: nowrap;
-  letter-spacing: -0.02em;
+#matrixBoard .m-skill:hover {
+  filter: brightness(0.95);
 }
 
-#matrixBoard .m-skill.fx-overlord_cleave .m-skill-fx { color: #fecdd3; }
-#matrixBoard .m-skill.fx-fire_storm .m-skill-fx { color: #fed7aa; }
-#matrixBoard .m-skill.fx-thunder_strike .m-skill-fx { color: #bae6fd; }
-#matrixBoard .m-skill.fx-piercing_volley .m-skill-fx { color: #e9d5ff; }
-#matrixBoard .m-skill.fx-tidal_surge .m-skill-fx { color: #99f6e4; }
-#matrixBoard .m-skill.fx-aegis_command .m-skill-fx { color: #a7f3d0; }
-#matrixBoard .m-skill.fx-shadow_ambush .m-skill-fx { color: #ddd6fe; }
-
-/* 底部 3 欄圖示數值條（SVG 圖示 + 粗體等寬數字，徹底去除字連在一起） */
-#matrixBoard .m-bot,
-[data-theme="light"] #matrixBoard .m-bot {
-  margin-top: auto !important;
-  padding-top: 3px;
+/* 第 3 列：SVG 圖示三欄分格數值條 */
+#matrixBoard .m-bot {
+  margin-top: 0 !important;
+  padding-top: 2px !important;
   border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
+  display: flex;
+  align-items: center;
+}
+
+[data-theme="light"] #matrixBoard .m-bot {
+  border-top-color: rgba(120, 86, 34, 0.12) !important;
 }
 
 #matrixBoard .m-stats {
@@ -30157,7 +30167,7 @@ html:not([data-theme="light"]) .formation-slot-row {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 4px !important;
+  gap: 3.5px !important;
   min-width: 0;
 }
 
@@ -30165,20 +30175,29 @@ html:not([data-theme="light"]) .formation-slot-row {
   border-right: 1px solid rgba(255, 255, 255, 0.09);
 }
 
+[data-theme="light"] #matrixBoard .m-stats span:not(:last-child) {
+  border-right-color: rgba(120, 86, 34, 0.14);
+}
+
 .m-stat-ico {
-  width: 10.5px;
-  height: 10.5px;
+  width: 10px;
+  height: 10px;
   flex: none;
 }
 
-.m-stat-ico.ico-hp { color: #fb7185; }
-.m-stat-ico.ico-atk { color: #fbbf24; }
-.m-stat-ico.ico-def { color: #94a3b8; }
-.m-stat-ico.ico-ew { color: #c084fc; }
-.m-stat-ico.ico-st { color: #38bdf8; }
+.m-stat-ico.ico-hp { color: #e11d48; }
+.m-stat-ico.ico-atk { color: #d97706; }
+.m-stat-ico.ico-def { color: #475569; }
+.m-stat-ico.ico-ew { color: #7c3aed; }
+.m-stat-ico.ico-st { color: #0284c7; }
 
-#matrixBoard .m-stats b,
-[data-theme="light"] #matrixBoard .m-stats b {
+html:not([data-theme="light"]) .m-stat-ico.ico-hp { color: #fb7185; }
+html:not([data-theme="light"]) .m-stat-ico.ico-atk { color: #fbbf24; }
+html:not([data-theme="light"]) .m-stat-ico.ico-def { color: #94a3b8; }
+html:not([data-theme="light"]) .m-stat-ico.ico-ew { color: #c084fc; }
+html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
+
+#matrixBoard .m-stats b {
   color: #e2e8f0 !important;
   font-family: var(--mono);
   font-size: 11.5px !important;
@@ -30187,120 +30206,48 @@ html:not([data-theme="light"]) .formation-slot-row {
   line-height: 1.2 !important;
 }
 
-/* 響應式：平板橫屏與極矮視窗微調（維持 5 列一屏完整呈現，不截斷技名與四字名將） */
+[data-theme="light"] #matrixBoard .m-stats b {
+  color: #292524 !important;
+}
+
 @media (min-width: 769px) and (max-width: 1220px) {
+  #matrixBoard .m-card-main-row {
+    gap: 5px;
+  }
+
   #matrixBoard .m-avatar-wrap {
-    width: 68px !important;
+    max-width: 31% !important;
   }
 
   #matrixBoard .m-card-info-col {
-    margin-left: 52px;
-    padding: 4px 5px 3px 2px;
-  }
-
-  #matrixBoard .m-top {
-    gap: 2px;
+    padding: 2px 5px 2px 0 !important;
   }
 
   #matrixBoard .m-name {
-    gap: 2px;
     font-size: 12.5px !important;
   }
 
-  #matrixBoard .m-name-text {
-    letter-spacing: 0;
-  }
-
-  #matrixBoard .m-syn-pill {
-    font-size: 8px;
-    padding: 0 2px;
-  }
-
-  #matrixBoard .m-top-badges .m-skill-phase {
-    font-size: 8px;
-    padding: 0 3px;
-  }
-
   #matrixBoard .m-skill {
-    padding: 2px 4px !important;
-    gap: 3px !important;
+    padding: 1px 5px !important;
     font-size: 10.5px;
+    min-height: 17px;
   }
 
-  #matrixBoard .m-skill-ico {
-    width: 10px;
-    height: 10px;
-    min-width: 10px;
-    max-width: 10px;
-    flex: 0 0 10px;
-  }
-
-  #matrixBoard .m-skill-fx {
-    font-size: 8.5px;
-    letter-spacing: -0.03em;
-  }
-
-  #matrixBoard .m-stats b,
-  [data-theme="light"] #matrixBoard .m-stats b {
+  #matrixBoard .m-stats b {
     font-size: 11px !important;
   }
 }
 
-@media (min-width: 769px) and (max-height: 760px) {
-  #matrixBoard .m-card-info-col {
-    padding: 3px 6px 2px 2px;
-    gap: 1px;
-  }
-
-  #matrixBoard .m-skill {
-    min-height: 18px;
-    padding: 1.5px 5px !important;
-  }
-}
-
 @media (max-width: 768px) {
-  #matrixBoard .m-avatar-wrap {
-    position: relative !important;
-    width: 84px !important;
-    flex: 0 0 84px !important;
-  }
-
   #matrixBoard .m-card-info-col {
-    margin-left: 0;
-    padding: 6px 8px 6px 2px;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 6px 8px 6px 0 !important;
   }
 
-  #matrixBoard .m-info-btn {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(212, 168, 83, 0.35) !important;
-    color: #e2e8f0 !important;
-  }
-
-  #matrixBoard .m-tac-chip {
-    color: #7dd3fc !important;
-    background: rgba(56, 189, 248, 0.14) !important;
-    border-color: rgba(56, 189, 248, 0.32) !important;
-  }
-
-  #matrixBoard .m-tac-chip.tag-ap {
-    color: #fdba74 !important;
-    background: rgba(249, 115, 22, 0.16) !important;
-    border-color: rgba(251, 146, 60, 0.35) !important;
-  }
-
-  #matrixBoard .m-tac-chip.tag-fy {
-    color: #fde047 !important;
-    background: rgba(234, 179, 8, 0.16) !important;
-    border-color: rgba(250, 204, 21, 0.35) !important;
-  }
-
-  #matrixBoard .m-tac-chip.tag-def {
-    color: #93c5fd !important;
-    background: rgba(59, 130, 246, 0.16) !important;
-    border-color: rgba(96, 165, 250, 0.35) !important;
-  }
-
-  #matrixBoard .m-mobile-skill-text {
-    color: #cbd5e1;
+  #matrixBoard .m-avatar-wrap {
+    width: 84px !important;
+    max-width: none !important;
+    flex: 0 0 84px !important;
   }
 }

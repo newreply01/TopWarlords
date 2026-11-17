@@ -1457,8 +1457,8 @@ function renderMatrix() {
               </div>
             </div>
             <div class="m-skill-row">
-              <button type="button" class="m-skill fx-${skillFxKey}" data-info-id="${u.id}" title="點擊查看詳細情報：${esc(u.skill?.desc || '')}" aria-label="${esc(u.name)}：${phase ? phase + ' ' : ''}${esc(u.skill?.name || '未配置戰法')}，${esc(skillBadge)}，查看詳情">
-                ${renderSkillSvgIcon(u)}<strong>${esc(u.skill?.name || '未配置戰法')}</strong>${skillBadge ? `<span class="m-skill-fx">${esc(skillBadge)}</span>` : ''}
+              <button type="button" class="m-skill fx-${skillFxKey}" data-info-id="${u.id}" title="點擊查看詳細情報：${esc(u.skill?.desc || '')}" aria-label="${esc(u.name)}：${phase ? phase + ' ' : ''}${esc(u.skill?.name || '未配置戰法')}，查看詳情">
+                ${renderSkillSvgIcon(u)}<strong>${esc(u.skill?.name || '未配置戰法')}</strong>
               </button>
             </div>
             <div class="m-bot">

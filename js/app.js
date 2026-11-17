@@ -5162,10 +5162,10 @@ function playBattleFinaleBanner(res, token) {
   banner.className = `battle-finale-banner${won ? '' : draw ? ' is-draw' : ' is-loss'}`;
   const titleText = won ? '🏆 戰鬥勝利！' : draw ? '⚖️ 兩軍平手' : '⚔️ 惜敗收場';
   const subText = won
-    ? '我軍凱旋・戰場掃蕩完畢（點擊立即查看結算）'
+    ? '我軍凱旋・戰場掃蕩完畢（3 秒後開啟結算，點擊立即查看）'
     : draw
-      ? '兩軍力竭・勝負未分（點擊立即查看結算）'
-      : '全軍陣亡・整軍再戰（點擊立即查看結算）';
+      ? '兩軍力竭・勝負未分（3 秒後開啟結算，點擊立即查看）'
+      : '全軍陣亡・整軍再戰（3 秒後開啟結算，點擊立即查看）';
   banner.innerHTML = `<div class="battle-finale-title">${titleText}</div><div class="battle-finale-sub">${subText}</div>`;
   wrapper.appendChild(banner);
   requestAnimationFrame(() => banner.classList.add('is-show'));
@@ -5184,7 +5184,7 @@ function playBattleFinaleBanner(res, token) {
     const poll = setInterval(() => {
       if (skip || token !== playToken) finish();
     }, 60);
-    const timer = setTimeout(finish, 1800);
+    const timer = setTimeout(finish, 3200);
   });
 }
 

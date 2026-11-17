@@ -605,12 +605,12 @@ function rerollMarketPool() {
   SoundEngine.play('equip');
   if (state.mode === 'bo3') {
     if (state.bo3 && state.bo3.marketMode === 'free') {
-      toast('🎲 東亞名將已重新調遣點兵！（已被敵方禁用的裝備仍持續封存）');
+      toast('🎲 已重新調遣點兵！（已被敵方禁用的裝備仍持續封存）');
     } else {
       toast('🎲 多局鏖戰軍火庫已重新調配！首局開戰後將正式鎖定全系列賽。');
     }
   } else {
-    toast('🎲 東亞名將已重新徵召點將！已清除當前選取，請由新軍火庫重新選配。');
+    toast('🎲 已重新徵召點將！已清除當前選取，請由新軍火庫重新選配。');
   }
   renderAll();
 }

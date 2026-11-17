@@ -30491,3 +30491,68 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   transform: none;
   transition: opacity 220ms ease-in-out;
 }
+
+/* =====================================================
+   終局謝幕勝敗宣告橫幅 (app.js playBattleFinaleBanner)
+   ===================================================== */
+.battle-finale-banner {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%) scale(0.88);
+  z-index: 48;
+  min-width: min(360px, 84vw);
+  max-width: min(520px, 90vw);
+  padding: 14px 28px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.99) 0%, rgba(45, 24, 12, 0.99) 100%);
+  border: 2.5px solid #fbbf24;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.82), inset 0 0 24px rgba(251, 191, 36, 0.22);
+  transition: opacity 240ms ease-out, transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.battle-finale-banner.is-show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.battle-finale-banner.is-loss {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.99) 0%, rgba(69, 10, 10, 0.99) 100%);
+  border-color: #f87171;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.84), inset 0 0 24px rgba(248, 113, 113, 0.2);
+}
+
+.battle-finale-banner.is-draw {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.99) 0%, rgba(30, 41, 59, 0.99) 100%);
+  border-color: #94a3b8;
+}
+
+.battle-finale-title {
+  font-family: 'Noto Serif TC', Georgia, serif;
+  font-size: clamp(22px, 2.5vw, 32px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+}
+
+.battle-finale-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fde68a;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.battle-finale-banner.is-loss .battle-finale-sub {
+  color: #fecaca;
+}
+
+.battle-finale-banner.is-draw .battle-finale-sub {
+  color: #e2e8f0;
+}

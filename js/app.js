@@ -5138,8 +5138,54 @@ async function showBattle(res, opts = {}) {
     }
     toast('🎬 戰場重播完畢！可自由檢視戰場，或點擊頂部【📊 查看結算報告】');
   } else {
+    if (!skip && is3DVisible) {
+      await playBattleFinaleBanner(res, token);
+      if (token !== playToken) return;
+    }
     finishBattle(res);
   }
+}
+
+function playBattleFinaleBanner(res, token) {
+  document.querySelectorAll('.battle-finale-banner').forEach(el => el.remove());
+  const wrapper = document.getElementById('battle3DWrapper');
+  if (!wrapper || skip) return Promise.resolve();
+
+  const won = res.winner === 'A';
+  const draw = res.winner === 'draw';
+  try {
+    window.Battle3DEngine?.playFinaleCelebration?.(res.winner);
+    window.MusouCutin?.clearAll?.();
+  } catch (_) {}
+
+  const banner = document.createElement('div');
+  banner.className = `battle-finale-banner${won ? '' : draw ? ' is-draw' : ' is-loss'}`;
+  const titleText = won ? '🏆 戰鬥勝利！' : draw ? '⚖️ 兩軍平手' : '⚔️ 惜敗收場';
+  const subText = won
+    ? '我軍凱旋・戰場掃蕩完畢（點擊立即查看結算）'
+    : draw
+      ? '兩軍力竭・勝負未分（點擊立即查看結算）'
+      : '全軍陣亡・整軍再戰（點擊立即查看結算）';
+  banner.innerHTML = `<div class="battle-finale-title">${titleText}</div><div class="battle-finale-sub">${subText}</div>`;
+  wrapper.appendChild(banner);
+  requestAnimationFrame(() => banner.classList.add('is-show'));
+
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearInterval(poll);
+      clearTimeout(timer);
+      banner.remove();
+      resolve();
+    };
+    banner.addEventListener('click', finish);
+    const poll = setInterval(() => {
+      if (skip || token !== playToken) finish();
+    }, 60);
+    const timer = setTimeout(finish, 1800);
+  });
 }
 
 function updateHoloPhase(phase) {

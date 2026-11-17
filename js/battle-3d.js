@@ -5386,7 +5386,29 @@ const Battle3DEngine = (function () {
     clearBattleEffects();
   }
 
+  function playFinaleCelebration(winnerSide) {
+    if (!isInitialized || !scene) return;
+    camZoomTarget = 2.4;
+    if (winnerSide === 'A' || winnerSide === 'B') {
+      unitsMap.forEach(token => {
+        if (token.alive && token.side === winnerSide && token.mesh) {
+          window.MusouVfx?.createGpuBurst?.({
+            scene,
+            origin: token.mesh.position.clone().add(new THREE.Vector3(0, 1.5, 0)),
+            count: 140,
+            color: winnerSide === 'A' ? 0xfbbf24 : 0xf87171,
+            speed: 4.2,
+            life: 1100,
+            size: 15,
+            gravity: -2.2
+          });
+        }
+      });
+    }
+  }
+
   function clearBattleEffects() {
+    document.querySelectorAll('.battle-finale-banner').forEach(el => el.remove());
     cutinFrozen = false;
     window.MusouCutin?.clearAll?.();
     window.MusouVfx?.clearAll?.();
@@ -5581,6 +5603,7 @@ const Battle3DEngine = (function () {
     refreshTheme,
     beginFinalCharge,
     syncBattleResult,
+    playFinaleCelebration,
     pauseAnimationLoop,
     setAudioPaused,
     toggleMode,

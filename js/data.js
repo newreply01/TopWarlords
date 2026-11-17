@@ -154,7 +154,8 @@ const RAW_UNITS = [
   ["TOYOTOMI", "豐臣秀吉", 'support', 5, 'E', "太閤天下·統一大將", "戰國三傑之一，從織田信長麾下崛起，經多場戰事完成日本大部分地區統一；其軍事才能以統帥與調度見長。", 28, 84, ["EW", "SPOT"], ["STRATEGIST", "STAMINA_DEEP"], 232, 96, 0.06],
   ["CAOCAO", "曹操", 'support', 4, 'I', "亂世雄略·官渡制勝", "東漢末年政治家、軍事家，挾天子以令諸侯，官渡之戰擊敗袁紹，奠定曹魏基業。", 36, 78, ["EW", "SPOT"], ["STRATEGIST", "STAMINA_DEEP"], 206, 88, 0.06],
   ["HANBEI", "竹中半兵衛", 'support', 2, 'F', "今孔明·十人奪城", "戰國天才軍師，僅帶十六名隨從便智奪固若金湯之稻葉山城，輔佐豐臣秀吉天下布武。", 26, 65, ["EW", "SPOT"], ["STRATEGIST"], 146, 66, 0.04],
-  ["KANBEI", "黑田官兵衛", 'support', 3, 'G', "如水大謀·天下二兵衛", "戰國頂級軍略家，高松城水攻、西國大返還之總策劃者，智謀令豐臣秀吉亦為之忌憚。", 28, 70, ["EW", "DEEP", "SPOT"], ["STRATEGIST"], 170, 74, 0.04],
+  ["KANBEI", "黑田官兵衛", 'support', 2, 'G', "如水大謀·天下二兵衛", "戰國頂級軍略家，高松城水攻、西國大返還之總策劃者，智謀令豐臣秀吉亦為之忌憚。", 28, 66, ["EW", "DEEP", "SPOT"], ["STRATEGIST"], 144, 66, 0.04],
+  ["KANGGAMCHAN", "姜邯贊", 'support', 3, 'H', "龜州大捷·高麗護國相", "高麗顯宗朝名相兼西北面行營都統使，於龜州大捷以決堤水攻與伏兵合圍殲滅契丹十萬大軍，與乙支文德、李舜臣並稱韓國三大護國名將。", 26, 72, ["EW", "SPOT"], ["STRATEGIST", "FORMATION_SHIELD"], 174, 76, 0.06],
   ["SUNBIN", "孫臏", 'support', 3, 'A', "圍魏救趙·馬陵道伏兵", "戰國兵家宗師，著《孫臏兵法》，桂陵之戰圍魏救趙、馬陵之戰減灶誘敵射殺龐涓。", 28, 73, ["EW", "SEAD", "ARTY"], ["STRATEGIST"], 170, 72, 0.04],
   ["WUQI", "吳起", 'support', 4, 'B', "吳子治軍·兼併無敵", "戰國兵法名家，與孫子並稱「孫吳」，治西河大戰七十六全勝六十四，魏武卒所向披靡。", 26, 78, ["EW", "SEAD", "SPOT"], ["STRATEGIST", "STAMINA_DEEP"], 206, 92, 0.06],
   ["GUOJIA", "郭嘉", 'support', 3, 'C', "十勝十敗·鬼謀奇策", "曹操心腹謀士，「郭嘉不死，便無赤壁」，算準孫策之死，力主遠征烏桓白狼山大勝。", 36, 73, ["EW", "DEEP"], ["STRATEGIST"], 172, 74, 0.04],
@@ -279,6 +280,7 @@ HUO: { flag: '🇨🇳', origin: '中國 · 西漢', weapon: '漢軍玄甲鐵騎
   CAOCAO: { flag: '🇨🇳', origin: '中國 · 東漢末／三國', weapon: '環首刀 + 丞相令旗', sfx: 'strategy_gong', img: 'assets/warlords/CAOCAO.jpg?v=7.11.1' },
   HANBEI: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '竹中軍配 + 一之谷形兜', sfx: 'strategy_gong', img: 'assets/warlords/HANBEI.jpg?v=7.11.1' },
   KANBEI: { flag: '🇯🇵', origin: '日本 · 戰國', weapon: '合子形兜 + 水攻策圖卷', sfx: 'strategy_gong', img: 'assets/warlords/KANBEI.jpg?v=7.11.1' },
+  KANGGAMCHAN: { flag: '🇰🇷', origin: '韓國 · 高麗', weapon: '龜州督軍劍 + 高麗水攻令旗', sfx: 'strategy_gong', img: 'assets/warlords/KANGGAMCHAN.jpg?v=7.11.65' },
   SUNBIN: { flag: '🇨🇳', origin: '中國 · 戰國', weapon: '孫臏兵法木牘 + 獨輪戰車', sfx: 'strategy_gong', img: 'assets/warlords/SUNBIN.jpg?v=7.11.1' },
   WUQI: { flag: '🇨🇳', origin: '中國 · 戰國', weapon: '吳子兵書 + 魏武卒精矛', sfx: 'war_drum', img: 'assets/warlords/WUQI.jpg?v=7.11.1' },
   GUOJIA: { flag: '🇨🇳', origin: '中國 · 三國', weapon: '十勝十敗論卷 + 謀士羽扇', sfx: 'strategy_gong', img: 'assets/warlords/GUOJIA.jpg?v=7.11.1' },
@@ -421,6 +423,7 @@ const UNIT_SKILLS = {
   FAZHENG: { name: '定軍奇畫', phase: 'P1', desc: '蜀漢奇謀翼侯登高指授，引導全軍集火斬將' },
   YAMAMOTO: { name: '啄木鳥奇策', phase: 'P1', desc: '川中島分兵夾擊與高嶺城築壘奇謀，以$1低費提升全軍命中與開局奇襲壓制力' },
   KANBEI: { name: '如水奇策', phase: 'P1', desc: '備中高松水攻謀主，兼具先制滲透與全軍命中、觀瞻校射增益' },
+  KANGGAMCHAN: { name: '龜州水淹', phase: 'P1', desc: '高麗護國名相決堤設伏，提升全軍戰力與陣型防護並干擾敵軍攻勢' },
   HANBEI: { name: '十人奪城', phase: 'P1', desc: '美濃今孔明智奪稻葉山城，輕費奇謀輔佐大軍' },
   SANADAMASA: { name: '表裏比興', phase: 'P1', desc: '上田城鬼謀以小博大，對敵軍造成破甲奇計傷害' },
   SHIMAZU_YOSHIHISA: { name: '薩摩釣野伏', phase: 'P1', desc: '九州三州太守，配合先登與突騎設伏合圍敵軍' }
@@ -548,6 +551,7 @@ const UNIT_SKILL_EFFECTS = {
   FAZHENG: { commandAttack: 0.03, teamHit: 0.04 },
   YAMAMOTO: { commandAttack: 0.03, teamHit: 0.05 },
   KANBEI: { commandAttack: 0.03, teamHit: 0.05, enemyHit: 0.03 },
+  KANGGAMCHAN: { commandAttack: 0.04, teamGuard: 0.07, enemyHit: 0.03 },
   HANBEI: { commandAttack: 0.04, enemyHit: 0.05, teamHit: 0.02 },
   SANADAMASA: { commandAttack: 0.03, enemyHit: 0.03, teamGuard: 0.03 },
   SHIMAZU_YOSHIHISA: { commandAttack: 0.03, enemyHit: 0.03, teamHit: 0.03 }
@@ -599,7 +603,7 @@ const UNIT_SKILL_FX = {
   SUNWU: 'bagua_array', ZHUGELIANG: 'bagua_array', ZHANGLIANG: 'bagua_array', LIUBOWEN: 'bagua_array',
   WUQI: 'bagua_array', SUNBIN: 'bagua_array', LEYI: 'bagua_array', CAOCAO: 'bagua_array',
   SIMAYI: 'bagua_array', XUNYU: 'bagua_array', TOYOTOMI: 'bagua_array', LUSU: 'bagua_array',
-  GUOJIA: 'bagua_array', FAZHENG: 'bagua_array', YAMAMOTO: 'bagua_array', KANBEI: 'bagua_array',
+  GUOJIA: 'bagua_array', FAZHENG: 'bagua_array', YAMAMOTO: 'bagua_array', KANBEI: 'bagua_array', KANGGAMCHAN: 'bagua_array',
   HANBEI: 'bagua_array', JIANGWEI: 'bagua_array',
   // 💥 霸王破甲 (20)
   LUBU: 'overlord_cleave', XIANGYU: 'overlord_cleave', GUANYU: 'overlord_cleave', ZHANGFEI: 'overlord_cleave',

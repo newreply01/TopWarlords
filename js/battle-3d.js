@@ -3826,7 +3826,6 @@ const Battle3DEngine = (function () {
         triggerHitStop,
         playFieldSound
       });
-      return;
     }
 
     // Phase 5：其餘 75 位武將依兵種 cat 做 ±12° 色相微調並疊加 Phase 2 華麗元件
@@ -3849,10 +3848,10 @@ const Battle3DEngine = (function () {
     if (key === 'fire_storm') {
       // 紅蓮火陣 + 高聳烈焰火柱 + 天降赤壁火流星 + 環繞炎舌
       addTexPlane('fire_lotus', 5.8, 5.8, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
-        rotateX: -Math.PI / 2, spinZ: 1.5, duration: 1080, scaleGrowth: 0.012, renderOrder: 22, additive: true
+        rotateX: -Math.PI / 2, spinZ: 1.5, duration: 1080, scaleGrowth: 0.012, renderOrder: 22, additive: false
       });
       addTexSprite('flame_tongue', 3.4, 4.2, new THREE.Vector3(fxPos.x, fxY + 2.1, fxPos.z), {
-        vy: 0.018, scaleGrowth: 0.02, duration: 960, depthTest: false, renderOrder: 28, additive: true
+        vy: 0.018, scaleGrowth: 0.02, duration: 960, depthTest: false, renderOrder: 28, additive: false
       });
       window.MusouVfx?.createGpuBurst?.({ scene, origin: fxPos.clone().add(new THREE.Vector3(0, 0.8, 0)), count: 520, color: 0xf97316, speed: 5.2, life: 950, size: 20 });
       for (let i = 0; i < 3; i++) {
@@ -3875,16 +3874,16 @@ const Battle3DEngine = (function () {
     } else if (key === 'thunder_strike') {
       // 地面雷紋法印 + 三道交錯九天分叉天雷
       addTexPlane('thunder_seal', 5.2, 5.2, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
-        rotateX: -Math.PI / 2, spinZ: -2.1, duration: 980, scaleGrowth: 0.01, renderOrder: 22, additive: true
+        rotateX: -Math.PI / 2, spinZ: -2.1, duration: 980, scaleGrowth: 0.01, renderOrder: 22, additive: false
       });
       addTexPlane('lightning_bolt', 3.4, 6.8, new THREE.Vector3(fxPos.x, fxY + 3.45, fxPos.z), {
-        rotateY: 0.35, duration: 640, renderOrder: 27, additive: true
+        rotateY: 0.35, duration: 640, renderOrder: 27, additive: false
       });
       addTexPlane('lightning_bolt', 3.4, 6.8, new THREE.Vector3(fxPos.x, fxY + 3.45, fxPos.z), {
-        rotateY: 0.35 + Math.PI / 2, duration: 640, renderOrder: 27, additive: true
+        rotateY: 0.35 + Math.PI / 2, duration: 640, renderOrder: 27, additive: false
       });
       addTexPlane('lightning_bolt', 2.4, 5.6, new THREE.Vector3(fxPos.x + 0.85, fxY + 2.85, fxPos.z - 0.65), {
-        rotateY: -0.45, rotateZ: 0.16, duration: 580, renderOrder: 27, additive: true
+        rotateY: -0.45, rotateZ: 0.16, duration: 580, renderOrder: 27, additive: false
       });
       window.MusouVfx?.createGpuBurst?.({ scene, origin: fxPos.clone().add(new THREE.Vector3(0, 1.1, 0)), count: 520, color: 0x38bdf8, speed: 6.2, life: 820, size: 19 });
       spawnShockwaveRing(fxPos, 0x0284c7, 3.5, 720);
@@ -3898,18 +3897,18 @@ const Battle3DEngine = (function () {
       // 巨型太極八卦陣圖 + 六道盤旋金篆奇門兵符
       const castGround = getBattleTerrainHeight(casterAnchor.x, casterAnchor.z);
       addTexPlane('bagua_seal', 6.2, 6.2, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
-        rotateX: -Math.PI / 2, spinZ: 1.45, duration: 1220, scaleGrowth: 0.008, renderOrder: 22, additive: true
+        rotateX: -Math.PI / 2, spinZ: 1.45, duration: 1220, scaleGrowth: 0.008, renderOrder: 22, additive: false
       });
       if (aToken && (!tToken || aToken !== targetToken)) {
         addTexPlane('bagua_seal', 4.6, 4.6, new THREE.Vector3(casterAnchor.x, castGround + 0.11, casterAnchor.z), {
-          rotateX: -Math.PI / 2, spinZ: -1.45, duration: 1080, renderOrder: 22, additive: true
+          rotateX: -Math.PI / 2, spinZ: -1.45, duration: 1080, renderOrder: 22, additive: false
         });
       }
       for (let i = 0; i < 6; i++) {
         const ang = (i * Math.PI * 2) / 6;
         addTexPlane('talisman_scroll', 1.05, 2.05, new THREE.Vector3(fxPos.x, fxY + 1.55, fxPos.z), {
           orbitCenter: fxPos, orbitRadius: 2.25, orbitAngle: ang, orbitSpeed: 2.3,
-          faceOutward: true, vy: 0.009, duration: 1120, renderOrder: 27, additive: true
+          faceOutward: true, vy: 0.009, duration: 1120, renderOrder: 27, additive: false
         });
       }
       window.MusouVfx?.createGpuBurst?.({ scene, origin: fxPos.clone().add(new THREE.Vector3(0, 0.9, 0)), count: 460, color: 0xfbbf24, speed: 4.0, life: 1000, size: 18, gravity: -1.2 });
@@ -3924,10 +3923,10 @@ const Battle3DEngine = (function () {
       const dist = travel.length();
       const horizontalDir = dist > 0.2 ? new THREE.Vector3(travel.x, 0, travel.z).normalize() : new THREE.Vector3(aToken?.side === 'A' ? 1 : -1, 0, 0);
       addTexPlane('bullseye_seal', 5.2, 5.2, new THREE.Vector3(anchor.x, groundY + 0.12, anchor.z), {
-        rotateX: -Math.PI / 2, spinZ: -2.4, duration: 960, renderOrder: 22, additive: true
+        rotateX: -Math.PI / 2, spinZ: -2.4, duration: 960, renderOrder: 22, additive: false
       });
       addTexSprite('bullseye_seal', 3.0, 3.0, end.clone().add(new THREE.Vector3(0, 0.35, 0)), {
-        spinZ: 2.5, duration: 840, depthTest: false, renderOrder: 27, additive: true
+        spinZ: 2.5, duration: 840, depthTest: false, renderOrder: 27, additive: false
       });
       window.MusouVfx?.createGpuBurst?.({ scene, origin: end, count: 480, color: 0xfef08a, speed: 5.5, life: 820, size: 17 });
       const plungeDir = horizontalDir.clone().multiplyScalar(0.75).add(new THREE.Vector3(0, 0.66, 0)).normalize();
@@ -3949,7 +3948,7 @@ const Battle3DEngine = (function () {
     } else if (key === 'tidal_surge') {
       // 鳴梁漩渦陣 + 四面高聳浮世繪怒濤捲浪湧拍
       addTexPlane('whirlpool_seal', 5.6, 5.6, new THREE.Vector3(fxPos.x, fxY + 0.12, fxPos.z), {
-        rotateX: -Math.PI / 2, spinZ: -3.1, duration: 1080, scaleGrowth: 0.01, renderOrder: 22, additive: true
+        rotateX: -Math.PI / 2, spinZ: -3.1, duration: 1080, scaleGrowth: 0.01, renderOrder: 22, additive: false
       });
       window.MusouVfx?.createGpuBurst?.({ scene, origin: fxPos.clone().add(new THREE.Vector3(0, 0.8, 0)), count: 520, color: 0x22d3ee, speed: 5.0, life: 920, size: 19 });
       for (let i = 0; i < 4; i++) {
@@ -3970,7 +3969,7 @@ const Battle3DEngine = (function () {
       const shPos = shieldTarget.mesh.position.clone();
       const shGround = getBattleTerrainHeight(shPos.x, shPos.z);
       addTexPlane('aegis_seal', 5.2, 5.2, new THREE.Vector3(shPos.x, shGround + 0.12, shPos.z), {
-        rotateX: -Math.PI / 2, spinZ: 0.9, duration: 1140, scaleGrowth: 0.006, renderOrder: 22, additive: true
+        rotateX: -Math.PI / 2, spinZ: 0.9, duration: 1140, scaleGrowth: 0.006, renderOrder: 22, additive: false
       });
       window.MusouVfx?.createGpuBurst?.({ scene, origin: shPos.clone().add(new THREE.Vector3(0, 0.9, 0)), count: 440, color: 0x10b981, speed: 3.8, life: 960, size: 18, gravity: -1.0 });
       for (let i = 0; i < 4; i++) {
@@ -3990,7 +3989,7 @@ const Battle3DEngine = (function () {
         rotateX: -Math.PI / 2, spinZ: -4.2, duration: 920, scaleGrowth: 0.01, renderOrder: 22, additive: false
       });
       addTexSprite('shadow_cross', 4.2, 4.2, hitPos, {
-        scaleGrowth: 0.028, duration: 740, depthTest: false, renderOrder: 28, additive: true
+        scaleGrowth: 0.028, duration: 740, depthTest: false, renderOrder: 28, additive: false
       });
       window.MusouVfx?.createGpuBurst?.({ scene, origin: hitPos, count: 460, color: 0xc084fc, speed: 5.4, life: 780, size: 18 });
       addTexSprite('shuriken_seal', 2.6, 2.6, hitPos.clone().add(new THREE.Vector3(0, 0.3, 0)), {
@@ -4004,10 +4003,10 @@ const Battle3DEngine = (function () {
       // overlord_cleave（霸王無雙：裂地破陣紋 + 立體旋轉月牙刀芒 + 雙重斬擊弧線）
       const hitPos = anchor.clone().add(new THREE.Vector3(0, 1.15, 0));
       addTexPlane('earth_fissure', 5.6, 5.6, new THREE.Vector3(anchor.x, groundY + 0.11, anchor.z), {
-        rotateX: -Math.PI / 2, spinZ: 0.25, duration: 980, scaleGrowth: 0.012, renderOrder: 22, additive: true
+        rotateX: -Math.PI / 2, spinZ: 0.25, duration: 980, scaleGrowth: 0.012, renderOrder: 22, additive: false
       });
       addTexSprite('crescent_wave', 4.2, 4.2, hitPos.clone().add(new THREE.Vector3(0, 0.5, 0)), {
-        spinZ: -4.5, scaleGrowth: 0.022, duration: 720, depthTest: false, renderOrder: 28, additive: true
+        spinZ: -4.5, scaleGrowth: 0.022, duration: 720, depthTest: false, renderOrder: 28, additive: false
       });
       window.MusouVfx?.createGpuBurst?.({ scene, origin: hitPos, count: 580, color: 0xf43f5e, speed: 5.8, life: 880, size: 20 });
       addTexPlane('crescent_wave', 4.4, 4.4, new THREE.Vector3(anchor.x, groundY + 0.85, anchor.z), {
@@ -4277,10 +4276,10 @@ const Battle3DEngine = (function () {
     cutinFrozen = Boolean(active);
     if (cutinFrozen && !battleSettled) {
       if (focusToken?.mesh) {
-        camFocusTarget.set(focusToken.mesh.position.x * 0.28, 0, focusToken.mesh.position.z * 0.28);
+        camFocusTarget.set(focusToken.mesh.position.x * 0.42, 0, focusToken.mesh.position.z * 0.42);
         lastFocusAt = combatNow();
       }
-      if (cameraShakeEnabled) camZoomTarget = -0.9;
+      if (cameraShakeEnabled) camZoomTarget = -1.8;
     } else {
       camZoomTarget = 0;
     }
@@ -4608,9 +4607,9 @@ const Battle3DEngine = (function () {
     camPhi = cameraView === 'cinematic' ? 1.04 : 0.78;
     const wideShort = Boolean(container && container.clientHeight > 0 && (container.clientWidth / container.clientHeight) >= 2.15);
     camRadius = (container && container.clientWidth < 720)
-      ? (cameraView === 'cinematic' ? 19.2 : 21.5)
-      : (cameraView === 'cinematic' ? (wideShort ? 17.2 : 16.4) : 22.8);
-    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 18.0);
+      ? (cameraView === 'cinematic' ? 14.5 : 19.5)
+      : (cameraView === 'cinematic' ? (wideShort ? 13.0 : 12.2) : 20.5);
+    if ([...unitsMap.values()].some(token => token.formationLayout === 'column')) camRadius = Math.max(camRadius, 14.5);
     camFocusOffset.set(0, 0, 0);
     camFocusTarget.set(0, 0, 0);
     camZoomOffset = 0;

@@ -90,7 +90,7 @@
     bloomRenderPass.clearAlpha = 0;
     bloomComposer.addPass(bloomRenderPass);
 
-    bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(w, h), 1.1, 0.45, 0.15);
+    bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(w, h), 0.38, 0.35, 0.55);
     bloomComposer.addPass(bloomPass);
 
     mixPass = new THREE.ShaderPass(
@@ -140,7 +140,7 @@
     if (!renderer || !scene || !camera) return;
     if (getQuality() === 'high' && bloomComposer && finalComposer && bloomPass) {
       const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      bloomPass.strength = isLight ? 0.8 : 1.1;
+      bloomPass.strength = isLight ? 0.24 : 0.38;
 
       const savedBg = scene.background;
       const savedFog = scene.fog;
@@ -201,7 +201,8 @@
     upBias = 0.55
   }) {
     if (!scene || !origin || typeof THREE === 'undefined') return null;
-    const scaledCount = Math.max(24, Math.round(count * getParticleScale()));
+    const capped = Math.min(count, 260);
+    const scaledCount = Math.max(20, Math.round(capped * getParticleScale()));
     const positions = new Float32Array(scaledCount * 3);
     const velocities = new Float32Array(scaledCount * 3);
     const seeds = new Float32Array(scaledCount);
@@ -229,7 +230,7 @@
       uniforms: {
         uTime: { value: 0 },
         uLife: { value: life / 1000 },
-        uSize: { value: size },
+        uSize: { value: size * 0.58 },
         uGravity: { value: gravity },
         uColor: { value: new THREE.Color(color) }
       },
@@ -259,12 +260,12 @@
         '  float d = dot(uv, uv);',
         '  if (d > 0.25) discard;',
         '  float glow = smoothstep(0.25, 0.0, d);',
-        '  gl_FragColor = vec4(uColor * (1.0 + glow * 0.75), glow * vAlpha);',
+        '  gl_FragColor = vec4(uColor, glow * vAlpha * 0.62);',
         '}'
       ].join('\n'),
       transparent: true,
       depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NormalBlending
     });
 
     const pts = new THREE.Points(geo, mat);
@@ -297,14 +298,14 @@
 
   function spawnShockRing(scene, pos, color = 0xfbbf24, maxRadius = 3.8, duration = 680) {
     if (!scene || !pos) return null;
-    const geo = new THREE.RingGeometry(0.45, 0.95, 36);
+    const geo = new THREE.RingGeometry(0.78, 0.95, 36);
     const mat = new THREE.MeshBasicMaterial({
       color,
       transparent: true,
-      opacity: 0.95,
+      opacity: 0.58,
       side: THREE.DoubleSide,
       depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NormalBlending
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
@@ -313,20 +314,20 @@
     return trackMesh(scene, mesh, duration, p => {
       const s = 0.4 + p * maxRadius;
       mesh.scale.set(s, s, 1);
-      mat.opacity = 0.95 * (1 - p);
+      mat.opacity = 0.58 * (1 - p);
     });
   }
 
   function spawnSlashArc(scene, pos, dir = 1, color = 0xf43f5e, width = 2.8, duration = 420) {
     if (!scene || !pos) return null;
-    const geo = new THREE.RingGeometry(width * 0.55, width, 28, 1, -Math.PI * 0.45, Math.PI * 0.9);
+    const geo = new THREE.RingGeometry(width * 0.68, width, 28, 1, -Math.PI * 0.45, Math.PI * 0.9);
     const mat = new THREE.MeshBasicMaterial({
       color,
       transparent: true,
-      opacity: 0.98,
+      opacity: 0.78,
       side: THREE.DoubleSide,
       depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NormalBlending
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(pos.x, pos.y + 1.05, pos.z);
@@ -337,25 +338,25 @@
       const s = 0.7 + p * 0.75;
       mesh.scale.set(s, s, 1);
       mesh.rotation.z += (dir >= 0 ? 0.08 : -0.08);
-      mat.opacity = 0.98 * (1 - p * p);
+      mat.opacity = 0.78 * (1 - p * p);
     });
   }
 
   function spawnRibbonTrail(scene, pathPoints, color = 0x38bdf8, width = 0.36, duration = 640) {
     if (!scene || !pathPoints || pathPoints.length < 2) return null;
     const curve = new THREE.CatmullRomCurve3(pathPoints);
-    const geo = new THREE.TubeGeometry(curve, Math.max(12, pathPoints.length * 6), width * 0.5, 6, false);
+    const geo = new THREE.TubeGeometry(curve, Math.max(12, pathPoints.length * 6), width * 0.24, 6, false);
     const mat = new THREE.MeshBasicMaterial({
       color,
       transparent: true,
-      opacity: 0.92,
+      opacity: 0.62,
       depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NormalBlending
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.renderOrder = 28;
     return trackMesh(scene, mesh, duration, p => {
-      mat.opacity = 0.92 * (1 - p);
+      mat.opacity = 0.62 * (1 - p);
     });
   }
 
@@ -365,10 +366,10 @@
     const mat = new THREE.MeshBasicMaterial({
       map: tex,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.88,
       depthWrite: false,
       side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NormalBlending
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
@@ -376,20 +377,20 @@
     mesh.renderOrder = 21;
     return trackMesh(scene, mesh, duration, p => {
       mesh.rotation.z += 0.015;
-      mat.opacity = p < 0.2 ? (p / 0.2) * 0.9 : 0.9 * (1 - (p - 0.2) / 0.8);
+      mat.opacity = p < 0.2 ? (p / 0.2) * 0.88 : 0.88 * (1 - (p - 0.2) / 0.8);
     });
   }
 
   function spawnPillar(scene, pos, color = 0xf97316, height = 6.5, duration = 850) {
     if (!scene || !pos) return null;
-    const geo = new THREE.CylinderGeometry(0.45, 1.05, height, 18, 1, true);
+    const geo = new THREE.CylinderGeometry(0.22, 0.55, height, 18, 1, true);
     const mat = new THREE.MeshBasicMaterial({
       color,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.42,
       side: THREE.DoubleSide,
       depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.NormalBlending
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(pos.x, pos.y + height * 0.5, pos.z);
@@ -398,7 +399,7 @@
       const radiusScale = 0.7 + p * 0.65;
       mesh.scale.set(radiusScale, 1 + p * 0.2, radiusScale);
       mesh.rotation.y += 0.06;
-      mat.opacity = 0.85 * (1 - p);
+      mat.opacity = 0.42 * (1 - p);
     });
   }
 

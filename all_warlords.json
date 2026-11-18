@@ -1944,7 +1944,7 @@
     "origin": "韓國 · 百濟",
     "weapon": "百濟環首大刀 + 鐵鱗背心",
     "sfx": "blade_clash",
-    "img": "assets/warlords/GYEBAEK.jpg?v=7.11.1"
+    "img": "assets/warlords/GYEBAEK.jpg?v=7.11.94"
   },
   {
     "id": "YANGYE",
@@ -2076,7 +2076,7 @@
     "origin": "中國 · 三國",
     "weapon": "截頭厚刃刀 + 肉盾鐵軀",
     "sfx": "blade_clash",
-    "img": "assets/warlords/ZHOUTAI.jpg?v=7.11.1"
+    "img": "assets/warlords/ZHOUTAI.jpg?v=7.11.94"
   },
   {
     "id": "IINAOMASA",
@@ -2206,7 +2206,7 @@
     "origin": "中國 · 三國",
     "weapon": "鐵環長刀 + 堅木大盾",
     "sfx": "war_drum",
-    "img": "assets/warlords/YUJIN.jpg?v=7.11.1"
+    "img": "assets/warlords/YUJIN.jpg?v=7.11.94"
   },
   {
     "id": "LIGUANG",

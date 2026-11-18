@@ -4,6 +4,15 @@
 
 ---
 
+## [7.11.93] - 2026-11-18
+### Added & Updated (新增 14 位名將 2.5D 賽璐珞 Q 版頭像 · 全軍進度 117/125 並同步 JSON 索引)
+- **新增 14 位商業級 2.5D 賽璐珞 Q 版頭像 (`assets/warlords/*.jpg`, `js/data.js`)**：
+  - `v7.11.91`：馬隆 (`MALONG`)、島津家久 (`SHIMAZU_IEHISA`)、賈詡 (`JIAXU`)。
+  - `v7.11.92`：魯肅 (`LUSU`)、法正 (`FAZHENG`)、山本勘助 (`YAMAMOTO`)、島津義久 (`SHIMAZU_YOSHIHISA`)、鳥居元忠 (`TORII`)、瀧川一益 (`TAKIGAWA`)、本多忠次 (`HONDA_TADATSUGU`)。
+  - `v7.11.93`：山縣昌景 (`YAMAGATA`)、龐德 (`PANGDE`)、前田利家 (`MAEDATOSHI`)、典韋 (`DIANWEI`)。
+- **全站資料與快取版本同步 (`all_warlords.json`, `tools/all_units.json`, `armory.html`, `js/poster-help.js`, `index.html`, `sw.js`)**：
+  - 透過 `tools/export_units.py` 匯出最新 125 位名將完整資料與圖鑑頁面版本號對齊 `v7.11.93`，並完成 125 張頭像 MD5 零碰撞驗證。
+
 ## [7.11.47] - 2026-11-15
 ### Fixed (線上 PvP 殘留禁用修復、回合同步圍欄與系列賽收斂 + 第二列橫幅防重疊)
 - **開局完整重置線上系列賽狀態 (`js/app.js`, `js/online-pvp.js`)**：

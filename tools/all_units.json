@@ -790,24 +790,24 @@
     "weapon": "海賊大太刀 + 安宅鐵甲船"
   },
   {
-    "id": "CHOSOKABE",
-    "name": "長宗我部元親",
+    "id": "LUXUN",
+    "name": "陸遜",
     "cat": "naval",
     "cost": 4,
-    "tag": "土佐之蝠·一領具足",
-    "flag": "🇯🇵",
-    "origin": "日本 · 戰國",
-    "weapon": "長槍 + 一領具足兩棲甲"
+    "tag": "火燒連營·夷陵破蜀",
+    "flag": "🇨🇳",
+    "origin": "中國 · 三國",
+    "weapon": "夷陵火計箭符 + 吳都督佩劍"
   },
   {
-    "id": "JANGPOGO",
-    "name": "張保皐",
+    "id": "YUNGWAN",
+    "name": "尹瓘",
     "cat": "naval",
     "cost": 3,
-    "tag": "清海鎮霸·東亞海王",
+    "tag": "別武班帥·東北九城",
     "flag": "🇰🇷",
-    "origin": "韓國 · 新羅",
-    "weapon": "清海鎮寶刀 + 大海船樓舵"
+    "origin": "韓國 · 高麗",
+    "weapon": "別武班長矛 + 東北九城令旗"
   },
   {
     "id": "LUMENG",
@@ -1083,11 +1083,21 @@
     "id": "KANBEI",
     "name": "黑田官兵衛",
     "cat": "support",
-    "cost": 3,
+    "cost": 2,
     "tag": "如水大謀·天下二兵衛",
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "合子形兜 + 水攻策圖卷"
+  },
+  {
+    "id": "KANGGAMCHAN",
+    "name": "姜邯贊",
+    "cat": "support",
+    "cost": 3,
+    "tag": "龜州大捷·高麗護國相",
+    "flag": "🇰🇷",
+    "origin": "韓國 · 高麗",
+    "weapon": "龜州督軍劍 + 高麗水攻令旗"
   },
   {
     "id": "SUNBIN",
@@ -1113,7 +1123,7 @@
     "id": "GUOJIA",
     "name": "郭嘉",
     "cat": "support",
-    "cost": 2,
+    "cost": 3,
     "tag": "十勝十敗·鬼謀奇策",
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
@@ -1138,16 +1148,6 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "離間策書 + 毒士算籌"
-  },
-  {
-    "id": "LUXUN",
-    "name": "陸遜",
-    "cat": "support",
-    "cost": 3,
-    "tag": "火燒連營·夷陵破蜀",
-    "flag": "🇨🇳",
-    "origin": "中國 · 三國",
-    "weapon": "夷陵火計箭符 + 吳都督佩劍"
   },
   {
     "id": "SHIMAZU_YOSHIHISA",

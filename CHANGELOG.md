@@ -4,6 +4,14 @@
 
 ---
 
+## [7.11.96] - 2026-11-22
+### Completed & Synced (全軍 125/125 位 2.5D 賽璐珞 Q 版頭像 100% 完工作業並同步全庫索引)
+- **補齊最後 5 位名將並精煉 2 位無字乾淨版 Q 版頭像 (`assets/warlords/*.jpg`, `js/data.js`)**：
+  - `v7.11.95`：加藤清正 (`KATOKIYOMASA`)、村上武吉 (`MURAKAMI`)、虞允文 (`YUYUNWEN`)、脇坂安治 (`WAKIZAKA`)、藤堂高虎 (`TOUDO`)——達成 125 位全編制 100% Q 版化。
+  - `v7.11.96`：重新繪製黃蓋 (`HUANGGAI`) 與周瑜 (`ZHOUYU`) 無文字乾淨版 2.5D 賽璐珞 Q 版頭像。
+- **全站資料與圖鑑版本同步 (`all_warlords.json`, `tools/all_units.json`, `armory.html`, `js/poster-help.js`)**：
+  - 重新執行 `tools/export_units.py` 匯出 125 位完整 JSON 索引並與 `js/data.js` 嚴格一致，同步 `armory.html` 與 `js/poster-help.js` 至 `v7.11.96`，全軍 125 張頭像皆為 `384×384` 且 MD5 零碰撞。
+
 ## [7.11.94] - 2026-11-18
 ### Added & Updated (新增 17 位名將 2.5D 賽璐珞 Q 版頭像 · 全軍進度 120/125 並同步 JSON 索引)
 - **新增 17 位商業級 2.5D 賽璐珞 Q 版頭像 (`assets/warlords/*.jpg`, `js/data.js`)**：

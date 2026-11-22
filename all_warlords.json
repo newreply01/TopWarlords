@@ -2164,7 +2164,7 @@
     "origin": "日本 · 戰國",
     "weapon": "片鎌槍 + 長烏帽子形兜",
     "sfx": "blade_clash",
-    "img": "assets/warlords/KATOKIYOMASA.jpg?v=7.11.1"
+    "img": "assets/warlords/KATOKIYOMASA.jpg?v=7.11.95"
   },
   {
     "id": "YUJIN",
@@ -3404,7 +3404,7 @@
     "origin": "中國 · 三國",
     "weapon": "赤壁督軍劍 + 樓船令旗",
     "sfx": "fire_attack",
-    "img": "assets/warlords/ZHOUYU.jpg?v=7.11.1"
+    "img": "assets/warlords/ZHOUYU.jpg?v=7.11.96"
   },
   {
     "id": "YISUNSIN",
@@ -3724,7 +3724,7 @@
     "origin": "中國 · 三國",
     "weapon": "火攻燃引火箭 + 艨艟衝角",
     "sfx": "fire_attack",
-    "img": "assets/warlords/HUANGGAI.jpg?v=7.11.87"
+    "img": "assets/warlords/HUANGGAI.jpg?v=7.11.96"
   },
   {
     "id": "JIANGWEI",
@@ -3900,7 +3900,7 @@
     "origin": "日本 · 戰國",
     "weapon": "焙烙火玉 + 鯨船快櫓",
     "sfx": "fire_attack",
-    "img": "assets/warlords/MURAKAMI.jpg?v=7.11.1"
+    "img": "assets/warlords/MURAKAMI.jpg?v=7.11.95"
   },
   {
     "id": "XIEXUAN",
@@ -3988,7 +3988,7 @@
     "origin": "中國 · 南宋",
     "weapon": "采石督師劍 + 海鰍踏浪船",
     "sfx": "fire_attack",
-    "img": "assets/warlords/YUYUNWEN.jpg?v=7.11.1"
+    "img": "assets/warlords/YUYUNWEN.jpg?v=7.11.95"
   },
   {
     "id": "WEIYAN",
@@ -4336,7 +4336,7 @@
     "origin": "日本 · 戰國",
     "weapon": "賤岳長槍 + 淡路戰船",
     "sfx": "blade_clash",
-    "img": "assets/warlords/WAKIZAKA.jpg?v=7.11.1"
+    "img": "assets/warlords/WAKIZAKA.jpg?v=7.11.95"
   },
   {
     "id": "TOUDO",
@@ -4378,7 +4378,7 @@
     "origin": "日本 · 戰國",
     "weapon": "築城大銃 + 水軍旗艦",
     "sfx": "war_drum",
-    "img": "assets/warlords/TOUDO.jpg?v=7.11.1"
+    "img": "assets/warlords/TOUDO.jpg?v=7.11.95"
   },
   {
     "id": "ZHANGHE",

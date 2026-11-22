@@ -1940,13 +1940,23 @@ function renderCommandDeck() {
       <i class="ind-dot"></i>
     </div>`;
 
-    synBar.innerHTML = `<div class="indicators-dock-wrap">${indicatorsHtml}${ewHtml}</div>`;
+    synBar.innerHTML = (() => {
+      const bonds = (typeof getDeckHistoricalBonds === 'function') ? getDeckHistoricalBonds(pickedUnits) : [];
+      const bondsHtml = bonds.map(b =>
+        `<span class="bond-pill" data-syn-tip="${esc(`【${b.icon} ${b.name} · 史實羈絆】${b.desc}`)}" title="${esc(b.desc)}">${b.icon} ${esc(b.name)}</span>`
+      ).join('');
+      return `<div class="indicators-dock-wrap">${indicatorsHtml}${ewHtml}${bondsHtml}</div>`;
+    })();
 
     const sheetSyn = $('#sheetSynergyBox');
     if (sheetSyn) {
-      sheetSyn.innerHTML = activeSyns.length > 0
-        ? activeSyns.map(s => `<span class="syn-chip active" title="${esc(s.desc)}">${s.icon} ${esc(s.name)}</span>`).join('')
-        : '<span class="syn-chip muted">請選取裝備以啟動聯合作戰體系羈絆</span>';
+      const bonds = (typeof getDeckHistoricalBonds === 'function') ? getDeckHistoricalBonds(pickedUnits) : [];
+      const synChips = activeSyns.map(s => `<span class="syn-chip active" title="${esc(s.desc)}">${s.icon} ${esc(s.name)}</span>`);
+      const bondChips = bonds.map(b => `<span class="bond-pill" title="${esc(b.desc)}">${b.icon} ${esc(b.name)}</span>`);
+      const combined = synChips.concat(bondChips);
+      sheetSyn.innerHTML = combined.length > 0
+        ? combined.join('')
+        : '<span class="syn-chip muted">請選取名將以啟動陣勢與史實羈絆</span>';
     }
   }
 
@@ -6997,6 +7007,8 @@ function showResult(res, bo3Custom) {
         </div>`;
       })()}
 
+      ${typeof WarlordAnalytics !== 'undefined' && typeof WarlordAnalytics.buildBattleBreakdownHtml === 'function' ? WarlordAnalytics.buildBattleBreakdownHtml(res, mySide) : ''}
+
       <!-- 下部網格：戰局關鍵轉折點 + 參謀總部戰術復盤 -->
       <div class="aar-intel-grid">
         <div class="aar-intel-card">
@@ -7326,10 +7338,10 @@ function applyTheme(theme, showNotice = false) {
   const iconEl = $('#themeIcon');
   const btn = $('#btnTheme');
   if (iconEl) iconEl.textContent = theme === 'light' ? '🌙' : '☀️';
-  if (btn) btn.title = theme === 'light' ? '切換為深色模式 (夜間指揮所)' : '切換為淺色模式 (日間戰情室)';
+  if (btn) btn.title = theme === 'light' ? '切換為深色模式 (墨硯夜戰模式)' : '切換為淺色模式 (日間戰情室)';
   LS.set('wl15_theme', theme);
   if (showNotice) {
-    toast(theme === 'light' ? '已切換為日間戰情室 (淺色模式)' : '已切換為夜間指揮中心 (深色模式)');
+    toast(theme === 'light' ? '已切換為日間戰情室 (淺色模式)' : '已切換為墨硯夜戰模式 (深色模式)');
   }
 }
 
@@ -7432,7 +7444,7 @@ function renderPvpPublicRoomsList() {
       <div class="pvp-room-info">
         <div class="pvp-room-host-line">
           <span>${esc(r.hostFlag || '🌐')}</span>
-          <span class="pvp-room-host-name">${esc(r.hostName || '本部特遣隊')}</span>
+          <span class="pvp-room-host-name">${esc(r.hostName || '主帥本陣')}</span>
           <span class="pvp-room-code-pill">#${esc(r.code)}</span>
         </div>
         <div class="pvp-room-meta-line">
@@ -7488,7 +7500,7 @@ function openOnlinePvpModal(forceJoinCode = null) {
   const player = LadderEngine.getState().player;
   const pUid = player.uid || LadderEngine.getPlayerUID();
   const isHostRole = !forceJoinCode;
-  const myName = (player && player.name && player.name !== '我方聯合戰術作戰群') ? player.name : (isHostRole ? '本部特遣隊' : '挑戰突擊隊');
+  const myName = (player && player.name && player.name !== '我方聯合戰術作戰群') ? player.name : (isHostRole ? '主帥本陣' : '挑戰軍團');
 
   $('#pvpMyFlag').textContent = player.flag || '🇹🇼';
   $('#pvpMyName').textContent = myName;
@@ -9476,7 +9488,7 @@ function renderMatchCardHtml(m, t, isFinal = false, isBronze = false) {
         const fmtTag = reqWins > 1 ? `BO${reqWins === 3 ? 5 : 3}` : 'BO1';
         return `<span class="b-match-id-tag" title="${m.id} · 先${reqWins}勝制">${cid} ${fmtTag}</span>`;
       })()}
-      ${(m.bannedListB && m.bannedListB.length) ? `<span class="b-ban-badge ban-opp" title="${m.teamA?.name || '我方'} 累計遭禁 ${m.bannedListB.length} 件：${m.bannedListB.map(id => UNIT_MAP[id]?.name || id).join('、')}">⚠️ ${m.bannedListB.length}</span>` : ''}
+      ${(m.bannedListB && m.bannedListB.length) ? `<span class="b-ban-badge ban-opp" title="${esc(m.teamA?.name || '我方')} 累計遭禁 ${m.bannedListB.length} 名：${m.bannedListB.map(id => esc(UNIT_MAP[id]?.name || id)).join('、')}">⚠️ ${m.bannedListB.length}</span>` : ''}
       ${(m.bannedListA && m.bannedListA.length) ? `<span class="b-ban-badge ban-me" title="我方累計禁用對手 ${m.bannedListA.length} 件：${m.bannedListA.map(id => UNIT_MAP[id]?.name || id).join('、')}">🚫 ${m.bannedListA.length}</span>` : ''}
       ${isFinished ?
         (isMyMatch ? `<span class="b-status-badge finished">✔ 戰報</span>` : `<span class="b-status-badge finished">✔ 戰報</span>`) :
@@ -11064,6 +11076,34 @@ document.addEventListener('keydown', e => {
     if (btnAi) btnAi.setAttribute('aria-expanded', 'false');
     const btnForm = document.getElementById('btnOpenFormation');
     if (btnForm) btnForm.setAttribute('aria-expanded', 'false');
+
+    const helpModal = document.getElementById('helpModal');
+    if (helpModal && !helpModal.hidden) {
+      document.getElementById('helpClose')?.click();
+      return;
+    }
+    const telModal = document.getElementById('globalTelemetryModal');
+    if (telModal && !telModal.hidden) {
+      document.getElementById('btnCloseTelemetryModal')?.click();
+      return;
+    }
+    const resModal = document.getElementById('resultModal');
+    if (resModal && !resModal.hidden) {
+      document.getElementById('rCloseX')?.click();
+    }
+    return;
+  }
+
+  if (e.key === 'r' || e.key === 'R') {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+    if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(tag) || (e.target && e.target.isContentEditable)) return;
+    if (document.querySelector('.modal:not([hidden])')) return;
+    const rerollBtn = document.getElementById('btnRerollMarket');
+    if (rerollBtn && !rerollBtn.disabled && rerollBtn.offsetParent !== null) {
+      e.preventDefault();
+      rerollBtn.click();
+    }
   }
 });
 

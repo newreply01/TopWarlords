@@ -7,6 +7,7 @@
   if (typeof window === 'undefined' || !window.MusouVfx) return;
   const V = window.MusouVfx;
   const reg = (k, fn) => V.registerSignature(k, fn);
+  const later = (fn, ms) => (V.schedule ? V.schedule(ms, fn) : setTimeout(fn, ms));
 
   const glyphCache = new Map();
   function getGlyphTex(text, color = '#fbbf24') {
@@ -33,7 +34,7 @@
   }
 
   function beat(ctx, delay = 200, shake = 0.24, sfx = 'blade_clash') {
-    setTimeout(() => {
+    later(() => {
       ctx.triggerHitStop?.(60);
       ctx.triggerCameraShake?.(shake);
       ctx.playFieldSound?.(sfx, ctx.target, 0.65);
@@ -60,7 +61,7 @@
       if (spec.ribbons) {
         const n = spec.ribbons;
         for (let i = 0; i < n; i++) {
-          setTimeout(() => {
+          later(() => {
             const oz = (i - (n - 1) / 2) * 0.7;
             const p0 = spec.fromSky
               ? targetPos.clone().add(new THREE.Vector3(-1.2 + i * 0.5, 6.0, oz))
@@ -71,19 +72,19 @@
       }
       if (spec.slashes) {
         for (let i = 0; i < spec.slashes; i++) {
-          setTimeout(() => {
+          later(() => {
             V.spawnSlashArc(scene, targetPos, i % 2 === 0 ? 1 : -1, i === 0 ? spec.color : (spec.accent || spec.color), 2.5 + i * 0.35, 400);
           }, i * 95);
         }
       }
       if (spec.rings) {
         for (let i = 0; i < spec.rings; i++) {
-          setTimeout(() => {
+          later(() => {
             V.spawnShockRing(scene, targetPos, i % 2 === 0 ? spec.color : (spec.accent || spec.color), 2.8 + i * 0.75, 580);
           }, i * 100);
         }
       }
-      setTimeout(() => {
+      later(() => {
         V.createGpuBurst({
           scene,
           origin: hit,

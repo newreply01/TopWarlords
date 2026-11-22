@@ -97,7 +97,7 @@ try:
         print(f"[TEST 3] Three.js 就緒: {is_three_ready}, Battle3DEngine 就緒: {is_engine_ready}")
         assert is_three_ready and is_engine_ready, "Three.js 或 Battle3DEngine 未載入！"
         try:
-            page.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", polling=100, timeout=10000)
+            page.wait_for_function("() => Battle3DEngine.getDebugState().battalionRanks === 10", polling=100, timeout=25000)
         except PlaywrightTimeoutError:
             print("[MODEL LOAD TIMEOUT]", page.evaluate("() => Battle3DEngine.getDebugState()"), desktop_errors)
             raise

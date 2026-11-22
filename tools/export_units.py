@@ -8,11 +8,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_units_from_data_js() -> list:
+    audit_path = ROOT / 'js' / 'historical-audit.js'
     data_path = ROOT / 'js' / 'data.js'
     if shutil.which('node'):
+        node_script = (
+            "const fs = require('fs'), vm = require('vm');"
+            "const ctx = vm.createContext({ window: {}, console, Math, Object, Array, Set, Map, JSON });"
+            "ctx.window = ctx;"
+            "for (const f of process.argv.slice(1)) {"
+            "  vm.runInContext(fs.readFileSync(f, 'utf8'), ctx, { filename: f });"
+            "}"
+            "process.stdout.write(JSON.stringify(vm.runInContext('UNITS', ctx)));"
+        )
         result = subprocess.run(
-            ['node', '-e', 'process.stdout.write(JSON.stringify(require(process.argv[1]).UNITS))',
-             str(data_path)],
+            ['node', '-e', node_script, str(audit_path), str(data_path)],
             check=True,
             capture_output=True,
             encoding='utf-8',
@@ -20,7 +29,7 @@ def load_units_from_data_js() -> list:
         return json.loads(result.stdout)
 
     from playwright.sync_api import sync_playwright
-    js_code = data_path.read_text(encoding='utf-8')
+    js_code = audit_path.read_text(encoding='utf-8') + "\n" + data_path.read_text(encoding='utf-8')
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()

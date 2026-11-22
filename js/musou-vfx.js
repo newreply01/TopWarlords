@@ -25,6 +25,26 @@
   let fpsAccumTime = 0;
   let fpsAccumFrames = 0;
   let autoDowngraded = false;
+  let vfxEpoch = 0;
+  const scheduledTimers = new Set();
+
+  function schedule(delayMs, fn) {
+    if (typeof fn !== 'function') return null;
+    const epoch = vfxEpoch;
+    const tid = setTimeout(() => {
+      scheduledTimers.delete(tid);
+      if (epoch !== vfxEpoch) return;
+      try { fn(); } catch (_) {}
+    }, Math.max(0, Number(delayMs) || 0));
+    scheduledTimers.add(tid);
+    return tid;
+  }
+
+  function clearTimers() {
+    vfxEpoch++;
+    scheduledTimers.forEach(tid => clearTimeout(tid));
+    scheduledTimers.clear();
+  }
 
   const SIGNATURE_VFX = {};
 
@@ -432,6 +452,7 @@
   }
 
   function clearAll() {
+    clearTimers();
     gpuBursts.forEach(b => {
       b.scene.remove(b.pts);
       b.geo.dispose();
@@ -469,6 +490,8 @@
     spawnRibbonTrail,
     spawnGroundDecal,
     spawnPillar,
+    schedule,
+    clearTimers,
     tick,
     clearAll,
     registerSignature(key, fn) { SIGNATURE_VFX[key] = fn; },

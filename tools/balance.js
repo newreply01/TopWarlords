@@ -1,6 +1,6 @@
 // 頂尖對戰：15元名將聯合作戰 (TopWarlords) 數值平衡與 AI 循環賽模擬工具：node tools/balance.js
 const fs = require('fs'), path = require('path');
-const code = ['data.js', 'engine.js'].map(f => fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8')).join('\n');
+const code = ['historical-audit.js', 'data.js', 'engine.js'].map(f => fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8')).join('\n');
 const E = new Function(code + '\nreturn {UNITS,UNIT_MAP,ARCHETYPES,EVENTS,DOCTRINES,TEMPLATES,SLOTS,resolveBattle,buildFromPlan,randomDeck,simulate,mulberry32,validateDeck};')();
 
 const rng = E.mulberry32(777);
@@ -24,7 +24,7 @@ E.ARCHETYPES.forEach((a, i) => {
 });
 
 // 3. 單位勝率（隨機合法陣容對戰）
-console.log('\n=== 單位勝率（隨機陣容 N=15000 場 · 165 位日韓中純歷史名將全鑑）===');
+console.log('\n=== 單位勝率（隨機陣容 N=15000 場 · 125 位日韓中純歷史名將全鑑）===');
 const stat = {}; E.UNITS.forEach(u => stat[u.id] = { w: 0, n: 0 });
 let draws = 0, wipes = 0, winchesters = 0, total = 15000;
 for (let i = 0; i < total; i++) {

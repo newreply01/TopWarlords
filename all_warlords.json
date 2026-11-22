@@ -15,14 +15,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "《史記·衛將軍驃騎列傳》《漢書·霍去病傳》載其六出塞外、封狼居胥與千里穿插奇襲。",
+      "sources": [
+        "https://ctext.org/shiji/wei-jiang-jun-piao-qi-lie-zhuan/zh"
+      ]
     },
     "st": 90,
     "ew": 22,
-    "hp": 476,
-    "atk": 140,
+    "hp": 345,
+    "atk": 138,
     "def": 0.02,
     "skill": {
       "name": "封狼居胥",
@@ -43,7 +46,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
     "weapon": "漢軍玄甲鐵騎 + 環首刀",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/HUO.jpg?v=7.11.1"
   },
   {
@@ -63,14 +66,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "《史記·衛將軍驃騎列傳》載其七戰七捷、收復河南地與漠北之戰以武剛車結陣禦匈奴。",
+      "sources": [
+        "https://ctext.org/shiji/wei-jiang-jun-piao-qi-lie-zhuan/zh"
+      ]
     },
     "st": 74,
     "ew": 28,
-    "hp": 424,
-    "atk": 120,
+    "hp": 322,
+    "atk": 128,
     "def": 0.04,
     "skill": {
       "name": "武剛龍城",
@@ -88,7 +94,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
     "weapon": "武剛突騎大陣 + 漢劍",
-    "sfx": "war_drum",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/WEI.jpg?v=7.11.1"
   },
   {
@@ -108,14 +114,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "《三國志·魏書·呂布傳》載其驍勇善騎射、「人中有呂布，馬中有赤兔」，虎牢、濮陽屢破敵軍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/L%C3%BC_Bu"
+      ]
     },
-    "st": 76,
+    "st": 85,
     "ew": 14,
-    "hp": 496,
-    "atk": 146,
+    "hp": 423,
+    "atk": 172,
     "def": 0.05,
     "skill": {
       "name": "轅門無雙",
@@ -131,7 +140,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "方天畫戟 + 赤兔馬",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/LUBU.jpg?v=7.11.1"
   },
   {
@@ -151,14 +160,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《吾妻鏡》《平家物語》所載一之谷、屋島與壇之浦之戰；高地奇襲具史源，演義神話部分需區分。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Minamoto_no_Yoshitsune"
+      ]
     },
     "st": 88,
     "ew": 26,
-    "hp": 464,
-    "atk": 136,
+    "hp": 331,
+    "atk": 132,
     "def": 0.02,
     "skill": {
       "name": "鵯越逆落",
@@ -176,7 +188,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 源平",
     "weapon": "薄綠太刀 + 黑葦威鎧",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/YOSHITSUNE.jpg?v=7.11.1"
   },
   {
@@ -196,14 +208,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《甲陽軍鑑》及同時期武田文書所載川中島、三方原等戰事；軍制與赤備精騎影響深遠。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Takeda_Shingen"
+      ]
     },
     "st": 80,
     "ew": 30,
-    "hp": 480,
-    "atk": 134,
+    "hp": 354,
+    "atk": 138,
     "def": 0.04,
     "skill": {
       "name": "風林火山",
@@ -221,7 +236,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "軍配團扇 + 諏訪法性兜",
-    "sfx": "war_drum",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/SHINGEN.jpg?v=7.11.1"
   },
   {
@@ -241,13 +256,16 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《三國史記》《舊唐書·高麗傳》載其執掌高句麗莫離支軍政，屢抗唐軍與周邊諸部。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yeon_Gaesomun"
+      ]
     },
     "st": 52,
     "ew": 16,
-    "hp": 284,
+    "hp": 206,
     "atk": 86,
     "def": 0.02,
     "skill": {
@@ -265,7 +283,7 @@
     "flag": "🇰🇷",
     "origin": "韓國 · 高句麗",
     "weapon": "五口寶刀 + 鐵騎長矛",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/GAISUWEN.jpg?v=7.11.1"
   },
   {
@@ -284,14 +302,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·趙雲傳》本傳及裴注《雲別傳》，載長坂護主、漢水空營退曹軍等實績。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Zhao_Yun"
+      ]
     },
     "st": 76,
     "ew": 20,
-    "hp": 424,
-    "atk": 120,
+    "hp": 331,
+    "atk": 130,
     "def": 0.03,
     "skill": {
       "name": "七進七出",
@@ -309,7 +330,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "青釭劍 + 亮銀龍膽槍",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/ZHAOYUN.jpg?v=7.11.1"
   },
   {
@@ -329,14 +350,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·馬超傳》，載潼關渭南之戰統涼州精騎迫使曹操幾陷險境。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ma_Chao"
+      ]
     },
-    "st": 60,
+    "st": 64,
     "ew": 14,
-    "hp": 348,
-    "atk": 104,
+    "hp": 307,
+    "atk": 130,
     "def": 0.02,
     "skill": {
       "name": "西涼鐵騎",
@@ -356,7 +380,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "虎頭湛金槍 + 白袍銀鎧",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/MACHO.jpg?v=7.11.1"
   },
   {
@@ -376,16 +400,18 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
+      "era": "three_kingdoms",
       "status": "source-linked",
       "note": "逍遙津先攻與八百敢死士有《三國志·張遼傳》所引記載。",
       "sources": [
+        "https://ctext.org/text.pl?node=603715",
         "https://en.wikipedia.org/wiki/Battle_of_Xiaoyao_Ford"
       ]
     },
     "st": 76,
     "ew": 24,
-    "hp": 424,
-    "atk": 120,
+    "hp": 313,
+    "atk": 124,
     "def": 0.03,
     "skill": {
       "name": "威震逍遙",
@@ -402,7 +428,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "問天青龍雙戟 + 塞外駿馬",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/ZHANGLIAO.jpg?v=7.11.1"
   },
   {
@@ -422,14 +448,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《梁書·陳慶之傳》，載率七千白袍北伐歷四十七戰克三十二城，入洛陽後終遭爾朱榮反撲。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Chen_Qingzhi"
+      ]
     },
     "st": 78,
     "ew": 32,
-    "hp": 412,
-    "atk": 118,
+    "hp": 305,
+    "atk": 122,
     "def": 0.02,
     "skill": {
       "name": "白袍千軍",
@@ -446,7 +475,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 南北朝",
     "weapon": "白袍麾旗 + 輕騎快槍",
-    "sfx": "strategy_gong",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/CHENQINGZHI.jpg?v=7.11.1"
   },
   {
@@ -466,14 +495,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《上杉家御年譜》《甲陽軍鑑》，領越後兵連年征戰川中島、關東，奉毘沙門天軍旗。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Uesugi_Kenshin"
+      ]
     },
     "st": 82,
     "ew": 26,
-    "hp": 472,
-    "atk": 138,
+    "hp": 357,
+    "atk": 144,
     "def": 0.03,
     "skill": {
       "name": "車懸之陣",
@@ -491,7 +523,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "順慶手太刀 + 毘字旗",
-    "sfx": "war_drum",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/KENSHIN.jpg?v=7.11.1"
   },
   {
@@ -512,14 +544,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《大坂陣山口休庵咄》及德川實紀所載大坂冬夏之陣，率赤備突入家康本陣名震一時。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sanada_Nobushige"
+      ]
     },
     "st": 62,
     "ew": 18,
-    "hp": 344,
-    "atk": 104,
+    "hp": 273,
+    "atk": 114,
     "def": 0.02,
     "skill": {
       "name": "六文錢決死",
@@ -536,7 +571,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "十文字槍 + 六文錢赤備",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/YUKIMURA.jpg?v=7.11.1"
   },
   {
@@ -556,14 +591,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《三國史記·金庾信列傳》，統率新羅花郎與唐羅聯軍滅百濟、高句麗完成三韓統一。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kim_Yushin"
+      ]
     },
     "st": 74,
     "ew": 28,
-    "hp": 420,
-    "atk": 116,
+    "hp": 313,
+    "atk": 120,
     "def": 0.03,
     "skill": {
       "name": "花郎誓天",
@@ -581,7 +619,7 @@
     "flag": "🇰🇷",
     "origin": "韓國 · 新羅",
     "weapon": "龍鳳環首刀 + 金花官服戰鎧",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/KIMYUSHIN.jpg?v=7.11.59"
   },
   {
@@ -600,14 +638,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·孫破虜討逆傳》，少將渡江平定江東數郡，奠定孫吳政權根基。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sun_Ce"
+      ]
     },
-    "st": 60,
+    "st": 64,
     "ew": 18,
-    "hp": 344,
-    "atk": 102,
+    "hp": 287,
+    "atk": 118,
     "def": 0.03,
     "skill": {
       "name": "霸王怒濤",
@@ -644,14 +685,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《北齊書·蘭陵武王傳》，邙山之戰戴面具率五百騎突入重圍解洛陽圍，軍中作〈蘭陵王入陣曲〉。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Gao_Changgong"
+      ]
     },
-    "st": 62,
+    "st": 64,
     "ew": 22,
-    "hp": 344,
-    "atk": 100,
+    "hp": 276,
+    "atk": 112,
     "def": 0.05,
     "skill": {
       "name": "蘭陵入陣曲",
@@ -686,13 +730,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·夏侯淵傳》，善千里疾馳突襲平定關中涼州，後於定軍山陣亡。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Xiahou_Yuan"
+      ]
     },
     "st": 52,
     "ew": 14,
-    "hp": 280,
+    "hp": 203,
     "atk": 84,
     "def": 0,
     "skill": {
@@ -727,23 +774,26 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·馬超傳》《諸葛亮傳》，任平北將軍隨軍北伐，受命追斬魏延。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ma_Dai"
+      ]
     },
-    "st": 44,
-    "ew": 16,
-    "hp": 224,
-    "atk": 68,
+    "st": 35,
+    "ew": 14,
+    "hp": 119,
+    "atk": 49,
     "def": 0,
     "skill": {
       "name": "西涼追襲",
       "phase": "P2",
-      "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.14；本次命中 +8 個百分點（上限 96%）；本次忽略 35% 護甲（與破甲重擊疊加可穿透玄甲底線）。持續效果至戰鬥結束。",
+      "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.06；本次命中 +2 個百分點（上限 96%）；本次忽略 20% 護甲（與破甲重擊疊加可穿透玄甲底線）。持續效果至戰鬥結束。",
       "effects": {
-        "damage": 1.14,
-        "armorPierce": 0.35,
-        "hit": 0.08
+        "damage": 1.06,
+        "armorPierce": 0.2,
+        "hit": 0.02
       },
       "fx": "piercing_volley",
       "fxLabel": "神射貫穿",
@@ -772,14 +822,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《貞山公治家記錄》，摺上原合戰確立奧州霸權，創立騎馬鐵砲隊並留名江戶藩政。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Date_Masamune"
+      ]
     },
     "st": 62,
     "ew": 22,
-    "hp": 340,
-    "atk": 100,
+    "hp": 276,
+    "atk": 114,
     "def": 0.02,
     "skill": {
       "name": "獨眼龍騎銃",
@@ -814,16 +867,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
+      "era": "korea_dynasties",
       "status": "qualified",
-      "note": "誘敵深入與薩水追擊有史籍脈絡；放水／水壩故事未見同時代來源支持。",
+      "note": "誘敵深入與薩水追擊有《三國史記》《隋書》脈絡；放水／水壩故事未見同時代來源支持。",
       "sources": [
         "https://en.wikipedia.org/wiki/Battle_of_Salsu"
       ]
     },
-    "st": 52,
-    "ew": 30,
-    "hp": 280,
-    "atk": 84,
+    "st": 50,
+    "ew": 28,
+    "hp": 180,
+    "atk": 75,
     "def": 0.01,
     "skill": {
       "name": "薩水誘敵",
@@ -858,14 +912,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·後主傳》《魏書》，陳倉之戰追擊撤退蜀軍斬殺謝雄、龔起，後中伏陣亡。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Wang_Shuang"
+      ]
     },
     "st": 36,
     "ew": 12,
-    "hp": 228,
-    "atk": 68,
+    "hp": 151,
+    "atk": 60,
     "def": 0,
     "skill": {
       "name": "流星狂追",
@@ -883,7 +940,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "六十斤大刀 + 飛擊流星錘",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/WANGSHUANG.jpg?v=7.11.58"
   },
   {
@@ -900,14 +957,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《甲陽軍鑑》《信長公記》，統領武田赤備精銳於長篠等役力戰殉陣。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yamagata_Masakage"
+      ]
     },
-    "st": 38,
+    "st": 35,
     "ew": 12,
-    "hp": 228,
-    "atk": 68,
+    "hp": 136,
+    "atk": 55,
     "def": 0.01,
     "skill": {
       "name": "赤備先驅",
@@ -924,7 +984,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "長柄槍 + 赤漆塗胴具足",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/YAMAGATA.jpg?v=7.11.93"
   },
   {
@@ -944,14 +1004,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見立花家文書與戰國九州史料，朝鮮之役碧蹄館立功，柳川城開城後復封大名。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Tachibana_Muneshige"
+      ]
     },
     "st": 50,
     "ew": 18,
-    "hp": 284,
-    "atk": 86,
+    "hp": 218,
+    "atk": 92,
     "def": 0.02,
     "skill": {
       "name": "西國疾風",
@@ -969,7 +1032,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "雷切脇差 + 栗色鎧甲",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/TACHIBANA.jpg?v=7.11.68"
   },
   {
@@ -986,14 +1049,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·廉頗藺相如列傳》載閼與之戰，「狹路相逢勇者勝」疾馳捲旗破秦軍，受封馬服君。",
+      "sources": [
+        "https://ctext.org/shiji/lian-po-lin-xiang-ru-lie-zhuan/zh"
+      ]
     },
     "st": 48,
     "ew": 24,
-    "hp": 276,
-    "atk": 84,
+    "hp": 194,
+    "atk": 80,
     "def": 0,
     "skill": {
       "name": "狹路勇勝",
@@ -1028,14 +1094,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·龐德傳》，襄樊之戰誓死抗關羽、箭中關羽額頭，兵敗被擒不屈殉節。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pang_De"
+      ]
     },
     "st": 34,
     "ew": 12,
-    "hp": 232,
-    "atk": 70,
+    "hp": 139,
+    "atk": 56,
     "def": 0.02,
     "skill": {
       "name": "抬櫬決死",
@@ -1052,7 +1121,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "截頭大刀 + 白馬重鐵鞍",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/PANGDE.jpg?v=7.11.93"
   },
   {
@@ -1069,22 +1138,25 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《信長公記》《加賀藩史料》，任織田赤母衣眾筆頭，賤岳立功並奠定加賀百萬石基礎。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Maeda_Toshiie"
+      ]
     },
-    "st": 38,
+    "st": 34,
     "ew": 14,
-    "hp": 224,
-    "atk": 68,
+    "hp": 128,
+    "atk": 51,
     "def": 0,
     "skill": {
       "name": "槍之又左",
       "phase": "P3",
-      "desc": "P3 首次命中時，每戰一次：本次傷害 ×1.14；本次忽略 65% 護甲（與破甲重擊疊加可穿透玄甲底線）。持續效果至戰鬥結束。",
+      "desc": "P3 首次命中時，每戰一次：本次傷害 ×1.12；本次忽略 50% 護甲（與破甲重擊疊加可穿透玄甲底線）。持續效果至戰鬥結束。",
       "effects": {
-        "damage": 1.14,
-        "armorPierce": 0.65
+        "damage": 1.12,
+        "armorPierce": 0.5
       },
       "fx": "overlord_cleave",
       "fxLabel": "霸王破甲",
@@ -1093,7 +1165,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "朱柄長槍 + 赤母衣良駒",
-    "sfx": "blade_clash",
+    "sfx": "cavalry_charge",
     "img": "assets/warlords/MAEDATOSHI.jpg?v=7.11.93"
   },
   {
@@ -1114,14 +1186,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·白起王翦列傳》，伊闕斬首二十四萬、鄢郢拔城、長平合圍坑降趙卒，功高賜死杜郵。",
+      "sources": [
+        "https://ctext.org/shiji/bai-qi-wang-jian-lie-zhuan/zh"
+      ]
     },
     "st": 10,
     "ew": 20,
-    "hp": 760,
-    "atk": 132,
+    "hp": 583,
+    "atk": 144,
     "def": 0.28,
     "skill": {
       "name": "長平殲滅",
@@ -1138,7 +1213,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
     "weapon": "武安君銅劍 + 戰國玄甲",
-    "sfx": "war_drum",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/BAIQI.jpg?v=7.11.1"
   },
   {
@@ -1157,14 +1232,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·項羽本紀》，鉅鹿破釜沉舟破秦軍主力，彭城三萬擊潰五十六萬漢聯軍，垓下自刎。",
+      "sources": [
+        "https://ctext.org/shiji/xiang-yu-ben-ji/zh"
+      ]
     },
     "st": 12,
     "ew": 12,
-    "hp": 752,
-    "atk": 142,
+    "hp": 603,
+    "atk": 160,
     "def": 0.26,
     "skill": {
       "name": "霸王破釜",
@@ -1181,7 +1259,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 楚漢",
     "weapon": "霸王楚戟 + 烏騅馬鎧",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/XIANGYU.jpg?v=7.11.46"
   },
   {
@@ -1201,14 +1279,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "tang_song_ming",
+      "status": "source-linked",
+      "note": "見《宋史·岳飛傳》，治岳家軍「凍死不拆屋、餓死不擄掠」，郾城、潁昌大破金兀朮精騎。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yue_Fei"
+      ]
     },
     "st": 12,
     "ew": 26,
-    "hp": 760,
-    "atk": 136,
+    "hp": 563,
+    "atk": 142,
     "def": 0.28,
     "skill": {
       "name": "背嵬撼山",
@@ -1245,13 +1326,16 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·白起王翦列傳》，平趙破燕，統大秦六十萬精兵堅壁相持滅楚國統一天下。",
+      "sources": [
+        "https://ctext.org/shiji/bai-qi-wang-jian-lie-zhuan/zh"
+      ]
     },
     "st": 10,
     "ew": 24,
-    "hp": 652,
+    "hp": 473,
     "atk": 110,
     "def": 0.28,
     "skill": {
@@ -1270,7 +1354,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 秦朝",
     "weapon": "大秦青銅長戈 + 重甲鐵盾",
-    "sfx": "war_drum",
+    "sfx": "shield_block",
     "img": "assets/warlords/WANGJIAN.jpg?v=7.11.1"
   },
   {
@@ -1290,14 +1374,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《德川實紀》《藩翰譜》，歷經姉川、三方原、長篠、小牧長久手等合戰，以重裝名槍蜻蛉切聞名。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Honda_Tadakatsu"
+      ]
     },
     "st": 12,
     "ew": 16,
-    "hp": 736,
-    "atk": 130,
+    "hp": 563,
+    "atk": 140,
     "def": 0.28,
     "skill": {
       "name": "蜻蛉切無傷",
@@ -1315,7 +1402,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "蜻蛉切神槍 + 鹿角脇立兜",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/HONDA.jpg?v=7.11.1"
   },
   {
@@ -1335,13 +1422,16 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "qualified",
+      "note": "見《信長公記》，佐和山與北陸軍團主帥，瓶割城故事具戰國傳說色彩，賤岳敗後於北之庄自盡。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Shibata_Katsuie"
+      ]
     },
     "st": 10,
     "ew": 12,
-    "hp": 436,
+    "hp": 316,
     "atk": 82,
     "def": 0.24,
     "skill": {
@@ -1361,7 +1451,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "瓶割刀 + 漆黑重甲具足",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/SHIBATA.jpg?v=7.11.1"
   },
   {
@@ -1380,14 +1470,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·廉頗藺相如列傳》，率趙軍連克齊燕魏，長平前線築堅壘相持強秦三年不敗。",
+      "sources": [
+        "https://ctext.org/shiji/lian-po-lin-xiang-ru-lie-zhuan/zh"
+      ]
     },
     "st": 10,
     "ew": 18,
-    "hp": 644,
-    "atk": 108,
+    "hp": 505,
+    "atk": 120,
     "def": 0.28,
     "skill": {
       "name": "長平堅壁",
@@ -1405,7 +1498,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 戰國",
     "weapon": "青銅重戟 + 戰國大盾",
-    "sfx": "war_drum",
+    "sfx": "shield_block",
     "img": "assets/warlords/LIANPO.jpg?v=7.11.1"
   },
   {
@@ -1426,14 +1519,17 @@
       "FORMATION_SHIELD"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·蒙恬列傳》，率三十萬大軍北逐匈奴收復河南地，連接戰國邊牆成萬里長城。",
+      "sources": [
+        "https://ctext.org/shiji/meng-tian-lie-zhuan/zh"
+      ]
     },
     "st": 14,
     "ew": 22,
-    "hp": 432,
-    "atk": 112,
+    "hp": 331,
+    "atk": 120,
     "def": 0.08,
     "skill": {
       "name": "萬里長城",
@@ -1474,14 +1570,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·關羽傳》，白馬斬顏良、襄樊水淹七軍擒于禁斬龐德，威震華夏。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Guan_Yu"
+      ]
     },
     "st": 14,
     "ew": 22,
-    "hp": 744,
-    "atk": 136,
+    "hp": 563,
+    "atk": 144,
     "def": 0.26,
     "skill": {
       "name": "威震華夏",
@@ -1518,14 +1617,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·張飛傳》，當陽據水斷橋喝退曹軍、義釋嚴顏、宕渠破張郃，並稱萬人敵。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Zhang_Fei"
+      ]
     },
     "st": 10,
     "ew": 12,
-    "hp": 632,
-    "atk": 114,
+    "hp": 484,
+    "atk": 124,
     "def": 0.25,
     "skill": {
       "name": "當陽斷橋",
@@ -1543,7 +1645,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "丈八蛇矛 + 烏金鐵環甲",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/ZHANGFEI.jpg?v=7.11.1"
   },
   {
@@ -1562,14 +1664,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《北條五代記》等關東文書，河越夜戰大破上杉聯合軍、小田原籠城退上杉謙信與武田信玄。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/H%C5%8Dj%C5%8D_Ujiyasu"
+      ]
     },
     "st": 12,
     "ew": 20,
-    "hp": 532,
-    "atk": 94,
+    "hp": 409,
+    "atk": 102,
     "def": 0.26,
     "skill": {
       "name": "相模獅籠城",
@@ -1588,7 +1693,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "采配 + 太刀",
-    "sfx": "war_drum",
+    "sfx": "shield_block",
     "img": "assets/warlords/HOJO_UJIYASU.jpg?v=7.11.59"
   },
   {
@@ -1608,13 +1713,16 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·夏侯惇傳》，長期任曹操前方統帥，中流矢傷目後仍堅守軍務。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Xiahou_Dun"
+      ]
     },
     "st": 10,
     "ew": 14,
-    "hp": 452,
+    "hp": 328,
     "atk": 84,
     "def": 0.24,
     "skill": {
@@ -1652,14 +1760,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "qualified",
+      "note": "見九州戰國史料，乘輿指揮大友軍堅守立花山城屢敗毛利與島津軍，「雷神」傳說見後世軍記。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Tachibana_D%C5%8Dsetsu"
+      ]
     },
     "st": 10,
     "ew": 20,
-    "hp": 528,
-    "atk": 96,
+    "hp": 421,
+    "atk": 108,
     "def": 0.26,
     "skill": {
       "name": "雷神斬雷",
@@ -1694,13 +1805,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《高麗史·崔瑩傳》，率高麗軍掃平紅巾軍與倭寇、鎮壓內亂，威名著於高麗末年。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Choe_Yeong"
+      ]
     },
     "st": 10,
     "ew": 16,
-    "hp": 456,
+    "hp": 331,
     "atk": 84,
     "def": 0.24,
     "skill": {
@@ -1719,7 +1833,7 @@
     "flag": "🇰🇷",
     "origin": "韓國 · 高麗",
     "weapon": "高麗大刀 + 頭頂鐵胄",
-    "sfx": "blade_clash",
+    "sfx": "shield_block",
     "img": "assets/warlords/CHOIYOUNG.jpg?v=7.11.87"
   },
   {
@@ -1739,14 +1853,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·典韋傳》，善使雙鐵戟，宛城張繡反叛時獨守營門力戰至死護曹操突圍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Dian_Wei"
+      ]
     },
     "st": 8,
     "ew": 10,
-    "hp": 352,
-    "atk": 68,
+    "hp": 235,
+    "atk": 58,
     "def": 0.23,
     "skill": {
       "name": "古之惡來",
@@ -1765,7 +1882,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "雙鐵戟 + 重裝近衛鎧",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/DIANWEI.jpg?v=7.11.93"
   },
   {
@@ -1786,15 +1903,18 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·許褚傳》，潼關渡河戰單手舉鞍蔽曹、威懾馬超於渭南。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Xu_Chu"
+      ]
     },
     "st": 8,
     "ew": 14,
-    "hp": 528,
-    "atk": 96,
-    "def": 0.26,
+    "hp": 380,
+    "atk": 95,
+    "def": 0.25,
     "skill": {
       "name": "裸衣虎癡",
       "phase": "P3",
@@ -1812,7 +1932,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "虎頭大金刀 + 粗鐵皮甲",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/XUCHU.jpg?v=7.11.68"
   },
   {
@@ -1832,14 +1952,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《關原合戰記》與薩摩藩史料，率島津兵以中央突破法自關原戰場突圍生還，名震戰國。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Shimazu_Yoshihiro"
+      ]
     },
     "st": 14,
     "ew": 16,
-    "hp": 612,
-    "atk": 110,
+    "hp": 473,
+    "atk": 120,
     "def": 0.25,
     "skill": {
       "name": "鬼石曼子背進",
@@ -1877,15 +2000,18 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·孫破虜討逆傳》，討伐董卓屢敗華雄、呂布軍率先攻入洛陽修復漢陵。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sun_Jian"
+      ]
     },
     "st": 12,
     "ew": 14,
-    "hp": 520,
-    "atk": 96,
-    "def": 0.25,
+    "hp": 426,
+    "atk": 110,
+    "def": 0.26,
     "skill": {
       "name": "江東猛虎",
       "phase": "P3",
@@ -1918,14 +2044,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《三國史記·階伯列傳》，黃山伐率五千決死士迎擊新羅五萬大軍，四戰四捷後力竭陣亡。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Gyebaek"
+      ]
     },
     "st": 8,
     "ew": 12,
-    "hp": 352,
-    "atk": 68,
+    "hp": 238,
+    "atk": 60,
     "def": 0.23,
     "skill": {
       "name": "黃山伐決死",
@@ -1943,7 +2072,7 @@
     "flag": "🇰🇷",
     "origin": "韓國 · 百濟",
     "weapon": "百濟環首大刀 + 鐵鱗背心",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/GYEBAEK.jpg?v=7.11.94"
   },
   {
@@ -1960,13 +2089,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "tang_song_ming",
+      "status": "source-linked",
+      "note": "見《宋史·楊業傳》，代州雁門大破遼軍十餘萬，陳家谷遭友軍失期不救孤軍血戰殉國。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yang_Ye"
+      ]
     },
     "st": 10,
     "ew": 16,
-    "hp": 456,
+    "hp": 331,
     "atk": 84,
     "def": 0.25,
     "skill": {
@@ -2007,14 +2139,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·曹仁傳》，南郡抗周瑜、樊城洪水圍城死守數月不降，受讚為天人之勇。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Cao_Ren"
+      ]
     },
     "st": 8,
     "ew": 18,
-    "hp": 532,
-    "atk": 92,
+    "hp": 406,
+    "atk": 100,
     "def": 0.27,
     "skill": {
       "name": "樊城天人",
@@ -2032,7 +2167,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "重鋼大盾 + 短刃佩刀",
-    "sfx": "war_drum",
+    "sfx": "shield_block",
     "img": "assets/warlords/CAOREN.jpg?v=7.11.59"
   },
   {
@@ -2050,14 +2185,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·周泰傳》，宣城以身護孫權身受十二創，濡須孫權命解衣指瘡賜御幘青縑傘蓋。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Zhou_Tai"
+      ]
     },
     "st": 8,
     "ew": 10,
-    "hp": 352,
-    "atk": 66,
+    "hp": 247,
+    "atk": 62,
     "def": 0.23,
     "skill": {
       "name": "膚如刻畫",
@@ -2075,7 +2213,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "截頭厚刃刀 + 肉盾鐵軀",
-    "sfx": "blade_clash",
+    "sfx": "shield_block",
     "img": "assets/warlords/ZHOUTAI.jpg?v=7.11.94"
   },
   {
@@ -2095,14 +2233,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《井伊家傳記》《德川實紀》，承繼武田舊部組井伊赤備隊，於小牧長久手與關原立首功。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ii_Naomasa"
+      ]
     },
     "st": 12,
     "ew": 14,
-    "hp": 456,
-    "atk": 86,
+    "hp": 319,
+    "atk": 80,
     "def": 0.25,
     "skill": {
       "name": "井伊赤鬼",
@@ -2138,14 +2279,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《清正記》，賤岳七本槍出身，擅築熊本、蔚山名城並率重甲精銳死守蔚山籠城。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kat%C5%8D_Kiyomasa"
+      ]
     },
     "st": 8,
     "ew": 12,
-    "hp": 356,
-    "atk": 68,
+    "hp": 247,
+    "atk": 62,
     "def": 0.23,
     "skill": {
       "name": "肥後虎之壘",
@@ -2163,7 +2307,7 @@
     "flag": "🇯🇵",
     "origin": "日本 · 戰國",
     "weapon": "片鎌槍 + 長烏帽子形兜",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/KATOKIYOMASA.jpg?v=7.11.95"
   },
   {
@@ -2180,14 +2324,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·于禁傳》，治軍最為嚴整毅重，宛城兵亂率先整軍禦敵，晚節因水淹七軍投降受譏。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yu_Jin"
+      ]
     },
     "st": 8,
     "ew": 16,
-    "hp": 348,
-    "atk": 66,
+    "hp": 235,
+    "atk": 58,
     "def": 0.24,
     "skill": {
       "name": "毅重假節",
@@ -2205,7 +2352,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "鐵環長刀 + 堅木大盾",
-    "sfx": "war_drum",
+    "sfx": "shield_block",
     "img": "assets/warlords/YUJIN.jpg?v=7.11.94"
   },
   {
@@ -2225,15 +2372,18 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·李將軍列傳》，射術出神、夜射獵草石沒羽，匈奴畏稱「漢之飛將軍」數年不敢入塞。",
+      "sources": [
+        "https://ctext.org/shiji/li-jiang-jun-lie-zhuan/zh"
+      ]
     },
     "st": 18,
     "ew": 22,
-    "hp": 520,
-    "atk": 138,
-    "def": 0.06,
+    "hp": 415,
+    "atk": 152,
+    "def": 0.07,
     "skill": {
       "name": "射石沒羽",
       "phase": "P2",
@@ -2272,21 +2422,24 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《左傳·成公十六年》《戰國策》，鄢陵之戰一矢穿七札，後人尊為春秋第一神射手。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yang_Youji"
+      ]
     },
     "st": 18,
-    "ew": 20,
-    "hp": 512,
-    "atk": 142,
-    "def": 0.08,
+    "ew": 22,
+    "hp": 386,
+    "atk": 146,
+    "def": 0.09,
     "skill": {
       "name": "百步穿楊",
       "phase": "P2",
-      "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.06；本次命中 +18 個百分點（上限 96%）；本次忽略 35% 護甲（與破甲重擊疊加可穿透玄甲底線）。持續效果至戰鬥結束。",
+      "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.09；本次命中 +18 個百分點（上限 96%）；本次忽略 35% 護甲（與破甲重擊疊加可穿透玄甲底線）。持續效果至戰鬥結束。",
       "effects": {
-        "damage": 1.06,
+        "damage": 1.09,
         "hit": 0.18,
         "armorPierce": 0.35
       },
@@ -2317,15 +2470,18 @@
       "FORMATION_SHIELD"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見太田牛一《信長公記》，桶狹間奇襲、長篠設馬防柵與大量鐵砲輪射破武田騎軍，開創近世統一秩序。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Oda_Nobunaga"
+      ]
     },
     "st": 16,
     "ew": 28,
-    "hp": 512,
-    "atk": 136,
-    "def": 0.06,
+    "hp": 412,
+    "atk": 152,
+    "def": 0.08,
     "skill": {
       "name": "長篠三段擊",
       "phase": "P2",
@@ -2363,14 +2519,17 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "qualified",
+      "note": "見《平家物語·屋島合戰》，屋島波濤間遠射折斷船頭金箔紅扇；屬軍記文學代表名場面。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Nasu_no_Yoichi"
+      ]
     },
     "st": 18,
     "ew": 18,
-    "hp": 344,
-    "atk": 94,
+    "hp": 264,
+    "atk": 100,
     "def": 0.04,
     "skill": {
       "name": "屋島扇之的",
@@ -2408,13 +2567,16 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《三國史記·高句麗本紀》及好太王碑，為高句麗建國始祖「東明聖王」，神射事蹟帶神話傳承。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Jumong"
+      ]
     },
     "st": 18,
     "ew": 22,
-    "hp": 516,
+    "hp": 374,
     "atk": 136,
     "def": 0.06,
     "skill": {
@@ -2452,13 +2614,16 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·黃忠傳》，老而彌堅，定軍山登高推鋒一鼓擊斬魏大將夏侯淵。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Huang_Zhong"
+      ]
     },
     "st": 16,
     "ew": 20,
-    "hp": 428,
+    "hp": 310,
     "atk": 114,
     "def": 0.06,
     "skill": {
@@ -2495,14 +2660,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·太史慈傳》，猿臂善射、城上飛矢貫叛徒之手，北海突圍、神亭單挑孫策。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Taishi_Ci"
+      ]
     },
     "st": 14,
     "ew": 14,
-    "hp": 348,
-    "atk": 96,
+    "hp": 270,
+    "atk": 104,
     "def": 0.06,
     "skill": {
       "name": "猿臂貫手",
@@ -2537,13 +2705,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "tang_song_ming",
+      "status": "source-linked",
+      "note": "見《宋史·韓世忠傳》，黃天蕩扼守大江阻金軍四十八日，製「克敵弓」配神臂弩破金軍重騎。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Han_Shizhong"
+      ]
     },
     "st": 16,
     "ew": 22,
-    "hp": 432,
+    "hp": 313,
     "atk": 114,
     "def": 0.06,
     "skill": {
@@ -2582,14 +2753,17 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·廉頗藺相如列傳》，雁門破匈奴十餘萬騎使其十餘年不近邊，肥之戰、番吾之戰兩挫秦軍。",
+      "sources": [
+        "https://ctext.org/shiji/lian-po-lin-xiang-ru-lie-zhuan/zh"
+      ]
     },
     "st": 20,
     "ew": 34,
-    "hp": 528,
-    "atk": 136,
+    "hp": 400,
+    "atk": 144,
     "def": 0.08,
     "skill": {
       "name": "代郡萬弩",
@@ -2626,14 +2800,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《信長公記》《兼見卿記》，精熟火繩槍戰法與近畿軍政，1582 年發動本能寺之變。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Akechi_Mitsuhide"
+      ]
     },
     "st": 18,
     "ew": 24,
-    "hp": 340,
-    "atk": 92,
+    "hp": 267,
+    "atk": 100,
     "def": 0.04,
     "skill": {
       "name": "本能寺雷火",
@@ -2670,14 +2847,17 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《信長公記》石山合戰史料，統領紀伊雜賀眾精銳鐵砲傭兵屢屢重創織田大軍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Saika_Magoichi"
+      ]
     },
     "st": 20,
     "ew": 20,
-    "hp": 416,
-    "atk": 114,
+    "hp": 322,
+    "atk": 122,
     "def": 0.05,
     "skill": {
       "name": "八咫烏銃擊",
@@ -2714,6 +2894,7 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
+      "era": "korea_dynasties",
       "status": "source-linked",
       "note": "1593 年幸州大捷率朝鮮軍民以神機箭火車、弓弩與巨石重創進犯日軍，正史《朝鮮王朝實錄》記載明確。",
       "sources": [
@@ -2723,8 +2904,8 @@
     },
     "st": 14,
     "ew": 16,
-    "hp": 284,
-    "atk": 78,
+    "hp": 223,
+    "atk": 86,
     "def": 0.06,
     "skill": {
       "name": "幸州火車",
@@ -2762,14 +2943,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《北齊書·斛律光傳》，善騎射號「落雕都督」，邙山大破北周大軍十萬，百戰無敗惜冤死讒言。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Hul%C3%BC_Guang"
+      ]
     },
     "st": 16,
     "ew": 24,
-    "hp": 420,
-    "atk": 112,
+    "hp": 316,
+    "atk": 118,
     "def": 0.06,
     "skill": {
       "name": "落雕都督",
@@ -2809,14 +2993,17 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《晉書·馬隆傳》，募勇士三千五百人造偏箱車八陣、配連弩長矛平定涼州禿髮樹機能之亂。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ma_Long_(Jin_dynasty)"
+      ]
     },
     "st": 18,
     "ew": 28,
-    "hp": 348,
-    "atk": 94,
+    "hp": 261,
+    "atk": 98,
     "def": 0.07,
     "skill": {
       "name": "偏箱強弩陣",
@@ -2858,13 +3045,16 @@
       "FORMATION_SHIELD"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·絳侯周勃世家》，細柳治軍連天子車駕亦須持節方可入營；平七國之亂大破吳楚聯軍。",
+      "sources": [
+        "https://ctext.org/shiji/jiang-hou-zhou-bo-shi-jia/zh"
+      ]
     },
     "st": 10,
     "ew": 26,
-    "hp": 648,
+    "hp": 470,
     "atk": 110,
     "def": 0.28,
     "skill": {
@@ -2884,7 +3074,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 西漢",
     "weapon": "漢軍大盾長戟 + 細柳令旗",
-    "sfx": "war_drum",
+    "sfx": "shield_block",
     "img": "assets/warlords/ZHOUYAFU.jpg?v=7.11.1"
   },
   {
@@ -2901,13 +3091,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "tang_song_ming",
+      "status": "source-linked",
+      "note": "見《宋史·宗澤傳》，靖康建炎間率義軍二十四戰連捷、築京師連弩箭樓，臨終三呼「過河」。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Zong_Ze"
+      ]
     },
     "st": 14,
     "ew": 24,
-    "hp": 288,
+    "hp": 209,
     "atk": 78,
     "def": 0.06,
     "skill": {
@@ -2945,13 +3138,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《德川實紀》，伏見城以千八百守軍配鐵砲弓弩血戰四萬西軍十餘日，護家康主力完成關原布局。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Torii_Mototada"
+      ]
     },
     "st": 12,
     "ew": 16,
-    "hp": 232,
+    "hp": 168,
     "atk": 62,
     "def": 0.06,
     "skill": {
@@ -2988,13 +3184,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《高麗史·崔茂宣傳》，首研火藥製造並創置火桶都監，1380 年鎮浦海戰以艦砲焚毀五百餘艘倭船。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Choe_Mu-seon"
+      ]
     },
     "st": 16,
     "ew": 20,
-    "hp": 228,
+    "hp": 165,
     "atk": 62,
     "def": 0.04,
     "skill": {
@@ -3029,13 +3228,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《後漢書·耿弇傳》，光武雲台名將，「有志者事竟成」圍城打援平定張步齊地四十六郡。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Geng_Yan"
+      ]
     },
     "st": 16,
     "ew": 22,
-    "hp": 284,
+    "hp": 206,
     "atk": 78,
     "def": 0.05,
     "skill": {
@@ -3073,14 +3275,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《甲陽軍鑑》與市川家文書，武田晴信軍師精研築城與陣法，第四次川中島合戰獻策後力戰陣亡。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yamamoto_Kansuke"
+      ]
     },
     "st": 38,
     "ew": 60,
-    "hp": 236,
-    "atk": 58,
+    "hp": 180,
+    "atk": 63,
     "def": 0.04,
     "skill": {
       "name": "啄木鳥奇策",
@@ -3116,13 +3321,16 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《後漢書·馮異傳》，大樹將軍謙退不伐，崤底設伏大破赤眉軍，平定關中三輔歸心。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Feng_Yi"
+      ]
     },
     "st": 18,
     "ew": 24,
-    "hp": 284,
+    "hp": 206,
     "atk": 78,
     "def": 0.06,
     "skill": {
@@ -3158,13 +3366,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《朝倉宗滴話記》，輔佐朝倉家征戰一揆並撰兵法錄，晚年率越前軍團實戰採用火繩銃。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Asakura_S%C5%8Dteki"
+      ]
     },
     "st": 14,
     "ew": 22,
-    "hp": 280,
+    "hp": 203,
     "atk": 78,
     "def": 0.04,
     "skill": {
@@ -3200,13 +3411,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《多聞院日記》《信長公記》，擅長城市防禦與早期大量部署鐵砲炸藥戰術，信貴山城引爆自盡具話題性。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Matsunaga_Hisahide"
+      ]
     },
     "st": 16,
     "ew": 20,
-    "hp": 220,
+    "hp": 160,
     "atk": 62,
     "def": 0.02,
     "skill": {
@@ -3244,14 +3458,17 @@
       "PASSIVE_VOLLEY"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《上井覺兼日記》，指揮島津氏經典「釣野伏」誘敵反殺戰術，於沖田畷以火砲連射破龍造寺隆信。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Shimazu_Iehisa"
+      ]
     },
     "st": 20,
     "ew": 26,
-    "hp": 352,
-    "atk": 94,
+    "hp": 264,
+    "atk": 98,
     "def": 0.06,
     "skill": {
       "name": "釣野伏齊射",
@@ -3289,13 +3506,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《信長公記》，擅長火繩槍調度與近江情報網，任關東管領並於各地戰線展現靈活進退。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Takigawa_Kazumasu"
+      ]
     },
     "st": 18,
     "ew": 22,
-    "hp": 228,
+    "hp": 165,
     "atk": 62,
     "def": 0.04,
     "skill": {
@@ -3331,13 +3551,16 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《德川實紀》《寬政重修諸家譜》，本多忠勝伯父，長篠合戰指揮德川家先鋒鐵砲足輕參戰。",
+      "sources": [
+        "https://ja.wikipedia.org/wiki/%E6%9C%AC%E5%A4%9A%E5%BF%A0%E6%AC%A1"
+      ]
     },
     "st": 14,
     "ew": 16,
-    "hp": 228,
+    "hp": 165,
     "atk": 62,
     "def": 0.04,
     "skill": {
@@ -3378,22 +3601,25 @@
       "FORMATION_SHIELD"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·周瑜傳》，建安十三年赤壁之戰與劉備聯軍以火攻大破曹操水步大軍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Zhou_Yu"
+      ]
     },
     "st": 24,
     "ew": 72,
-    "hp": 344,
-    "atk": 78,
+    "hp": 241,
+    "atk": 77,
     "def": 0.04,
     "skill": {
       "name": "赤壁東風",
       "phase": "P1",
-      "desc": "P1 開局號令，每戰一次：全軍後續傷害 ×1.06；全軍後續命中 +2 個百分點（同類取最高）；敵軍後續命中 -4 個百分點（同類取最高）。持續效果至戰鬥結束。",
+      "desc": "P1 開局號令，每戰一次：全軍後續傷害 ×1.04；全軍後續命中 +2 個百分點（同類取最高）；敵軍後續命中 -3 個百分點（同類取最高）。持續效果至戰鬥結束。",
       "effects": {
-        "commandAttack": 0.06,
-        "enemyHit": 0.04,
+        "commandAttack": 0.04,
+        "enemyHit": 0.03,
         "teamHit": 0.02
       },
       "fx": "fire_storm",
@@ -3423,6 +3649,7 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
+      "era": "korea_dynasties",
       "status": "qualified",
       "note": "鳴梁實戰十三艘與戰前奏報十二艘須區分；海峽潮流為戰術要素，不以鳴梁龜船或鐵甲覆頂作已證實事實。敵艦數量有來源差異。",
       "sources": [
@@ -3431,8 +3658,8 @@
     },
     "st": 84,
     "ew": 26,
-    "hp": 712,
-    "atk": 136,
+    "hp": 484,
+    "atk": 124,
     "def": 0.14,
     "skill": {
       "name": "鳴梁扼流",
@@ -3472,14 +3699,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《信長公記》，築鐵皮覆蓋「鐵甲船」於第二次木津川口海戰大勝毛利水軍，任織田與豐臣水軍柱石。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kuki_Yoshitaka"
+      ]
     },
     "st": 34,
     "ew": 22,
-    "hp": 584,
-    "atk": 114,
+    "hp": 435,
+    "atk": 118,
     "def": 0.14,
     "skill": {
       "name": "鐵甲船大筒",
@@ -3517,15 +3747,18 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·陸遜傳》，夷陵火燒連營破劉備、石亭大破曹休十萬，出將入相名列武廟。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lu_Xun_(Eastern_Wu)"
+      ]
     },
     "st": 54,
     "ew": 46,
-    "hp": 576,
-    "atk": 114,
-    "def": 0.11,
+    "hp": 383,
+    "atk": 101,
+    "def": 0.1,
     "skill": {
       "name": "火燒連營",
       "phase": "P2",
@@ -3562,14 +3795,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《高麗史·尹瓘傳》，編練「別武班」特種水陸精銳北逐女真、築東北九城守邊。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yun_Gwan"
+      ]
     },
     "st": 48,
     "ew": 28,
-    "hp": 468,
-    "atk": 98,
+    "hp": 322,
+    "atk": 90,
     "def": 0.12,
     "skill": {
       "name": "別武班突擊",
@@ -3610,14 +3846,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·呂蒙傳》，白衣渡江精妙偽裝奇襲荊州、襲奪江陵烽火台擒殺關羽。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/L%C3%BC_Meng"
+      ]
     },
     "st": 86,
     "ew": 34,
-    "hp": 700,
-    "atk": 130,
+    "hp": 470,
+    "atk": 116,
     "def": 0.12,
     "skill": {
       "name": "白衣渡江",
@@ -3656,14 +3895,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·甘寧傳》，率百騎銜枚夜襲曹營、「孟德有張遼，孤有甘興霸」之稱。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Gan_Ning"
+      ]
     },
     "st": 64,
     "ew": 18,
-    "hp": 476,
-    "atk": 102,
+    "hp": 331,
+    "atk": 96,
     "def": 0.12,
     "skill": {
       "name": "百騎劫營",
@@ -3680,7 +3922,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "短戟飛刀 + 銅鈴錦帆",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/GANNING.jpg?v=7.11.1"
   },
   {
@@ -3697,14 +3939,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·黃蓋傳》，獻計詐降駕十艘蒙衝鬥艦滿載薪草膏油火燒赤壁曹營。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Huang_Gai"
+      ]
     },
     "st": 44,
     "ew": 20,
-    "hp": 368,
-    "atk": 78,
+    "hp": 302,
+    "atk": 92,
     "def": 0.08,
     "skill": {
       "name": "苦肉火船",
@@ -3743,13 +3988,16 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·姜維傳》，承諸葛亮兵法九伐中原，段谷、洮西皆有交鋒，終與鍾會計敗殉蜀。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Jiang_Wei"
+      ]
     },
     "st": 46,
     "ew": 32,
-    "hp": 472,
+    "hp": 342,
     "atk": 98,
     "def": 0.11,
     "skill": {
@@ -3788,15 +4036,18 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "tang_song_ming",
+      "status": "source-linked",
+      "note": "見《舊唐書·李靖傳》《李衛公問對》，十日破蕭銑水軍、雪夜奔襲陰山滅東突厥，為大唐第一軍神。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Li_Jing_(general)"
+      ]
     },
     "st": 68,
     "ew": 38,
-    "hp": 708,
-    "atk": 134,
-    "def": 0.13,
+    "hp": 461,
+    "atk": 116,
+    "def": 0.12,
     "skill": {
       "name": "雪夜襲陰山",
       "phase": "P1",
@@ -3833,13 +4084,16 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·鄧艾傳》，景元四年率兵偷渡陰平險道七百里奇襲江油綿竹滅蜀漢。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Deng_Ai"
+      ]
     },
     "st": 72,
     "ew": 28,
-    "hp": 568,
+    "hp": 412,
     "atk": 116,
     "def": 0.1,
     "skill": {
@@ -3875,14 +4129,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見瀬戸内海村上水軍文書，嚴島之戰率能島水軍以潮汐戰法與焙烙火彈助毛利元就覆滅陶晴賢水軍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Murakami_Takeyoshi"
+      ]
     },
     "st": 38,
     "ew": 16,
-    "hp": 260,
-    "atk": 62,
+    "hp": 220,
+    "atk": 76,
     "def": 0.07,
     "skill": {
       "name": "能島焙烙玉",
@@ -3919,14 +4176,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《晉書·謝玄傳》，組建精銳北府兵，太元八年淝水之戰以八萬渡河反擊大破前秦八十萬大軍。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Xie_Xuan"
+      ]
     },
     "st": 50,
     "ew": 36,
-    "hp": 720,
-    "atk": 134,
+    "hp": 508,
+    "atk": 128,
     "def": 0.14,
     "skill": {
       "name": "北府風鶴",
@@ -3960,14 +4220,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "tang_song_ming",
+      "status": "source-linked",
+      "note": "見《宋史·虞允文傳》，紹興三十一年以參贊軍事書生之身於采石磯指揮水師霹靂砲破海陵王完顏亮渡江。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yu_Yunwen"
+      ]
     },
     "st": 26,
     "ew": 26,
-    "hp": 256,
-    "atk": 60,
+    "hp": 212,
+    "atk": 72,
     "def": 0.06,
     "skill": {
       "name": "采石霹靂",
@@ -4006,14 +4269,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·魏延傳》，鎮守漢中十餘年重門設險，曾建議率精騎萬人自子午谷直取長安。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Wei_Yan"
+      ]
     },
     "st": 52,
     "ew": 20,
-    "hp": 580,
-    "atk": 118,
+    "hp": 455,
+    "atk": 132,
     "def": 0.12,
     "skill": {
       "name": "子午奇略",
@@ -4030,7 +4296,7 @@
     "flag": "🇨🇳",
     "origin": "中國 · 三國",
     "weapon": "狂骨環刀 + 伏兵令旗",
-    "sfx": "blade_clash",
+    "sfx": "heavy_strike",
     "img": "assets/warlords/WEIYAN.jpg?v=7.11.59"
   },
   {
@@ -4050,13 +4316,16 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見安藝毛利家文書，嚴島暴風雨夜以少勝多殲滅陶晴賢，制霸中國地方；「三矢之訓」流傳後世。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/M%C5%8Dri_Motonari"
+      ]
     },
     "st": 52,
     "ew": 38,
-    "hp": 692,
+    "hp": 502,
     "atk": 128,
     "def": 0.12,
     "skill": {
@@ -4095,13 +4364,16 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《德川實紀》《寬政重修諸家譜》，神君伊賀越時統領伊賀武士兼忍軍護衛家康脫險，任伊賀同心統領。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Hattori_Hanz%C5%8D"
+      ]
     },
     "st": 86,
     "ew": 22,
-    "hp": 452,
+    "hp": 328,
     "atk": 100,
     "def": 0.07,
     "skill": {
@@ -4137,14 +4409,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《高麗史·鄭地傳》，高麗末年督造大型戰艦並配火砲於觀音浦、南海水戰連敗倭寇。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Jeong_Ji"
+      ]
     },
     "st": 30,
     "ew": 18,
-    "hp": 368,
-    "atk": 76,
+    "hp": 290,
+    "atk": 86,
     "def": 0.1,
     "skill": {
       "name": "觀音浦斬寇",
@@ -4182,14 +4457,17 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·樂進傳》，五子良將之一，從征官渡、柳城、合肥每戰先登立功。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Yue_Jin"
+      ]
     },
     "st": 34,
     "ew": 18,
-    "hp": 372,
-    "atk": 78,
+    "hp": 307,
+    "atk": 92,
     "def": 0.11,
     "skill": {
       "name": "無堅不陷",
@@ -4225,14 +4503,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "qualified",
+      "note": "見《漢晉春秋》與《華陽國志》，南中渠帥聚各姓起兵，「七擒七縱」情節主要源自裴注引《漢晉春秋》。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Meng_Huo"
+      ]
     },
     "st": 46,
     "ew": 12,
-    "hp": 276,
-    "atk": 66,
+    "hp": 232,
+    "atk": 80,
     "def": 0.08,
     "skill": {
       "name": "南中藤甲象",
@@ -4270,13 +4551,16 @@
       "HEAVY_AP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·徐晃傳》，漢水背水破敵、樊城長驅直入破關羽十重鹿角，曹操讚「有周亞夫之風」。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Xu_Huang"
+      ]
     },
     "st": 42,
     "ew": 24,
-    "hp": 592,
+    "hp": 429,
     "atk": 116,
     "def": 0.14,
     "skill": {
@@ -4311,15 +4595,18 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《太閤記》《關原合戰記》，賤岳七本槍出身，豐臣時期統率淡路水軍出征九州及朝鮮。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Wakizaka_Yasuharu"
+      ]
     },
     "st": 30,
     "ew": 16,
-    "hp": 256,
-    "atk": 62,
-    "def": 0.06,
+    "hp": 244,
+    "atk": 86,
+    "def": 0.07,
     "skill": {
       "name": "淡路快船",
       "phase": "P2",
@@ -4352,14 +4639,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《宗國史》，豐臣與德川兩代皆領水軍與築城重任，擅造宇和島、今治、津城等近代水城名堡。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/T%C5%8Dd%C5%8D_Takatora"
+      ]
     },
     "st": 26,
     "ew": 22,
-    "hp": 260,
-    "atk": 62,
+    "hp": 220,
+    "atk": 76,
     "def": 0.08,
     "skill": {
       "name": "水城改築",
@@ -4397,16 +4687,18 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
+      "era": "three_kingdoms",
       "status": "source-linked",
       "note": "街亭斷水與用兵巧變有《三國志》卷十七所引記載；木門道為追擊中伏身亡。已調整為先登奇兵以貼合地形穿插與斷敵補給專長。",
       "sources": [
+        "https://ctext.org/text.pl?node=603728",
         "https://en.wikipedia.org/wiki/Zhang_He"
       ]
     },
     "st": 54,
     "ew": 24,
-    "hp": 468,
-    "atk": 98,
+    "hp": 354,
+    "atk": 104,
     "def": 0.11,
     "skill": {
       "name": "巧變斷汲",
@@ -4441,14 +4733,17 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "tang_song_ming",
+      "status": "source-linked",
+      "note": "見《宋史·曹彬傳》，統水步軍渡采石磯浮橋平定南唐金陵，「妄殺一人」之戒稱譽宋代仁將。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Cao_Bin"
+      ]
     },
     "st": 30,
     "ew": 28,
-    "hp": 372,
-    "atk": 76,
+    "hp": 293,
+    "atk": 84,
     "def": 0.1,
     "skill": {
       "name": "浮橋平江南",
@@ -4486,13 +4781,16 @@
       "FORMATION_SHIELD"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·諸葛亮傳》，隆中定策、治蜀南征北伐並推演八陣與連弩損益，忠貞智聖垂範千古。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Zhuge_Liang"
+      ]
     },
     "st": 28,
     "ew": 88,
-    "hp": 476,
+    "hp": 345,
     "atk": 92,
     "def": 0.06,
     "skill": {
@@ -4532,6 +4830,7 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
+      "era": "qin_han",
       "status": "source-linked",
       "note": "暗度陳倉、井陘背水與伏兵可連結《史記·淮陰侯列傳》；部分後世成語化敘事仍需區分。",
       "sources": [
@@ -4540,8 +4839,8 @@
     },
     "st": 34,
     "ew": 84,
-    "hp": 456,
-    "atk": 102,
+    "hp": 307,
+    "atk": 90,
     "def": 0.04,
     "skill": {
       "name": "十面埋伏",
@@ -4578,14 +4877,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·留侯世家》，運籌帷幄之中決勝千里之外，佐劉邦定關中、鴻門排難、垓下合圍定漢鼎。",
+      "sources": [
+        "https://ctext.org/shiji/liu-hou-shi-jia/zh"
+      ]
     },
     "st": 26,
     "ew": 87,
-    "hp": 464,
-    "atk": 90,
+    "hp": 357,
+    "atk": 100,
     "def": 0.06,
     "skill": {
       "name": "運籌千里",
@@ -4623,14 +4925,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《晉書·宣帝紀》，相持諸葛亮於五丈原、百日急行軍平遼東公孫淵，高平陵政變奠基晉室。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sima_Yi"
+      ]
     },
     "st": 24,
     "ew": 72,
-    "hp": 352,
-    "atk": 76,
+    "hp": 273,
+    "atk": 84,
     "def": 0.06,
     "skill": {
       "name": "鷹視狼顧",
@@ -4668,14 +4973,17 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《信長公記》《太閤記》，備中高松水攻、山崎急行軍與小田原動員完成日本近代全國性軍事一統。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Toyotomi_Hideyoshi"
+      ]
     },
     "st": 28,
     "ew": 84,
-    "hp": 464,
-    "atk": 96,
+    "hp": 345,
+    "atk": 100,
     "def": 0.06,
     "skill": {
       "name": "太閤號令",
@@ -4713,13 +5021,16 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·武帝紀》，官渡烏巢焚糧破袁紹、白狼山遠征烏桓，著《孫子略解》深通兵學。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Cao_Cao"
+      ]
     },
     "st": 36,
     "ew": 78,
-    "hp": 412,
+    "hp": 299,
     "atk": 88,
     "def": 0.06,
     "skill": {
@@ -4757,14 +5068,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《太閤記》《信長公記》，智奪稻葉山城後輔佐豐臣秀吉征討西國，與官兵衛並稱「兩兵衛」。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Takenaka_Hanbei"
+      ]
     },
     "st": 26,
-    "ew": 65,
-    "hp": 292,
-    "atk": 66,
+    "ew": 67,
+    "hp": 218,
+    "atk": 69,
     "def": 0.04,
     "skill": {
       "name": "十人奪城",
@@ -4802,13 +5116,16 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《黑田家譜》，為秀吉策劃高松水攻、中國大返還與九州關原後九州動員之核心戰略總參。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kuroda_Kanbei"
+      ]
     },
     "st": 28,
     "ew": 66,
-    "hp": 288,
+    "hp": 209,
     "atk": 66,
     "def": 0.04,
     "skill": {
@@ -4847,14 +5164,17 @@
       "FORMATION_SHIELD"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "korea_dynasties",
+      "status": "source-linked",
+      "note": "見《高麗史·姜邯贊傳》，1019 年龜州大捷以決堤水攻與伏兵殲滅契丹蕭排押大軍，位列三韓國公。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Gang_Gam-chan"
+      ]
     },
     "st": 26,
     "ew": 72,
-    "hp": 348,
-    "atk": 76,
+    "hp": 270,
+    "atk": 84,
     "def": 0.06,
     "skill": {
       "name": "龜州水淹",
@@ -4892,14 +5212,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·孫子吳起列傳》與銀雀山漢簡《孫臏兵法》，創桂陵圍魏救趙、馬陵減灶誘殺龐涓。",
+      "sources": [
+        "https://ctext.org/shiji/sun-zi-wu-qi-lie-zhuan/zh"
+      ]
     },
     "st": 28,
     "ew": 73,
-    "hp": 340,
-    "atk": 72,
+    "hp": 267,
+    "atk": 82,
     "def": 0.04,
     "skill": {
       "name": "圍魏救趙",
@@ -4937,13 +5260,16 @@
       "STAMINA_DEEP"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·孫子吳起列傳》，治魏武卒拓土西河、在楚變法強兵，「與諸侯大戰七十六，全勝六十四」。",
+      "sources": [
+        "https://ctext.org/shiji/sun-zi-wu-qi-lie-zhuan/zh"
+      ]
     },
     "st": 26,
     "ew": 78,
-    "hp": 412,
+    "hp": 299,
     "atk": 92,
     "def": 0.06,
     "skill": {
@@ -4981,14 +5307,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·郭嘉傳》，獻十勝十敗論安軍心，準確預測孫策遇刺並力主遠征烏桓定柳城。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Guo_Jia"
+      ]
     },
     "st": 36,
     "ew": 73,
-    "hp": 344,
-    "atk": 74,
+    "hp": 261,
+    "atk": 80,
     "def": 0.04,
     "skill": {
       "name": "十勝遺計",
@@ -5025,14 +5354,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·荀彧傳》，舉才規劃迎奉天子並設計迎擊呂布、死守官渡後方大戰略。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Xun_Yu"
+      ]
     },
     "st": 30,
     "ew": 67,
-    "hp": 288,
-    "atk": 62,
+    "hp": 218,
+    "atk": 67,
     "def": 0.04,
     "skill": {
       "name": "王佐居中",
@@ -5069,13 +5401,16 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·魏書·賈詡傳》，佐張繡兩挫曹操、潼關獻離間韓遂馬超策，算無遺策明哲保身。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Jia_Xu"
+      ]
     },
     "st": 42,
     "ew": 62,
-    "hp": 236,
+    "hp": 171,
     "atk": 54,
     "def": 0.02,
     "skill": {
@@ -5112,14 +5447,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見薩摩《島津氏正統系譜》，統籌家臣兄弟耳川、沖田畷大戰席捲九州大部，終向秀吉和談保領國。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Shimazu_Yoshihisa"
+      ]
     },
     "st": 24,
     "ew": 58,
-    "hp": 236,
-    "atk": 56,
+    "hp": 180,
+    "atk": 61,
     "def": 0.04,
     "skill": {
       "name": "薩摩釣野伏",
@@ -5157,13 +5495,16 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·龐統傳》，與諸葛亮齊名「鳳雛」，入蜀獻上中下三策奪涪城，惜中流矢卒於雒城。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Pang_Tong"
+      ]
     },
     "st": 24,
     "ew": 66,
-    "hp": 284,
+    "hp": 206,
     "atk": 64,
     "def": 0.06,
     "skill": {
@@ -5202,14 +5543,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·蜀書·法正傳》，獻策奪益州、定軍山登高舉旗指揮黃忠斬夏侯淵定漢中。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Fa_Zheng"
+      ]
     },
     "st": 22,
     "ew": 60,
-    "hp": 228,
-    "atk": 52,
+    "hp": 174,
+    "atk": 57,
     "def": 0.04,
     "skill": {
       "name": "定軍奇畫",
@@ -5245,14 +5589,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見真田文書與關原資料，第一次、第二次上田城以少兵挫敗德川數萬大軍，足智多謀稱「表裏比興」。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Sanada_Masayuki"
+      ]
     },
-    "st": 30,
-    "ew": 61,
-    "hp": 236,
-    "atk": 56,
+    "st": 32,
+    "ew": 62,
+    "hp": 189,
+    "atk": 62,
     "def": 0.06,
     "skill": {
       "name": "表裏比興",
@@ -5289,14 +5636,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "three_kingdoms",
+      "status": "source-linked",
+      "note": "見《三國志·吳書·魯肅傳》，建安五年即擬就「榻上策」鼎足江東，力排眾議促成孫劉赤壁破曹。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Lu_Su"
+      ]
     },
     "st": 24,
     "ew": 66,
-    "hp": 300,
-    "atk": 68,
+    "hp": 247,
+    "atk": 80,
     "def": 0.04,
     "skill": {
       "name": "榻上宏圖",
@@ -5331,16 +5681,18 @@
     ],
     "roleFlags": [],
     "historicalAudit": {
+      "era": "qin_han",
       "status": "source-linked",
-      "note": "即墨火牛陣屬陸上誘敵反擊；naval 槽是遊戲職能，不是史實水軍身分。",
+      "note": "即墨火牛陣屬陸上誘敵反擊見《史記·田單列傳》；naval 槽是遊戲奇兵職能，不是史實水軍身分。",
       "sources": [
+        "https://ctext.org/shiji/tian-dan-lie-zhuan/zh",
         "https://en.wikipedia.org/wiki/Tian_Dan"
       ]
     },
     "st": 46,
     "ew": 28,
-    "hp": 360,
-    "atk": 78,
+    "hp": 276,
+    "atk": 84,
     "def": 0.08,
     "skill": {
       "name": "即墨火牛陣",
@@ -5376,14 +5728,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "tang_song_ming",
+      "status": "source-linked",
+      "note": "見《明史·劉基傳》，佐朱元璋定先漢（陳友諒）後吳（張士誠）大略，參與大明開國諸謀議。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Liu_Ji_(Ming_dynasty)"
+      ]
     },
     "st": 24,
     "ew": 81,
-    "hp": 412,
-    "atk": 82,
+    "hp": 307,
+    "atk": 86,
     "def": 0.06,
     "skill": {
       "name": "神機誠意",
@@ -5421,6 +5776,7 @@
       "FORMATION_SHIELD"
     ],
     "historicalAudit": {
+      "era": "qin_han",
       "status": "needs-review",
       "note": "孫武生平與《孫子兵法》作者歸屬存在歷史研究爭議，不將傳統敘事當成已證實履歷。",
       "sources": [
@@ -5429,7 +5785,7 @@
     },
     "st": 30,
     "ew": 88,
-    "hp": 472,
+    "hp": 342,
     "atk": 98,
     "def": 0.06,
     "skill": {
@@ -5467,14 +5823,17 @@
       "STRATEGIST"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "qin_han",
+      "status": "source-linked",
+      "note": "見《史記·樂毅列傳》，佩燕趙韓魏楚五國相印濟西破齊，連下七十餘城，受封昌國君。",
+      "sources": [
+        "https://ctext.org/shiji/le-yi-lie-zhuan/zh"
+      ]
     },
     "st": 28,
     "ew": 79,
-    "hp": 412,
-    "atk": 90,
+    "hp": 310,
+    "atk": 96,
     "def": 0.06,
     "skill": {
       "name": "昌國合縱",
@@ -5513,13 +5872,16 @@
       "FORMATION_SHIELD"
     ],
     "historicalAudit": {
-      "status": "unverified",
-      "note": "",
-      "sources": []
+      "era": "sengoku",
+      "status": "source-linked",
+      "note": "見《德川實紀》，於三方原歷練忍耐、小牧與關原勝出、終至大坂之陣開創江戶二百六十年和平盛世。",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Tokugawa_Ieyasu"
+      ]
     },
     "st": 26,
     "ew": 77,
-    "hp": 412,
+    "hp": 299,
     "atk": 84,
     "def": 0.08,
     "skill": {

@@ -1,8 +1,16 @@
 # TopWarlords 跨專案 Firebase 與本機儲存隔離設計規格
 
-**版本**：`v7.10.10`  
+**版本**：`v7.12.0`  
 **適用專案**：頂尖對戰：15元名將聯合作戰 (`TopWarlords`，`gameId: 'topwarlords'`)  
 **共用資料庫**：Firebase Realtime Database (`top-game-913c0-default-rtdb`)
+
+---
+
+## 0. v7.12.0 安全與管理員驗證強化
+
+- **遙測管理員驗證改為記憶體態＋工作階段權杖**：[js/telemetry.js](../js/telemetry.js) 不再將 `ADMIN_HASH` 長期寫入 `localStorage`（並自動清除舊鍵 `wl15_telemetry_admin_v1`），改以 `sessionStorage` 儲存 `ADMIN_SESSION_TOKEN_KEY`（`wl15_telemetry_admin_session_v1`）並搭配執行期記憶體旗標 `adminUnlockedInMemory` 與隨機種子 `SESSION_NONCE`，關閉分頁即自動登出。
+- **CSP 與連線白名單**：[vercel.json](../vercel.json) 新增完整 `Content-Security-Policy` 標頭，限制 `script-src`、`connect-src`（僅允許 Firebase RTDB / PeerJS / Google Analytics / 本域）與 `frame-ancestors 'none'`，並將專案 `name` 正名為 `topwarlords`。
+- **建議 RTDB Security Rules 加固**：於 Firebase Console 針對 `global_stats/warlords/summary`、`players` 建議限制欄位型別與非負整數範圍；對 `pvp_rooms/WL_*` 限制寫入內容大小與必須攜帶 `gameId === 'topwarlords'`。
 
 ---
 

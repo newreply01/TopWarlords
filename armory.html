@@ -33,12 +33,13 @@
 <meta property="og:title" content="TopWarlords 東亞名將錄全鑑 | 125 位日韓中歷史名將實戰參數">
 <meta property="og:description" content="收錄 TopWarlords 全部 125 位日韓中歷史名將錄，涵蓋五大兵團、五階軍令費用、古典水墨戰將圖、五維數值與孫子兵法招牌戰術特性。">
 <meta property="og:url" content="https://newreply01.github.io/TopWarlords/armory.html">
-<meta property="og:image" content="https://newreply01.github.io/TopWarlords/assets/warlords/GUANYU.jpg">
+<meta property="og:image" content="https://newreply01.github.io/TopWarlords/assets/og-banner.jpg">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://newreply01.github.io/TopWarlords/assets/og-banner.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.11.96">
+<link rel="stylesheet" href="style.css?v=7.12.0">
 <link rel="manifest" href="manifest.json">
 <style>
 /* =====================================================
@@ -956,8 +957,20 @@ body {
         <div class="cost-pills" id="natFilterGroup">
           <button class="cost-btn active" style="width:auto;padding:0 10px;" data-nat="all">全部</button>
           <button class="cost-btn" style="width:auto;padding:0 8px;" data-nat="🇨🇳">🇨🇳 中國 (75)</button>
-          <button class="cost-btn" style="width:auto;padding:0 8px;" data-nat="🇯🇵">🇯🇵 日本 (39)</button>
-          <button class="cost-btn" style="width:auto;padding:0 8px;" data-nat="🇰🇷">🇰🇷 韓國 (11)</button>
+          <button class="cost-btn" style="width:auto;padding:0 8px;" data-nat="🇯🇵">🇯🇵 日本 (38)</button>
+          <button class="cost-btn" style="width:auto;padding:0 8px;" data-nat="🇰🇷">🇰🇷 韓國 (12)</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span class="select-label">歷史時代：</span>
+        <div class="cost-pills era-filter-bar" id="eraFilterGroup">
+          <button class="cost-btn era-btn active" style="width:auto;padding:0 10px;" data-era="all">全部時代</button>
+          <button class="cost-btn era-btn" style="width:auto;padding:0 8px;" data-era="qin_han">先秦兩漢 (21)</button>
+          <button class="cost-btn era-btn" style="width:auto;padding:0 8px;" data-era="three_kingdoms">三國兩晉南北朝 (46)</button>
+          <button class="cost-btn era-btn" style="width:auto;padding:0 8px;" data-era="tang_song_ming">唐宋明 (8)</button>
+          <button class="cost-btn era-btn" style="width:auto;padding:0 8px;" data-era="sengoku">日本源平戰國 (38)</button>
+          <button class="cost-btn era-btn" style="width:auto;padding:0 8px;" data-era="korea_dynasties">朝鮮高麗 (12)</button>
         </div>
       </div>
 
@@ -1040,7 +1053,7 @@ body {
 </div>
 
 <!-- 全息武器情報彈窗 (Modal) -->
-<div class="intel-modal-backdrop" id="intelModal" hidden>
+<div class="intel-modal-backdrop" id="intelModal" role="dialog" aria-modal="true" hidden>
   <div class="intel-modal-content">
     <button class="intel-close-btn" id="intelCloseBtn" aria-label="關閉彈窗">×</button>
     <div class="intel-hero-img-wrap">
@@ -1062,13 +1075,15 @@ body {
         <b style="color:var(--cyan); font-size:13px;">💡 戰場實戰建議與定位</b>
         <p style="font-size:13px; color:var(--text); margin-top:6px; line-height:1.5;" id="intelTacticalTips"></p>
       </div>
+      <div id="intelAuditBox" class="intel-audit-box" style="margin-top:14px;"></div>
     </div>
   </div>
 </div>
 
 <!-- 腳本引入 -->
-<script defer src="js/data.js?v=7.11.96"></script>
-<script defer src="js/armory.js?v=7.11.96"></script>
+<script defer src="js/historical-audit.js?v=7.12.0"></script>
+<script defer src="js/data.js?v=7.12.0"></script>
+<script defer src="js/armory.js?v=7.12.0"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   const hadController = Boolean(navigator.serviceWorker.controller);
@@ -1080,7 +1095,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.11.96').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.12.0').then(r => r.update()).catch(() => {});
   });
 }
 </script>

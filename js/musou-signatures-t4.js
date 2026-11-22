@@ -7,6 +7,7 @@
   if (typeof window === 'undefined' || !window.MusouVfx) return;
   const V = window.MusouVfx;
   const reg = (k, fn) => V.registerSignature(k, fn);
+  const later = (fn, ms) => (V.schedule ? V.schedule(ms, fn) : setTimeout(fn, ms));
 
   const glyphCache = new Map();
   function getGlyphTex(text, color = '#fbbf24') {
@@ -33,7 +34,7 @@
   }
 
   function impact(ctx, delay = 240, shake = 0.28, sfx = 'blade_clash') {
-    setTimeout(() => {
+    later(() => {
       ctx.triggerHitStop?.(75);
       ctx.triggerCameraShake?.(shake);
       ctx.playFieldSound?.(sfx, ctx.target, 0.68);
@@ -48,7 +49,7 @@
       const p1 = targetPos.clone().add(new THREE.Vector3(0, 0.8, i * 1.1));
       V.spawnRibbonTrail(scene, [p0, p1], 0xfbbf24, 0.36, 720);
     }
-    setTimeout(() => {
+    later(() => {
       V.spawnShockRing(scene, targetPos, 0xf59e0b, 4.2, 700);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 0.9, 0)), count: 600, color: 0xfbbf24, speed: 5.5, life: 850, size: 18 });
     }, 240);
@@ -58,12 +59,12 @@
   reg('zhaoyun_seven_charges', ctx => {
     const { scene, targetPos } = ctx;
     for (let i = 0; i < 7; i++) {
-      setTimeout(() => {
+      later(() => {
         const off = new THREE.Vector3((Math.random() - 0.5) * 1.6, 0.5 + (i % 3) * 0.4, (Math.random() - 0.5) * 1.6);
         V.spawnSlashArc(scene, targetPos.clone().add(off), i % 2 === 0 ? 1 : -1, 0xe0f2fe, 2.2, 320);
       }, i * 65);
     }
-    setTimeout(() => {
+    later(() => {
       V.spawnPillar(scene, targetPos, 0x7dd3fc, 6.0, 620);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 660, color: 0xbae6fd, speed: 6.2, life: 880, size: 19 });
     }, 440);
@@ -74,7 +75,7 @@
     const { scene, targetPos } = ctx;
     V.spawnSlashArc(scene, targetPos, 1, 0xa855f7, 3.2, 460);
     V.spawnSlashArc(scene, targetPos, -1, 0x38bdf8, 3.2, 460);
-    setTimeout(() => {
+    later(() => {
       V.spawnShockRing(scene, targetPos, 0xa855f7, 4.4, 700);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 640, color: 0xc084fc, speed: 6.0, life: 880, size: 19 });
     }, 220);
@@ -84,7 +85,7 @@
   reg('chen_white_robe', ctx => {
     const { scene, casterPos, targetPos } = ctx;
     V.spawnRibbonTrail(scene, [casterPos.clone().add(new THREE.Vector3(0, 1, 0)), targetPos.clone().add(new THREE.Vector3(0, 1, 0))], 0xf8fafc, 0.52, 700);
-    setTimeout(() => {
+    later(() => {
       V.spawnShockRing(scene, targetPos, 0xe2e8f0, 4.4, 740);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.1, 0)), count: 640, color: 0xf1f5f9, speed: 5.4, life: 920, size: 18, gravity: -1.4 });
     }, 220);
@@ -97,9 +98,9 @@
       const a = (i / 6) * Math.PI * 2;
       const top = targetPos.clone().add(new THREE.Vector3(Math.cos(a) * 1.4, 5.2, Math.sin(a) * 1.4));
       const bot = targetPos.clone().add(new THREE.Vector3(Math.cos(a) * 0.8, 0.3, Math.sin(a) * 0.8));
-      setTimeout(() => V.spawnRibbonTrail(scene, [top, bot], 0xfbbf24, 0.22, 420), i * 55);
+      later(() => V.spawnRibbonTrail(scene, [top, bot], 0xfbbf24, 0.22, 420), i * 55);
     }
-    setTimeout(() => {
+    later(() => {
       V.spawnShockRing(scene, targetPos, 0xfde047, 4.2, 720);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 600, color: 0xfde047, speed: 5.4, life: 880, size: 18 });
     }, 320);
@@ -112,7 +113,7 @@
     for (let i = -1; i <= 1; i++) {
       V.spawnPillar(scene, targetPos.clone().add(new THREE.Vector3(i * 1.2, 0, 0)), 0xf59e0b, 4.8, 720);
     }
-    setTimeout(() => {
+    later(() => {
       V.spawnShockRing(scene, targetPos, 0xd97706, 4.2, 700);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 0.9, 0)), count: 560, color: 0xfbbf24, speed: 4.8, life: 840, size: 18 });
     }, 240);
@@ -130,7 +131,7 @@
   reg('zhangfei_roar', ctx => {
     const { scene, targetPos } = ctx;
     for (let i = 0; i < 3; i++) {
-      setTimeout(() => {
+      later(() => {
         V.spawnShockRing(scene, targetPos, 0xef4444, 3.2 + i * 0.9, 540);
       }, i * 110);
     }
@@ -163,14 +164,14 @@
       const p1 = targetPos.clone().add(new THREE.Vector3(0, 0.9, i * 0.5));
       V.spawnRibbonTrail(scene, [p0, p1], 0xfbbf24, 0.2, 540);
     }
-    setTimeout(() => V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 0.9, 0)), count: 580, color: 0xfde047, speed: 5.5, life: 840, size: 18 }), 200);
+    later(() => V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 0.9, 0)), count: 580, color: 0xfde047, speed: 5.5, life: 840, size: 18 }), 200);
     impact(ctx, 200, 0.28, 'arrow_volley');
   });
 
   reg('huangzhong_dingjun', ctx => {
     const { scene, casterPos, targetPos } = ctx;
     V.spawnPillar(scene, casterPos, 0xf97316, 4.5, 520);
-    setTimeout(() => {
+    later(() => {
       V.spawnRibbonTrail(scene, [casterPos.clone().add(new THREE.Vector3(0, 1.5, 0)), targetPos.clone().add(new THREE.Vector3(0, 0.9, 0))], 0xf97316, 0.44, 620);
       V.spawnShockRing(scene, targetPos, 0xfbbf24, 4.2, 700);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 660, color: 0xfb923c, speed: 6.2, life: 880, size: 19 });
@@ -182,7 +183,7 @@
     const { scene, targetPos } = ctx;
     V.spawnShockRing(scene, targetPos, 0x06b6d4, 4.4, 720);
     for (let i = 0; i < 3; i++) {
-      setTimeout(() => V.spawnPillar(scene, targetPos.clone().add(new THREE.Vector3((i - 1) * 1.1, 0, 0)), 0xf97316, 4.6, 540), i * 100);
+      later(() => V.spawnPillar(scene, targetPos.clone().add(new THREE.Vector3((i - 1) * 1.1, 0, 0)), 0xf97316, 4.6, 540), i * 100);
     }
     V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 0.9, 0)), count: 600, color: 0x38bdf8, speed: 5.6, life: 860, size: 18 });
     impact(ctx, 240, 0.3, 'arrow_volley');
@@ -191,7 +192,7 @@
   reg('saika_yatagarasu', ctx => {
     const { scene, casterPos, targetPos } = ctx;
     for (let w = 0; w < 3; w++) {
-      setTimeout(() => {
+      later(() => {
         V.spawnRibbonTrail(scene, [casterPos.clone().add(new THREE.Vector3(0, 1.3, (w - 1) * 0.6)), targetPos.clone().add(new THREE.Vector3(0, 0.9, 0))], 0xf97316, 0.25, 360);
         V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 220, color: 0xfbbf24, speed: 5.4, life: 560, size: 17 });
       }, w * 140);
@@ -203,7 +204,7 @@
     const { scene, casterPos, targetPos } = ctx;
     const sky = targetPos.clone().add(new THREE.Vector3(0, 6.2, 0));
     V.spawnRibbonTrail(scene, [casterPos.clone().add(new THREE.Vector3(0, 1.4, 0)), sky, targetPos.clone().add(new THREE.Vector3(0, 0.8, 0))], 0xfef08a, 0.32, 680);
-    setTimeout(() => {
+    later(() => {
       V.spawnShockRing(scene, targetPos, 0xfde047, 3.8, 660);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.2, 0)), count: 580, color: 0xfef08a, speed: 5.8, life: 860, size: 18 });
     }, 240);
@@ -215,7 +216,7 @@
     const { scene, targetPos } = ctx;
     const top = targetPos.clone().add(new THREE.Vector3(-1.8, 7.5, 0));
     V.spawnRibbonTrail(scene, [top, targetPos.clone().add(new THREE.Vector3(0, 0.5, 0))], 0x10b981, 0.45, 580);
-    setTimeout(() => {
+    later(() => {
       V.spawnShockRing(scene, targetPos, 0x34d399, 4.4, 720);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 0.8, 0)), count: 640, color: 0x34d399, speed: 6.0, life: 880, size: 19 });
     }, 220);
@@ -225,7 +226,7 @@
   reg('kuki_ironclad', ctx => {
     const { scene, targetPos } = ctx;
     for (let i = 0; i < 3; i++) {
-      setTimeout(() => {
+      later(() => {
         const p = targetPos.clone().add(new THREE.Vector3((i - 1) * 1.2, 0.9, 0));
         V.spawnShockRing(scene, new THREE.Vector3(p.x, targetPos.y, p.z), 0xf97316, 3.0, 520);
         V.createGpuBurst({ scene, origin: p, count: 240, color: 0xf97316, speed: 5.5, life: 680, size: 18 });
@@ -237,7 +238,7 @@
   reg('luxun_burning_camps', ctx => {
     const { scene, targetPos } = ctx;
     for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
+      later(() => {
         const p = targetPos.clone().add(new THREE.Vector3((i - 2) * 0.95, 0, (i % 2 === 0 ? 0.6 : -0.6)));
         V.spawnPillar(scene, p, 0xf97316, 4.6, 680);
         V.createGpuBurst({ scene, origin: p.clone().add(new THREE.Vector3(0, 0.8, 0)), count: 160, color: 0xfb923c, speed: 4.8, life: 700, size: 17 });
@@ -257,9 +258,9 @@
   reg('xuhuang_ten_rings', ctx => {
     const { scene, targetPos } = ctx;
     for (let i = 0; i < 4; i++) {
-      setTimeout(() => V.spawnShockRing(scene, targetPos, 0xfbbf24, 2.0 + i * 0.8, 480), i * 85);
+      later(() => V.spawnShockRing(scene, targetPos, 0xfbbf24, 2.0 + i * 0.8, 480), i * 85);
     }
-    setTimeout(() => {
+    later(() => {
       V.spawnSlashArc(scene, targetPos, 1, 0xf43f5e, 3.5, 480);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.0, 0)), count: 600, color: 0xfbbf24, speed: 5.6, life: 860, size: 19 });
     }, 260);
@@ -293,7 +294,7 @@
       const p0 = targetPos.clone().add(new THREE.Vector3(Math.cos(a) * 3.0, 2.0, Math.sin(a) * 3.0));
       V.spawnRibbonTrail(scene, [p0, targetPos.clone().add(new THREE.Vector3(0, 1.0, 0))], col, 0.24, 640);
     });
-    setTimeout(() => {
+    later(() => {
       V.spawnPillar(scene, targetPos, 0xfbbf24, 6.2, 720);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.2, 0)), count: 620, color: 0xfde047, speed: 5.4, life: 880, size: 19 });
     }, 260);
@@ -305,7 +306,7 @@
     addTexPlane('bagua_seal', 5.6, 5.6, new THREE.Vector3(targetPos.x, groundY + 0.13, targetPos.z), {
       rotateX: -Math.PI / 2, spinZ: 1.5, duration: 1200, renderOrder: 22, additive: true
     });
-    setTimeout(() => {
+    later(() => {
       V.spawnPillar(scene, targetPos, 0xf59e0b, 6.4, 720);
       V.createGpuBurst({ scene, origin: targetPos.clone().add(new THREE.Vector3(0, 1.2, 0)), count: 600, color: 0xfbbf24, speed: 5.6, life: 900, size: 19 });
     }, 240);

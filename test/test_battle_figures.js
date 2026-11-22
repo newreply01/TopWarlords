@@ -46,7 +46,7 @@ for (const cat of cats) {
   figures.animate(ranks, token, 1500, false, false, () => 0);
   assert.notDeepEqual(Array.from(arm.instanceMatrix.array), idle, 'Attack must articulate the weapon arm');
   figures.animate(ranks, token, 1700, false, false, () => 0.3);
-  assert(Math.abs(body.instanceMatrix.array[13] - 0.3 - (cat === 'air' ? 0.57 * 0.94 : 0)) < 0.001,
+  assert(Math.abs(body.instanceMatrix.array[13] - 0.3 - (cat === 'air' ? 0.57 * 0.94 * 1.24 : 0)) < 0.001,
     'Figures must follow the actual terrain height');
   token.currentHp = 50;
   token.visualHp = 90;

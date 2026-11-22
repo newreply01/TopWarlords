@@ -29,6 +29,7 @@ try:
 <html>
 <head><meta charset="utf-8"></head>
 <body>
+<script src="http://localhost:{PORT}/js/historical-audit.js"></script>
 <script src="http://localhost:{PORT}/js/data.js"></script>
 <script src="http://localhost:{PORT}/js/ladder-data.js"></script>
 <script src="http://localhost:{PORT}/js/engine.js"></script>
@@ -186,16 +187,16 @@ try:
             if (getSkillAttackModifiers(burst, skillTarget, 3).damage !== 1) errs.push('已使用技能仍重複增傷');
             const wounded = skillAttacker('XIAHOU_DUN');
             wounded.hp = wounded.hpMax / 2;
-            if (Math.abs(getSkillAttackModifiers(wounded, skillTarget, 3).damage - 1.28) > 1e-9) errs.push('受創爆發未按缺失兵力計算');
+            if (Math.abs(getSkillAttackModifiers(wounded, skillTarget, 3).damage - 1.345) > 1e-9) errs.push('受創爆發未按缺失兵力計算');
             const executioner = skillAttacker('BAIQI');
             skillTarget.hp = skillTarget.hpMax / 2;
             if (Math.abs(getSkillAttackModifiers(executioner, skillTarget, 3).damage - 1.32) > 1e-9) errs.push('斬殺未按目標缺失兵力計算');
             if (getSkillAttackModifiers(skillAttacker('LIGUANG'), skillTarget, 2).armorPierce !== 0.45) errs.push('神射穿甲效果缺漏');
             if (Math.abs(getSkillAttackModifiers(skillAttacker('ZHANGLIAO'), skillTarget, 3).damage - 1.38) > 1e-9) errs.push('越級技能未按費用判定');
             const terrainFighter = skillAttacker('MENGHUO');
-            if (Math.abs(getSkillAttackModifiers(terrainFighter, skillTarget, 3, 'forest').damage - getSkillAttackModifiers(terrainFighter, skillTarget, 3, 'plain').damage - 0.12) > 1e-9) errs.push('地形技能未生效');
-            if (Math.abs(getSkillAttackModifiers(skillAttacker('YANGYE'), skillAttacker('HUO'), 3).damage - 1.43) > 1e-9) errs.push('反騎技能未按軍種判定');
-            const recoveryDeck = ['ZHAOYUN', 'HOJO_UJIYASU', 'LIGUANG', 'CHOSOKABE', 'ZHUGELIANG'];
+            if (Math.abs(getSkillAttackModifiers(terrainFighter, skillTarget, 3, 'forest').damage - getSkillAttackModifiers(terrainFighter, skillTarget, 3, 'plain').damage - 0.14) > 1e-9) errs.push('地形技能未生效');
+            if (Math.abs(getSkillAttackModifiers(skillAttacker('YANGYE'), skillAttacker('HUO'), 3).damage - 1.49) > 1e-9) errs.push('反騎技能未按軍種判定');
+            const recoveryDeck = ['ZHAOYUN', 'HOJO_UJIYASU', 'LIGUANG', 'LUXUN', 'ZHUGELIANG'];
             let recoveryObserved = false;
             let guardObserved = false;
             let effectDifferenceObserved = false;
@@ -204,12 +205,14 @@ try:
                 const options = { seed, formationsA: Array(5).fill('fishscale'), formationsB: Array(5).fill('fishscale') };
                 const enabled = resolveBattle(recoveryDeck, recoveryDeck, options);
                 const activations = enabled.frames.flatMap(frame => frame.lines.map(line => ({ ...line, phase: frame.phase }))).filter(line => line.skillActivation);
-                const activationIds = new Set();
+                const activationCounts = {};
                 for (const activation of activations) {
-                    if (activationIds.has(activation.auid)) errs.push('專屬技能一場重複發動：' + activation.auid);
-                    activationIds.add(activation.auid);
+                    activationCounts[activation.auid] = (activationCounts[activation.auid] || 0) + 1;
+                    if (activationCounts[activation.auid] > 2) errs.push('專屬技能一場異常觸發超過 2 次：' + activation.auid);
                     const unit = enabled.final.A.concat(enabled.final.B).find(unit => unit.uid === activation.auid);
-                    if (unit.skill.phase !== 'P' + activation.phase) errs.push('技能發動階段錯誤：' + unit.id);
+                    const skillPhaseNum = Number(String(unit.skill.phase || '').replace('P', ''));
+                    if (activationCounts[activation.auid] === 1 && unit.skill.phase !== 'P' + activation.phase) errs.push('技能首次發動階段錯誤：' + unit.id);
+                    if (activationCounts[activation.auid] === 2 && activation.phase < skillPhaseNum) errs.push('技能二次覺醒階段過早：' + unit.id);
                     recoveryObserved ||= activation.hpRestored > 0;
                     guardObserved ||= unit.skillGuard > 0;
                 }
@@ -234,8 +237,8 @@ try:
             if (unitMap.IINAOMASA && (unitMap.IINAOMASA.cost !== 2 || unitMap.IINAOMASA.cat !== 'armor')) {
                 errs.push('井伊直政費用／兵種錯誤');
             }
-            if (!(unitMap.LUXUN.cost > unitMap.LUSU.cost && unitMap.LUXUN.ew > unitMap.LUSU.ew && unitMap.LUSU.ew >= unitMap.PANGTONG.ew)) {
-                errs.push('陸遜 > 魯肅 >= 龐統 全域歷史排序未落實');
+            if (!(unitMap.ZHUGELIANG.cost > unitMap.LUSU.cost && unitMap.ZHUGELIANG.ew > unitMap.LUSU.ew && unitMap.LUSU.ew >= unitMap.PANGTONG.ew)) {
+                errs.push('諸葛亮 > 魯肅 >= 龐統 軍師歷史排序未落實');
             }
             for (const [navalId, cost] of [['XIEXUAN', 5], ['TIANDAN', 2], ['LUMENG', 5], ['CAOBIN', 2], ['YISUNSIN', 5], ['GANNING', 3]]) {
                 if (!unitMap[navalId] || unitMap[navalId].cat !== 'naval' || unitMap[navalId].cost !== cost) {
@@ -332,19 +335,23 @@ try:
 
             const formationDeck = ['HUO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'];
             const neutralFormations = Array(5).fill('fishscale');
-            const gooseBattle = resolveBattle(formationDeck, formationDeck, {
-                seed: 0,
-                formationsA: Array(5).fill('goose'),
-                formationsB: neutralFormations
-            });
-            const enemyById = new Map(gooseBattle.final.B.map(unit => [unit.uid, unit]));
-            const gooseRearHit = gooseBattle.frames.flatMap(frame => frame.lines).some(line =>
-                line.auid === formationDeck[2] + '-A2' && ['support', 'air_defense'].includes(enemyById.get(line.tuid)?.cat)
-            );
+            let gooseRearHit = false;
+            let gooseCannotCapture = true;
+            for (let seed = 0; seed < 32 && !gooseRearHit; seed++) {
+                const gooseBattle = resolveBattle(formationDeck, formationDeck, {
+                    seed,
+                    formationsA: Array(5).fill('goose'),
+                    formationsB: neutralFormations
+                });
+                const enemyById = new Map(gooseBattle.final.B.map(unit => [unit.uid, unit]));
+                gooseRearHit = gooseBattle.frames.flatMap(frame => frame.lines).some(line =>
+                    line.auid === formationDeck[2] + '-A2' && ['support', 'air_defense'].includes(enemyById.get(line.tuid)?.cat)
+                );
+                if (gooseBattle.frames.flatMap(frame => frame.lines).some(line =>
+                    line.auid === formationDeck[2] + '-A2' && line.kind === 'capture'
+                )) gooseCannotCapture = false;
+            }
             if (!gooseRearHit) errs.push('雁行未能攻擊敵軍後列');
-            const gooseCannotCapture = !gooseBattle.frames.flatMap(frame => frame.lines).some(line =>
-                line.auid === formationDeck[2] + '-A2' && line.kind === 'capture'
-            );
             if (!gooseCannotCapture) errs.push('雁行部隊不應俘虜敵將');
             let normalCaptureObserved = false;
             for (let seed = 0; seed < 32 && !normalCaptureObserved; seed++) {

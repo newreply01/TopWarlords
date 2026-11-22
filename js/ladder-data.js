@@ -390,7 +390,7 @@ const LADDER_PRESETS = [
     "deck": [
       "KENSHIN",
       "HONDA",
-      "TORII",
+      "ASAKURA_SOT",
       "WAKIZAKA",
       "KANBEI"
     ],
@@ -1170,7 +1170,7 @@ const LADDER_PRESETS = [
     "deck": [
       "YOSHITSUNE",
       "IINAOMASA",
-      "HONDA_TADATSUGU",
+      "ASAKURA_SOT",
       "KUKI",
       "KANBEI"
     ],

@@ -5981,7 +5981,6 @@ body:has(.battle:not([hidden])) .command-deck,
   margin-right: 4px
 }
 
-
 /* ---------- Responsive / 行動裝置手機版優化 ---------- */
 @media(max-width:1280px) {
   .matrix-layout {
@@ -7163,10 +7162,6 @@ body:has(.battle:not([hidden])) .command-deck,
   border-left-color: var(--line)
 }
 
-[data-theme="light"] .budget-mini-bar i {
-  background: rgba(15, 23, 42, .12)
-}
-
 [data-theme="light"] .budget-mini-bar i.on {
   background: var(--cyan);
   box-shadow: 0 0 4px rgba(2, 132, 199, .4)
@@ -8243,12 +8238,6 @@ body:has(.battle:not([hidden])) .command-deck,
   color: #fb7185;
   border: 1px solid rgba(244, 63, 94, 0.55);
   box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
-}
-
-.brevity-tag.capture {
-  background: rgba(217, 119, 6, 0.2);
-  color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.55);
 }
 
 .brevity-tag.block {
@@ -12315,10 +12304,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   /* 對戰樹本體尺寸不在此覆寫：一律由 fitBracketToViewport() 整體等比縮放 */
 }
 
-
-
-
-
 /* =====================================================
    錦標賽多模式大廳 (Solo / Private / Public) & Firebase UI
    ===================================================== */
@@ -12491,7 +12476,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   color: var(--muted) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
-
 
 /* =====================================================
    v4.0 全新戰術系統樣式：聯合作戰體系羈絆條、傷害統計表、常用編制選單與全方位 RWD 行動端優化
@@ -13464,10 +13448,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   color: #f8fafc;
 }
 
-[data-theme="light"] .t-commander-name {
-  color: #0f172a;
-}
-
 .t-card-streak {
   font-size: 10px;
   font-weight: 700;
@@ -13477,14 +13457,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   color: #fbbf24;
   border: 1px solid rgba(251, 191, 36, 0.35);
   white-space: nowrap;
-}
-
-.t-commander-meta {
-  font-size: 11px;
-  color: #94a3b8;
-  display: flex;
-  gap: 6px;
-  align-items: center;
 }
 
 .t-card-right {
@@ -13936,7 +13908,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   padding: 2px 6px !important;
   white-space: nowrap !important;
 }
-
 
 /* =====================================================
    🎖️ 現代軍事化左欄HUD與常駐戰況指示燈強化 (v4.2.6)
@@ -15717,7 +15688,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   }
 }
 
-
 /* 手機端對戰卡片緊湊適配 */
 @media (max-width: 768px) {
   .bu {
@@ -15763,7 +15733,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   }
 }
 
-
 /* 戰場右上角【🔄 戰場重播】按鈕 (取代重複的退出推演) */
 .btn-battle-replay {
   display: inline-flex;
@@ -15802,7 +15771,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   background: #e0f2fe;
   border-color: #0284c7;
 }
-
 
 .btn-battle-replay[hidden],
 .btn-battle-reopen[hidden],
@@ -18054,7 +18022,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   }
 }
 
-
 /* =====================================================
    🛡️ 全局視圖容器隱藏防穿透保護 (保證非活動視圖 100% 零高度佔位)
    ===================================================== */
@@ -18073,7 +18040,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   margin: 0 !important;
   overflow: hidden !important;
 }
-
 
 /* ==========================================================================
    UI/UX Standardization Overhaul (Topbars, Command Deck, Doctrines, Synergies)
@@ -18145,11 +18111,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   background: #ecfdf5 !important;
   border-color: rgba(16, 185, 129, 0.35) !important;
   color: #047857 !important;
-}
-
-[data-theme="light"] .chip-telemetry:hover {
-  background: #d1fae5 !important;
-  border-color: #10b981 !important;
 }
 
 .nav-cloud-btn {
@@ -18369,7 +18330,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
   flex: 0 1 auto !important;
 }
 
-
 /* ==========================================================================
    UI/UX V3.1 PRECISION 52PX / 44PX / 40PX HIERARCHY ARCHITECTURE OVERHAUL
    1. Tri-Deck 52px Geometry (Row 1: 52px, Row 2: 52px, Row 3: 52px)
@@ -18510,8 +18470,6 @@ html:not([data-theme="light"]) .b-team-badge.badge-peer {
     margin: 0 10px !important;
     box-sizing: border-box !important;
   }
-
-
 
   /* === SEGMENTED RAIL MODE CONTROLS (Balanced Centered Command Deck) === */
   .modes {
@@ -20819,7 +20777,6 @@ html:not([data-theme="light"]) #btnGoBuildFromLadder:hover {
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35) !important;
 }
 
-
 /* =====================================================
    👤 使用者 Google 式圓形頭像 (Google Avatar: 36px 圓形，中顯首字)
    ===================================================== */
@@ -21353,7 +21310,6 @@ html:not([data-theme="light"]) #btnGoBuildFromLadder:hover {
   }
 }
 
-
 /* ==========================================================================
    v5.9.33 Tactical UI Upgrades (Modules 1, 3A, 4, 5)
    Carefully integrated without disrupting classic responsive architecture
@@ -21421,7 +21377,6 @@ html:not([data-theme="light"]) input[type="checkbox"] {
   background-color: #ffffff !important;
   color: #0f172a !important;
 }
-
 
 /* --- Module 4: Top-right Utility Group Capsule --- */
 .hud-icon-group {
@@ -21601,7 +21556,6 @@ html:not([data-theme="light"]) input[type="checkbox"] {
     box-shadow: 0 0 0 6px rgba(217, 119, 6, 0), 0 4px 22px rgba(217, 119, 6, 0.4);
   }
 }
-
 
 /* ==========================================================================
    v5.9.38 Tournament Private Dual Portal Cards (Scheme A: Host & Join Portals)
@@ -21838,7 +21792,6 @@ html:not([data-theme="light"]) .portal-input-code:focus {
     gap: 10px;
   }
 }
-
 
 /* ==========================================================================
    錦標賽大廳戰術按鈕與私人房間控制列規格統一 (v5.9.40)
@@ -22109,7 +22062,6 @@ html:not([data-theme="light"]) .btn-tourney-leave:hover {
     height: 36px !important;
   }
 }
-
 
 /* ==========================================================================
    錦標賽三大分頁【方案 A + C】自然等高與緊湊精緻佈局系統 (v5.9.43)
@@ -22536,7 +22488,6 @@ html {
     height: auto !important;
   }
 }
-
 
 /* =====================================================
    🏆 天梯挑戰方案 A：頂部滿寬指揮戰情 HUD + 下方全景名冊
@@ -23216,7 +23167,6 @@ html {
   }
 }
 
-
 /* 6. 行動端 (<= 768px) 極致緊湊適配 (100% 容器寬度限制與平滑滾動) */
 @media (max-width: 768px) {
 
@@ -23372,7 +23322,6 @@ html {
   }
 }
 
-
 /* 7. 階梯交戰守則整併於右上方戰術資訊艙 (.hud-rules-strip) */
 .hud-rules-strip {
   width: 100% !important;
@@ -23458,7 +23407,6 @@ html {
     font-size: 9px !important;
   }
 }
-
 
 /* 8. 階梯交戰雙核心守則 (.rules-grid-2) */
 .hud-rules-strip {
@@ -23553,7 +23501,6 @@ html {
     font-size: 9px !important;
   }
 }
-
 
 /* ==========================================================================
    🏆 天梯名冊全鏈條 RWD 黃金比例網格重構 (v5.9.49)
@@ -24010,7 +23957,6 @@ html {
   border: 1px solid rgba(16, 185, 129, 0.4) !important;
 }
 
-
 /* --- 戰場場景自選下拉選單 (Tactical Weather Custom Dropdown - 100% 絕對對齊) --- */
 .custom-weather-dropdown {
   position: relative !important;
@@ -24408,7 +24354,6 @@ html:not([data-theme="light"]) .custom-ai-menu {
   border-color: rgba(56, 189, 248, 0.35) !important;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5) !important;
 }
-
 
 /* 確保 Mission Bar 及其子元件允許戰術下拉選單浮現穿透，不被高度 52px 截斷 */
 .mission-bar {
@@ -24925,7 +24870,6 @@ html:not([data-theme="light"]) .custom-ai-menu {
   font-size: 11.5px !important;
   font-weight: 700 !important;
 }
-
 
 /* =====================================================
    PWA 手機端原生 App 級沉浸式體驗 (Touch, Gesture & iOS Safe Area)
@@ -30565,12 +30509,14 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   color: #e2e8f0;
 }
 
-#btnBgm[aria-pressed="false"] {
+#btnBgm[aria-pressed="false"],
+#btnBgm.is-muted {
   opacity: 0.45;
   position: relative;
 }
 
-#btnBgm[aria-pressed="false"]::after {
+#btnBgm[aria-pressed="false"]::after,
+#btnBgm.is-muted::after {
   content: '';
   position: absolute;
   left: 22%;
@@ -30580,4 +30526,325 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   background: #ef4444;
   transform: rotate(-35deg);
   pointer-events: none;
+}
+
+/* =====================================================
+   v7.12.0 新增元件樣式 (史實羈絆、戰後遙測、音量滑桿、考據徽章)
+   ===================================================== */
+.bond-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fef3c7;
+  background: linear-gradient(135deg, rgba(180, 83, 9, 0.85), rgba(217, 119, 6, 0.72));
+  border: 1px solid rgba(251, 191, 36, 0.65);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.22);
+  white-space: nowrap;
+  cursor: help;
+}
+
+[data-theme="light"] .bond-pill {
+  color: #78350f;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-color: #d97706;
+  box-shadow: 0 1px 4px rgba(180, 83, 9, 0.14);
+}
+
+.result-analytics-card {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.56);
+  border: 1px solid var(--line);
+}
+
+[data-theme="light"] .result-analytics-card {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.ra-bonds-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+}
+
+[data-theme="light"] .ra-bonds-row {
+  background: #ffffff;
+}
+
+.ra-bonds-col {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.ra-bonds-lbl {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.ra-bond-empty {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.ra-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+}
+
+@media (max-width: 640px) {
+  .ra-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ra-metric-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ra-metric-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-family: var(--mono);
+}
+
+.ra-metric-lbl {
+  color: var(--muted);
+  font-family: var(--sans);
+  font-weight: 600;
+}
+
+.ra-val-a,
+.ra-val-b {
+  min-width: 36px;
+  color: var(--text);
+}
+
+.ra-val-b {
+  text-align: right;
+}
+
+.ra-val-a.is-lead {
+  color: #38bdf8;
+}
+
+.ra-val-b.is-lead {
+  color: #fb7185;
+}
+
+[data-theme="light"] .ra-val-a.is-lead {
+  color: #0369a1;
+}
+
+[data-theme="light"] .ra-val-b.is-lead {
+  color: #be123c;
+}
+
+.ra-metric-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(148, 163, 184, 0.22);
+}
+
+.ra-fill-a {
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+}
+
+.ra-fill-b {
+  background: linear-gradient(90deg, #f43f5e, #e11d48);
+}
+
+.ra-advisor {
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.26);
+}
+
+[data-theme="light"] .ra-advisor {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.ra-advisor-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--cyan);
+  margin-bottom: 4px;
+}
+
+[data-theme="light"] .ra-advisor-title {
+  color: #0369a1;
+}
+
+.ra-advisor-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.era-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.intel-audit-box {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+[data-theme="light"] .intel-audit-box {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.intel-audit-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.intel-audit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+[data-theme="light"] .intel-audit-badge {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.intel-audit-badge.status-qualified {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+[data-theme="light"] .intel-audit-badge.status-qualified {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.intel-audit-badge.status-review {
+  background: rgba(168, 85, 247, 0.16);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.45);
+}
+
+[data-theme="light"] .intel-audit-badge.status-review {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border-color: #d8b4fe;
+}
+
+.intel-audit-era {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.intel-audit-note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.intel-audit-sources {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.intel-audit-sources a {
+  color: var(--cyan);
+  text-decoration: underline;
+}
+
+.audio-vol-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  padding: 10px 14px;
+  margin: 10px 0 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+}
+
+[data-theme="light"] .audio-vol-panel {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+@media (max-width: 600px) {
+  .audio-vol-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+.audio-vol-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.audio-vol-row label {
+  white-space: nowrap;
+}
+
+.audio-vol-row input[type="range"] {
+  flex: 1;
+  min-width: 80px;
+  accent-color: var(--cyan);
+  cursor: pointer;
+}
+
+.audio-vol-pct {
+  min-width: 38px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--cyan);
 }

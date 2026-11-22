@@ -11,15 +11,15 @@
 <meta property="og:title" content="TopWarlords 頂尖對戰：15元名將聯合作戰 | 東亞歷史名將 3D 合戰推演">
 <meta property="og:description" content="用 $15 軍令預算從 125 位日韓中歷史名將組建五大兵團！全 3D 骨骼動畫方陣沙盤、奇謀先制、突騎衝鋒與線上即時對決，一分鐘一局。">
 <meta property="og:url" content="https://newreply01.github.io/TopWarlords/">
-<meta property="og:image" content="https://newreply01.github.io/TopWarlords/assets/warlords/GUANYU.jpg">
+<meta property="og:image" content="https://newreply01.github.io/TopWarlords/assets/og-banner.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="TopWarlords 頂尖對戰：15元名將聯合作戰">
 <meta name="twitter:description" content="用 $15 軍令預算從 125 位日韓中歷史名將組建五大兵團，全 3D 古戰場方陣沙盤對決！">
-<meta name="twitter:image" content="https://newreply01.github.io/TopWarlords/assets/warlords/GUANYU.jpg">
+<meta name="twitter:image" content="https://newreply01.github.io/TopWarlords/assets/og-banner.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.11.96">
+<link rel="stylesheet" href="style.css?v=7.12.0">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
@@ -82,7 +82,7 @@
     </button>
   </nav>
   <div class="hud-right">
-    <!-- 全服 C4ISR 即時戰況/到訪人次膠囊 (固定寬度防彈跳，初始立即掛載全服快取次數避免抖動與跳動) -->
+    <!-- 全服戰情即時戰況/到訪人次膠囊 (固定寬度防彈跳，初始立即掛載全服快取次數避免抖動與跳動) -->
     <div class="hud-stats" id="hudStats">
       <span class="chip-stat chip-telemetry" id="btnOpenTelemetry" style="cursor:default" title="全服累計到訪人次">
         <span class="live-pulse-dot"></span>
@@ -111,7 +111,7 @@
     <div class="hud-icon-group" id="hudUtilityGroup">
       <button class="icon-btn" id="btnAudio" aria-label="切換戰場音效" title="開啟/關閉真實戰場音效"><span id="audioIcon">🔊</span></button>
       <button class="icon-btn" id="btnBgm" aria-label="切換背景音樂" aria-pressed="false" title="背景音樂已關閉（點擊開啟）"><span id="bgmIcon">🎵</span></button>
-      <button class="icon-btn" id="btnTheme" aria-label="切換深淺色主題" title="切換為深色模式 (夜間指揮所)"><span id="themeIcon">🌙</span></button>
+      <button class="icon-btn" id="btnTheme" aria-label="切換深淺色主題" title="切換為深色模式 (墨硯夜戰模式)"><span id="themeIcon">🌙</span></button>
       <button class="icon-btn" id="btnHelp" aria-label="遊戲說明">?</button>
     </div>
   </div>
@@ -130,7 +130,7 @@
   </div>
   <div class="mission-item" id="missionBo3PvpSlot" hidden style="margin-left:4px"></div>
   <div class="mission-right-tools" id="missionRightTools">
-    <button class="btn-reroll-top" id="btnRerollMarket" title="隨機調撥 5 大兵種戰區軍火庫 (注意：將清空當前選取)">
+    <button class="btn-reroll-top" id="btnRerollMarket" title="隨機調撥 5 大兵種點將兵符庫 (注意：將清空當前選取)">
       <span class="reroll-icon">🎲</span>
       <div class="reroll-texts">
         <span class="reroll-title">點將調撥兵符</span>
@@ -722,7 +722,7 @@
   <div class="modal-card tourney-champion-card" id="tourneyChampionCard"></div>
 </div>
 
-<div class="modal" id="resultModal" hidden>
+<div class="modal" id="resultModal" role="dialog" aria-modal="true" hidden>
   <div class="modal-card result-card" id="resultCard">
     <button class="modal-x" id="rCloseX" onclick="document.getElementById('resultModal').hidden=true">✕</button>
     <div style="padding:28px 20px;text-align:center">
@@ -745,13 +745,13 @@
 <div class="modal" id="ladderResultModal" hidden>
   <div class="modal-card ladder-result-card" id="ladderResultCard"></div>
 </div>
-<div class="modal" id="helpModal" hidden>
+<div class="modal" id="helpModal" role="dialog" aria-modal="true" hidden>
   <div class="modal-card help-card" id="helpCard"></div>
 </div>
 
 
 <!-- 雲端指揮官中心 Modal (A+C 跨電腦存檔與專屬免密書籤) -->
-<div class="modal" id="cloudSyncModal" hidden>
+<div class="modal" id="cloudSyncModal" role="dialog" aria-modal="true" hidden>
   <div class="modal-card cloud-sync-card">
     <div class="cloud-modal-header" style="margin-bottom:12px">
       <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:var(--cyan);background:rgba(56,189,248,0.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.4);">🎖️ 指揮官戰情檔案與雲端連動中心</div>
@@ -921,7 +921,7 @@
 </div>
 
 <!-- 線上真人雙人對戰 (Online PvP Room) Modal -->
-<div class="modal" id="onlinePvpModal" hidden>
+<div class="modal" id="onlinePvpModal" role="dialog" aria-modal="true" hidden>
   <div class="modal-card pvp-modal-card">
     <div class="pvp-modal-header">
       <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:#f59e0b;background:rgba(245,158,11,0.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.4);">⚔️ P2P 零伺服器極速連線</div>
@@ -931,8 +931,8 @@
 
     <!-- 模式分頁開關：建立房間 / 加入房間 -->
     <div class="pvp-tabs-row" id="pvpTabsRow">
-      <button class="pvp-tab active" data-tab="host" id="tabPvpHost">👑 本部特遣隊 (建立房間)</button>
-      <button class="pvp-tab" data-tab="join" id="tabPvpJoin">🎯 挑戰突擊隊 (加入房間)</button>
+      <button class="pvp-tab active" data-tab="host" id="tabPvpHost">👑 主帥本陣 (建立房間)</button>
+      <button class="pvp-tab" data-tab="join" id="tabPvpJoin">🎯 挑戰軍團 (加入房間)</button>
     </div>
 
     <!-- 房主面板 -->
@@ -948,7 +948,7 @@
             <option value="5" selected>⚔️ 5局3勝 (BO5)</option>
             <option value="7">🔥 7局4勝 (BO7)</option>
           </select>
-          <select class="select sm" id="pvpHostMarketSel" title="房主設定軍火庫與禁用規則">
+          <select class="select sm" id="pvpHostMarketSel" title="房主設定兵符庫與禁用規則">
             <option value="locked" selected>🔒 開戰鎖定 (Ban 1)</option>
             <option value="free">🎲 自由調撥 (Ban 2)</option>
           </select>
@@ -1053,8 +1053,8 @@
   </div>
 </div>
 
-<!-- C4ISR 全域戰情報告與大數據大盤 (Global Telemetry & Analytics Modal) -->
-<div class="modal" id="globalTelemetryModal" hidden>
+<!-- 全服戰情報告與大數據大盤 (Global Telemetry & Analytics Modal) -->
+<div class="modal" id="globalTelemetryModal" role="dialog" aria-modal="true" hidden>
   <div class="modal-card telemetry-modal-card">
     <div class="cloud-modal-header" style="margin-bottom:12px">
       <div class="badge-tag" style="display:inline-block;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:#10b981;background:rgba(16,185,129,0.12);padding:2px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.35);">📡 戰略軍情全域報告 · 即時遙測大盤</div>
@@ -1105,7 +1105,7 @@
       <div style="display:flex;gap:8px;align-items:center">
         <input id="inputGA4MeasurementId" class="input" placeholder="例如: G-XXXXXXXXXX (留空則停用)" style="font-family:var(--mono);font-size:12px;flex:1" maxlength="24">
         <button class="btn primary sm" id="btnSaveGA4" type="button" style="white-space:nowrap;font-weight:700">💾 儲存並啟用</button>
-        <button class="btn ghost sm" id="btnTestGAEvent" type="button" style="white-space:nowrap" title="向 GA4 發送一筆測試信號 (c4isr_ping)">📡 測試信號</button>
+        <button class="btn ghost sm" id="btnTestGAEvent" type="button" style="white-space:nowrap" title="向 GA4 發送一筆測試信號 (warlords_ping)">📡 測試信號</button>
       </div>
     </div>
 
@@ -1118,40 +1118,42 @@
 
 <div class="toast" id="toast" role="status"></div>
 
-<script defer src="js/data.js?v=7.11.96"></script>
-<script defer src="js/musou-data.js?v=7.11.96"></script>
-<script defer src="js/ladder-data.js?v=7.11.96"></script>
-<script defer src="js/ladder.js?v=7.11.96"></script>
-<script defer src="js/engine.js?v=7.11.96"></script>
+<script defer src="js/historical-audit.js?v=7.12.0"></script>
+<script defer src="js/data.js?v=7.12.0"></script>
+<script defer src="js/musou-data.js?v=7.12.0"></script>
+<script defer src="js/ladder-data.js?v=7.12.0"></script>
+<script defer src="js/ladder.js?v=7.12.0"></script>
+<script defer src="js/engine.js?v=7.12.0"></script>
 <!-- Firebase 雲端多人錦標賽模組 (Compat SDK) -->
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script defer src="js/firebase-config.js?v=7.11.96"></script>
-<script defer src="js/firebase-tourney.js?v=7.11.96"></script>
-<script defer src="js/tournament.js?v=7.11.96"></script>
-<script defer src="js/online-pvp.js?v=7.11.96"></script>
-<script defer src="js/telemetry.js?v=7.11.96"></script>
-<script defer src="js/cloud-sync.js?v=7.11.96"></script>
-<script defer src="js/sound.js?v=7.11.96"></script>
-<script defer src="js/poster-help.js?v=7.11.96"></script>
-<script defer src="js/libs/three.min.js?v=7.11.96"></script>
-<script defer src="js/libs/GLTFLoader.js?v=7.11.96"></script>
-<script defer src="js/libs/SkeletonUtils.js?v=7.11.96"></script>
-<script defer src="js/libs/postprocessing/CopyShader.js?v=7.11.96"></script>
-<script defer src="js/libs/postprocessing/LuminosityHighPassShader.js?v=7.11.96"></script>
-<script defer src="js/libs/postprocessing/EffectComposer.js?v=7.11.96"></script>
-<script defer src="js/libs/postprocessing/RenderPass.js?v=7.11.96"></script>
-<script defer src="js/libs/postprocessing/ShaderPass.js?v=7.11.96"></script>
-<script defer src="js/libs/postprocessing/UnrealBloomPass.js?v=7.11.96"></script>
-<script defer src="js/battle-figures.js?v=7.11.96"></script>
-<script defer src="js/musou-vfx.js?v=7.11.96"></script>
-<script defer src="js/musou-signatures-t5.js?v=7.11.96"></script>
-<script defer src="js/musou-signatures-t4.js?v=7.11.96"></script>
-<script defer src="js/musou-signatures-t13.js?v=7.11.96"></script>
-<script defer src="js/musou-cutin.js?v=7.11.96"></script>
-<script defer src="js/battle-3d.js?v=7.11.96"></script>
-<script defer src="js/app.js?v=7.11.96"></script>
+<script defer src="js/firebase-config.js?v=7.12.0"></script>
+<script defer src="js/firebase-tourney.js?v=7.12.0"></script>
+<script defer src="js/tournament.js?v=7.12.0"></script>
+<script defer src="js/online-pvp.js?v=7.12.0"></script>
+<script defer src="js/telemetry.js?v=7.12.0"></script>
+<script defer src="js/cloud-sync.js?v=7.12.0"></script>
+<script defer src="js/sound.js?v=7.12.0"></script>
+<script defer src="js/poster-help.js?v=7.12.0"></script>
+<script defer src="js/libs/three.min.js?v=7.12.0"></script>
+<script defer src="js/libs/GLTFLoader.js?v=7.12.0"></script>
+<script defer src="js/libs/SkeletonUtils.js?v=7.12.0"></script>
+<script defer src="js/libs/postprocessing/CopyShader.js?v=7.12.0"></script>
+<script defer src="js/libs/postprocessing/LuminosityHighPassShader.js?v=7.12.0"></script>
+<script defer src="js/libs/postprocessing/EffectComposer.js?v=7.12.0"></script>
+<script defer src="js/libs/postprocessing/RenderPass.js?v=7.12.0"></script>
+<script defer src="js/libs/postprocessing/ShaderPass.js?v=7.12.0"></script>
+<script defer src="js/libs/postprocessing/UnrealBloomPass.js?v=7.12.0"></script>
+<script defer src="js/battle-figures.js?v=7.12.0"></script>
+<script defer src="js/musou-vfx.js?v=7.12.0"></script>
+<script defer src="js/musou-signatures-t5.js?v=7.12.0"></script>
+<script defer src="js/musou-signatures-t4.js?v=7.12.0"></script>
+<script defer src="js/musou-signatures-t13.js?v=7.12.0"></script>
+<script defer src="js/musou-cutin.js?v=7.12.0"></script>
+<script defer src="js/battle-3d.js?v=7.12.0"></script>
+<script defer src="js/result-analytics.js?v=7.12.0"></script>
+<script defer src="js/app.js?v=7.12.0"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   const hadController = Boolean(navigator.serviceWorker.controller);
@@ -1163,7 +1165,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.11.96').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.12.0').then(r => r.update()).catch(() => {});
   });
 }
 </script>

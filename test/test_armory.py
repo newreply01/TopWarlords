@@ -69,17 +69,26 @@ async def main():
         await page.wait_for_timeout(300)
         jp_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-2] 篩選 🇯🇵 日本名將數量: {jp_cards} 張")
-        assert jp_cards == 39, f"預期 39 位日本名將，實際得到 {jp_cards}"
+        assert jp_cards == 38, f"預期 38 位日本名將，實際得到 {jp_cards}"
 
         # 🇰🇷 韓國
         await page.locator("button[data-nat='🇰🇷']").click()
         await page.wait_for_timeout(300)
         kr_cards = await page.locator(".unit-card").count()
         print(f"[TEST 3-3] 篩選 🇰🇷 韓國名將數量: {kr_cards} 張")
-        assert kr_cards == 11, f"預期 11 位韓國名將，實際得到 {kr_cards}"
+        assert kr_cards == 12, f"預期 12 位韓國名將，實際得到 {kr_cards}"
 
         # 切回全部國籍
         await page.locator("button[data-nat='all']").click()
+        await page.wait_for_timeout(200)
+
+        # 3-4. 歷史時代篩選
+        await page.locator("#eraFilterGroup button[data-era='qin_han']").click()
+        await page.wait_for_timeout(200)
+        qh_cards = await page.locator(".unit-card").count()
+        print(f"[TEST 3-4] 篩選先秦兩漢數量: {qh_cards} 張")
+        assert qh_cards == 21, f"預期 21 位先秦兩漢名將，實際得到 {qh_cards}"
+        await page.locator("#eraFilterGroup button[data-era='all']").click()
         await page.wait_for_timeout(200)
 
         for unit_id, name in [
@@ -143,8 +152,10 @@ async def main():
         await page.locator(".unit-card[data-unit-id='ZHUGELIANG']").click()
         await page.wait_for_selector("#intelModal:not([hidden])", timeout=3000)
         intel_title = await page.locator("#intelTitle").inner_text()
-        print(f"[TEST 5] 展開全息名將情報成功: {intel_title}")
+        audit_text = await page.locator("#intelAuditBox").inner_text()
+        print(f"[TEST 5] 展開全息名將情報成功: {intel_title} | {audit_text[:40]}")
         assert "諸葛亮" in intel_title
+        assert "時代考據" in audit_text and "史" in audit_text
 
         # 關閉模態窗
         await page.locator("#intelCloseBtn").click()

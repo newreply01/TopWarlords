@@ -71,8 +71,8 @@ const OnlinePvPEngine = (function () {
       if ((currentRoomId && cleanCode === currentRoomId) || (r.hostId && r.hostId === senderId)) return;
       list.push({
         code: cleanCode,
-        hostUid: r.hostUid || 'CMD-HOST',
-        hostName: r.hostName || '本部特遣隊',
+        hostUid: r.hostUid || 'WL-HOST',
+        hostName: r.hostName || '主帥本陣',
         hostFlag: r.hostFlag || '🌐',
         maxGames: [3, 5, 7].includes(Number(r.maxGames)) ? Number(r.maxGames) : 5,
         marketMode: r.marketMode === 'free' ? 'free' : 'locked',
@@ -83,19 +83,11 @@ const OnlinePvPEngine = (function () {
     return list;
   }
 
-  const FIREBASE_CONFIG = (typeof window !== 'undefined' && window.TOPCLASH_FIREBASE_CONFIG) || {
-    apiKey: "AIzaSyCcqIW2P88KMBTCkNJhneADRjdJzjBOcI0",
-    authDomain: "top-game-913c0.firebaseapp.com",
-    databaseURL: "https://top-game-913c0-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "top-game-913c0",
-    storageBucket: "top-game-913c0.firebasestorage.app",
-    messagingSenderId: "948581983008",
-    appId: "1:948581983008:web:c141212f221a706263ad45"
-  };
+  const FIREBASE_CONFIG = (typeof window !== 'undefined' && window.TOPCLASH_FIREBASE_CONFIG) || null;
 
   function getFbDb() {
     try {
-      if (typeof window !== 'undefined' && window.firebase) {
+      if (typeof window !== 'undefined' && window.firebase && FIREBASE_CONFIG) {
         if (!window.firebase.apps || !window.firebase.apps.length) {
           window.firebase.initializeApp(FIREBASE_CONFIG);
         }
@@ -111,8 +103,8 @@ const OnlinePvPEngine = (function () {
     return {
       gameId: 'topwarlords',
       senderId,
-      name: (playerProfile && playerProfile.name) || (hostFlag ? '本部特遣隊' : '挑戰突擊隊'),
-      uid: (playerProfile && playerProfile.uid) || 'CMD-ONLINE',
+      name: (playerProfile && playerProfile.name) || (hostFlag ? '主帥本陣' : '挑戰軍團'),
+      uid: (playerProfile && playerProfile.uid) || 'WL-ONLINE',
       flag: (playerProfile && playerProfile.flag) || '🇹🇼',
       isHost: !!hostFlag,
       isPublic: roomSettings.isPublic,

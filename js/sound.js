@@ -5,7 +5,7 @@
    支援左右陣營立體聲定位、多取樣輪替防機械感、戶外山谷空間殘響與平滑 BGM 交叉淡入淡出
    ===================================================== */
 (function () {
-  const AUDIO_VER = '7.11.90';
+  const AUDIO_VER = '7.12.0';
   const BASE_PATH = 'assets/audio/';
 
   const CLIP_MANIFEST = {
@@ -30,14 +30,15 @@
     defeat: `${BASE_PATH}defeat.mp3?v=${AUDIO_VER}`
   };
 
-  // 先載入戰場核心音效，再載入長篇 BGM，確保首戰零延遲
-  const PRIORITY_KEYS = [
+  // 先載入戰場核心音效；長篇 BGM 採按需延遲載入，預設靜音時不浪費 1.64MB 流量
+  const SFX_KEYS = [
     'ui_click', 'equip', 'war_drum', 'war_horn',
     'blade_clash_1', 'blade_clash_2', 'blade_clash_3', 'heavy_strike',
     'shield_block', 'cavalry_charge', 'cavalry_hooves', 'arrow_volley',
-    'fire_attack', 'strategy_gong', 'warlord_fall', 'victory', 'defeat',
-    'bgm_battle', 'bgm_prep'
+    'fire_attack', 'strategy_gong', 'warlord_fall', 'victory', 'defeat'
   ];
+  const BGM_KEYS = ['bgm_battle', 'bgm_prep'];
+  const PRIORITY_KEYS = SFX_KEYS.concat(BGM_KEYS);
 
   // 8 大無雙技能流派：全數採用真實樂器與冷兵器錄音（單一清脆起手音 + 3D 爆發實音，無合成音色）
   const SKILL_AUDIO_PROFILES = {
@@ -97,6 +98,30 @@
     } catch (e) { }
   }
 
+  function readVolPref(key, fallback) {
+    try {
+      const raw = (window.LS && typeof window.LS.get === 'function')
+        ? window.LS.get(key, null)
+        : localStorage.getItem(key);
+      if (raw === null || raw === undefined) return fallback;
+      const num = typeof raw === 'number' ? raw : Number(JSON.parse(raw));
+      return Number.isFinite(num) ? Math.max(0, Math.min(1, num)) : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function writeVolPref(key, val) {
+    try {
+      const clamped = Math.max(0, Math.min(1, Number(val)));
+      if (window.LS && typeof window.LS.set === 'function') {
+        window.LS.set(key, clamped);
+      } else {
+        localStorage.setItem(key, JSON.stringify(clamped));
+      }
+    } catch (_) { }
+  }
+
   const SoundEngine = {
     ctx: null,
     masterGain: null,
@@ -117,10 +142,11 @@
     spatialSources: new Set(),
     enabled: readSoundPref(),
     bgmEnabled: readBgmPref(),
+    sfxVolume: readVolPref('wl15_sfx_vol', 0.95),
+    bgmVolume: readVolPref('wl15_bgm_vol', 0.32),
 
-    // 預先抓取二進位音訊檔（不需等待使用者點擊即可透過網路快取下載）
-    prefetchAll() {
-      PRIORITY_KEYS.forEach((key) => {
+    _fetchKeys(keys) {
+      keys.forEach((key) => {
         if (this.loadingPromises[key]) return;
         const url = CLIP_MANIFEST[key];
         if (!url || typeof fetch !== 'function') return;
@@ -136,6 +162,15 @@
           })
           .catch(() => null);
       });
+    },
+
+    // 預先抓取真實 SFX 音效檔；僅在 BGM 已開啟時才下載 1.64MB 背景音樂
+    prefetchAll() {
+      this._fetchKeys(this.bgmEnabled ? PRIORITY_KEYS : SFX_KEYS);
+    },
+
+    prefetchBgm() {
+      this._fetchKeys(BGM_KEYS);
     },
 
     _decodeKey(key) {
@@ -183,10 +218,10 @@
         this.masterComp.release.setValueAtTime(0.2, now);
 
         this.sfxBus = this.ctx.createGain();
-        this.sfxBus.gain.setValueAtTime(0.95, now);
+        this.sfxBus.gain.setValueAtTime(this.sfxVolume, now);
 
         this.bgmBus = this.ctx.createGain();
-        this.bgmBus.gain.setValueAtTime(0.32, now);
+        this.bgmBus.gain.setValueAtTime(this.bgmVolume, now);
 
         // 0.95 秒自然山谷戰場空間殘響 (Warm Outdoor Valley Reverb)
         const irLen = Math.floor(sr * 0.95);
@@ -267,9 +302,36 @@
       const ico = document.querySelector('#bgmIcon');
       if (btn) {
         btn.setAttribute('aria-pressed', String(this.bgmEnabled));
+        btn.classList.toggle('is-muted', !this.bgmEnabled);
         btn.title = this.bgmEnabled ? '背景音樂已開啟（點擊關閉）' : '背景音樂已關閉（點擊開啟）';
       }
-      if (ico) ico.textContent = this.bgmEnabled ? '🎵' : '🎵';
+      if (ico) ico.textContent = this.bgmEnabled ? '🎵' : '🔇';
+    },
+
+    getVolumes() {
+      return { sfx: this.sfxVolume, bgm: this.bgmVolume };
+    },
+
+    setSfxVolume(val) {
+      const v = Math.max(0, Math.min(1, Number(val)));
+      if (!Number.isFinite(v)) return this.sfxVolume;
+      this.sfxVolume = v;
+      writeVolPref('wl15_sfx_vol', v);
+      if (this.sfxBus && this.ctx) {
+        this.sfxBus.gain.setTargetAtTime(v, this.ctx.currentTime, 0.03);
+      }
+      return v;
+    },
+
+    setBgmVolume(val) {
+      const v = Math.max(0, Math.min(1, Number(val)));
+      if (!Number.isFinite(v)) return this.bgmVolume;
+      this.bgmVolume = v;
+      writeVolPref('wl15_bgm_vol', v);
+      if (this.bgmBus && this.ctx) {
+        this.bgmBus.gain.setTargetAtTime(v, this.ctx.currentTime, 0.04);
+      }
+      return v;
     },
 
     toggleBgm() {
@@ -281,6 +343,7 @@
       }
       if (this.bgmEnabled) {
         this.init();
+        this.prefetchBgm();
         if (this.enabled) {
           this._startBgmSource(this.currentBgmMode || 'prep');
         }
@@ -335,7 +398,7 @@
       const clipKey = mode === 'battle' ? 'bgm_battle' : 'bgm_prep';
       const buf = this.buffers[clipKey];
       if (!buf) {
-        this.prefetchAll();
+        this.prefetchBgm();
         return;
       }
 
@@ -373,9 +436,10 @@
     _duckBgm(duckGain = 0.12, holdSec = 2.4) {
       if (!this.bgmBus || !this.ctx) return;
       const now = this.ctx.currentTime;
+      const restGain = this.bgmVolume ?? 0.32;
       this.bgmBus.gain.cancelScheduledValues(now);
-      this.bgmBus.gain.setTargetAtTime(duckGain, now, 0.06);
-      this.bgmBus.gain.setTargetAtTime(0.32, now + holdSec, 0.45);
+      this.bgmBus.gain.setTargetAtTime(Math.min(duckGain, restGain), now, 0.06);
+      this.bgmBus.gain.setTargetAtTime(restGain, now + holdSec, 0.45);
     },
 
     // 將遊戲內各事件名稱映射至真實錄音取樣池與混音參數

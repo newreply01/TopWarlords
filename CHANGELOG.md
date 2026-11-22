@@ -4,6 +4,20 @@
 
 ---
 
+## [7.12.0] - 2026-11-22
+### Overhauled (全面工程、美術資源、音效、戰鬥深度、史料考據與測試 CI 升級)
+- **美術資產與 SEO 橫幅整理 (`assets/warlords/`, `assets/models/`, `assets/og-banner.jpg`, `chibi_preview.html`)**：
+  - 清理 144 張冗餘未引用立繪與 12 個未使用 `.glb` 模型（釋放約 10.86 MB），僅保留 125 名將對應頭像與 6 個戰場實景道具模型；重建真實 `1200×630` Open Graph 預覽橫幅，並重寫 `chibi_preview.html` 動態讀取全鑑名將資料。
+- **音效與配樂懶載入升級 (`js/sound.js`, `js/poster-help.js`, `js/data.js`)**：
+  - 將 1.64 MB 古戰場配樂改為按需延遲載入，首屏僅預載核心音效；修正 `#btnBgm` 切換圖示與靜音狀態，新增獨立音效/配樂音量持久化與說明彈窗內滑桿，並為 125 位名將重新均衡專屬音效 (`cavalry_charge`、`heavy_strike`、`shield_block` 等)。
+- **戰鬥深度、史實羈絆與數值平衡 (`js/engine.js`, `js/data.js`, `js/ladder-data.js`)**：
+  - 調整全域生命係數為 `1.45×`、修復天梯 `bot_20`/`bot_72` 為精準 `$15` 編制；實作「灼燒／破甲／動搖／奮戰」四大異常狀態與個人戰鬥遙測、六大史實共鳴羈絆（蜀漢英烈、曹魏五子霸府、江東都督英傑、戰國主從齊心、三韓護國精忠、戰國兵家名帥），下調熟練度勳章門檻 (`5/15/40/100`)。
+  - Pass 3 平衡調校收斂六大流派循環賽勝率至 `47%–51%`、五檔費用勝率 `49.8%–50.3%`、125 名將區間 `45.1%–56.7%`、三大教條 `48.6%–51.2%`。
+- **125 名將史料考據、名將錄時代篩選與戰後數據分析 (`js/historical-audit.js`, `js/result-analytics.js`, `armory.html`, `js/armory.js`, `js/app.js`)**：
+  - 補齊 125 位名將史實考據與時代索引（0 `unverified`），於名將錄新增五大時代篩選與詳細考據彈窗，於備戰與戰後結算展示史實羈絆、戰術遙測對比與軍師換陣建議，並補足全域 `Escape` 關窗與 `R` 鍵調撥支援。
+- **架構穩定性、資安防護、CSS 整理與自動化 CI (`js/musou-vfx.js`, `js/musou-signatures-*.js`, `js/telemetry.js`, `js/online-pvp.js`, `vercel.json`, `tools/slim_css.py`, `tools/verify_integrity.py`, `.github/workflows/ci.yml`)**：
+  - 為無雙 3D 特效計時器統一加入 `MusouVfx.schedule()`/`clearTimers()` 避免切場洩漏；移除硬編碼管理員雜湊持久化改用 `sessionStorage` 權杖、補齊 `vercel.json` CSP 標頭與 `escapeHtml()` 防護；清理現代軍事用語殘留；建立 `verify_integrity.py` 與 GitHub Actions CI 工作流。
+
 ## [7.11.96] - 2026-11-22
 ### Completed & Synced (全軍 125/125 位 2.5D 賽璐珞 Q 版頭像 100% 完工作業並同步全庫索引)
 - **補齊最後 5 位名將並精煉 2 位無字乾淨版 Q 版頭像 (`assets/warlords/*.jpg`, `js/data.js`)**：

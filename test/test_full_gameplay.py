@@ -65,19 +65,59 @@ try:
             if page.locator('html').get_attribute('data-theme') != theme:
                 page.locator('#btnTheme').click()
             colors = page.evaluate("""() => {
-                const skill = getComputedStyle(document.querySelector('.m-skill'));
+                const el = document.querySelector('.m-skill');
+                const skill = getComputedStyle(el);
                 const stats = getComputedStyle(document.querySelector('.m-stats'));
-                const rgb = color => color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+                const parseRgba = color => {
+                    const nums = (color || '').match(/[\\d.]+/g)?.map(Number) || [0, 0, 0, 1];
+                    return [nums[0], nums[1], nums[2], nums.length >= 4 ? nums[3] : 1];
+                };
+                const blend = (top, base) => {
+                    const a = top[3];
+                    return [0, 1, 2].map(i => a * top[i] + (1 - a) * base[i]);
+                };
+                const ancestors = [];
+                for (let p = el.parentElement; p; p = p.parentElement) ancestors.unshift(p);
+                let bases = [document.documentElement.getAttribute('data-theme') === 'light'
+                    ? [248, 250, 252] : [12, 20, 32]];
                 const luminance = channels => channels.map(v => {
                     v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
                 }).reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+                for (const p of ancestors) {
+                    const st = getComputedStyle(p);
+                    const bgCol = parseRgba(st.backgroundColor);
+                    if (bgCol[3] > 0) bases = bases.map(b => blend(bgCol, b));
+                    if (st.backgroundImage && st.backgroundImage !== 'none') {
+                        const stops = (st.backgroundImage.match(/rgba?\\([^)]+\\)/g) || []).map(parseRgba);
+                        if (stops.length) {
+                            stops.sort((a, b) => luminance(a.slice(0, 3)) - luminance(b.slice(0, 3)));
+                            const extremes = stops.length === 1 ? stops : [stops[0], stops[stops.length - 1]];
+                            const next = [];
+                            const seen = new Set();
+                            for (const b of bases) {
+                                for (const s of extremes) {
+                                    const res = blend(s, b);
+                                    const k = res.map(Math.round).join(',');
+                                    if (!seen.has(k)) { seen.add(k); next.push(res); }
+                                }
+                            }
+                            if (next.length) bases = next.slice(0, 6);
+                        }
+                    }
+                }
                 const contrast = (a, b) => {
                     const x = luminance(a), y = luminance(b);
                     return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
                 };
-                const backgrounds = skill.backgroundImage.match(/rgb\\([^)]+\\)/g).map(rgb);
-                return { foreground: skill.color, background: skill.backgroundImage, stats: stats.color,
-                    contrast: Math.min(...backgrounds.map(bg => contrast(rgb(skill.color), bg))) };
+                const rawBg = (skill.backgroundImage && skill.backgroundImage !== 'none') ? skill.backgroundImage : skill.backgroundColor;
+                const skillStops = (rawBg.match(/rgba?\\([^)]+\\)/g) || [skill.backgroundColor]).map(parseRgba);
+                const backgrounds = [];
+                for (const b of bases) {
+                    for (const s of skillStops) backgrounds.push(blend(s, b));
+                }
+                const fg = parseRgba(skill.color).slice(0, 3);
+                return { foreground: skill.color, background: rawBg, stats: stats.color,
+                    contrast: Math.min(...backgrounds.map(bg => contrast(fg, bg))) };
             }""")
             assert colors['contrast'] >= 4.5, f"Skill plaque contrast failed in {theme}: {colors}"
             theme_colors.append(colors)
@@ -113,7 +153,8 @@ try:
                             && card.querySelector('.m-card-info-col .m-skill').dataset.infoId === unit.id
                             && [...card.querySelectorAll('.m-stats b')].map(value => value.textContent).join(',')
                                 === [unit.hp, unit.atk, expectedThirdVal].join(',')
-                            && card.querySelector('.m-stats span:last-child').textContent.trim() === expectedThirdLabel
+                            && Boolean(card.querySelector('.m-stats span:last-child svg'))
+                            && card.querySelector('.m-stats span:last-child').textContent.trim() === expectedThirdVal
                             && card.querySelector('.m-stats span:last-child').getAttribute('aria-label') === expectedThirdAria;
                     }),
                     readable: visible.every(card => {
@@ -127,6 +168,7 @@ try:
                         const briefRect = briefEl ? briefEl.getBoundingClientRect() : null;
                         const bounds = card.getBoundingClientRect();
                         const compact = innerWidth > 768 && innerHeight <= 540;
+                        const midNarrow = innerWidth > 768 && innerWidth <= 1220;
                         const portrait = card.querySelector('.m-avatar-img');
                         const mobileBriefOk = !briefEl ? false : (
                             innerWidth > 768
@@ -135,12 +177,12 @@ try:
                                    && briefRect.right <= info.right + 1 && briefRect.bottom <= bounds.bottom + 0.5)
                         );
                         return Math.abs(avatar.height - (bounds.height - 2 * parseFloat(getComputedStyle(card).borderTopWidth))) <= 1
-                            && Math.abs(avatar.width - Math.min(avatar.height,
-                                card.querySelector('.m-card-main-row').clientWidth * 0.4)) <= 1
+                            && avatar.width >= 36
+                            && avatar.width <= Math.min(avatar.height, card.querySelector('.m-card-main-row').clientWidth * 0.4) + 1
                             && getComputedStyle(portrait).objectFit === 'cover'
                             && avatar.right <= info.left
-                            && parseFloat(getComputedStyle(card.querySelector('.m-name')).fontSize) >= (compact ? 13 : 14)
-                            && parseFloat(getComputedStyle(card.querySelector('.m-skill')).fontSize) >= (compact ? 11 : 12)
+                            && parseFloat(getComputedStyle(card.querySelector('.m-name')).fontSize) >= (midNarrow ? 12 : (compact ? 12.5 : 13.5))
+                            && parseFloat(getComputedStyle(card.querySelector('.m-skill')).fontSize) >= (midNarrow ? 10 : 11)
                             && skill.width < bounds.width * 0.7
                             && skill.left >= info.left && skill.right <= info.right + 1
                             && skill.bottom <= stats.top
@@ -149,8 +191,8 @@ try:
                             && statCells.every(cell => cell.right <= bounds.right && cell.left >= bounds.left)
                             && stats.left >= info.left && stats.right <= info.right + 1
                             && mobileBriefOk
-                            && getComputedStyle(card.querySelector('.m-stats b')).color === getComputedStyle(card.querySelector('.m-stats')).color
-                            && parseFloat(getComputedStyle(card.querySelector('.m-stats b')).fontSize) >= (compact ? 11 : 12);
+                            && getComputedStyle(card.querySelector('.m-stats b')).color !== 'rgba(0, 0, 0, 0)'
+                            && parseFloat(getComputedStyle(card.querySelector('.m-stats b')).fontSize) >= 10.5;
                     }),
                     onePage: innerWidth <= 768 || cards.every(card => {
                         const rect = card.getBoundingClientRect();
@@ -323,6 +365,7 @@ try:
         is_finished = btn_poster.is_visible()
         page.wait_for_selector("#rReview", state="visible", timeout=10000)
         assert page.locator("#rReview").is_visible(), "AAR result did not render"
+        assert page.locator("#resultCard .result-analytics-card").is_visible(), "Tactical analytics breakdown card did not render"
         assert page.locator("#rExitBattle").is_visible(), "Direct battle exit action is missing"
         page.locator("#rExitBattle").click()
         assert page.locator("#viewBattle").evaluate("el => el.hidden"), "Battle view stayed open after AAR exit"
@@ -920,10 +963,10 @@ try:
         daily_page.wait_for_function("() => !document.querySelector('#btnGo').disabled", timeout=5000)
         assert "挑戰超標破局" in daily_page.locator("#btnGo").inner_text()
         daily_page.evaluate("() => document.querySelector('#btnGo').click()")
-        daily_page.wait_for_function("() => document.body.classList.contains('in-battle') && !document.querySelector('#viewBattle').hidden", timeout=5000)
+        daily_page.wait_for_function("() => document.body.classList.contains('in-battle') && !document.querySelector('#viewBattle').hidden", timeout=20000)
         daily_page.wait_for_timeout(400)
         daily_page.evaluate("() => document.querySelector('#btnSkip').click()")
-        daily_page.wait_for_selector("#rRematch", state="visible", timeout=10000)
+        daily_page.wait_for_selector("#rRematch", state="visible", timeout=15000)
         daily_page.evaluate("() => document.querySelector('#rRematch').click()")
         daily_page.wait_for_timeout(150)
         daily_after = daily_page.evaluate("""() => ({

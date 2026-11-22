@@ -1,0 +1,47 @@
+name: TopWarlords CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: JS syntax check
+        run: |
+          for f in js/*.js; do
+            node -c "$f"
+          done
+
+      - name: Run Node unit tests & integrity audit
+        run: |
+          node test/test_battle_figures.js
+          node test/test_spatial_audio.js
+          python3 tools/verify_integrity.py
+          node tools/balance.js
+
+      - name: Install Playwright & Chromium
+        run: |
+          pip install playwright
+          playwright install chromium --with-deps
+
+      - name: Run Playwright engine & armory tests
+        run: |
+          python3 test/test_warlords_engine.py
+          python3 test/test_armory.py

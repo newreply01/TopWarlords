@@ -6,6 +6,21 @@
 (function () {
   const $ = selector => document.querySelector(selector);
   const $$ = selector => Array.from(document.querySelectorAll(selector));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  const ERA_LABELS = {
+    qin_han: '先秦兩漢',
+    three_kingdoms: '三國兩晉南北朝',
+    tang_song_ming: '唐宋明',
+    sengoku: '日本源平戰國',
+    korea_dynasties: '朝鮮三國高麗朝鮮'
+  };
+  const AUDIT_STATUS_MAP = {
+    'source-linked': { label: '✓ 史籍有據', cls: 'status-verified' },
+    'verified': { label: '✓ 史料考據', cls: 'status-verified' },
+    'qualified': { label: '⚖️ 細節保留說明', cls: 'status-qualified' },
+    'needs-review': { label: '📝 學術存疑附註', cls: 'status-review' },
+    'unverified': { label: '⏳ 待補考據', cls: 'status-unverified' }
+  };
 
   // 主題控制 (解析主頁 LS.set 規範，杜絕 JSON 引號污染)
   function getCleanTheme() {
@@ -13,7 +28,7 @@
       const raw = localStorage.getItem('wl15_theme');
       if (!raw) return 'light';
       let t = raw;
-      try { t = JSON.parse(raw); } catch (_) {}
+      try { t = JSON.parse(raw); } catch (_) { }
       return (t === 'dark' || t === 'light') ? t : 'light';
     } catch (_) {
       return 'light';
@@ -23,7 +38,7 @@
   function setCleanTheme(t) {
     try {
       localStorage.setItem('wl15_theme', JSON.stringify(t));
-    } catch (_) {}
+    } catch (_) { }
   }
 
   function initTheme() {
@@ -48,7 +63,7 @@
   window.addEventListener('storage', e => {
     if (e.key === 'wl15_theme' && e.newValue) {
       let t = e.newValue;
-      try { t = JSON.parse(t); } catch (_) {}
+      try { t = JSON.parse(t); } catch (_) { }
       if (t === 'dark' || t === 'light') {
         document.documentElement.setAttribute('data-theme', t);
         updateThemeIcon(t);
@@ -62,6 +77,7 @@
   const state = {
     cat: 'all',
     nat: 'all',
+    era: 'all',
     cost: 'all',
     trait: 'all',
     sort: 'cost_desc',
@@ -104,6 +120,7 @@
     return UNITS.filter(u => {
       if (state.cat !== 'all' && u.cat !== state.cat) return false;
       if (state.nat !== 'all' && u.flag !== state.nat) return false;
+      if (state.era !== 'all' && ((u.historicalAudit && u.historicalAudit.era) || '') !== state.era) return false;
       if (state.cost !== 'all' && u.cost !== Number(state.cost)) return false;
       if (state.trait !== 'all' && !u.traits.includes(state.trait)) return false;
 
@@ -123,12 +140,12 @@
     }).sort((a, b) => {
       switch (state.sort) {
         case 'cost_desc': return b.cost - a.cost || b.hp - a.hp;
-        case 'cost_asc':  return a.cost - b.cost || a.hp - b.hp;
-        case 'hp_desc':   return b.hp - a.hp;
-        case 'atk_desc':  return b.atk - a.atk;
-        case 'sth_desc':  return b.st - a.st;
-        case 'ew_desc':   return b.ew - a.ew;
-        case 'name_asc':  return a.name.localeCompare(b.name, 'zh-Hant');
+        case 'cost_asc': return a.cost - b.cost || a.hp - b.hp;
+        case 'hp_desc': return b.hp - a.hp;
+        case 'atk_desc': return b.atk - a.atk;
+        case 'sth_desc': return b.st - a.st;
+        case 'ew_desc': return b.ew - a.ew;
+        case 'name_asc': return a.name.localeCompare(b.name, 'zh-Hant');
         default: return 0;
       }
     });
@@ -149,8 +166,6 @@
       `;
       return;
     }
-
-    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 
     container.innerHTML = units.map(u => {
       const cat = CATS[u.cat] || { label: u.cat, short: u.cat, color: '#3de0ff' };
@@ -347,6 +362,27 @@
       ${masteryHtml}
     `;
 
+    const auditBox = $('#intelAuditBox');
+    if (auditBox) {
+      const audit = u.historicalAudit || { status: 'unverified', note: '', sources: [] };
+      const stMeta = AUDIT_STATUS_MAP[audit.status] || AUDIT_STATUS_MAP.unverified;
+      const eraName = ERA_LABELS[audit.era] || '東亞古典史';
+      const srcHtml = Array.isArray(audit.sources) && audit.sources.length
+        ? `<div class="intel-audit-sources">參考史料：${audit.sources.map((src, i) => {
+          const safeUrl = /^https?:\/\//i.test(String(src)) ? esc(src) : '';
+          return safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">典籍連結 ${i + 1}</a>` : `<span>${esc(src)}</span>`;
+        }).join(' · ')}</div>`
+        : '';
+      auditBox.innerHTML = `
+        <div class="intel-audit-head">
+          <span class="intel-audit-badge ${stMeta.cls}">${esc(stMeta.label)}</span>
+          <span class="intel-audit-era">⏳ 時代考據：${esc(eraName)}</span>
+        </div>
+        ${audit.note ? `<p class="intel-audit-note">${esc(audit.note)}</p>` : ''}
+        ${srcHtml}
+      `;
+    }
+
     modal.hidden = false;
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
@@ -389,7 +425,17 @@
       updateView();
     });
 
-// 費用篩選
+    // 歷史時代篩選
+    $('#eraFilterGroup')?.addEventListener('click', e => {
+      const btn = e.target.closest('.era-btn');
+      if (!btn) return;
+      $$('#eraFilterGroup .era-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.era = btn.dataset.era;
+      updateView();
+    });
+
+    // 費用篩選
     $('#costFilterGroup')?.addEventListener('click', e => {
       const btn = e.target.closest('.cost-btn');
       if (!btn) return;

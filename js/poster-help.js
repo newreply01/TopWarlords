@@ -89,7 +89,7 @@
     const appVer = (() => {
       const src = document.querySelector('script[src*="poster-help.js"]')?.getAttribute('src') || '';
       const m = src.match(/[?&]v=([^&]+)/);
-      return m ? m[1] : '7.11.96';
+      return m ? m[1] : '7.12.0';
     })();
 
     $('#helpCard').innerHTML = `
@@ -109,6 +109,19 @@
   <div class="help-tab-panel" id="helpPanelRules" ${activeTab === 'rules' ? '' : 'hidden'}>
     <h2>📖 古代名將聯合作戰推演手冊</h2>
     <p class="muted">用 $15 軍令預算組建五大古代兵團槽位，與對手進行古代古典沙盤推演。</p>
+
+    <div class="audio-vol-panel" aria-label="音效與背景音樂音量設定">
+      <div class="audio-vol-row">
+        <label for="sliderSfxVol">🔊 戰場音效音量</label>
+        <input id="sliderSfxVol" type="range" min="0" max="100" step="1" value="95">
+        <span class="audio-vol-pct" id="valSfxVol">95%</span>
+      </div>
+      <div class="audio-vol-row">
+        <label for="sliderBgmVol">🎵 古戰場配樂音量</label>
+        <input id="sliderBgmVol" type="range" min="0" max="100" step="1" value="32">
+        <span class="audio-vol-pct" id="valBgmVol">32%</span>
+      </div>
+    </div>
 
     <h3>一、排兵布陣規則</h3>
     <ul>
@@ -178,7 +191,7 @@
       <div class="help-row">
         <div class="help-badge">🌪 疾如風</div>
         <div class="help-desc">
-          階段一、二攻擊火力 <b>+26%</b>、階段三攻擊火力 <b>+20%</b>，但承受傷害 <b>+2%</b>（兵貴神速，適合突騎千里奔襲與猛攻速決）。
+          階段一、二攻擊火力 <b>+26%</b>、階段三攻擊火力 <b>+21%</b>，但承受傷害 <b>+3.5%</b>（兵貴神速，適合突騎千里奔襲與猛攻速決）。
         </div>
       </div>
       <div class="help-row">
@@ -335,6 +348,36 @@
     });
 
     $('#helpModal').hidden = false;
+    const vols = (typeof window !== 'undefined' && window.SoundEngine && typeof window.SoundEngine.getVolumes === 'function')
+      ? window.SoundEngine.getVolumes()
+      : { sfx: 0.95, bgm: 0.32 };
+    const sfxSlider = $('#sliderSfxVol');
+    const bgmSlider = $('#sliderBgmVol');
+    const sfxVal = $('#valSfxVol');
+    const bgmVal = $('#valBgmVol');
+    if (sfxSlider && sfxVal) {
+      const pct = Math.round((vols.sfx ?? 0.95) * 100);
+      sfxSlider.value = String(pct);
+      sfxVal.textContent = pct + '%';
+      sfxSlider.oninput = () => {
+        const p = Number(sfxSlider.value);
+        sfxVal.textContent = p + '%';
+        window.SoundEngine?.setSfxVolume?.(p / 100);
+      };
+      sfxSlider.onchange = () => {
+        window.SoundEngine?.play?.('equip');
+      };
+    }
+    if (bgmSlider && bgmVal) {
+      const pct = Math.round((vols.bgm ?? 0.32) * 100);
+      bgmSlider.value = String(pct);
+      bgmVal.textContent = pct + '%';
+      bgmSlider.oninput = () => {
+        const p = Number(bgmSlider.value);
+        bgmVal.textContent = p + '%';
+        window.SoundEngine?.setBgmVolume?.(p / 100);
+      };
+    }
     const closeHelpModal = () => {
       $('#helpModal').hidden = true;
       if (LS) LS.set('wl15_seen', 1);

@@ -1,7 +1,7 @@
 'use strict';
 /**
  * =====================================================
- * TopClash 全域遙測與戰情報告引擎 (Telemetry & Analytics Engine)
+ * TopWarlords 全域遙測與戰情報告引擎 (Telemetry & Analytics Engine)
  * 雙軌統計架構 (Dual-Track Architecture):
  * 軌道 1 (Firebase RTDB): 全服在線人數 (Presence)、累計推演場次、總註冊指揮官數、今日戰況
  * 軌道 2 (Google Analytics 4): 專業訪客流向、留存率、自訂遊戲戰術事件 (GA4 Measurement)
@@ -17,12 +17,17 @@ const Telemetry = (() => {
   let onlineCount = 1;
   const CACHE_KEY_GLOBAL_VISITS = 'topwarlords_cached_global_visits';
   const ADMIN_STORAGE_KEY = 'topwarlords_admin_auth';
+  const ADMIN_SESSION_TOKEN_KEY = 'topwarlords_admin_session';
   const ADMIN_SALT = '_C4ISR_ADMIN_SALT_2026';
+  const SESSION_NONCE = Math.random().toString(36).slice(2) + ':' + Date.now();
   const ADMIN_HASH = '7df4073dafe01d32adc34c9036ce8ffc35f732c779f40e8d2e10794d955e88e0';
+  let adminUnlockedInMemory = false;
 
   function isAdmin() {
+    if (adminUnlockedInMemory) return true;
     try {
-      return localStorage.getItem(ADMIN_STORAGE_KEY) === ADMIN_HASH;
+      const token = sessionStorage.getItem(ADMIN_SESSION_TOKEN_KEY);
+      return Boolean(token && token === sha256FallbackHex(ADMIN_HASH + '|' + SESSION_NONCE));
     } catch (e) {
       return false;
     }
@@ -104,8 +109,10 @@ const Telemetry = (() => {
   async function verifyAndUnlockAdmin(pwd) {
     const digest = await sha256Hex(String(pwd || '').trim() + ADMIN_SALT);
     if (digest === ADMIN_HASH) {
+      adminUnlockedInMemory = true;
       try {
-        localStorage.setItem(ADMIN_STORAGE_KEY, ADMIN_HASH);
+        sessionStorage.setItem(ADMIN_SESSION_TOKEN_KEY, sha256FallbackHex(ADMIN_HASH + '|' + SESSION_NONCE));
+        localStorage.removeItem(ADMIN_STORAGE_KEY);
       } catch (e) { }
       syncAdminBadgeState();
       return true;
@@ -114,7 +121,9 @@ const Telemetry = (() => {
   }
 
   function lockAdmin() {
+    adminUnlockedInMemory = false;
     try {
+      sessionStorage.removeItem(ADMIN_SESSION_TOKEN_KEY);
       localStorage.removeItem(ADMIN_STORAGE_KEY);
     } catch (e) { }
     syncAdminBadgeState();

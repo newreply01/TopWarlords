@@ -3767,9 +3767,10 @@ body:has(.battle:not([hidden])) .command-deck,
   min-height: 200px;
   max-height: calc(100vh - 28px);
   overflow-y: auto;
+  overflow-anchor: none;
   box-sizing: border-box;
   margin: 6px auto;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   padding: 14px 20px;
   background: var(--modal-bg);
   border: 1px solid var(--line2);

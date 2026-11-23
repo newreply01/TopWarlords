@@ -5942,6 +5942,7 @@ $('#btnReopenResult').onclick = () => {
 
   if (currentActiveModal && currentActiveModal.children && currentActiveModal.children.length > 0) {
     currentActiveModal.hidden = false;
+    if (currentActiveModal === $('#resultModal')) resetResultModalScroll();
     return;
   }
 
@@ -5960,27 +5961,9 @@ $('#btnReopenResult').onclick = () => {
     `;
     currentActiveModal = $('#resultModal');
     const rModal = $('#resultModal');
-    const rCard = $('#resultCard');
-    if (rModal) {
-      rModal.hidden = false;
-      rModal.scrollTop = 0;
-    }
-    if (rCard) {
-      rCard.scrollTop = 0;
-    }
+    if (rModal) rModal.hidden = false;
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    requestAnimationFrame(() => {
-      if (rModal) rModal.scrollTop = 0;
-      if (rCard) rCard.scrollTop = 0;
-    });
-    setTimeout(() => {
-      if (rModal) rModal.scrollTop = 0;
-      if (rCard) rCard.scrollTop = 0;
-    }, 40);
-    setTimeout(() => {
-      if (rModal) rModal.scrollTop = 0;
-      if (rCard) rCard.scrollTop = 0;
-    }, 120);
+    resetResultModalScroll();
   }
 };
 function handleExitBattleToCurrentMode() {
@@ -6732,6 +6715,29 @@ function showBo3SeriesResult(isPlayerWon) {
   }
 }
 
+/** 將戰場結算彈窗捲軸與焦點重設至最頂部，確保優先看見頂部評級與 MVP 名將 */
+function resetResultModalScroll() {
+  const rModal = $('#resultModal');
+  const rCard = $('#resultCard');
+  if (rModal && document.activeElement && rModal.contains(document.activeElement) && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+  const applyTop = () => {
+    if (rModal) {
+      rModal.scrollTop = 0;
+      if (typeof rModal.scrollTo === 'function') rModal.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    if (rCard) {
+      rCard.scrollTop = 0;
+      if (typeof rCard.scrollTo === 'function') rCard.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  };
+  applyTop();
+  requestAnimationFrame(applyTop);
+  setTimeout(applyTop, 50);
+  setTimeout(applyTop, 160);
+}
+
 /* ---------- 旗艦級戰鬥結算報告 (Tactical After-Action Report, AAR) ---------- */
 function showResult(res, bo3Custom) {
   if (!res) return;
@@ -7081,6 +7087,7 @@ function showResult(res, bo3Custom) {
 
     currentActiveModal = $('#resultModal');
     $('#resultModal').hidden = false;
+    resetResultModalScroll();
 
     const resultActions = $('#resultCard .aar-actions');
     if (resultActions && !$('#rExitBattle')) {
@@ -7201,6 +7208,7 @@ function showResult(res, bo3Custom) {
     `;
     currentActiveModal = $('#resultModal');
     $('#resultModal').hidden = false;
+    resetResultModalScroll();
   }
 }
 window.showResult = showResult;

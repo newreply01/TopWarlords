@@ -116,7 +116,7 @@ try:
             if (units.some(u => !u.skill?.fx || !SKILL_FX_ARCHETYPES?.[u.skill.fx] || !UNIT_SKILL_FX?.[u.id])) {
                 errs.push('存在缺少專屬戰法 3D 特效映射 (skill.fx) 之武將');
             }
-            const effectFields = new Set(['damage', 'hit', 'armorPierce', 'missingHpDamage', 'woundedTargetDamage', 'highCostDamage', 'terrainDamage', 'bonusVs', 'heal', 'guard', 'teamGuard', 'teamHit', 'enemyHit', 'commandAttack']);
+            const effectFields = new Set(['damage', 'hit', 'armorPierce', 'missingHpDamage', 'woundedTargetDamage', 'highCostDamage', 'terrainDamage', 'bonusVs', 'heal', 'guard', 'teamGuard', 'teamHit', 'enemyHit', 'commandAttack', 'lifesteal', 'multiHit', 'splash', 'dispel', 'counterStrike']);
             for (const unit of units) {
                 const effects = unit.skill?.effects;
                 if (!effects || !Object.keys(effects).length) {
@@ -495,6 +495,35 @@ try:
                 .filter(l => l.auid === 'YANGYE-A1' && l.tuid).map(l => yangyeAirCheck.final.B.find(u => u.uid === l.tuid)?.cat);
             if (yangyeP3Targets.length > 0 && yangyeP3Targets[0] !== 'air') {
                 errs.push('楊業階段三未優先迎擊敵方突騎');
+            }
+            if ((unitMap.NOBUNAGA?.roleFlags || []).includes('FORMATION_SHIELD')) {
+                errs.push('織田信長不應保留 FORMATION_SHIELD 誤懲罰');
+            }
+            for (const unit of units) {
+                const eff = unit.skill?.effects || {};
+                const fx = unit.skill?.fx;
+                const hasProc = fx === 'fire_storm' || fx === 'overlord_cleave' || (eff.armorPierce || 0) >= 0.35
+                    || fx === 'thunder_strike' || fx === 'shadow_ambush' || fx === 'piercing_volley' || fx === 'tidal_surge'
+                    || fx === 'aegis_command' || eff.heal || eff.teamGuard || eff.commandAttack || (fx === 'bagua_array' && (eff.enemyHit || 0) > 0);
+                if (!hasProc) errs.push('存在無法觸發異常狀態的武將：' + unit.id);
+            }
+            let sawMulti = false, sawSplash = false, sawSteal = false, sawCounter = false, sawDispel = false, sawStaggerOrMark = false;
+            for (let seed = 0; seed < 36 && !(sawMulti && sawSplash && sawSteal && sawCounter && sawDispel && sawStaggerOrMark); seed++) {
+                const sb = resolveBattle(
+                    ['LUBU', 'HONDA', 'NOBUNAGA', 'YISUNSIN', 'ZHUGELIANG'],
+                    ['KENSHIN', 'YUEFEI', 'JUMONG', 'LUXUN', 'SUNWU'],
+                    { seed, event: EVENTS.find(ev => ev.id === 'clear'), formationsA: neutralFormations, formationsB: neutralFormations }
+                );
+                const sLines = sb.frames.flatMap(f => f.lines);
+                sawMulti ||= sLines.some(l => l.followUp && l.matchup === '專屬連擊');
+                sawSplash ||= sLines.some(l => l.followUp && l.matchup === '餘波濺射');
+                sawSteal ||= sLines.some(l => (l.hpHealed || 0) > 0);
+                sawCounter ||= sLines.some(l => l.isCounter && l.brevity === '鐵壁反擊');
+                sawDispel ||= sLines.some(l => Array.isArray(l.statusKeys) && l.statusKeys.includes('dispel'));
+                sawStaggerOrMark ||= sLines.some(l => Array.isArray(l.statusKeys) && (l.statusKeys.includes('stagger') || l.statusKeys.includes('mark')));
+            }
+            if (!(sawMulti && sawSplash && sawSteal && sawCounter && sawDispel && sawStaggerOrMark)) {
+                errs.push(`新詞條或狀態未全面實戰生效: ${JSON.stringify({ sawMulti, sawSplash, sawSteal, sawCounter, sawDispel, sawStaggerOrMark })}`);
             }
 
             const hashFormations = Array(5).fill('fishscale');

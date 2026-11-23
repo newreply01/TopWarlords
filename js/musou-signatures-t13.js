@@ -96,6 +96,61 @@
           gravity: spec.gravity ?? -2.8
         });
       }, spec.delay || 180);
+
+      // 流派專屬實體動畫原型（火牛奔襲 / 水師齊砲 / 忍霧分身 / 箭雨箭牆）
+      if (spec.proto === 'fire_ox') {
+        const dir = new THREE.Vector3().subVectors(targetPos, casterPos);
+        dir.y = 0;
+        if (dir.lengthSq() < 0.01) dir.set(1, 0, 0);
+        dir.normalize();
+        const sideVec = new THREE.Vector3(-dir.z, 0, dir.x);
+        for (let i = 0; i < 5; i++) {
+          const lane = (i - 2) * 0.62;
+          later(() => {
+            const p0 = casterPos.clone().addScaledVector(sideVec, lane).add(new THREE.Vector3(0, 0.55, 0));
+            const pMid = casterPos.clone().lerp(targetPos, 0.52).addScaledVector(sideVec, lane * 0.85).add(new THREE.Vector3(0, 0.72, 0));
+            const p1 = targetPos.clone().addScaledVector(sideVec, lane * 0.6).addScaledVector(dir, 0.75).add(new THREE.Vector3(0, 0.45, 0));
+            V.spawnRibbonTrail(scene, [p0, pMid, p1], i % 2 === 0 ? 0xf97316 : 0xef4444, 0.34, 520);
+            V.spawnShockRing(scene, p1.clone().setY(groundY), i % 2 === 0 ? 0xfbbf24 : 0xf97316, 1.9, 440);
+          }, i * 55);
+        }
+      } else if (spec.proto === 'warship_broadside') {
+        for (let i = 0; i < 4; i++) {
+          later(() => {
+            const oz = (i - 1.5) * 0.78;
+            const ox = ((i % 2) - 0.5) * 0.65;
+            const p0 = casterPos.clone().add(new THREE.Vector3(0, 1.25, oz * 0.7));
+            const pPeak = casterPos.clone().lerp(targetPos, 0.5).add(new THREE.Vector3(ox * 0.5, 4.4 + (i % 2) * 0.6, oz));
+            const pLand = targetPos.clone().add(new THREE.Vector3(ox, 0.45, oz));
+            V.spawnRibbonTrail(scene, [p0, pPeak, pLand], i % 2 === 0 ? 0xf97316 : 0x22d3ee, 0.28, 480);
+            V.spawnShockRing(scene, pLand.clone().setY(groundY), i === 0 ? 0x06b6d4 : 0xf97316, 2.3 + i * 0.35, 520);
+          }, i * 70);
+        }
+      } else if (spec.proto === 'shinobi_clone') {
+        const offsets = [[-1.35, 0.2, -0.9], [1.35, 0.2, 0.9], [0, 1.65, 0]];
+        offsets.forEach(([ox, oy, oz], i) => {
+          later(() => {
+            const pStart = targetPos.clone().add(new THREE.Vector3(ox, 0.8 + oy, oz));
+            const pEnd = hit.clone().add(new THREE.Vector3(-ox * 0.5, 0.2, -oz * 0.5));
+            V.spawnRibbonTrail(scene, [pStart, hit.clone().add(new THREE.Vector3(0, oy * 0.5, 0)), pEnd], 0xc084fc, 0.26, 380);
+            V.spawnSlashArc(scene, pEnd, i % 2 === 0 ? 1 : -1, i === 2 ? 0xf3e8ff : 0xa855f7, 2.2 + i * 0.35, 380);
+          }, i * 85);
+        });
+      } else if (spec.proto === 'arrow_wall') {
+        for (let i = 0; i < 7; i++) {
+          later(() => {
+            const oz = (i - 3) * 0.48;
+            const ox = ((i % 3) - 1) * 0.42;
+            const pSky = targetPos.clone().add(new THREE.Vector3(ox - 1.4, 6.2 + (i % 2) * 0.6, oz));
+            const pMid = targetPos.clone().add(new THREE.Vector3(ox * 0.5 - 0.5, 3.1, oz));
+            const pHit = targetPos.clone().add(new THREE.Vector3(ox, 0.35, oz));
+            V.spawnRibbonTrail(scene, [pSky, pMid, pHit], i % 2 === 0 ? spec.color : (spec.accent || 0xfef08a), 0.18, 420);
+            if (i % 2 === 0) {
+              V.spawnShockRing(scene, pHit.clone().setY(groundY), spec.color, 1.85, 420);
+            }
+          }, i * 42);
+        }
+      }
       beat(ctx, spec.delay || 180, spec.shake || 0.24, spec.sfx || 'blade_clash');
     });
   }
@@ -136,37 +191,37 @@
 
   /* ==================== 神射強弩 ($3 / $2 / $1 共 15 位) ==================== */
   registerCustom('yoichi_sig',      { glyph: '扇', hexStr: '#fbbf24', color: 0xfbbf24, accent: 0xe0f2fe, ribbons: 1, rings: 3, sfx: 'arrow_volley' });
-  registerCustom('taishici_sig',    { color: 0x38bdf8, accent: 0xfbbf24, ribbons: 3, slashes: 1, sfx: 'arrow_volley' });
+  registerCustom('taishici_sig',    { proto: 'arrow_wall', color: 0x38bdf8, accent: 0xfbbf24, ribbons: 3, slashes: 1, sfx: 'arrow_volley' });
   registerCustom('akechi_sig',      { glyph: '桔梗', hexStr: '#a855f7', color: 0xf97316, accent: 0xc084fc, ribbons: 3, pillar: 0xf97316, sfx: 'fire_attack' });
-  registerCustom('malong_sig',      { seal: 'bullseye_seal', color: 0xfbbf24, accent: 0x34d399, ribbons: 4, rings: 2, sfx: 'arrow_volley' });
-  registerCustom('shimazu_iehisa_sig', { color: 0xf97316, accent: 0xfef08a, ribbons: 4, rings: 2, sfx: 'arrow_volley' });
-  registerCustom('gwonyul_sig',     { glyph: '幸州', hexStr: '#f97316', color: 0xf97316, accent: 0xfde047, ribbons: 5, fromSky: true, sfx: 'fire_attack' });
-  registerCustom('zongze_sig',      { glyph: '汴京', hexStr: '#fbbf24', color: 0xfbbf24, accent: 0xfef08a, ribbons: 4, rings: 2, sfx: 'arrow_volley' });
+  registerCustom('malong_sig',      { proto: 'arrow_wall', seal: 'bullseye_seal', color: 0xfbbf24, accent: 0x34d399, ribbons: 4, rings: 2, sfx: 'arrow_volley' });
+  registerCustom('shimazu_iehisa_sig', { proto: 'arrow_wall', color: 0xf97316, accent: 0xfef08a, ribbons: 4, rings: 2, sfx: 'arrow_volley' });
+  registerCustom('gwonyul_sig',     { proto: 'arrow_wall', glyph: '幸州', hexStr: '#f97316', color: 0xf97316, accent: 0xfde047, ribbons: 5, fromSky: true, sfx: 'fire_attack' });
+  registerCustom('zongze_sig',      { proto: 'arrow_wall', glyph: '汴京', hexStr: '#fbbf24', color: 0xfbbf24, accent: 0xfef08a, ribbons: 4, rings: 2, sfx: 'arrow_volley' });
   registerCustom('gengyan_sig',     { color: 0xf59e0b, accent: 0xfef08a, ribbons: 4, fromSky: true, sfx: 'arrow_volley' });
   registerCustom('fengyi_sig',      { color: 0x10b981, accent: 0xa855f7, ribbons: 3, rings: 2, sfx: 'arrow_volley' });
   registerCustom('asakura_sot_sig', { color: 0xf97316, accent: 0xfbbf24, ribbons: 3, rings: 2, sfx: 'arrow_volley' });
   registerCustom('torii_sig',       { seal: 'aegis_seal', color: 0xf97316, accent: 0x10b981, ribbons: 2, rings: 2, sfx: 'arrow_volley' });
-  registerCustom('choimuseon_sig',  { glyph: '火桶', hexStr: '#f97316', color: 0xf97316, accent: 0xfde047, ribbons: 4, pillar: 0xea580c, sfx: 'fire_attack' });
+  registerCustom('choimuseon_sig',  { proto: 'arrow_wall', glyph: '火桶', hexStr: '#f97316', color: 0xf97316, accent: 0xfde047, ribbons: 4, pillar: 0xea580c, sfx: 'fire_attack' });
   registerCustom('matsunaga_sig',   { color: 0xea580c, accent: 0xfde047, pillar: 0xf97316, rings: 3, shake: 0.34, sfx: 'fire_attack' });
   registerCustom('takigawa_sig',    { color: 0xfbbf24, accent: 0xa855f7, ribbons: 3, rings: 1, sfx: 'arrow_volley' });
   registerCustom('honda_tadatsugu_sig', { color: 0xf97316, accent: 0xfef08a, ribbons: 3, rings: 1, sfx: 'arrow_volley' });
 
   /* ==================== 先登奇兵 ($3 / $2 / $1 共 15 位) ==================== */
-  registerCustom('ganning_sig',     { glyph: '百騎', hexStr: '#06b6d4', color: 0x06b6d4, accent: 0xfbbf24, slashes: 3, rings: 2, sfx: 'blade_clash' });
-  registerCustom('hattori_sig',     { glyph: '忍', hexStr: '#a855f7', color: 0xa855f7, accent: 0xf3e8ff, slashes: 3, ribbons: 2, sfx: 'blade_clash' });
+  registerCustom('ganning_sig',     { proto: 'shinobi_clone', glyph: '百騎', hexStr: '#06b6d4', color: 0x06b6d4, accent: 0xfbbf24, slashes: 3, rings: 2, sfx: 'blade_clash' });
+  registerCustom('hattori_sig',     { proto: 'shinobi_clone', glyph: '忍', hexStr: '#a855f7', color: 0xa855f7, accent: 0xf3e8ff, slashes: 3, ribbons: 2, sfx: 'blade_clash' });
   registerCustom('jiangwei_sig',    { glyph: '麒麟', hexStr: '#34d399', color: 0x10b981, accent: 0xfbbf24, slashes: 2, pillar: 0x10b981, sfx: 'war_drum' });
   registerCustom('yungwan_sig',     { glyph: '別武', hexStr: '#22d3ee', color: 0x06b6d4, accent: 0xbae6fd, slashes: 2, ribbons: 3, sfx: 'war_drum' });
-  registerCustom('zhanghe_sig',     { color: 0xa855f7, accent: 0x38bdf8, ribbons: 3, slashes: 2, sfx: 'blade_clash' });
-  registerCustom('huanggai_sig',    { seal: 'fire_lotus', color: 0xf97316, accent: 0xfde047, ribbons: 2, pillar: 0xf97316, sfx: 'fire_attack' });
-  registerCustom('tiandan_sig',     { glyph: '火牛', hexStr: '#f97316', color: 0xf97316, accent: 0xef4444, ribbons: 4, rings: 2, sfx: 'fire_attack' });
-  registerCustom('caobin_sig',      { seal: 'whirlpool_seal', color: 0x06b6d4, accent: 0xecfeff, rings: 3, sfx: 'war_drum' });
-  registerCustom('jeongji_sig',     { color: 0xf97316, accent: 0x06b6d4, pillar: 0xf97316, rings: 2, sfx: 'fire_attack' });
+  registerCustom('zhanghe_sig',     { proto: 'shinobi_clone', color: 0xa855f7, accent: 0x38bdf8, ribbons: 3, slashes: 2, sfx: 'blade_clash' });
+  registerCustom('huanggai_sig',    { proto: 'fire_ox', seal: 'fire_lotus', color: 0xf97316, accent: 0xfde047, ribbons: 2, pillar: 0xf97316, sfx: 'fire_attack' });
+  registerCustom('tiandan_sig',     { proto: 'fire_ox', glyph: '火牛', hexStr: '#f97316', color: 0xf97316, accent: 0xef4444, ribbons: 4, rings: 2, sfx: 'fire_attack' });
+  registerCustom('caobin_sig',      { proto: 'warship_broadside', seal: 'whirlpool_seal', color: 0x06b6d4, accent: 0xecfeff, rings: 3, sfx: 'war_drum' });
+  registerCustom('jeongji_sig',     { proto: 'warship_broadside', color: 0xf97316, accent: 0x06b6d4, pillar: 0xf97316, rings: 2, sfx: 'fire_attack' });
   registerCustom('yuejin_sig',      { color: 0xe11d48, accent: 0xfbbf24, slashes: 2, rings: 2, sfx: 'blade_clash' });
   registerCustom('menghuo_sig',     { color: 0x10b981, accent: 0xf43f5e, rings: 3, slashes: 1, sfx: 'war_drum' });
-  registerCustom('murakami_sig',    { color: 0xf97316, accent: 0xfbbf24, ribbons: 3, rings: 2, sfx: 'fire_attack' });
-  registerCustom('yuyunwen_sig',    { glyph: '采石', hexStr: '#f97316', color: 0xf97316, accent: 0x38bdf8, pillar: 0xf97316, rings: 2, sfx: 'fire_attack' });
-  registerCustom('wakizaka_sig',    { color: 0x06b6d4, accent: 0x67e8f9, slashes: 2, rings: 1, sfx: 'blade_clash' });
-  registerCustom('toudo_sig',       { color: 0x0891b2, accent: 0x38bdf8, rings: 3, sfx: 'war_drum' });
+  registerCustom('murakami_sig',    { proto: 'warship_broadside', color: 0xf97316, accent: 0xfbbf24, ribbons: 3, rings: 2, sfx: 'fire_attack' });
+  registerCustom('yuyunwen_sig',    { proto: 'warship_broadside', glyph: '采石', hexStr: '#f97316', color: 0xf97316, accent: 0x38bdf8, pillar: 0xf97316, rings: 2, sfx: 'fire_attack' });
+  registerCustom('wakizaka_sig',    { proto: 'warship_broadside', color: 0x06b6d4, accent: 0x67e8f9, slashes: 2, rings: 1, sfx: 'blade_clash' });
+  registerCustom('toudo_sig',       { proto: 'warship_broadside', color: 0x0891b2, accent: 0x38bdf8, rings: 3, sfx: 'war_drum' });
 
   /* ==================== 軍師奇謀 ($3 / $2 / $1 共 15 位) ==================== */
   registerCustom('zhouyu_sig',      { glyph: '赤壁', hexStr: '#f97316', color: 0xf97316, accent: 0xfde047, pillar: 0xf97316, rings: 3, sfx: 'fire_attack' });

@@ -530,6 +530,25 @@ const BattleFigures = (() => {
     }
     bodyGrp.add(rightArm);
 
+    // 右手戰刃氣軌 (刀光殘影帶)
+    let weaponTrail = null;
+    if (cat !== 'support') {
+      const trailLen = cat === 'naval' ? 0.82 : (cat === 'air_defense' ? 0.65 : 1.25);
+      const trailMat = new THREE.MeshBasicMaterial({
+        color: isSideB ? 0xfbbf24 : 0x7dd3fc,
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+      weaponTrail = new THREE.Mesh(new THREE.PlaneGeometry(0.16, trailLen), trailMat);
+      weaponTrail.position.set(0, cat === 'naval' ? 0.24 : 0.56, -0.04);
+      weaponTrail.rotation.x = 0.35;
+      weaponTrail.layers.enable(1);
+      rightArm.add(weaponTrail);
+    }
+
     // 左手戰盾 / 寶弓
     const leftArm = new THREE.Group();
     leftArm.position.set(-0.15, 0.60, 0.02);
@@ -547,15 +566,14 @@ const BattleFigures = (() => {
     bodyGrp.add(leftArm);
 
     let horseGrp = null;
+    let horseLegs = null;
+    let horseHeadPivot = null;
+    let horseTailPivot = null;
     if (mounted) {
       horseGrp = new THREE.Group();
       const horseMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(horseCol).convertSRGBToLinear(), roughness: 0.55, metalness: 0.25 });
       const horseParts = [
-        { geo: new THREE.CylinderGeometry(0.20, 0.20, 0.84, 8), pos: [0, 0.68, 0], rot: [Math.PI / 2, 0, 0] },
-        { geo: new THREE.BoxGeometry(0.16, 0.42, 0.22), pos: [0, 0.94, 0.36], rot: [-0.42, 0, 0] },
-        ...[[-0.14, 0.28], [0.14, 0.28], [-0.14, -0.28], [0.14, -0.28]].map(([lx, lz]) => ({
-          geo: new THREE.CylinderGeometry(0.04, 0.025, 0.62, 6), pos: [lx, 0.31, lz]
-        }))
+        { geo: new THREE.CylinderGeometry(0.20, 0.20, 0.84, 8), pos: [0, 0.68, 0], rot: [Math.PI / 2, 0, 0] }
       ];
       const horseMesh = new THREE.Mesh(mergePartGeometries(horseParts), horseMat);
       horseMesh.castShadow = true;
@@ -563,20 +581,56 @@ const BattleFigures = (() => {
       const caparison = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.30, 0.72), clothMat);
       caparison.position.set(0, 0.66, 0);
       horseGrp.add(caparison);
-      const hHead = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.16, 0.28), trimMat);
-      hHead.position.set(0, 1.09, 0.50);
-      hHead.rotation.x = -0.35;
-      horseGrp.add(hHead);
+
+      horseHeadPivot = new THREE.Group();
+      horseHeadPivot.position.set(0, 0.74, 0.28);
+      const headParts = [
+        { geo: new THREE.BoxGeometry(0.16, 0.42, 0.22), pos: [0, 0.20, 0.08], rot: [-0.42, 0, 0] },
+        { geo: new THREE.BoxGeometry(0.14, 0.16, 0.28), pos: [0, 0.35, 0.22], rot: [-0.35, 0, 0] }
+      ];
+      horseHeadPivot.add(new THREE.Mesh(mergePartGeometries(headParts), horseMat));
+      const crestPlate = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.08, 0.18), trimMat);
+      crestPlate.position.set(0, 0.40, 0.27);
+      crestPlate.rotation.x = -0.35;
+      horseHeadPivot.add(crestPlate);
+      horseGrp.add(horseHeadPivot);
+
+      horseTailPivot = new THREE.Group();
+      horseTailPivot.position.set(0, 0.72, -0.42);
+      const tailGeo = new THREE.ConeGeometry(0.055, 0.44, 6);
+      tailGeo.translate(0, -0.22, 0);
+      const tailMesh = new THREE.Mesh(tailGeo, clothMat);
+      tailMesh.rotation.x = -0.35;
+      horseTailPivot.add(tailMesh);
+      horseGrp.add(horseTailPivot);
+
+      horseLegs = {};
+      [
+        ['FL', -0.14, 0.28],
+        ['FR', 0.14, 0.28],
+        ['BL', -0.14, -0.28],
+        ['BR', 0.14, -0.28]
+      ].forEach(([key, lx, lz]) => {
+        const legPivot = new THREE.Group();
+        legPivot.position.set(lx, 0.60, lz);
+        const legGeo = new THREE.CylinderGeometry(0.042, 0.025, 0.60, 6);
+        legGeo.translate(0, -0.30, 0);
+        const legMesh = new THREE.Mesh(legGeo, horseMat);
+        legMesh.castShadow = true;
+        legPivot.add(legMesh);
+        horseGrp.add(legPivot);
+        horseLegs[key] = legPivot;
+      });
       root.add(horseGrp);
     }
 
-    root.userData.parts = { bodyGrp, rightArm, leftArm, capePivot, horseGrp };
+    root.userData.parts = { bodyGrp, rightArm, leftArm, capePivot, horseGrp, horseLegs, horseHeadPivot, horseTailPivot, weaponTrail };
     return root;
   }
 
   function animateCommander(hero, token, now, moving, fighting, advanceZ, terrainHeight) {
     if (!hero || !hero.userData.parts) return;
-    const { bodyGrp, rightArm, leftArm, capePivot, horseGrp } = hero.userData.parts;
+    const { bodyGrp, rightArm, leftArm, capePivot, horseGrp, horseLegs, horseHeadPivot, horseTailPivot, weaponTrail } = hero.userData.parts;
     const yaw = token.formationRig.rotation.y;
     const ranged = token.cat === 'air_defense' || token.cat === 'support';
     const frontZ = (token.cat === 'air' ? 0.86 : ranged ? 0.24 : 0.68) + (advanceZ || 0);
@@ -595,6 +649,15 @@ const BattleFigures = (() => {
       const arc = Math.sin(mp * Math.PI);
       hero.scale.setScalar(1 + arc * 0.42);
       capePivot.rotation.x = 0.45 + arc * 0.55;
+      if (weaponTrail?.material) weaponTrail.material.opacity = 0.74 * arc;
+      if (horseLegs) {
+        horseLegs.FL.rotation.x = -0.88 * arc;
+        horseLegs.FR.rotation.x = -0.78 * arc;
+        horseLegs.BL.rotation.x = 0.42 * arc;
+        horseLegs.BR.rotation.x = 0.36 * arc;
+        if (horseHeadPivot) horseHeadPivot.rotation.x = -0.24 * arc;
+        if (horseTailPivot) horseTailPivot.rotation.x = 0.52 * arc;
+      }
       if (token.cat === 'air') {
         hero.position.set(0, localGround + arc * 0.65, frontZ + arc * 0.9);
         if (horseGrp) horseGrp.rotation.x = -0.35 * arc;
@@ -630,6 +693,30 @@ const BattleFigures = (() => {
     hero.position.y = localGround + (horseGrp && (moving || fighting) ? Math.abs(Math.sin(pulse)) * (attack ? 0.14 : 0.04) : 0);
     if (horseGrp && attack) horseGrp.rotation.x = -0.18 + Math.sin(pulse * 1.4) * 0.12;
     else if (horseGrp) horseGrp.rotation.x = moving ? Math.sin(pulse) * 0.06 : 0;
+
+    if (horseLegs) {
+      if (moving || attack || fighting) {
+        const gaitSpeed = attack ? 0.021 : (moving ? 0.017 : 0.0085);
+        const gaitAmp = attack ? 0.68 : (moving ? 0.56 : 0.24);
+        const gait = now * gaitSpeed + (token.attackPhaseOffset || 0);
+        horseLegs.FL.rotation.x = Math.sin(gait) * gaitAmp;
+        horseLegs.FR.rotation.x = Math.sin(gait + 0.72) * gaitAmp;
+        horseLegs.BL.rotation.x = Math.sin(gait + Math.PI) * gaitAmp;
+        horseLegs.BR.rotation.x = Math.sin(gait + Math.PI + 0.72) * gaitAmp;
+        if (horseHeadPivot) horseHeadPivot.rotation.x = Math.sin(gait) * (gaitAmp * 0.26);
+        if (horseTailPivot) horseTailPivot.rotation.x = 0.26 + Math.sin(gait * 1.25) * (gaitAmp * 0.42);
+      } else {
+        horseLegs.FL.rotation.x = 0;
+        horseLegs.FR.rotation.x = 0;
+        horseLegs.BL.rotation.x = 0;
+        horseLegs.BR.rotation.x = 0;
+        if (horseHeadPivot) horseHeadPivot.rotation.x = Math.sin(now * 0.002 + (token.attackPhaseOffset || 0)) * 0.04;
+        if (horseTailPivot) horseTailPivot.rotation.x = 0.12;
+      }
+    }
+    if (weaponTrail?.material) {
+      weaponTrail.material.opacity = attack ? 0.44 * Math.abs(Math.cos(pulse * 1.5)) : 0;
+    }
 
     capePivot.rotation.x = 0.25 + (moving ? 0.38 : 0.14) + Math.sin(now * 0.009 + (token.attackPhaseOffset || 0)) * 0.16;
     if (attack) {

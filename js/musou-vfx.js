@@ -221,8 +221,9 @@
     upBias = 0.55
   }) {
     if (!scene || !origin || typeof THREE === 'undefined') return null;
-    const capped = Math.min(count, 260);
-    const scaledCount = Math.max(20, Math.round(capped * getParticleScale()));
+    const q = getQuality();
+    const maxByQuality = q === 'high' ? 750 : (q === 'medium' ? 400 : 180);
+    const scaledCount = Math.max(24, Math.min(Math.round(count), maxByQuality));
     const positions = new Float32Array(scaledCount * 3);
     const velocities = new Float32Array(scaledCount * 3);
     const seeds = new Float32Array(scaledCount);

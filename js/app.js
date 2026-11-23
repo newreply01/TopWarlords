@@ -5061,6 +5061,11 @@ async function showBattle(res, opts = {}) {
           fieldHp[ln.tuid] = ln.hpAfter;
           updateFieldStrength();
         }
+        if (ln.auid && ln.attackerHpAfter !== undefined) {
+          setHp(ln.auid, ln.attackerHpAfter, maxHp[ln.auid]);
+          fieldHp[ln.auid] = ln.attackerHpAfter;
+          updateFieldStrength();
+        }
         playFx(ln);
         if (ln.kind === 'info' && !ln.skillActivation && !ln.ambushActivation) return;
         const attacker = UNIT_MAP[ln.auid?.split('-')[0]];

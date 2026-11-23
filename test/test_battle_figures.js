@@ -100,4 +100,18 @@ for (const side of ['A', 'B']) {
   reserves.material.dispose();
   reserves.dispose();
 }
+const cavToken = { cat: 'air', side: 'A', cost: 5, mesh: new THREE.Group(), formationRig: new THREE.Group(), attackUntil: 0, attackPhaseOffset: 0 };
+const cavHero = figures.createCommanderHero(cavToken);
+assert(cavHero.userData.parts.horseLegs && cavHero.userData.parts.weaponTrail, 'Mounted commander hero must expose articulated horseLegs and weaponTrail');
+figures.animateCommander(cavHero, cavToken, 1000, true, true, 0, () => 0);
+const legPose1 = cavHero.userData.parts.horseLegs.FL.rotation.x;
+figures.animateCommander(cavHero, cavToken, 1140, true, true, 0, () => 0);
+const legPose2 = cavHero.userData.parts.horseLegs.FL.rotation.x;
+assert.notEqual(legPose1, legPose2, 'Mounted commander horse legs must articulate during movement/combat');
+cavHero.traverse(obj => {
+  if (obj.isMesh && obj.geometry) {
+    assert([...obj.geometry.attributes.position.array].every(Number.isFinite));
+    obj.geometry.dispose();
+  }
+});
 console.log('PASS: five original troop silhouettes, complete mounts, articulated gait/attacks, finite geometry, terrain grounding.');

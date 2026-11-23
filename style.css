@@ -30208,12 +30208,11 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   min-width: 240px;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 8px 18px 8px 10px;
+  padding: 8px 12px;
   border-radius: 10px;
   border: 2px solid var(--musou-border, #fbbf24);
-  border-left: 5px solid var(--musou-border, #fbbf24);
-  background: linear-gradient(100deg, var(--musou-dark, #4c0519) 0%, var(--musou-primary, #e11d48) 65%, rgba(15, 23, 42, 0.94) 100%);
-  clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
+  border-left: 5px solid #38bdf8;
+  background: linear-gradient(90deg, var(--musou-dark, #4c0519) 0%, var(--musou-primary, #e11d48) 58%, rgba(15, 23, 42, 0.96) 100%);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.72), inset 0 0 18px rgba(251, 191, 36, 0.2);
   overflow: hidden;
   pointer-events: auto;
@@ -30223,14 +30222,25 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease-out;
 }
 
+.musou-cutin-card::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(253, 224, 71, 0.72), transparent);
+  pointer-events: none;
+  z-index: 3;
+}
+
 .musou-cutin-card.side-b {
   left: auto;
   right: 12px;
-  padding: 8px 10px 8px 18px;
+  padding: 8px 12px;
   border-left: 2px solid var(--musou-border, #fbbf24);
-  border-right: 5px solid var(--musou-border, #fbbf24);
-  background: linear-gradient(100deg, rgba(15, 23, 42, 0.94) 0%, var(--musou-primary, #e11d48) 35%, var(--musou-dark, #4c0519) 100%);
-  clip-path: polygon(18px 0, 100% 0, 100% 100%, 0 100%);
+  border-right: 5px solid #f87171;
+  background: linear-gradient(270deg, var(--musou-dark, #4c0519) 0%, var(--musou-primary, #e11d48) 58%, rgba(15, 23, 42, 0.96) 100%);
   transform: translateX(115%);
 }
 
@@ -30249,12 +30259,20 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   transform: translateX(115%);
 }
 
-/* 淺色模式強制 99% 不透明深色 HUD 實底 */
+/* 淺色模式強制 99% 不透明深色 HUD 實底（左右對稱完整金框＋陣營邊條） */
 .musou-cutin-card.is-light,
 [data-theme="light"] .musou-cutin-card {
-  background: linear-gradient(100deg, rgba(15, 23, 42, 0.99) 0%, rgba(69, 26, 3, 0.99) 100%) !important;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.99) 0%, rgba(69, 26, 3, 0.99) 100%) !important;
   border-color: #f59e0b !important;
+  border-left-color: #38bdf8 !important;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.78), inset 0 0 16px rgba(245, 158, 11, 0.24) !important;
+}
+
+.musou-cutin-card.side-b.is-light,
+[data-theme="light"] .musou-cutin-card.side-b {
+  background: linear-gradient(270deg, rgba(15, 23, 42, 0.99) 0%, rgba(69, 26, 3, 0.99) 100%) !important;
+  border-left-color: #f59e0b !important;
+  border-right-color: #f87171 !important;
 }
 
 .musou-cutin-speedlines {
@@ -30264,6 +30282,10 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   opacity: 0.4;
   animation: musouSpeedSpin 1.4s linear infinite;
   pointer-events: none;
+}
+
+.musou-cutin-card.side-b .musou-cutin-speedlines {
+  background: repeating-conic-gradient(from 0deg at 80% 50%, rgba(255, 255, 255, 0.12) 0deg 2deg, transparent 2deg 10deg);
 }
 
 @keyframes musouSpeedSpin {
@@ -30332,6 +30354,12 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   align-items: center;
   gap: 8px;
   min-width: 0;
+  max-width: 100%;
+}
+
+.musou-cutin-card.side-b .musou-cutin-title-row {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
 }
 
 .musou-cutin-title {
@@ -30342,6 +30370,8 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 2px 10px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .musou-cutin-title.is-long {
@@ -30388,13 +30418,13 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
     left: 6px;
     min-width: 190px;
     max-width: min(245px, 66vw);
-    padding: 6px 12px 6px 8px;
+    padding: 6px 10px;
   }
 
   .musou-cutin-card.side-b {
     left: auto;
     right: 6px;
-    padding: 6px 8px 6px 12px;
+    padding: 6px 10px;
   }
 
   .musou-cutin-inner {

@@ -112,11 +112,10 @@
     return { total, lead };
   }
 
-  function computeSideTopPx(wrapper, sideKey) {
+  function computeSideTopPx(wrapper) {
     const wrapRect = wrapper.getBoundingClientRect();
     let minTop = 48;
-    const tickerId = sideKey === 'B' ? '#battleSkillTickerB' : '#battleSkillTickerA';
-    const selectors = [tickerId, '.battle-3d-overlay-hud', '#holoRadarStrip', '.log-header-hud'];
+    const selectors = ['#battleSkillTickerA', '#battleSkillTickerB', '.battle-3d-overlay-hud', '#holoRadarStrip', '.log-header-hud'];
     selectors.forEach(sel => {
       const el = document.querySelector(sel);
       if (!el) return;
@@ -175,7 +174,7 @@
 
     const card = document.createElement('div');
     card.className = `musou-cutin-card side-${sideKey.toLowerCase()}${reduced ? ' is-reduced' : ''}${isLight ? ' is-light' : ''}`;
-    card.style.top = `${computeSideTopPx(wrapper, sideKey)}px`;
+    card.style.top = `${computeSideTopPx(wrapper)}px`;
     card.style.setProperty('--musou-primary', pal.primary);
     card.style.setProperty('--musou-accent', pal.accent);
     card.style.setProperty('--musou-dark', pal.dark);

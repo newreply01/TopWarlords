@@ -283,8 +283,8 @@ function makeTeam(ids, side, formationIds, terrain) {
       traits: d.traits || [], roleFlags: d.roleFlags || [], hpMax: d.hp, hp: d.hp, atk: d.atk, def: d.def,
       stealth: d.st || 0, ew: d.ew || 0, skill: d.skill || null, alive: true, apsUsed: false, abmUsed: false,
       skillUsed: false, skillCount: 0, skillAwakened: false, skillAwakenedReady: false, ambushUsed: false, skillGuard: 0,
-      shots: 0, dmgDone: 0, dmgTaken: 0, skillDmg: 0, statusDmg: 0, healed: 0, dodges: 0, blocks: 0,
-      statuses: { burn: 0, burnCaster: null, sunder: 0, confuse: 0, rally: 0 }, killedBy: null,
+      shots: 0, dmgDone: 0, dmgTaken: 0, skillDmg: 0, statusDmg: 0, healed: 0, dodges: 0, blocks: 0, counterStrike: 0,
+      statuses: { burn: 0, burnCaster: null, sunder: 0, confuse: 0, rally: 0, stagger: 0, mark: 0 }, killedBy: null,
       formation: formation.id,
       formationName: formation.name,
       formationAttack: formation.attack * terrainMultiplier,
@@ -392,30 +392,61 @@ function resolveBattle(deckA, deckB, opts) {
           ? resolveSkillFx(unit.id, unit.cat, unit.skill, effects, unit.traits)
           : { fx: null, fxLabel: null, fxIcon: '⚡' });
     const statusNotes = [];
+    const statusKeys = [];
     const primaryTgt = (target && target.alive) ? target : pickTop(alive(other(unit.side)));
     if (resolvedFx.fx === 'fire_storm' && primaryTgt && primaryTgt.alive) {
       primaryTgt.statuses.burn = 2;
       primaryTgt.statuses.burnCaster = unit;
+      statusKeys.push('burn');
       statusNotes.push(`🔥 灼燒 ${primaryTgt.name} (2輪)`);
     } else if ((resolvedFx.fx === 'overlord_cleave' || (effects.armorPierce || 0) >= 0.35) && primaryTgt && primaryTgt.alive) {
       primaryTgt.statuses.sunder = 2;
+      statusKeys.push('sunder');
       statusNotes.push(`💔 破盾 ${primaryTgt.name} (防禦-30%)`);
     } else if ((resolvedFx.fx === 'bagua_array' || resolvedFx.fx === 'shadow_ambush') && (effects.enemyHit || 0) > 0 && primaryTgt && primaryTgt.alive) {
       primaryTgt.statuses.confuse = 2;
+      statusKeys.push('confuse');
       statusNotes.push(`😵 混亂 ${primaryTgt.name} (命中-6%)`);
+    } else if ((resolvedFx.fx === 'thunder_strike' || resolvedFx.fx === 'shadow_ambush') && primaryTgt && primaryTgt.alive) {
+      primaryTgt.statuses.stagger = 2;
+      statusKeys.push('stagger');
+      statusNotes.push(`⚡ 震懾 ${primaryTgt.name} (攻擊-10%)`);
+    } else if ((resolvedFx.fx === 'piercing_volley' || resolvedFx.fx === 'tidal_surge') && primaryTgt && primaryTgt.alive) {
+      primaryTgt.statuses.mark = 2;
+      statusKeys.push('mark');
+      statusNotes.push(`🎯 破綻 ${primaryTgt.name} (受傷+10%)`);
     }
     if (resolvedFx.fx === 'aegis_command' || effects.heal || effects.teamGuard || effects.commandAttack) {
       unit.statuses.rally = 2;
       unit.statuses.burn = 0;
       unit.statuses.confuse = 0;
+      unit.statuses.stagger = 0;
+      unit.statuses.mark = 0;
+      statusKeys.push('rally');
       statusNotes.push(`📯 振奮 +淨化`);
+    }
+    if (effects.dispel) {
+      const sup = clamp(effects.dispel, 0, 1);
+      S[other(unit.side)].guardSuppress = Math.max(S[other(unit.side)].guardSuppress || 0, sup);
+      for (const eu of alive(other(unit.side))) {
+        if (eu.statuses) eu.statuses.rally = 0;
+      }
+      statusKeys.push('dispel');
+      statusNotes.push(`✨ 破陣驅散 (削弱敵盾${Math.round(sup * 100)}%)`);
+    }
+    if (effects.counterStrike) {
+      unit.counterStrike = Math.max(unit.counterStrike || 0, effects.counterStrike);
+      statusNotes.push(`⚔️ 反擊蓄勢 (${Math.round(effects.counterStrike * 100)}%)`);
     }
     lines.push({
       side: unit.side, kind: 'info', auid: unit.uid, tuid: (primaryTgt ? primaryTgt.uid : (target ? target.uid : undefined)),
       brevity: unit.skill.name,
       skillActivation: true, skillEffects: effects, hpRestored: unit.hp - hpBefore,
+      attackerHpAfter: unit.hp > hpBefore ? Math.round(unit.hp) : undefined,
       skillFx: resolvedFx.fx, skillFxLabel: resolvedFx.fxLabel, skillFxIcon: resolvedFx.fxIcon,
       statusApplied: statusNotes,
+      statusKeys,
+      statusTargetUid: primaryTgt ? primaryTgt.uid : (target ? target.uid : undefined),
       text: `[${unit.skill.name}] ${unit.name}：${unit.skill.desc}${statusNotes.length ? ' 【' + statusNotes.join(' · ') + '】' : ''}`
     });
   }
@@ -453,12 +484,14 @@ function resolveBattle(deckA, deckB, opts) {
       }
       rolled.push({
         a, p, ok, tacticProc, duelProc, skillProc, ambushProc, skillModifiers,
-        raw: a.dmg * (0.85 + rng() * 0.3) * DMG_SCALE * (S[a.att.side].atkAll || 1) * (vOpts.phase === 3 ? (S[a.att.side].atkLate || 1) : 1) * a.att.formationAttack * (a.att.statuses?.rally > 0 ? 1.06 : 1) * (tacticProc ? a.att.formationTacticDamage : 1) * (duelProc ? 1.12 : 1) * skillModifiers.damage * (ambushProc ? 1.25 : 1)
+        raw: a.dmg * (0.85 + rng() * 0.3) * DMG_SCALE * (S[a.att.side].atkAll || 1) * (vOpts.phase === 3 ? (S[a.att.side].atkLate || 1) : 1) * a.att.formationAttack * (a.att.statuses?.rally > 0 ? 1.06 : 1) * (a.att.statuses?.stagger > 0 ? 0.90 : 1) * (tacticProc ? a.att.formationTacticDamage : 1) * (duelProc ? 1.12 : 1) * skillModifiers.damage * (ambushProc ? 1.25 : 1)
       });
     }
     const preSunderSet = new Set();
+    const preMarkSet = new Set();
     for (const roll of rolled) {
       if (roll.a?.tgt?.statuses?.sunder > 0) preSunderSet.add(roll.a.tgt);
+      if (roll.a?.tgt?.statuses?.mark > 0) preMarkSet.add(roll.a.tgt);
     }
     for (const roll of rolled) {
       if (roll.skillProc) applySkillEffects(roll.a.att, lines, roll.a.tgt);
@@ -484,7 +517,12 @@ function resolveBattle(deckA, deckB, opts) {
       let skillTag = null;
       if (r.skillProc) {
         const eff = at.skill?.effects || {};
-        if (r.skillModifiers.armorPierce > 0) skillTag = '破甲';
+        if (eff.multiHit) skillTag = '連擊';
+        else if (eff.lifesteal) skillTag = '浴血';
+        else if (eff.splash) skillTag = '濺射';
+        else if (eff.dispel) skillTag = '破陣';
+        else if (eff.counterStrike) skillTag = '反擊';
+        else if (r.skillModifiers.armorPierce > 0) skillTag = '破甲';
         else if (eff.woundedTargetDamage) skillTag = '斬殺';
         else if (eff.missingHpDamage) skillTag = '背水';
         else if (eff.highCostDamage && (t.cost > at.cost || (at.cost >= 4 && t.cost >= 4))) skillTag = '克敵';
@@ -557,6 +595,7 @@ function resolveBattle(deckA, deckB, opts) {
         continue;
       }
       const sunderMult = preSunderSet.has(t) ? 0.70 : 1.0;
+      const markMult = preMarkSet.has(t) ? 1.10 : 1.0;
       const effectiveDef = Math.min(0.9, t.def * t.formationDefense * sunderMult);
       const skillArmorPierce = r.skillModifiers.armorPierce || 0;
       const hasTrueAndSkillPierce = Boolean(a.trueDmg && skillArmorPierce > 0);
@@ -564,11 +603,19 @@ function resolveBattle(deckA, deckB, opts) {
       const pierceFrac = a.trueDmg ? 1 : clamp(skillArmorPierce, 0, 1);
       const defAfterPierce = effectiveDef * (1 - pierceFrac * (1 - heavyFloor));
       const skillPierceBonus = hasTrueAndSkillPierce ? (1 + skillArmorPierce * 0.20) : 1;
-      const d = r.raw * skillPierceBonus * (1 - defAfterPierce) * S[t.side].taken * t.formationDamageTaken * (1 - Math.max(t.skillGuard, S[t.side].skillGuard || 0));
+      const effectiveGuard = Math.max(t.skillGuard, S[t.side].skillGuard || 0) * (1 - (S[t.side].guardSuppress || 0));
+      const d = r.raw * skillPierceBonus * markMult * (1 - defAfterPierce) * S[t.side].taken * t.formationDamageTaken * (1 - effectiveGuard);
       t.hp -= d;
       t.dmgTaken += d;
       at.dmgDone += d;
       if (r.skillProc) at.skillDmg += d;
+      let lifestealAmt = 0;
+      if (r.skillProc && at.skill?.effects?.lifesteal && at.alive && d > 0) {
+        const beforeHeal = at.hp;
+        at.hp = Math.min(at.hpMax, at.hp + d * at.skill.effects.lifesteal);
+        lifestealAmt = Math.round(at.hp - beforeHeal);
+        at.healed += Math.max(0, at.hp - beforeHeal);
+      }
       if (t.hp <= 0) {
         t.hp = 0; t.alive = false; t.killedBy = at;
         const captured = at.formationCanCapture && rng() < 0.18;
@@ -576,6 +623,7 @@ function resolveBattle(deckA, deckB, opts) {
         const killCode = (t.cat === 'air') ? '陣斬落馬' : (t.cat === 'armor') ? '重創破陣' : '力竭戰死';
         const killLabel = (t.cat === 'air') ? '斬落馬下' : (t.cat === 'armor') ? '潰敗破陣' : '陣前討取';
         const actionVerb = meta.isC4isr ? '指揮聯合圍剿討取' : '擊破討取';
+        const stealNote = lifestealAmt > 0 ? `，浴血回復 +${lifestealAmt}` : '';
         lines.push({
           side: at.side,
           kind: captured ? 'capture' : 'kill',
@@ -596,12 +644,14 @@ function resolveBattle(deckA, deckB, opts) {
           ammoTier: tier,
           sfxOverride: meta.sfxOverride,
           dmg: Math.round(d),
+          hpHealed: lifestealAmt,
+          attackerHpAfter: lifestealAmt > 0 ? Math.round(at.hp) : undefined,
           text: captured
-            ? `[俘虜] ${r.skillProc ? `【${at.skill.name}】 ` : (r.ambushProc ? '[奇襲] ' : '')}${at.name} 擒獲 ${t.name}！`
+            ? `[俘虜] ${r.skillProc ? `【${at.skill.name}】 ` : (r.ambushProc ? '[奇襲] ' : '')}${at.name} 擒獲 ${t.name}！${stealNote}`
             : r.duelProc
-            ? `[一騎單挑] ${at.name} 與 ${t.name} 正面交鋒後 ${actionVerb}！`
+            ? `[一騎單挑] ${at.name} 與 ${t.name} 正面交鋒後 ${actionVerb}！${stealNote}`
             : r.skillProc
-              ? `[${at.skill.name}] ${at.name} 施展專屬戰法，${actionVerb} ${t.name}！`
+              ? `[${at.skill.name}] ${at.name} 施展專屬戰法，${actionVerb} ${t.name}！${stealNote}`
               : r.ambushProc
                 ? `[奇襲突擊] ${at.name} 趁隙突襲 ${t.name}！`
                 : `[${killCode} ${killLabel}] ${at.name} ${actionVerb} ${t.name}！`,
@@ -616,6 +666,7 @@ function resolveBattle(deckA, deckB, opts) {
         }
       } else {
         const hitArrow = meta.isC4isr ? '調兵圍攻 →' : '→';
+        const stealNote = lifestealAmt > 0 ? `，浴血回復 +${lifestealAmt}` : '';
         lines.push({
           side: at.side,
           kind: 'hit',
@@ -635,11 +686,110 @@ function resolveBattle(deckA, deckB, opts) {
           ammoTier: tier,
           sfxOverride: meta.sfxOverride,
           dmg: Math.round(d),
+          hpHealed: lifestealAmt,
+          attackerHpAfter: lifestealAmt > 0 ? Math.round(at.hp) : undefined,
           text: r.duelProc
-            ? `[一騎單挑] ${at.name} 與 ${t.name} 近身交鋒：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）`
-            : `[${brv}] ${at.name} ${hitArrow} ${t.name}：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）`,
+            ? `[一騎單挑] ${at.name} 與 ${t.name} 近身交鋒：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）${stealNote}`
+            : `[${brv}] ${at.name} ${hitArrow} ${t.name}：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）${stealNote}`,
           hpAfter: Math.round(t.hp)
         });
+        if (r.skillProc && at.skill?.effects?.multiHit > 0 && t.alive && d > 0) {
+          const d2 = d * at.skill.effects.multiHit;
+          t.hp -= d2;
+          t.dmgTaken += d2;
+          at.dmgDone += d2;
+          at.skillDmg += d2;
+          if (t.hp <= 0) {
+            t.hp = 0; t.alive = false; t.killedBy = at;
+            const cap2 = at.formationCanCapture && rng() < 0.18;
+            t.captured = cap2;
+            lines.push({
+              side: at.side, kind: cap2 ? 'capture' : 'kill', matchup: '專屬連擊',
+              formation: at.formation, followUp: true, captured: cap2,
+              auid: at.uid, tuid: t.uid, brevity: `${at.skill.name}·連擊`,
+              ammoTier: tier, sfxOverride: meta.sfxOverride, dmg: Math.round(d2),
+              text: `[${at.skill.name}·連擊] ${at.name} 乘勢追擊，再${cap2 ? '擒獲' : '擊破'} ${t.name}！`,
+              hpAfter: 0
+            });
+            addKey(t.cost * 2 + Math.max(0, t.cost - at.cost) * 2, `${at.name}（$${at.cost}）連擊擊破 ${t.name}`, at.side);
+          } else {
+            lines.push({
+              side: at.side, kind: 'hit', matchup: '專屬連擊',
+              formation: at.formation, followUp: true,
+              auid: at.uid, tuid: t.uid, brevity: `${at.skill.name}·連擊`,
+              ammoTier: tier, sfxOverride: meta.sfxOverride, dmg: Math.round(d2),
+              text: `[${at.skill.name}·連擊] ${at.name} 乘勢追擊 ${t.name}：追加重創 −${Math.round(d2 / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）`,
+              hpAfter: Math.round(t.hp)
+            });
+          }
+        }
+      }
+      if (r.skillProc && at.skill?.effects?.splash > 0 && d > 0) {
+        const splashPool = alive(t.side, u => u !== t);
+        const spTgt = splashPool.length ? pickTop(splashPool) : null;
+        if (spTgt) {
+          const dSp = d * at.skill.effects.splash;
+          spTgt.hp -= dSp;
+          spTgt.dmgTaken += dSp;
+          at.dmgDone += dSp;
+          at.skillDmg += dSp;
+          if (spTgt.hp <= 0) {
+            spTgt.hp = 0; spTgt.alive = false; spTgt.killedBy = at;
+            lines.push({
+              side: at.side, kind: 'kill', matchup: '餘波濺射',
+              formation: at.formation, followUp: true,
+              auid: at.uid, tuid: spTgt.uid, brevity: `${at.skill.name}·餘波`,
+              ammoTier: tier, sfxOverride: meta.sfxOverride, dmg: Math.round(dSp),
+              text: `[${at.skill.name}·餘波] ${at.name} 戰法威勢波及，順勢潰滅 ${spTgt.name}！`,
+              hpAfter: 0
+            });
+            addKey(spTgt.cost * 2, `${at.name} 戰法餘波潰滅 ${spTgt.name}`, at.side);
+          } else {
+            lines.push({
+              side: at.side, kind: 'hit', matchup: '餘波濺射',
+              formation: at.formation, followUp: true,
+              auid: at.uid, tuid: spTgt.uid, brevity: `${at.skill.name}·餘波`,
+              ammoTier: tier, sfxOverride: meta.sfxOverride, dmg: Math.round(dSp),
+              text: `[${at.skill.name}·餘波] ${at.name} 餘波震傷 ${spTgt.name}：−${Math.round(dSp / spTgt.hpMax * 100)}%（剩餘 ${Math.round(spTgt.hp / spTgt.hpMax * 100)}% 戰力）`,
+              hpAfter: Math.round(spTgt.hp)
+            });
+          }
+        }
+      }
+    }
+    if (vOpts.phase === 3) {
+      const counteredThisVolley = new Set();
+      for (const r of rolled) {
+        const at = r.a.att, t = r.a.tgt;
+        if (!r.ok || !t.alive || !at.alive || t.counterStrike <= 0 || counteredThisVolley.has(t.uid)) continue;
+        if (!['air', 'armor', 'naval'].includes(at.cat)) continue;
+        counteredThisVolley.add(t.uid);
+        const cd = t.atk * t.counterStrike * (0.9 + rng() * 0.2) * (1 - Math.min(0.6, at.def));
+        at.hp -= cd;
+        at.dmgTaken += cd;
+        t.dmgDone += cd;
+        t.skillDmg += cd;
+        if (at.hp <= 0) {
+          at.hp = 0; at.alive = false; at.killedBy = t;
+          lines.push({
+            side: t.side, kind: 'kill', matchup: '鐵壁反擊',
+            formation: t.formation, followUp: true, isCounter: true,
+            auid: t.uid, tuid: at.uid, brevity: '鐵壁反擊',
+            ammoTier: 1, sfxOverride: 'blade_clash', dmg: Math.round(cd),
+            text: `[鐵壁反擊] ${t.name} 乘隙反刺，陣斬迎敵的 ${at.name}！`,
+            hpAfter: 0
+          });
+          addKey(at.cost * 2, `${t.name} 反擊陣斬 ${at.name}`, t.side);
+        } else {
+          lines.push({
+            side: t.side, kind: 'hit', matchup: '鐵壁反擊',
+            formation: t.formation, followUp: true, isCounter: true,
+            auid: t.uid, tuid: at.uid, brevity: '鐵壁反擊',
+            ammoTier: 1, sfxOverride: 'blade_clash', dmg: Math.round(cd),
+            text: `[鐵壁反擊] ${t.name} 反擊 ${at.name}：重創 −${Math.round(cd / at.hpMax * 100)}%（剩餘 ${Math.round(at.hp / at.hpMax * 100)}% 戰力）`,
+            hpAfter: Math.round(at.hp)
+          });
+        }
       }
     }
     return lines;
@@ -680,6 +830,13 @@ function resolveBattle(deckA, deckB, opts) {
     for (const commander of alive(s, unit => hasRoleFlag(unit, 'STRATEGIST') && unit.skill?.phase === 'P1' && !unit.skillUsed)) {
       commander.skillUsed = true;
       applySkillEffects(commander, l1);
+    }
+  }
+  for (const s of ['A', 'B']) {
+    if ((S[s].guardSuppress || 0) > 0) {
+      for (const u of alive(s)) {
+        if (u.statuses) u.statuses.rally = 0;
+      }
     }
   }
   pushFrame(1, '階段一 · 軍師謀略博弈', l1);
@@ -1005,6 +1162,8 @@ function resolveBattle(deckA, deckB, opts) {
         if (u.statuses.sunder > 0) u.statuses.sunder--;
         if (u.statuses.confuse > 0) u.statuses.confuse--;
         if (u.statuses.rally > 0) u.statuses.rally--;
+        if (u.statuses.stagger > 0) u.statuses.stagger--;
+        if (u.statuses.mark > 0) u.statuses.mark--;
       }
     }
     pushFrame(3, phaseLabel, roundLines);

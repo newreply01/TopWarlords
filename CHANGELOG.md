@@ -4,6 +4,19 @@
 
 ---
 
+## [7.13.0] - 2026-11-23
+### Added & Enhanced (無雙戰法 Cut-in 左右對稱優化、P0 引擎與技能平衡重整、P1 3D 寫實戰鬥動畫與戰場演出升級)
+- **無雙戰法 Cut-in 左右對稱優化 (`style.css`, `js/musou-cutin.js`)**：
+  - 移除左右戰法名牌原本不對稱的半邊斜角裁切 (`clip-path: polygon(...)`)，全面改為雙側完整四邊圓角金框牌匾 (`border-radius: 12px`)，支援深淺色主題高對比黑金鑲邊、左右鏡像漸層與標題文字對齊，並自動對齊兩側戰法播報欄下方座標。
+- **全 125 名將零替換、引擎新機制與技能平衡重整 (`js/engine.js`, `js/data.js`, `js/app.js`, `all_warlords.json`, `tools/all_units.json`)**：
+  - 完整保留全 125 位名將名單（75 中 / 38 日 / 12 韓，五兵種各 25 將、$1–$5 各 5 將）；新增 `stagger`（震懾：攻擊 -10%）與 `mark`（標記：易傷 +10%）兩種戰術異常狀態，達成 125 位名將 100% 具備狀態觸發效果。
+  - 引擎新增 5 項專屬戰法機制：`lifesteal`（吸血回血並即時同步 2D/3D 血條與浮字）、`multiHit`（連擊追擊）、`splash`（橫掃濺射相鄰敵軍）、`dispel`（驅散敵方號令護盾與鼓舞，並修正先後手對稱性）、`counterStrike`（守勢反擊）。
+  - 修正織田信長 ($5) 誤掛步兵方陣盾為深厚耐力 (`STAMINA_DEEP`)、修正姜邯贊 ($4) 戰法特效對應為 `tidal_surge`；重點調強 **呂布 ($5)**、**衛青 ($4)**、**于禁 ($1)**、**島津義久 ($1)** 與高低費技能配置。
+- **3D 寫實戰鬥動畫與華麗戰場演出升級 (`js/battle-figures.js`, `js/musou-vfx.js`, `js/musou-signatures-t13.js`, `js/battle-3d.js`)**：
+  - 增設主將坐騎四肢獨立關節 (`FL/FR/BL/BR`) 奔馳步態、馬首馬尾擺動與武器揮砍半透明光帶 (`weaponTrail`)；GPU 粒子上限依畫質動態分級（高 750 / 中 400 / 低 180）。
+  - 新增 `fire_ox`（火牛奔襲）、`warship_broadside`（水師艦砲齊射）、`shinobi_clone`（忍術分身急襲）、`arrow_wall`（萬箭齊發箭雨牆）4 套實體化戰術特效原型。
+  - 戰場新增 2 盞技能動態閃光點光源池、$4–$5 名將大招背景壓暗暗幕與 180ms 慢動作特寫、6 種 3D 腳下/頭頂狀態光環、火繩槍名將膛口焰煙與高速平射曳光彈、`InstancedMesh` 插地箭池、三合單挑交鋒、重甲陷陣與盾陣雙層震波火花，以及本陣旗幟頂點著色器風動效果。
+
 ## [7.12.0] - 2026-11-22
 ### Overhauled (全面工程、美術資源、音效、戰鬥深度、史料考據與測試 CI 升級)
 - **美術資產與 SEO 橫幅整理 (`assets/warlords/`, `assets/models/`, `assets/og-banner.jpg`, `chibi_preview.html`)**：

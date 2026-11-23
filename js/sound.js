@@ -5,7 +5,7 @@
    支援左右陣營立體聲定位、多取樣輪替防機械感、戶外山谷空間殘響與平滑 BGM 交叉淡入淡出
    ===================================================== */
 (function () {
-  const AUDIO_VER = '7.13.0';
+  const AUDIO_VER = '7.14.0';
   const BASE_PATH = 'assets/audio/';
 
   const CLIP_MANIFEST = {
@@ -140,6 +140,8 @@
     currentBgmGain: null,
     unlocked: false,
     spatialSources: new Set(),
+    finaleNodes: new Set(),
+    _cheerNoiseBuffer: null,
     enabled: readSoundPref(),
     bgmEnabled: readBgmPref(),
     sfxVolume: readVolPref('wl15_sfx_vol', 0.95),
@@ -526,7 +528,7 @@
       }
     },
 
-    _triggerBuffer(clipKey, { side = 'A', gain = 0.85, rateJitter = 0.05, delay = 0, panScale = 1.0, pan = null, distance = 0, spatial = false }) {
+    _triggerBuffer(clipKey, { side = 'A', gain = 0.85, rateJitter = 0.05, delay = 0, panScale = 1.0, pan = null, distance = 0, spatial = false, finale = false }) {
       const buf = this.buffers[clipKey];
       if (!buf || !this.ctx) return false;
 
@@ -564,6 +566,7 @@
 
       src.onended = () => {
         this.spatialSources.delete(src);
+        this.finaleNodes.delete(src);
         src.disconnect();
         if (filter) filter.disconnect();
         g.disconnect();
@@ -571,12 +574,171 @@
       };
       src.start(now);
       if (spatial) this.spatialSources.add(src);
+      if (finale) this.finaleNodes.add(src);
       return true;
     },
 
     stopSpatial() {
       this.spatialSources.forEach(source => source.stop());
       this.spatialSources.clear();
+    },
+
+    stopFinale() {
+      this.finaleNodes.forEach(node => {
+        try { node.stop(); } catch (_) {}
+        try { node.disconnect(); } catch (_) {}
+      });
+      this.finaleNodes.clear();
+    },
+
+    _getCheerNoiseBuffer() {
+      if (this._cheerNoiseBuffer) return this._cheerNoiseBuffer;
+      if (!this.ctx || typeof this.ctx.createBuffer !== 'function') return null;
+      const sr = this.ctx.sampleRate || 44100;
+      const durSec = 1.35;
+      const len = Math.max(1, Math.floor(sr * durSec));
+      const buf = this.ctx.createBuffer(1, len, sr);
+      const data = typeof buf.getChannelData === 'function' ? buf.getChannelData(0) : null;
+      if (data) {
+        let lp = 0;
+        let b0 = 0;
+        for (let i = 0; i < len; i++) {
+          const t = i / sr;
+          // 結合 1/f 粉紅噪聲與多頻胸腔吶喊調變，模擬千軍齊呼的厚實聲浪
+          const white = Math.random() * 2 - 1;
+          b0 = 0.94 * b0 + white * 0.18;
+          lp = 0.72 * lp + b0 * 0.28;
+          const mod = 0.72 + 0.16 * Math.sin(t * 2 * Math.PI * 17.5) + 0.12 * Math.sin(t * 2 * Math.PI * 31.0 + 1.1);
+          data[i] = Math.max(-1, Math.min(1, lp * 2.1 * mod));
+        }
+      }
+      this._cheerNoiseBuffer = buf;
+      return buf;
+    },
+
+    _triggerCrowdCheerWave({ delay = 0, duration = 1.15, gain = 0.44, pan = 0, lowpassHz = 2600 } = {}) {
+      const noiseBuf = this._getCheerNoiseBuffer();
+      if (!noiseBuf || !this.ctx || !this.sfxBus) return false;
+      const t0 = this.ctx.currentTime + Math.max(0, delay);
+      const dur = Math.max(0.4, Math.min(1.28, duration));
+      const tEnd = t0 + dur;
+
+      const src = this.ctx.createBufferSource();
+      src.buffer = noiseBuf;
+      src.loop = false;
+      if (src.playbackRate?.setValueAtTime) {
+        src.playbackRate.setValueAtTime(0.95 + Math.random() * 0.10, t0);
+      }
+
+      // 雙人聲共振峰 (胸聲 580Hz + 吼聲 1180Hz) + 低通柔化，避免乾澀白噪
+      const formantA = this.ctx.createBiquadFilter();
+      formantA.type = 'bandpass';
+      formantA.frequency?.setValueAtTime?.(560 + Math.random() * 60, t0);
+      formantA.Q?.setValueAtTime?.(2.2, t0);
+
+      const formantB = this.ctx.createBiquadFilter();
+      formantB.type = 'bandpass';
+      formantB.frequency?.setValueAtTime?.(1160 + Math.random() * 110, t0);
+      formantB.Q?.setValueAtTime?.(3.0, t0);
+
+      const lpFilter = this.ctx.createBiquadFilter();
+      lpFilter.type = 'lowpass';
+      lpFilter.frequency?.setValueAtTime?.(lowpassHz, t0);
+
+      const mixGainA = this.ctx.createGain();
+      mixGainA.gain?.setValueAtTime?.(0.95, t0);
+      const mixGainB = this.ctx.createGain();
+      mixGainB.gain?.setValueAtTime?.(0.55, t0);
+
+      const env = this.ctx.createGain();
+      const setEnv = (method, v, t) => {
+        if (typeof env.gain?.[method] === 'function') env.gain[method](v, t);
+        else env.gain?.setValueAtTime?.(v, t);
+      };
+      env.gain?.setValueAtTime?.(0.0001, t0);
+      setEnv('linearRampToValueAtTime', gain, t0 + Math.min(0.22, dur * 0.25));
+      setEnv('linearRampToValueAtTime', gain * 0.86, t0 + dur * 0.68);
+      setEnv('linearRampToValueAtTime', 0.0001, tEnd);
+
+      let panner = null;
+      if (typeof this.ctx.createStereoPanner === 'function') {
+        panner = this.ctx.createStereoPanner();
+        panner.pan?.setValueAtTime?.(Math.max(-1, Math.min(1, pan)), t0);
+      }
+
+      src.connect(formantA);
+      src.connect(formantB);
+      formantA.connect(mixGainA);
+      formantB.connect(mixGainB);
+      mixGainA.connect(lpFilter);
+      mixGainB.connect(lpFilter);
+      lpFilter.connect(env);
+      if (panner) {
+        env.connect(panner);
+        panner.connect(this.sfxBus);
+      } else {
+        env.connect(this.sfxBus);
+      }
+
+      const nodesList = [src, formantA, formantB, lpFilter, mixGainA, mixGainB, env, panner].filter(Boolean);
+      src.onended = () => {
+        this.finaleNodes.delete(src);
+        nodesList.forEach(n => {
+          try { n.disconnect(); } catch (_) {}
+        });
+      };
+      this.finaleNodes.add(src);
+      src.start(t0);
+      return true;
+    },
+
+    playBattleFinale(outcome = 'victory', winnerSide = 'A') {
+      if (!this.enabled) return;
+      this.init();
+      if (!this.ctx) return;
+      this.stopFinale();
+
+      const scheduleClip = (key, opts) => {
+        this._triggerBuffer(key, { ...opts, finale: true });
+      };
+
+      try {
+        if (outcome === 'victory') {
+          this._duckBgm(0.10, 3.4);
+          scheduleClip('war_horn', { side: winnerSide, gain: 0.86, rateJitter: 0.02, delay: 0.0, panScale: 0.35 });
+          scheduleClip('war_drum', { side: winnerSide, gain: 0.90, rateJitter: 0.03, delay: 0.0, panScale: 0.25 });
+          scheduleClip('victory', { side: winnerSide, gain: 0.95, rateJitter: 0.0, delay: 0.32, panScale: 0.0 });
+          scheduleClip('war_drum', { side: 'A', gain: 0.66, rateJitter: 0.04, delay: 1.18, pan: -0.25, panScale: 1.0 });
+          scheduleClip('war_drum', { side: 'B', gain: 0.66, rateJitter: 0.04, delay: 2.10, pan: 0.25, panScale: 1.0 });
+
+          // 三波立體聲軍陣歡呼聲浪
+          this._triggerCrowdCheerWave({ delay: 0.18, duration: 1.15, gain: 0.44, pan: -0.32, lowpassHz: 2650 });
+          this._triggerCrowdCheerWave({ delay: 1.02, duration: 1.25, gain: 0.50, pan: 0.04, lowpassHz: 2800 });
+          this._triggerCrowdCheerWave({ delay: 1.92, duration: 1.15, gain: 0.44, pan: 0.34, lowpassHz: 2650 });
+
+          // 古代軍陣慶祝「叩盾齊呼」五連節奏
+          [0.52, 0.92, 1.38, 1.84, 2.34].forEach((dSec, idx) => {
+            scheduleClip('shield_block', {
+              side: idx % 2 === 0 ? 'A' : 'B',
+              gain: 0.34,
+              rateJitter: 0.05,
+              delay: dSec,
+              pan: idx % 2 === 0 ? -0.35 : 0.35,
+              panScale: 1.0
+            });
+          });
+        } else if (outcome === 'defeat') {
+          this._duckBgm(0.12, 3.2);
+          scheduleClip('defeat', { side: 'B', gain: 0.90, rateJitter: 0.0, delay: 0.0, panScale: 0.0 });
+          // 遠處敵陣低沉凱旋歡呼
+          this._triggerCrowdCheerWave({ delay: 0.55, duration: 1.05, gain: 0.22, pan: 0.48, lowpassHz: 1350 });
+          this._triggerCrowdCheerWave({ delay: 1.65, duration: 1.05, gain: 0.20, pan: 0.42, lowpassHz: 1300 });
+        } else {
+          this._duckBgm(0.15, 2.8);
+          scheduleClip('strategy_gong', { side: 'A', gain: 0.85, rateJitter: 0.02, delay: 0.0, panScale: 0.0 });
+          scheduleClip('war_horn', { side: 'B', gain: 0.65, rateJitter: 0.02, delay: 0.35, panScale: 0.0 });
+        }
+      } catch (_) {}
     },
 
     playSpatial(type, side, { distance, pan, gain = 1 }) {

@@ -47,9 +47,9 @@ window.SoundEngine = SoundEngine;
 
 /* ---------- 預設社群幽靈名將錄 ---------- */
 const SEED_GHOSTS = [
-  { id: 'g_falcon', callsign: '冠軍侯・驃騎營', title: '驃騎將軍', rating: 1420, wins: 58, losses: 19, deck: ['HUO','ZHOUTAI','GENGYAN','GANNING','LIUBOWEN'], doctrine: 'strike', motto: '疾如風千里奔襲，閃擊直取中軍帥帳！', isUser: false },
+  { id: 'g_falcon', callsign: '冠軍侯・驃騎營', title: '驃騎將軍', rating: 1420, wins: 58, losses: 19, deck: ['HUO','ZHOUTAI','MALONG','GANNING','LIUBOWEN'], doctrine: 'strike', motto: '疾如風千里奔襲，閃擊直取中軍帥帳！', isUser: false },
   { id: 'g_iron', callsign: '武安君・鐵壁陣', title: '鎮國大將軍', rating: 1310, wins: 41, losses: 22, deck: ['DATE','BAIQI','ZONGZE','YUEJIN','SIMAYI'], doctrine: 'defense', motto: '不動如山大盾重甲，長平鐵壁固若金湯。', isUser: false },
-  { id: 'g_shadow', callsign: '臥龍崗・八陣圖', title: '軍師祭酒', rating: 1490, wins: 64, losses: 14, deck: ['ZHAOYUN','DIANWEI','MALONG','CAOBIN','ZHUGELIANG'], doctrine: 'deception', motto: '奇門八陣迷霧困敵，未戰而廟算先勝。', isUser: false },
+  { id: 'g_shadow', callsign: '臥龍崗・八陣圖', title: '軍師祭酒', rating: 1490, wins: 64, losses: 14, deck: ['ZHAOYUN','XIAHOU_DUN','MALONG','CAOBIN','ZHUGELIANG'], doctrine: 'deception', motto: '奇門八陣迷霧困敵，未戰而廟算先勝。', isUser: false },
   { id: 'g_swarm', callsign: '忠武公・龜船水師', title: '三道水軍統制使', rating: 1260, wins: 33, losses: 26, deck: ['EULJI','HOJO_UJIYASU','GWONYUL','YISUNSIN','ZHOUYU'], doctrine: 'deception', motto: '鶴翼陣鐵甲龜船，鳴梁海峽以寡擊眾。', isUser: false },
   { id: 'g_viper', callsign: '毘沙門天・車懸陣', title: '越後守護', rating: 1610, wins: 88, losses: 21, deck: ['KENSHIN','ZHANGFEI','TAKIGAWA','MENGHUO','CAOCAO'], doctrine: 'strike', motto: '車懸輪番急襲破陣，白刃一騎討斬將奪旗。', isUser: false },
   { id: 'g_aegis', callsign: '大司馬・漢軍鐵騎', title: '大將軍大司馬', rating: 1720, wins: 104, losses: 25, deck: ['WEI','DIANWEI','LIGUANG','MENGHUO','LIUBOWEN'], doctrine: 'strike', motto: '武剛車陣奇兵破虜，神射強弩萬箭齊發。', isUser: false }
@@ -300,7 +300,7 @@ function autoFillAndSubmitPvpDeck() {
     filledDeck = randomDeck(Math.random, budgetLimit(), [], banned);
   }
   if (!filledDeck) {
-    filledDeck = ['ZHAOYUN', 'GYEBAEK', 'MALONG', 'CAOBIN', 'ZHUGELIANG'];
+    filledDeck = ['ZHAOYUN', 'CHOIYOUNG', 'MALONG', 'CAOBIN', 'ZHUGELIANG'];
   }
 
   state.deck = filledDeck.slice();
@@ -3168,9 +3168,11 @@ function fitBattleViewport() {
 }
 window.addEventListener('resize', fitBattleViewport);
 function syncBattleIntelMode() {
+  const viewBattle = $('#viewBattle');
+  if (viewBattle) viewBattle.classList.toggle('is-2d-view', !is3DVisible);
   const dialog = $('#battleIntelDialog');
   dialog.close();
-  if (!is3DVisible && !$('#viewBattle').hidden) dialog.show();
+  if (!is3DVisible && viewBattle && !viewBattle.hidden) dialog.show();
   $('#btnBattleIntel').hidden = !is3DVisible;
   $('#btnBattleIntel').setAttribute('aria-expanded', 'false');
 }
@@ -5171,15 +5173,19 @@ function playBattleFinaleBanner(res, token) {
   try {
     window.Battle3DEngine?.playFinaleCelebration?.(res.winner);
     window.MusouCutin?.clearAll?.();
+    if (typeof SoundEngine !== 'undefined' && typeof SoundEngine.playBattleFinale === 'function') {
+      SoundEngine.playBattleFinale(won ? 'victory' : draw ? 'draw' : 'defeat', res.winner);
+      res._finaleAudioPlayed = true;
+    }
   } catch (_) {}
 
   const banner = document.createElement('div');
   banner.className = `battle-finale-banner${won ? '' : draw ? ' is-draw' : ' is-loss'}`;
   const titleText = won ? '🏆 戰鬥勝利！' : draw ? '⚖️ 兩軍平手' : '⚔️ 惜敗收場';
   const subText = won
-    ? '我軍凱旋・戰場掃蕩完畢（3 秒後開啟結算，點擊立即查看）'
+    ? '三軍凱旋齊呼・萬勝慶捷（3 秒後開啟結算，點擊立即查看）'
     : draw
-      ? '兩軍力竭・勝負未分（3 秒後開啟結算，點擊立即查看）'
+      ? '兩軍力竭鳴金・勝負未分（3 秒後開啟結算，點擊立即查看）'
       : '全軍陣亡・整軍再戰（3 秒後開啟結算，點擊立即查看）';
   banner.innerHTML = `<div class="battle-finale-title">${titleText}</div><div class="battle-finale-sub">${subText}</div>`;
   wrapper.appendChild(banner);
@@ -5187,19 +5193,23 @@ function playBattleFinaleBanner(res, token) {
 
   return new Promise(resolve => {
     let done = false;
-    const finish = () => {
+    const finish = (early = false) => {
       if (done) return;
       done = true;
       clearInterval(poll);
       clearTimeout(timer);
       banner.remove();
+      try {
+        window.Battle3DEngine?.stopFinaleCelebration?.();
+        if (early) window.SoundEngine?.stopFinale?.();
+      } catch (_) {}
       resolve();
     };
-    banner.addEventListener('click', finish);
+    banner.addEventListener('click', () => finish(true));
     const poll = setInterval(() => {
-      if (skip || token !== playToken) finish();
+      if (skip || token !== playToken) finish(true);
     }, 60);
-    const timer = setTimeout(finish, 3200);
+    const timer = setTimeout(() => finish(false), 3200);
   });
 }
 
@@ -6029,7 +6039,7 @@ $('#btnBattleExit')?.addEventListener('click', handleExitBattleToCurrentMode);
 function finishBattle(res) {
   enterBattlefieldReviewState();
   const won = res.winner === 'A', draw = res.winner === 'draw';
-  if (typeof SoundEngine !== 'undefined' && typeof SoundEngine.play === 'function') {
+  if (!res?._finaleAudioPlayed && typeof SoundEngine !== 'undefined' && typeof SoundEngine.play === 'function') {
     SoundEngine.play(won ? 'victory' : 'defeat');
   }
   if (state.mode !== 'sandbox') {
@@ -7064,7 +7074,7 @@ function showResult(res, bo3Custom) {
                   : `<button class="btn primary aar-btn-main" id="rRematch">⚔️ ${state.mode === 'daily' ? '調整陣容再戰' : '再戰一局'}</button>`))}
         <button class="btn ghost aar-btn-sub" id="rReview">🔍 檢視戰場情形</button>
         <button class="btn ghost aar-btn-sub" id="rShareReplay" title="複製一鍵重播網址，戰術同好點擊即可100%精準重現推演">🔗 分享重播網址</button>
-        ${state.mode === 'tournament' ? '' : (state.mode === 'ladder' ? '<button class="btn ghost aar-btn-sub" id="rLadderScoreToggle">🏅 查看天梯積分變動</button>' : `<button class="btn ghost aar-btn-sub" id="rEdit">🛠️ 返回編輯編組</button>`)}
+        ${state.mode === 'ladder' ? '<button class="btn ghost aar-btn-sub" id="rLadderScoreToggle">🏅 查看天梯積分變動</button>' : ''}
       </div>
     `;
 
@@ -7077,7 +7087,9 @@ function showResult(res, bo3Custom) {
       exitButton.type = 'button';
       exitButton.className = 'btn ghost aar-btn-sub';
       exitButton.id = 'rExitBattle';
-      exitButton.textContent = '離開戰場';
+      exitButton.textContent = state.mode === 'ladder'
+        ? '⚔️ 返回天梯榜'
+        : (state.mode === 'tournament' ? '🚪 離開戰場' : '🛠️ 返回陣容編組');
       exitButton.addEventListener('click', () => {
         if (typeof PvPTimerManager !== 'undefined') PvPTimerManager.stop();
         handleExitBattleToCurrentMode();
@@ -7171,19 +7183,6 @@ function showResult(res, bo3Custom) {
             renderMissionBar();
           }
         };
-      }
-    }
-
-    const editBtn = $('#rEdit');
-    if (editBtn) {
-      if (state.mode === 'tournament') {
-        editBtn.style.display = 'none';
-      } else if (state.mode === 'ladder') {
-        editBtn.textContent = '⚔️ 返回天梯榜';
-        editBtn.onclick = handleExitBattleToCurrentMode;
-      } else {
-        editBtn.textContent = '🛠️ 返回編輯編組';
-        editBtn.onclick = handleExitBattleToCurrentMode;
       }
     }
   } catch (renderErr) {

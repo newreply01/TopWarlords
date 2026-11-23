@@ -330,8 +330,15 @@ try:
         for width, height in [(1680, 900), (1100, 800), (390, 844)]:
             page.set_viewport_size({"width": width, "height": height})
             page.wait_for_timeout(150)
+            if width >= 900:
+                assert not page.locator('#battlePanelTabs').is_visible(), f"2D 桌機模式於 {width}px 不應顯示分頁切換列"
+                assert page.locator('#teamA').is_visible() and page.locator('.log-col').is_visible() and page.locator('#teamB').is_visible(), \
+                    f"2D 模式於 {width}px 未同時顯示三欄"
+            else:
+                assert page.locator('#battlePanelTabs').is_visible(), f"2D 手機模式於 {width}px 應保留分頁切換列"
             for panel, team in [("team-a", "#teamA"), ("team-b", "#teamB")]:
-                page.locator(f'button[data-battle-panel="{panel}"]').click()
+                if width < 900:
+                    page.locator(f'button[data-battle-panel="{panel}"]').click()
                 vertical = page.locator(f"{team} .bu").evaluate_all("""cards => {
                     const rects = cards.map(card => ({
                         top: card.offsetTop, bottom: card.offsetTop + card.offsetHeight,

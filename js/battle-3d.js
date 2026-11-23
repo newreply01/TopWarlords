@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.13.0';
+  const ASSET_VER = '7.14.0';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -77,6 +77,7 @@ const Battle3DEngine = (function () {
       combatPausedAt = null;
     }
     audioPaused = next;
+    lastPausedRenderAt = 0;
     if (next) window.SoundEngine?.stopSpatial?.();
   }
   const activeAttackers = new Set();
@@ -110,6 +111,10 @@ const Battle3DEngine = (function () {
   let slowMoScale = 1.0;
   const battleTimers = new Set();
   const bannerWindUniform = { value: 0 };
+  let finaleCelebrationUntil = 0;
+  let finaleCelebrationTimers = [];
+  let lastPausedRenderAt = 0;
+  let animFrameTimer = null;
   let cutinTimeout = null;
   let cutinTimer = null;
   let cutinQueue = [];
@@ -600,7 +605,7 @@ const Battle3DEngine = (function () {
   }
 
   function triggerSkillFlashLight(pos, colorHex = 0xfbbf24, peak = 4.4, duration = 480) {
-    if (!scene || !pos || !skillFlashLights.length || battleSettled) return;
+    if (!scene || !pos || !skillFlashLights.length || (battleSettled && combatNow() >= finaleCelebrationUntil)) return;
     let slot = skillFlashLights.find(s => s.duration === 0 || (combatNow() - s.startedAt >= s.duration));
     if (!slot) {
       slot = skillFlashLights[0].startedAt <= skillFlashLights[1].startedAt ? skillFlashLights[0] : skillFlashLights[1];
@@ -1728,6 +1733,7 @@ const Battle3DEngine = (function () {
       uid: unit.uid,
       id: unit.id,
       name: unit.name,
+      country: unit.country || (typeof UNIT_MAP !== 'undefined' && UNIT_MAP[unit.id]?.country) || 'CN',
       cost: unit.cost || 3,
       tag: unit.tag || '',
       wep: unit.wep || '',
@@ -4609,7 +4615,7 @@ const Battle3DEngine = (function () {
   }
 
   function spawnShockwaveRing(pos, colorHex = 0xf59e0b, maxRadius = 2.4, duration = 400) {
-    if (!scene || battleSettled || shockwaves.length > 24) return;
+    if (!scene || (battleSettled && combatNow() >= finaleCelebrationUntil) || shockwaves.length > 24) return;
     const ringGeo = new THREE.RingGeometry(0.24, 0.48, 24);
     const ringMat = new THREE.MeshBasicMaterial({
       color: colorHex,
@@ -5090,20 +5096,45 @@ const Battle3DEngine = (function () {
      ---------------------------------------------------- */
   function startAnimationLoop() {
     if (isAnimationPaused) return;
-    if (animFrameId) cancelAnimationFrame(animFrameId);
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    if (animFrameTimer) { clearTimeout(animFrameTimer); animFrameTimer = null; }
     let lastBrazierSmokeAt = 0;
 
+    function scheduleNextFrame(frameMs = 0) {
+      if (isAnimationPaused) return;
+      if (frameMs > 80) {
+        animFrameId = null;
+        animFrameTimer = setTimeout(() => {
+          animFrameTimer = null;
+          if (!isAnimationPaused) animFrameId = requestAnimationFrame(animate);
+        }, 32);
+      } else {
+        animFrameId = requestAnimationFrame(animate);
+      }
+    }
+
     function animate(now) {
+      const frameStart = performance.now();
       now = combatNow();
-      animFrameId = requestAnimationFrame(animate);
-      if (!isEnabled) return;
-      if (audioPaused) { renderFrame(); return; }
+      if (!isEnabled) {
+        scheduleNextFrame(0);
+        return;
+      }
+      if (audioPaused) {
+        const wallNow = performance.now();
+        if (wallNow - lastPausedRenderAt >= 200) {
+          lastPausedRenderAt = wallNow;
+          renderFrame();
+        }
+        scheduleNextFrame(0);
+        return;
+      }
       const dt = Math.min(0.05, Math.max(0.001, (now - lastTimestamp) / 1000));
       lastTimestamp = now;
       window.MusouVfx?.tick?.(performance.now());
       window.MusouVfx?.recordFrameDt?.(dt, battleMotionActive && !cutinFrozen);
       const elapsed = now * 0.001;
-      bannerWindUniform.value = elapsed;
+      bannerWindUniform.value = now < finaleCelebrationUntil ? elapsed * 2.15 : elapsed;
       const inHitStop = now < hitStopUntil || cutinFrozen;
       const inSlowMo = !inHitStop && now < slowMoUntil;
       const animDt = inHitStop ? dt * 0.12 : (inSlowMo ? dt * slowMoScale : dt);
@@ -5112,7 +5143,7 @@ const Battle3DEngine = (function () {
         const slot = skillFlashLights[li];
         if (slot.duration > 0) {
           const age = now - slot.startedAt;
-          if (age >= slot.duration || battleSettled) {
+          if (age >= slot.duration || (battleSettled && now >= finaleCelebrationUntil)) {
             slot.light.intensity = 0;
             slot.duration = 0;
           } else {
@@ -5354,7 +5385,7 @@ const Battle3DEngine = (function () {
       const focusAlpha = 1 - Math.exp(-3.8 * dt);
       camFocusOffset.lerp(camFocusTarget, focusAlpha);
       camZoomOffset += (camZoomTarget - camZoomOffset) * (1 - Math.exp(-5.0 * dt));
-      if (!cutinFrozen) camZoomTarget *= Math.exp(-2.2 * dt);
+      if (!cutinFrozen && now >= finaleCelebrationUntil) camZoomTarget *= Math.exp(-2.2 * dt);
       if (shakePower > 0.002) {
         camShakeOffset.set(
           (Math.random() - 0.5) * shakePower,
@@ -5634,6 +5665,7 @@ const Battle3DEngine = (function () {
       if (renderer && scene && camera) {
         renderFrame();
       }
+      scheduleNextFrame(performance.now() - frameStart);
     }
 
     animate(performance.now());
@@ -5642,10 +5674,16 @@ const Battle3DEngine = (function () {
   function pauseAnimationLoop(paused = true) {
     isAnimationPaused = Boolean(paused);
     if (isAnimationPaused) window.SoundEngine?.stopSpatial?.();
-    if (isAnimationPaused && animFrameId) {
-      cancelAnimationFrame(animFrameId);
-      animFrameId = null;
-    } else if (!isAnimationPaused && isInitialized && !animFrameId) {
+    if (isAnimationPaused) {
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+      }
+      if (animFrameTimer) {
+        clearTimeout(animFrameTimer);
+        animFrameTimer = null;
+      }
+    } else if (!isAnimationPaused && isInitialized && !animFrameId && !animFrameTimer) {
       startAnimationLoop();
     }
   }
@@ -5653,6 +5691,7 @@ const Battle3DEngine = (function () {
   function clearAllTokens() {
     battleEpoch++;
     battleMotionActive = false;
+    stopFinaleCelebration();
     lastLabelLayoutKey = '';
     cutinQueue = [];
     if (cutinTimer) { clearTimeout(cutinTimer); cutinTimer = null; }
@@ -5696,29 +5735,106 @@ const Battle3DEngine = (function () {
     clearBattleEffects();
   }
 
+  function stopFinaleCelebration() {
+    finaleCelebrationTimers.forEach(tid => clearTimeout(tid));
+    finaleCelebrationTimers = [];
+    finaleCelebrationUntil = 0;
+    unitsMap.forEach(token => { token.celebrateUntil = 0; });
+    camFocusTarget.set(0, 0, 0);
+    camZoomTarget = 0;
+    lastFocusAt = 0;
+    if (battleSettled) {
+      window.MusouVfx?.clearAll?.();
+      shockwaves.forEach(sw => {
+        if (scene && sw.mesh) scene.remove(sw.mesh);
+        sw.mesh.geometry.dispose();
+        sw.mesh.material.dispose();
+      });
+      shockwaves = [];
+      floatingPopups.forEach(fp => {
+        if (scene && fp.sprite) scene.remove(fp.sprite);
+        fp.tex.dispose();
+        fp.mat.dispose();
+      });
+      floatingPopups = [];
+      skillFlashLights.forEach(slot => { slot.light.intensity = 0; slot.duration = 0; });
+    }
+  }
+
   function playFinaleCelebration(winnerSide) {
     if (!isInitialized || !scene) return;
-    camZoomTarget = 0.8;
-    if (winnerSide === 'A' || winnerSide === 'B') {
-      unitsMap.forEach(token => {
-        if (token.alive && token.side === winnerSide && token.mesh) {
+    stopFinaleCelebration();
+    if (winnerSide !== 'A' && winnerSide !== 'B') {
+      camZoomTarget = 0.6;
+      return;
+    }
+
+    const epoch = battleEpoch;
+    const now = combatNow();
+    finaleCelebrationUntil = now + 3350;
+    const winners = [];
+    unitsMap.forEach(token => {
+      if (token.alive && token.side === winnerSide && token.mesh) {
+        token.celebrateUntil = finaleCelebrationUntil;
+        winners.push(token);
+      }
+    });
+    if (!winners.length) return;
+
+    // 鏡頭平滑推近勝方凱旋軍陣重心
+    const cx = winners.reduce((s, t) => s + t.mesh.position.x, 0) / winners.length;
+    const cz = winners.reduce((s, t) => s + t.mesh.position.z, 0) / winners.length;
+    camFocusTarget.set(cx * 0.45, 0.25, cz * 0.35);
+    lastFocusAt = now + 2600;
+    camZoomTarget = -1.35;
+
+    const shoutsByCountry = {
+      CN: ['萬勝！', '大破敵軍！', '凱旋！', '威震四海！'],
+      JP: ['勝鬨！', '應！', '天下布武！', '大勝凱旋！'],
+      KR: ['大捷！', '忠武凱旋！', '破敵萬勝！', '軍威大振！']
+    };
+    const burstColor = winnerSide === 'A' ? 0xfbbf24 : 0xf87171;
+    const textColor = winnerSide === 'A' ? '#fbbf24' : '#f87171';
+    const burstCount = isLowPowerDevice ? 48 : 96;
+
+    [0, 950, 1900].forEach((delayMs, waveIdx) => {
+      const tid = setTimeout(() => {
+        if (epoch !== battleEpoch || !scene) return;
+        const focusAnchor = winners[waveIdx % winners.length]?.mesh?.position;
+        if (focusAnchor) {
+          triggerSkillFlashLight(focusAnchor, burstColor, waveIdx === 0 ? 5.2 : 4.2, 850);
+        }
+        winners.forEach((token, idx) => {
+          const pos = token.mesh.position;
           window.MusouVfx?.createGpuBurst?.({
             scene,
-            origin: token.mesh.position.clone().add(new THREE.Vector3(0, 1.5, 0)),
-            count: 140,
-            color: winnerSide === 'A' ? 0xfbbf24 : 0xf87171,
-            speed: 4.2,
-            life: 1100,
+            origin: pos.clone().add(new THREE.Vector3(0, 1.45, 0)),
+            count: burstCount,
+            color: idx % 2 === 0 ? burstColor : 0xfef08a,
+            speed: 4.3,
+            life: 1050,
             size: 15,
             gravity: -2.2
           });
-        }
-      });
-    }
+          if ((idx + waveIdx) % 2 === 0) {
+            spawnShockwaveRing(pos, burstColor, 2.3, 620);
+          }
+          // 每拍輪流由 2~3 名倖存名將高喊陣營戰吼
+          if ((idx + waveIdx) % 2 === 0 || winners.length <= 2) {
+            const ctry = token.country || 'CN';
+            const pool = shoutsByCountry[ctry] || shoutsByCountry.CN;
+            const shoutText = pool[(waveIdx + idx) % pool.length];
+            spawnFloatingDamagePopup(pos, shoutText, textColor, true);
+          }
+        });
+      }, delayMs);
+      finaleCelebrationTimers.push(tid);
+    });
   }
 
   function clearBattleEffects() {
     resetDynamicLightingAndTimers();
+    stopFinaleCelebration();
     unitsMap.forEach(clearTokenStatusAuras);
     document.querySelectorAll('.battle-finale-banner').forEach(el => el.remove());
     cutinFrozen = false;
@@ -5918,6 +6034,7 @@ const Battle3DEngine = (function () {
     beginFinalCharge,
     syncBattleResult,
     playFinaleCelebration,
+    stopFinaleCelebration,
     pauseAnimationLoop,
     setAudioPaused,
     toggleMode,

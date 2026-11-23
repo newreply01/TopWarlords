@@ -297,6 +297,7 @@ const BattleFigures = (() => {
     const mounted = token.cat === 'air';
     const isBackline = ['air_defense', 'support'].includes(token.cat);
     const attack = token.attackUntil > now;
+    const celebrating = Boolean(token.celebrateUntil && now < token.celebrateUntil);
     const losses = Math.max(ranks.userData.losses,
       Math.floor(ranks.userData.soldierCount * Math.min(0.9, 1 - (token.visualHp ?? token.currentHp) / token.maxHp)));
     ranks.userData.losses = losses;
@@ -330,48 +331,69 @@ const BattleFigures = (() => {
         let angle = 0;
         let torsoYaw = 0;
         let lungeZ = 0;
-        if (fighting && !isBackline && !moving) {
-          lungeZ = Math.max(0, strikeWave) * (mounted ? 0.24 : 0.16);
-        }
-        if (part.endsWith('Leg')) {
-          angle = gait * (part === 'leftLeg' ? 0.54 : -0.54);
-          if (fighting && !moving && isBackline) {
-            angle += Math.sin(phase + attackPhaseOffset) * (part === 'leftLeg' ? 0.1 : -0.1);
+        let cheerHop = 0;
+        if (celebrating) {
+          const cheerPhase = now * 0.0155 + i * 0.93 + attackPhaseOffset;
+          cheerHop = Math.max(0, Math.sin(cheerPhase)) * (mounted ? 0.09 : 0.15);
+          if (part.endsWith('Leg')) {
+            angle = Math.sin(cheerPhase) * (part === 'leftLeg' ? 0.24 : -0.24);
+          } else if (part.startsWith('horseLeg')) {
+            const front = part === 'horseLegFL' || part === 'horseLegFR';
+            angle = front
+              ? (-0.64 - Math.max(0, Math.sin(cheerPhase)) * 0.38)
+              : (0.26 + Math.sin(cheerPhase) * 0.14);
+          } else if (part === 'rightArm') {
+            angle = -2.45 + Math.sin(cheerPhase * 1.35) * 0.48;
+          } else if (part === 'leftArm') {
+            angle = -1.65 + Math.cos(cheerPhase * 1.15) * 0.35;
+          } else if (part === 'body') {
+            angle = -0.10 + Math.sin(cheerPhase) * 0.08;
+            torsoYaw = Math.sin(cheerPhase * 0.85) * 0.28;
           }
-        }
-        else if (part.startsWith('horseLeg')) {
-          const horseActive = moving || (fighting && !isBackline);
-          const rearBoost = attack && (part === 'horseLegFL' || part === 'horseLegFR') ? -0.35 : 0;
-          angle = rearBoost + Math.sin(phase + (part.endsWith('FL') || part.endsWith('BR') ? 0 : Math.PI)) * (horseActive ? 0.64 : 0.04);
-        }
-        else if (part.endsWith('Arm')) {
-          angle = gait * (part === 'leftArm' ? -0.36 : 0.36);
-          const striking = fighting && Math.sin(now * 0.0085 + attackPhaseOffset + (i % 7) * 0.85) > -0.25;
-          if (part === 'rightArm') {
-            if (attack) {
-              angle -= 1.05 + Math.sin(now * 0.016 + i * 1.35 + attackPhaseOffset) * 0.72;
-            } else if (striking && token.cat !== 'support') {
-              angle -= 0.74 + strikeWave * 0.62;
+        } else {
+          if (fighting && !isBackline && !moving) {
+            lungeZ = Math.max(0, strikeWave) * (mounted ? 0.24 : 0.16);
+          }
+          if (part.endsWith('Leg')) {
+            angle = gait * (part === 'leftLeg' ? 0.54 : -0.54);
+            if (fighting && !moving && isBackline) {
+              angle += Math.sin(phase + attackPhaseOffset) * (part === 'leftLeg' ? 0.1 : -0.1);
             }
-          } else if (part === 'leftArm' && fighting && !isBackline) {
-            angle -= 0.30 + Math.cos(now * 0.009 + i * 0.95 + attackPhaseOffset) * 0.32;
           }
-          if (token.cat === 'air_defense' && (attack || striking)) {
-            angle = part === 'leftArm' ? -0.95 : (-1.12 + Math.sin(now * 0.006 + i) * 0.28);
+          else if (part.startsWith('horseLeg')) {
+            const horseActive = moving || (fighting && !isBackline);
+            const rearBoost = attack && (part === 'horseLegFL' || part === 'horseLegFR') ? -0.35 : 0;
+            angle = rearBoost + Math.sin(phase + (part.endsWith('FL') || part.endsWith('BR') ? 0 : Math.PI)) * (horseActive ? 0.64 : 0.04);
           }
-          if (token.cat === 'support' && fighting) {
-            const castBeat = Math.max(0, Math.sin(now * 0.0055 + i * 0.8 + attackPhaseOffset));
-            const armDirection = part === 'leftArm' ? 1 : -1;
-            angle = armDirection * (0.32 + castBeat * 0.62);
+          else if (part.endsWith('Arm')) {
+            angle = gait * (part === 'leftArm' ? -0.36 : 0.36);
+            const striking = fighting && Math.sin(now * 0.0085 + attackPhaseOffset + (i % 7) * 0.85) > -0.25;
+            if (part === 'rightArm') {
+              if (attack) {
+                angle -= 1.05 + Math.sin(now * 0.016 + i * 1.35 + attackPhaseOffset) * 0.72;
+              } else if (striking && token.cat !== 'support') {
+                angle -= 0.74 + strikeWave * 0.62;
+              }
+            } else if (part === 'leftArm' && fighting && !isBackline) {
+              angle -= 0.30 + Math.cos(now * 0.009 + i * 0.95 + attackPhaseOffset) * 0.32;
+            }
+            if (token.cat === 'air_defense' && (attack || striking)) {
+              angle = part === 'leftArm' ? -0.95 : (-1.12 + Math.sin(now * 0.006 + i) * 0.28);
+            }
+            if (token.cat === 'support' && fighting) {
+              const castBeat = Math.max(0, Math.sin(now * 0.0055 + i * 0.8 + attackPhaseOffset));
+              const armDirection = part === 'leftArm' ? 1 : -1;
+              angle = armDirection * (0.32 + castBeat * 0.62);
+            }
           }
         }
         base.decompose(position, rotation, scale);
-        position.y += heights[i];
+        position.y += heights[i] + cheerHop;
         position.z += ranks.userData.advance + lungeZ;
-        if (mounted && (moving || fighting)) {
+        if (!celebrating && mounted && (moving || fighting)) {
           position.y += Math.abs(Math.sin(phase * 1.8)) * (attack ? 0.055 : 0.025);
         }
-        if (part === 'body' && fighting) {
+        if (!celebrating && part === 'body' && fighting) {
           const sway = token.cat === 'support' ? 0.09 : isBackline ? 0.05 : 0.12;
           angle = Math.sin(now * 0.007 + i * 1.45 + attackPhaseOffset) * sway;
           torsoYaw = (token.individualYawOffset || 0) + (!isBackline ? Math.cos(now * 0.011 + i * 1.25 + attackPhaseOffset) * 0.22 : 0);
@@ -684,6 +706,32 @@ const BattleFigures = (() => {
         bodyGrp.rotation.y = (token.individualYawOffset || 0);
         rightArm.rotation.x = -2.35 + mp * 3.15;
         leftArm.rotation.x = -0.95;
+      }
+      return;
+    }
+
+    const celebrating = Boolean(token.celebrateUntil && now < token.celebrateUntil);
+    if (celebrating) {
+      const cPhase = now * 0.0145 + (token.attackPhaseOffset || 0);
+      const cheerHop = Math.max(0, Math.sin(cPhase));
+      hero.scale.setScalar(1.06 + cheerHop * 0.08);
+      hero.position.y = localGround + cheerHop * (horseGrp ? 0.18 : 0.20);
+      bodyGrp.rotation.x = -0.10 + Math.sin(cPhase) * 0.07;
+      bodyGrp.rotation.y = Math.sin(cPhase * 0.75) * 0.28;
+      rightArm.rotation.x = -2.55 + Math.sin(cPhase * 1.45) * 0.42;
+      leftArm.rotation.x = -1.75 + Math.cos(cPhase * 1.20) * 0.32;
+      capePivot.rotation.x = 0.52 + Math.sin(cPhase * 1.40) * 0.26;
+      if (weaponTrail?.material) weaponTrail.material.opacity = 0.36 + cheerHop * 0.36;
+      if (horseGrp) {
+        horseGrp.rotation.x = -0.26 - cheerHop * 0.16;
+        if (horseLegs) {
+          horseLegs.FL.rotation.x = -0.78 - cheerHop * 0.38;
+          horseLegs.FR.rotation.x = -0.68 - cheerHop * 0.32;
+          horseLegs.BL.rotation.x = 0.34 + cheerHop * 0.14;
+          horseLegs.BR.rotation.x = 0.28 + cheerHop * 0.12;
+        }
+        if (horseHeadPivot) horseHeadPivot.rotation.x = -0.28 - cheerHop * 0.16;
+        if (horseTailPivot) horseTailPivot.rotation.x = 0.42 + Math.sin(cPhase * 1.6) * 0.24;
       }
       return;
     }

@@ -105,7 +105,7 @@ const LADDER_PRESETS = [
     "deck": [
       "WEI",
       "ZHOUTAI",
-      "GENGYAN",
+      "MALONG",
       "WEIYAN",
       "CAOCAO"
     ],
@@ -150,7 +150,7 @@ const LADDER_PRESETS = [
     "deck": [
       "MACHO",
       "XUCHU",
-      "GENGYAN",
+      "MALONG",
       "XUHUANG",
       "SIMAYI"
     ],
@@ -285,7 +285,7 @@ const LADDER_PRESETS = [
     "deck": [
       "XIAHOUYUAN",
       "XIAHOU_DUN",
-      "MALONG",
+      "GENGYAN",
       "YUNGWAN",
       "SUNWU"
     ],
@@ -315,7 +315,7 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHAOYUN",
       "XUCHU",
-      "GENGYAN",
+      "MALONG",
       "YUYUNWEN",
       "HANXIN"
     ],
@@ -495,7 +495,7 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHANGLIAO",
       "XUCHU",
-      "GENGYAN",
+      "MALONG",
       "XUHUANG",
       "PANGTONG"
     ],
@@ -540,7 +540,7 @@ const LADDER_PRESETS = [
     "deck": [
       "HUO",
       "HOJO_UJIYASU",
-      "GENGYAN",
+      "MALONG",
       "JEONGJI",
       "GUOJIA"
     ],
@@ -720,7 +720,7 @@ const LADDER_PRESETS = [
     "deck": [
       "XIAHOUYUAN",
       "BAIQI",
-      "MALONG",
+      "GENGYAN",
       "YUYUNWEN",
       "CAOCAO"
     ],
@@ -795,7 +795,7 @@ const LADDER_PRESETS = [
     "deck": [
       "WEI",
       "XUCHU",
-      "GENGYAN",
+      "MALONG",
       "WEIYAN",
       "XUNYU"
     ],
@@ -945,7 +945,7 @@ const LADDER_PRESETS = [
     "deck": [
       "WEI",
       "GUANYU",
-      "GENGYAN",
+      "MALONG",
       "YUNGWAN",
       "FAZHENG"
     ],
@@ -1185,7 +1185,7 @@ const LADDER_PRESETS = [
     "deck": [
       "GAOCHANGGONG",
       "WANGJIAN",
-      "MALONG",
+      "GENGYAN",
       "WEIYAN",
       "FAZHENG"
     ],
@@ -1350,7 +1350,7 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHAOYUN",
       "XUCHU",
-      "GENGYAN",
+      "MALONG",
       "LUMENG",
       "YAMAMOTO"
     ],
@@ -1410,7 +1410,7 @@ const LADDER_PRESETS = [
     "deck": [
       "WEI",
       "BAIQI",
-      "GENGYAN",
+      "MALONG",
       "JIANGWEI",
       "FAZHENG"
     ],
@@ -1455,7 +1455,7 @@ const LADDER_PRESETS = [
     "deck": [
       "MADAI",
       "XIAHOU_DUN",
-      "MALONG",
+      "GENGYAN",
       "XIEXUAN",
       "LEYI"
     ],
@@ -1485,7 +1485,7 @@ const LADDER_PRESETS = [
     "deck": [
       "WEI",
       "XUCHU",
-      "GENGYAN",
+      "MALONG",
       "XIEXUAN",
       "YAMAMOTO"
     ],
@@ -1500,7 +1500,7 @@ const LADDER_PRESETS = [
     "deck": [
       "ZHAOSHE",
       "YANGYE",
-      "GENGYAN",
+      "MALONG",
       "LUMENG",
       "WUQI"
     ],

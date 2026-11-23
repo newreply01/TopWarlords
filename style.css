@@ -30878,3 +30878,196 @@ html:not([data-theme="light"]) .m-stat-ico.ico-st { color: #38bdf8; }
   font-size: 12px;
   color: var(--cyan);
 }
+
+/* =====================================================
+   2D 戰鬥畫面三欄整併同屏顯示 (v7.13.1)
+   桌機與平板橫屏 (>= 900px) 進入 2D 模式時，將「我方 / 戰報 / 敵方」
+   三欄同時並排呈現；3D 側邊抽屜與 <900px 窄螢幕維持分頁切換。
+   ===================================================== */
+@media (min-width: 900px) {
+  #viewBattle.is-2d-view #btnBattleIntel {
+    display: none !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog {
+    padding: 8px 10px !important;
+    gap: 0 !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog .battle-panel-tabs {
+    display: none !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog .battle-grid {
+    display: grid !important;
+    grid-template-columns: minmax(250px, 0.95fr) minmax(360px, 1.35fr) minmax(250px, 0.95fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    grid-template-areas: none !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    overflow: hidden !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog .battle-grid>#teamA,
+  #viewBattle.is-2d-view #battleIntelDialog .battle-grid>.log-col,
+  #viewBattle.is-2d-view #battleIntelDialog .battle-grid>#teamB {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-area: auto !important;
+    order: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog .team-units-box {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog .team-units-box>h3 {
+    position: static !important;
+    flex: 0 0 auto !important;
+    margin: 0 0 4px !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog .units-card-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    justify-content: flex-start !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog .units-card-list .bu {
+    flex: 1 0 auto !important;
+    min-height: 68px !important;
+    padding: 6px 8px !important;
+  }
+
+  #viewBattle.is-2d-view #battleIntelDialog .log-integrated-box {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+}
+
+/* ---------- v7.14.0 戰術禁用 (Banned) 武將卡片高對比軍事印章視覺強化 ---------- */
+#matrixBoard .m-card.banned,
+.m-card.banned {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 2px solid #ef4444 !important;
+  opacity: 0.96 !important;
+  filter: none !important;
+  box-shadow: inset 0 0 18px rgba(220, 38, 38, 0.42), 0 0 0 1px rgba(239, 68, 68, 0.5) !important;
+  cursor: not-allowed !important;
+}
+
+#matrixBoard .m-card.banned .m-avatar-img,
+.m-card.banned .m-avatar-img {
+  filter: grayscale(92%) brightness(0.45) contrast(1.1) !important;
+}
+
+#matrixBoard .m-card.banned .m-name,
+.m-card.banned .m-name {
+  text-decoration: line-through !important;
+  text-decoration-color: #ef4444 !important;
+  text-decoration-thickness: 2px !important;
+  opacity: 0.65 !important;
+}
+
+#matrixBoard .m-card.banned .m-cost,
+#matrixBoard .m-card.banned .m-sub,
+#matrixBoard .m-card.banned .m-tags,
+.m-card.banned .m-cost,
+.m-card.banned .m-sub,
+.m-card.banned .m-tags {
+  opacity: 0.48 !important;
+}
+
+#matrixBoard .m-card.banned::before,
+.m-card.banned::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(220, 38, 38, 0.22) 0 8px,
+    rgba(15, 23, 42, 0.35) 8px 16px
+  );
+  z-index: 4;
+  pointer-events: none;
+}
+
+html[data-theme="light"] #matrixBoard .m-card.banned::before,
+html[data-theme="light"] .m-card.banned::before {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(220, 38, 38, 0.18) 0 8px,
+    rgba(255, 241, 242, 0.45) 8px 16px
+  );
+}
+
+#matrixBoard .m-card.banned::after,
+.m-card.banned::after {
+  content: '🚫 戰術禁用';
+  position: absolute;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) rotate(-12deg) !important;
+  background: linear-gradient(135deg, #dc2626, #991b1b) !important;
+  color: #ffffff !important;
+  border: 2px solid #fecaca !important;
+  padding: 4px 11px !important;
+  border-radius: 6px !important;
+  font-family: var(--head) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1.5px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 0 2px rgba(220, 38, 38, 0.45) !important;
+  z-index: 6 !important;
+  pointer-events: none !important;
+}
+
+.m-why.why-banned {
+  position: relative;
+  z-index: 5;
+  color: #ffffff !important;
+  background: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4) !important;
+}
+
+.b-ban-badge.ban-opp {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+  border: 1px solid #fecaca !important;
+  padding: 2px 6px !important;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.45) !important;
+}
+
+.b-ban-badge.ban-me {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  border: 1px solid #a7f3d0 !important;
+  padding: 2px 6px !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4) !important;
+}

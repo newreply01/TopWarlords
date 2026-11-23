@@ -108,6 +108,24 @@ const legPose1 = cavHero.userData.parts.horseLegs.FL.rotation.x;
 figures.animateCommander(cavHero, cavToken, 1140, true, true, 0, () => 0);
 const legPose2 = cavHero.userData.parts.horseLegs.FL.rotation.x;
 assert.notEqual(legPose1, legPose2, 'Mounted commander horse legs must articulate during movement/combat');
+cavToken.celebrateUntil = 5000;
+figures.animateCommander(cavHero, cavToken, 1500, false, false, 0, () => 0);
+assert(cavHero.userData.parts.rightArm.rotation.x < -2.0, 'Celebrating commander must raise weapon high in victory cheer');
+assert(cavHero.scale.x > 1.0 && cavHero.userData.parts.horseLegs.FL.rotation.x < -0.5, 'Celebrating mounted commander must rear steed proudly');
+cavToken.celebrateUntil = 0;
+
+// 驗證步兵/騎兵軍陣在凱旋狀態下高舉兵刃歡呼且矩陣全數有效
+const cheerToken = { cat: 'armor', side: 'A', lowPower: false, mesh: new THREE.Group(), formationRig: new THREE.Group(), attackUntil: 0, currentHp: 100, maxHp: 100 };
+const cheerRanks = figures.createRanks(cheerToken, 12, i => ({ x: (i % 4 - 1.5) * 0.42, z: -Math.floor(i / 4) * 0.5 }));
+const rightArmMesh = cheerRanks.children.find(m => m.userData.part === 'rightArm');
+figures.animate(cheerRanks, cheerToken, 1400, false, false, () => 0, 0);
+const idleArm = Array.from(rightArmMesh.instanceMatrix.array);
+cheerToken.celebrateUntil = 5000;
+figures.animate(cheerRanks, cheerToken, 1500, false, false, () => 0, 0);
+assert([...rightArmMesh.instanceMatrix.array].every(Number.isFinite), 'Celebrating troop matrices must remain finite');
+assert.notDeepEqual(Array.from(rightArmMesh.instanceMatrix.array), idleArm, 'Celebrating troops must raise weapons compared to idle');
+cheerRanks.children.forEach(mesh => mesh.dispose());
+cheerRanks.userData.material.dispose();
 cavHero.traverse(obj => {
   if (obj.isMesh && obj.geometry) {
     assert([...obj.geometry.attributes.position.array].every(Number.isFinite));

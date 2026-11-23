@@ -112,12 +112,12 @@ const RAW_UNITS = [
   ["SAIKA", "雜賀孫市", 'air_defense', 4, 'F', "紀伊鐵砲·八咫烏之王", "雜賀眾首領鈴木重秀，率鐵砲傭兵重創織田信長大軍，火器游擊戰之宗師。", 20, 20, ["CIWS", "AA_LONG", "TRUE_AT"], ["PASSIVE_VOLLEY"], 234, 128, 0.05],
   ["GWONYUL", "權慄", 'air_defense', 2, 'G', "幸州大捷·火車拒敵", "朝鮮王朝中興名將，1593年壬辰倭亂期間於幸州山城運用神機箭火車、弓弩與滾石以少勝多擊退數萬日軍。", 14, 16, ["CIWS", "AA_LONG"], [], 154, 86, 0.06],
   ["HULUGUANG", "斛律光", 'air_defense', 4, 'H', "落雕都督·百步穿石", "北齊軍事支柱，號「落雕都督」，神射天下第一，臨陣射箭無不應弦而倒，生平百戰未嘗一敗。", 16, 24, ["AA_LONG", "CIWS", "TRUE_AT"], [], 218, 118, 0.06],
-  ["MALONG", "馬隆", 'air_defense', 3, 'A', "奇謀強弩·涼州平叛", "西晉名將，率三千五百精兵孤軍深入涼州，依《八陣圖》創製偏箱車與強弩矢陣大破禿髮樹機能數萬鐵騎，威震西陲。", 18, 28, ["AA_LONG", "CIWS", "EW"], ["PASSIVE_VOLLEY"], 180, 98, 0.07],
+  ["MALONG", "馬隆", 'air_defense', 2, 'A', "奇謀強弩·涼州平叛", "西晉名將，率三千五百精兵孤軍深入涼州，依《八陣圖》創製偏箱車與強弩矢陣大破禿髮樹機能數萬鐵騎，威震西陲。", 16, 22, ["AA_LONG", "CIWS"], [], 142, 78, 0.06],
   ["ZHOUYAFU", "周亞夫", 'armor', 4, 'C', "細柳嚴軍·重步堅壁", "西漢名將條侯，細柳營號令嚴整、披甲執銳連營固守，「軍中聞將軍令不聞天子之詔」，平定七國之亂營壘固若金湯。", 10, 26, ["APS", "HEAVY", "EW"], ["STAMINA_DEEP", "FORMATION_SHIELD"], 324, 110, 0.28],
   ["ZONGZE", "宗澤", 'air_defense', 2, 'D', "汴京連弩·過河名將", "南宋初年抗金名臣，重整東京汴京城防，築連弩箭樓二十餘座阻截金騎。", 14, 24, ["AA_LONG", "CIWS"], [], 144, 78, 0.06],
   ["TORII", "鳥居元忠", 'air_defense', 1, 'E', "三河武士·伏見鐵砲血戰", "德川忠臣，伏見城以少數守軍搭配鐵砲長弓死守半月，拖住西軍四萬主力，壯烈殉節。", 12, 16, ["AA_LONG", "CIWS"], [], 116, 62, 0.06],
   ["CHOIMUSEON", "崔茂宣", 'air_defense', 1, 'G', "高麗火砲之父·鎮海轟雷", "高麗科學家兼將領，首次自製火藥，並創立走火砲與神機箭破除倭寇。", 16, 20, ["CIWS", "AA_LONG", "SAT"], [], 114, 62, 0.04],
-  ["GENGYAN", "耿弇", 'air_defense', 2, 'A', "雲台神將·圍城破援", "東漢雲台二十八將第四，連下四十六郡，精通強弩大陣與圍城打援，光武帝譽其戰功可比韓信。", 16, 22, ["AA_LONG", "CIWS"], [], 142, 78, 0.05],
+  ["GENGYAN", "耿弇", 'air_defense', 3, 'A', "雲台神將·圍城破援", "東漢雲台二十八將第四，連下四十六郡，精通強弩大陣與圍城打援，光武帝譽其戰功可比韓信。", 18, 28, ["AA_LONG", "CIWS", "EW"], ["PASSIVE_VOLLEY"], 180, 98, 0.07],
   ["YAMAMOTO", "山本勘助", 'support', 1, 'E', "啄木鳥智謀·晴幸軍師", "武田信玄首席獨眼軍師，精通城郭築城、奇門陣法與兵略，於川中島合戰獻「啄木鳥戰法」名震戰國。", 38, 60, ["EW", "SPOT"], ["STRATEGIST"], 126, 65, 0.04],
   ["FENGYI", "馮異", 'air_defense', 2, 'C', "大樹將軍·巧設強弩", "東漢開國名將大樹將軍，善於以險阻地形設伏弩大陣，崤底之戰大破赤眉主力。", 18, 24, ["AA_LONG", "CIWS"], ["PASSIVE_VOLLEY"], 142, 78, 0.06],
   ["ASAKURA_SOT", "朝倉宗滴", 'air_defense', 2, 'E', "越前軍神·鐵砲先驅", "越前朝倉家軍事支柱，九頭龍川大破三十萬一揆，晚年率先在實戰中裝備火繩槍連連告捷。", 14, 22, ["AA_LONG", "CIWS"], [], 140, 78, 0.04],
@@ -493,9 +493,9 @@ const UNIT_SKILL_EFFECTS = {
   HULUGUANG: { damage: 1.14, bonusVs: { air: 0.16 }, hit: 0.04 },
   HUANGZHONG: { damage: 1.20, highCostDamage: 0.24, hit: 0.08 },
   JUMONG: { damage: 1.10, hit: 0.2, armorPierce: 0.15 },
-  MALONG: { damage: 1.14, bonusVs: { air: 0.22 }, teamGuard: 0.06, hit: 0.06 },
+  MALONG: { damage: 1.12, bonusVs: { air: 0.18 }, teamGuard: 0.05, hit: 0.04 },
   ZONGZE: { damage: 1.1, teamGuard: 0.06, bonusVs: { air: 0.14 } },
-  GENGYAN: { damage: 1.14, enemyHit: 0.03, hit: 0.03 },
+  GENGYAN: { damage: 1.16, bonusVs: { air: 0.16 }, enemyHit: 0.05, hit: 0.05 },
   FENGYI: { damage: 1.14, guard: 0.12, hit: 0.06 },
   TAKIGAWA: { damage: 1.14, armorPierce: 0.4, hit: 0.06 },
   TAISHICI: { damage: 1.16, guard: 0.06, multiHit: 0.35 },
@@ -1039,9 +1039,9 @@ function recordUnitMasteryFromBattle(res, mySide = 'A') {
 
 /* ---------- 推薦經典名將陣容 (Recommended Historical Formations) ---------- */
 const TEMPLATES = [
-  { name: '八陣神機', note: '諸葛奇謀＋馬隆偏箱八陣合圍', ids: ['ZHANGLIAO', 'DIANWEI', 'MALONG', 'HUANGGAI', 'ZHUGELIANG'] },
+  { name: '八陣神機', note: '諸葛奇謀＋馬隆偏箱八陣合圍', ids: ['ZHANGLIAO', 'XIAHOU_DUN', 'MALONG', 'HUANGGAI', 'ZHUGELIANG'] },
   { name: '封狼居胥', note: '霍去病千里奔襲破敵', ids: ['HUO', 'XIAHOU_DUN', 'TAISHICI', 'GANNING', 'PANGTONG'] },
-  { name: '殺神陷陣', note: '武安君白起與帝師劉伯溫合擊', ids: ['XIAHOUYUAN', 'BAIQI', 'GENGYAN', 'TIANDAN', 'LIUBOWEN'] },
+  { name: '殺神陷陣', note: '武安君白起與帝師劉伯溫合擊', ids: ['XIAHOUYUAN', 'BAIQI', 'FENGYI', 'TIANDAN', 'LIUBOWEN'] },
   { name: '鳴梁伏波', note: '周瑜火攻與忠武公李舜臣水陸連環', ids: ['EULJI', 'CAOREN', 'GWONYUL', 'YISUNSIN', 'ZHOUYU'] },
   { name: '天下布武', note: '織田信長三段火器與戰國名將合擊', ids: ['YUKIMURA', 'SHIBATA', 'NOBUNAGA', 'HATTORI', 'HANBEI'] }
 ];

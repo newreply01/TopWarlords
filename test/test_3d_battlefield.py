@@ -221,6 +221,21 @@ try:
         page.keyboard.press('Escape')
         assert not page.locator('#battleIntelDialog').is_visible()
         assert page.locator('#btnBattleIntel').evaluate('(button) => button === document.activeElement')
+        settled_or_ending = page.evaluate("""() => {
+            const dbg = Battle3DEngine.getDebugState();
+            const phaseTxt = document.querySelector('#phaseTitle')?.textContent || '';
+            const replayBtn = document.querySelector('#btnBattleReplay');
+            const pauseBtn = document.querySelector('#btnPause');
+            return !dbg.battleMotionActive || dbg.aliveBattalions === 0 || (replayBtn && !replayBtn.hidden) || (pauseBtn && pauseBtn.hidden) || phaseTxt.includes('階段三') || phaseTxt.includes('結束');
+        }""")
+        if settled_or_ending:
+            page.evaluate("""() => {
+                const replayBtn = document.querySelector('#btnBattleReplay');
+                if (!replayBtn || replayBtn.hidden) document.querySelector('#btnSkip')?.click();
+                document.querySelector('#resultModal')?.setAttribute('hidden', '');
+                document.querySelector('#btnBattleReplay')?.click();
+            }""")
+            page.wait_for_function("() => { const p = document.querySelector('#btnPause'); const d = Battle3DEngine.getDebugState(); return p && !p.hidden && d.battleMotionActive && d.aliveBattalions > 0; }", polling=100, timeout=15000)
         page.evaluate("""() => {
             if (Battle3DEngine.getDebugState().audioPaused) document.querySelector('#btnPause').click();
             Battle3DEngine.pauseAnimationLoop(false);
@@ -244,6 +259,32 @@ try:
         is_hidden_now = page.locator('#battle3DWrapper').is_hidden()
         print(f"[TEST 5] 切換 3D 隱藏: {is_hidden_now}")
         assert is_hidden_now, "點擊切換後 3D 沙盤未正常隱藏！"
+
+        unified_2d = page.evaluate("""() => {
+            const box = (sel) => {
+                const el = document.querySelector(sel);
+                if (!el) return null;
+                const r = el.getBoundingClientRect();
+                return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) };
+            };
+            const tabsEl = document.querySelector('#battlePanelTabs');
+            return {
+                tabsVisible: Boolean(tabsEl && getComputedStyle(tabsEl).display !== 'none' && tabsEl.getClientRects().length),
+                teamA: box('#teamA'),
+                logCol: box('.log-col'),
+                teamB: box('#teamB'),
+                overflow: document.documentElement.scrollWidth > window.innerWidth + 1
+            };
+        }""")
+        print(f"[TEST 5a] 2D 三欄同屏整併驗證: {unified_2d}")
+        assert not unified_2d['tabsVisible'], f"2D 桌機模式不應顯示三分頁切換列: {unified_2d}"
+        assert page.locator('#teamA').is_visible() and page.locator('.log-col').is_visible() and page.locator('#teamB').is_visible(), \
+            f"2D 模式下我方/戰報/敵方須同時可見: {unified_2d}"
+        assert unified_2d['teamA']['x'] < unified_2d['logCol']['x'] < unified_2d['teamB']['x'], \
+            f"2D 三欄水平排列順序不正確: {unified_2d}"
+        assert all(unified_2d[k]['w'] >= 200 and unified_2d[k]['h'] >= 200 for k in ('teamA', 'logCol', 'teamB')), \
+            f"2D 三欄尺寸過小或遭壓縮: {unified_2d}"
+        assert not unified_2d['overflow'], f"2D 三欄同屏造成水平捲動溢出: {unified_2d}"
 
         assert page.locator('#btnToggle3DView').is_visible(), '2D mode hid the only way back to 3D'
         assert page.locator('#btnToggle3DView').get_attribute('aria-expanded') == 'false'

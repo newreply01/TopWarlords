@@ -2998,18 +2998,15 @@
     "id": "MALONG",
     "name": "馬隆",
     "cat": "air_defense",
-    "cost": 3,
+    "cost": 2,
     "v": "A",
     "tag": "奇謀強弩·涼州平叛",
     "desc": "西晉名將，率三千五百精兵孤軍深入涼州，依《八陣圖》創製偏箱車與強弩矢陣大破禿髮樹機能數萬鐵騎，威震西陲。",
     "traits": [
       "AA_LONG",
-      "CIWS",
-      "EW"
+      "CIWS"
     ],
-    "roleFlags": [
-      "PASSIVE_VOLLEY"
-    ],
+    "roleFlags": [],
     "historicalAudit": {
       "era": "three_kingdoms",
       "status": "source-linked",
@@ -3018,22 +3015,22 @@
         "https://en.wikipedia.org/wiki/Ma_Long_(Jin_dynasty)"
       ]
     },
-    "st": 18,
-    "ew": 28,
-    "hp": 261,
-    "atk": 98,
-    "def": 0.07,
+    "st": 16,
+    "ew": 22,
+    "hp": 206,
+    "atk": 78,
+    "def": 0.06,
     "skill": {
       "name": "偏箱強弩陣",
       "phase": "P2",
-      "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.14；本次命中 +6 個百分點（上限 96%）；對突騎本次傷害倍率 +22%；全軍後續受傷減少 6%（同類取最高）。持續效果至戰鬥結束。",
+      "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.12；本次命中 +4 個百分點（上限 96%）；對突騎本次傷害倍率 +18%；全軍後續受傷減少 5%（同類取最高）。持續效果至戰鬥結束。",
       "effects": {
-        "damage": 1.14,
+        "damage": 1.12,
         "bonusVs": {
-          "air": 0.22
+          "air": 0.18
         },
-        "teamGuard": 0.06,
-        "hit": 0.06
+        "teamGuard": 0.05,
+        "hit": 0.04
       },
       "fx": "piercing_volley",
       "fxLabel": "神射貫穿",
@@ -3236,15 +3233,18 @@
     "id": "GENGYAN",
     "name": "耿弇",
     "cat": "air_defense",
-    "cost": 2,
+    "cost": 3,
     "v": "A",
     "tag": "雲台神將·圍城破援",
     "desc": "東漢雲台二十八將第四，連下四十六郡，精通強弩大陣與圍城打援，光武帝譽其戰功可比韓信。",
     "traits": [
       "AA_LONG",
-      "CIWS"
+      "CIWS",
+      "EW"
     ],
-    "roleFlags": [],
+    "roleFlags": [
+      "PASSIVE_VOLLEY"
+    ],
     "historicalAudit": {
       "era": "qin_han",
       "status": "source-linked",
@@ -3253,19 +3253,22 @@
         "https://en.wikipedia.org/wiki/Geng_Yan"
       ]
     },
-    "st": 16,
-    "ew": 22,
-    "hp": 206,
-    "atk": 78,
-    "def": 0.05,
+    "st": 18,
+    "ew": 28,
+    "hp": 261,
+    "atk": 98,
+    "def": 0.07,
     "skill": {
       "name": "雲台破齊",
       "phase": "P2",
-      "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.14；本次命中 +3 個百分點（上限 96%）；敵軍後續命中 -3 個百分點（同類取最高）。持續效果至戰鬥結束。",
+      "desc": "P2 首次命中時，每戰一次：本次傷害 ×1.16；本次命中 +5 個百分點（上限 96%）；對突騎本次傷害倍率 +16%；敵軍後續命中 -5 個百分點（同類取最高）。持續效果至戰鬥結束。",
       "effects": {
-        "damage": 1.14,
-        "enemyHit": 0.03,
-        "hit": 0.03
+        "damage": 1.16,
+        "bonusVs": {
+          "air": 0.16
+        },
+        "enemyHit": 0.05,
+        "hit": 0.05
       },
       "fx": "piercing_volley",
       "fxLabel": "神射貫穿",

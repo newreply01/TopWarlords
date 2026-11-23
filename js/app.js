@@ -4640,7 +4640,8 @@ function startBattle() {
     docB: state.enemyDoc,
     formationsA: activeFormations,
     formationsB: enemyFormations,
-    terrain: state.terrain
+    terrain: state.terrain,
+    dailyBuffer: state.mode === 'daily'
   });
   state.lastRes = res;
   if (state.enemy && state.enemy.length === 5) {
@@ -5119,7 +5120,7 @@ async function showBattle(res, opts = {}) {
         recent.prepend(event);
         while (recent.children.length > 2) recent.lastElementChild.remove();
       };
-      const effectiveTempo = f.phase < 3 ? speed * 1.45 : speed * 1.2;
+      const effectiveTempo = f.phase < 3 ? speed * 1.12 : speed * 0.92;
       if (typeof Battle3DEngine !== 'undefined') await Battle3DEngine.playVolley(f.lines, onImpact, effectiveTempo, f.hp);
       else f.lines.forEach(onImpact);
       if (token !== playToken || res._finished) return;

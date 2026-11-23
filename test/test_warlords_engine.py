@@ -172,17 +172,17 @@ try:
                 if (Math.abs(partialPierce - baseSkill * 0.7) > 1) errs.push('40% 技能破甲未正確降低護甲效果');
                 if (!getCombatMatchup({ cat: 'armor' }, { cat: 'armor', def: 0.5 }, 3, false, false, 0.4).includes('40%')) errs.push('部分破甲提示與實際效果不符');
                 const intercept = firstDamage('air_defense', 'air', {}, {}, 2);
-                const formationScale = 0.9 * 0.78 * 0.88;
-                if (intercept < Math.round(2125 * formationScale) || intercept > Math.round(2875 * formationScale)) errs.push('神射階段二攔截未實際使用 2.5 倍攻擊');
+                const formationScale = 0.9 * 0.78 * 0.89;
+                if (intercept < Math.round(1487 * formationScale) || intercept > Math.round(2013 * formationScale)) errs.push('神射階段二攔截未實際使用 1.75 倍攻擊');
                 const plainShot = firstDamage('air_defense', 'armor');
-                if (plainShot < Math.round(595 * formationScale) || plainShot > Math.round(805 * formationScale)) errs.push('神射無突騎時平射未實際使用 0.7 倍攻擊');
-                if (intercept <= plainShot * 2.5) errs.push('神射攔截與平射缺少實際傷害差異');
+                if (plainShot < Math.round(663 * formationScale) || plainShot > Math.round(897 * formationScale)) errs.push('神射無突騎時平射未實際使用 0.78 倍攻擊');
+                if (intercept <= plainShot * 1.7) errs.push('神射攔截與平射缺少實際傷害差異');
             } finally {
                 for (const id of fixtureIds) delete UNIT_MAP[id];
             }
             const skillTarget = skillAttacker('BAIQI');
             const burst = skillAttacker('LUBU');
-            if (getSkillAttackModifiers(burst, skillTarget, 3).damage !== 1.3 || getSkillAttackModifiers(burst, skillTarget, 2).damage !== 1) errs.push('爆發／階段限制錯誤');
+            if (getSkillAttackModifiers(burst, skillTarget, 3).damage !== 1.18 || getSkillAttackModifiers(burst, skillTarget, 2).damage !== 1) errs.push('爆發／階段限制錯誤');
             burst.skillUsed = true;
             if (getSkillAttackModifiers(burst, skillTarget, 3).damage !== 1) errs.push('已使用技能仍重複增傷');
             const wounded = skillAttacker('XIAHOU_DUN');
@@ -487,6 +487,32 @@ try:
                 .filter(l => l.auid === 'HUO-A0' && l.tuid).map(l => huoRearCheck.final.B.find(u => u.uid === l.tuid)?.cat);
             if (huoP3Targets.length > 0 && !huoP3Targets.some(c => c === 'air_defense' || c === 'support')) {
                 errs.push('霍去病階段三未優先攻擊敵方後排');
+            }
+            const lubuSample = makeTeam(['LUBU', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'], 'A')[0];
+            if (canTriggerUnitSkill(lubuSample, 3, 1) || !canTriggerUnitSkill(lubuSample, 3, 2) || !canTriggerUnitSkill(lubuSample, 3)) {
+                errs.push('階段三大招第 2 輪蓄力觸發或向下相容判定失敗');
+            }
+            let sawLastStand = false, sawMoraleShift = false;
+            for (let seed = 0; seed < 40 && !(sawLastStand && sawMoraleShift); seed++) {
+                const p3b = resolveBattle(
+                    ['LUBU', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'],
+                    ['HUO', 'XIANGYU', 'NOBUNAGA', 'LUXUN', 'SUNWU'],
+                    { seed, docA: 'strike', docB: 'defense' }
+                );
+                const lines = p3b.frames.flatMap(f => f.lines);
+                sawLastStand ||= lines.some(l => l.lastStand === true);
+                sawMoraleShift ||= lines.some(l => l.moraleShift === true);
+            }
+            if (!sawLastStand || !sawMoraleShift) {
+                errs.push(`v7.15.0 拉鋸機制未觸發: ${JSON.stringify({ sawLastStand, sawMoraleShift })}`);
+            }
+            const dailyBufRes = resolveBattle(
+                ['HUO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'],
+                ['LUBU', 'XIANGYU', 'NOBUNAGA', 'YISUNSIN', 'ZHUGELIANG'],
+                { seed: 7, dailyBuffer: true }
+            );
+            if (!dailyBufRes.frames.flatMap(f => f.lines).some(l => l.brevity === '以逸待勞')) {
+                errs.push('每日破局以逸待勞守勢緩衝未觸發');
             }
             const yangyeAirCheck = resolveBattle(['HUO', 'YANGYE', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'], ['HUO', 'BAIQI', 'LIGUANG', 'YISUNSIN', 'ZHUGELIANG'], {
                 seed: 0, event: EVENTS.find(ev => ev.id === 'clear'), formationsA: neutralFormations, formationsB: neutralFormations

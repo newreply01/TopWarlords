@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.14.0';
+  const ASSET_VER = '7.15.0';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -2535,6 +2535,14 @@ const Battle3DEngine = (function () {
       lanes.get(line.auid).push({ line, index });
     }
     await Promise.all([...lanes.entries()].map(async ([uid, events]) => {
+      const attCat = unitsMap.get(uid)?.cat;
+      const waveDelay = (lanes.size >= 3 && tempo <= 2.5)
+        ? (attCat === 'armor' ? 170 : (attCat === 'air_defense' || attCat === 'support') ? 320 : 0)
+        : 0;
+      if (waveDelay > 0) {
+        await waitForCombatBeat(waveDelay / Math.max(0.6, tempo), epoch);
+        if (epoch !== battleEpoch || battleSettled) return;
+      }
       for (const { line, index } of events) {
         await waitForCombatBeat(0, epoch);
         if (epoch !== battleEpoch || battleSettled) return;
@@ -2634,7 +2642,8 @@ const Battle3DEngine = (function () {
         side: aToken.side,
         fxKey: resolvedFxKey,
         tempo,
-        focusToken: aToken
+        focusToken: aToken,
+        cooldownKey: aToken.uid
       });
     }
     if (epoch !== battleEpoch || battleSettled) return;
@@ -2665,7 +2674,18 @@ const Battle3DEngine = (function () {
 
     const aToken = ln.auid ? unitsMap.get(ln.auid) : null;
     const tToken = ln.tuid ? unitsMap.get(ln.tuid) : null;
-    if (!aToken && !tToken) return;
+    if (!aToken && !tToken) {
+      if (ln.moraleShift || ln.brevity === '短兵相接' || ln.brevity === '以逸待勞') {
+        if (!audioPaused && !document.hidden && window.SoundEngine?.play) {
+          window.SoundEngine.play(ln.moraleShift || ln.brevity === '短兵相接' ? 'war_drum' : 'strategy_gong');
+        }
+        if (cameraShakeEnabled && (ln.moraleShift || ln.brevity === '短兵相接')) {
+          camZoomTarget = -0.9;
+          lastFocusAt = combatNow();
+        }
+      }
+      return;
+    }
 
     // 1. 戰法發動時於部隊上方顯示 3D 浮動技能字，並觸發光榮風格橫幅 Cut-in（帶入技能名稱與說明）
     const nowMs = combatNow();
@@ -2842,7 +2862,8 @@ const Battle3DEngine = (function () {
               side: aToken.side,
               fxKey: ln.skillFx || aToken.skillFx,
               tempo: options.tempo || 1,
-              focusToken: aToken
+              focusToken: aToken,
+              cooldownKey: aToken.uid
             });
             if (!battleSettled && tToken?.mesh) {
               const tAct = combatNow();
@@ -2873,6 +2894,13 @@ const Battle3DEngine = (function () {
             isKill ? '#fb7185' : '#f87171',
             isKill
           );
+          if (ln.lastStand && tToken?.mesh) {
+            performShieldBlockDome(tToken);
+            spawnShockwaveRing(tToken.mesh.position, 0xfbbf24, 2.3, 450);
+            spawnSparkBurst(tToken.mesh.position.clone().add(new THREE.Vector3(0, 0.9, 0)), 20, 0xfde047);
+            spawnFloatingDamagePopup(tToken.mesh.position, '🛡️ 死守殘陣!', '#fde047', true);
+            triggerCameraShake(0.22);
+          }
           if (ln.hpHealed > 0 && aToken?.mesh) {
             const healTroops = Math.max(100, Math.round(ln.hpHealed * 100)).toLocaleString();
             spawnFloatingDamagePopup(aToken.mesh.position, `💚 浴血 +${healTroops}`, '#34d399', false);

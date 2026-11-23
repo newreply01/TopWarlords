@@ -33,16 +33,16 @@ const EVENTS = [
 
 /* ---------- 兵法戰術教條（賽前 3 選 1，源自《孫子兵法》與風林火山） ---------- */
 const DOCTRINES = [
-  { id: 'strike',    icon: '🌪️', name: '疾如風', desc: '奇襲破敵：階段一、二攻擊 +26%、階段三攻擊 +21%，但承受傷害 +3.5%。' },
-  { id: 'defense',   icon: '⛰️', name: '不動如山', desc: '固守待援：承受傷害 −13.5%，神射攔截命中 +6%。' },
-  { id: 'deception', icon: '🌑', name: '難知如陰', desc: '虛實奇謀：軍師謀略值 ×1.16；敵方全體命中率 −3%。' }
+  { id: 'strike',    icon: '🌪️', name: '疾如風', desc: '奇襲破敵：階段一、二攻擊 +19%、階段三攻擊 +16%，但承受傷害 +3%。' },
+  { id: 'defense',   icon: '⛰️', name: '不動如山', desc: '固守待援：承受傷害 −11%，神射攔截命中 +6%。' },
+  { id: 'deception', icon: '🌑', name: '難知如陰', desc: '虛實奇謀：軍師謀略值 ×1.13；敵方全體命中率 −2.3%。' }
 ];
 const DOC_FX = {
-  strike:     { atkEarly: 1.26, atkLate: 1.21, taken: 1.035, adHit: 0,    ewMult: 1.0,  enemyPen: 0 },
-  defense:    { atkEarly: 1,    atkLate: 1,    taken: 0.865, adHit: 0.06, ewMult: 1.0,  enemyPen: 0 },
-  deception:  { atkEarly: 1,    atkLate: 1,    taken: 1,     adHit: 0,    ewMult: 1.16, enemyPen: 0.03 },
-  electronic: { atkEarly: 1,    atkLate: 1,    taken: 1,     adHit: 0,    ewMult: 1.16, enemyPen: 0.03 },
-  air_sup:    { atkEarly: 1.26, atkLate: 1.21, taken: 1.035, adHit: 0,    ewMult: 1.0,  enemyPen: 0 }
+  strike:     { atkEarly: 1.19, atkLate: 1.16, taken: 1.03, adHit: 0,    ewMult: 1.0,  enemyPen: 0 },
+  defense:    { atkEarly: 1,    atkLate: 1,    taken: 0.89, adHit: 0.06, ewMult: 1.0,  enemyPen: 0 },
+  deception:  { atkEarly: 1,    atkLate: 1,    taken: 1,    adHit: 0,    ewMult: 1.13, enemyPen: 0.023 },
+  electronic: { atkEarly: 1,    atkLate: 1,    taken: 1,    adHit: 0,    ewMult: 1.13, enemyPen: 0.023 },
+  air_sup:    { atkEarly: 1.19, atkLate: 1.16, taken: 1.03, adHit: 0,    ewMult: 1.0,  enemyPen: 0 }
 };
 
 /* ---------- 武將戰術標記 (Role Flags) 判定輔助函式 ---------- */
@@ -65,13 +65,13 @@ function unitHasTrueAt(u, ammo) {
 function getAmmoProfile(u) {
   const bonus = hasRoleFlag(u, 'STAMINA_DEEP') ? 1 : 0;
   const s = u.shots || 0;
-  if (s < 4 + bonus) {
+  if (s < 5 + bonus) {
     return { tier: 1, dmgMult: 1.00, hitMod: 0, canSat: true, canSwarm: true, canTrueAt: true };
   }
-  if (s < 7 + bonus) {
-    return { tier: 2, dmgMult: 0.78, hitMod: 0, canSat: false, canSwarm: true, canTrueAt: true };
+  if (s < 8 + bonus) {
+    return { tier: 2, dmgMult: 0.82, hitMod: 0, canSat: false, canSwarm: true, canTrueAt: true };
   }
-  return { tier: 3, dmgMult: 0.52, hitMod: -0.06, canSat: false, canSwarm: false, canTrueAt: hasRoleFlag(u, 'HEAVY_AP') };
+  return { tier: 3, dmgMult: 0.60, hitMod: -0.05, canSat: false, canSwarm: false, canTrueAt: hasRoleFlag(u, 'HEAVY_AP') };
 }
 
 function getCombatRoleSummary(unit) {
@@ -95,15 +95,15 @@ function getCombatMatchup(attacker, target, phase, trueDamage = false, skillProc
   return '';
 }
 
-function canTriggerUnitSkill(unit, phase) {
+function canTriggerUnitSkill(unit, phase, round = 2) {
   if (!unit || !unit.skill) return false;
   const skillPhase = Number(String(unit.skill.phase || '').replace('P', ''));
-  if (!unit.skillUsed) return skillPhase === phase;
+  if (!unit.skillUsed) return skillPhase === phase && (phase !== 3 || round >= 2);
   return Boolean(unit.skillAwakenedReady && unit.cat !== 'support' && (unit.skillCount || 0) < 2 && phase >= skillPhase);
 }
 
-function getSkillAttackModifiers(attacker, target, phase, terrain = 'plain') {
-  const active = canTriggerUnitSkill(attacker, phase);
+function getSkillAttackModifiers(attacker, target, phase, terrain = 'plain', round = 2) {
+  const active = canTriggerUnitSkill(attacker, phase, round);
   const effects = active ? attacker.skill.effects : null;
   const missingHp = clamp(1 - attacker.hp / attacker.hpMax, 0, 1);
   const targetMissingHp = clamp(1 - target.hp / target.hpMax, 0, 1);
@@ -300,7 +300,8 @@ function makeTeam(ids, side, formationIds, terrain) {
       formationDuelImmune: Boolean(formation.duelImmune),
       formationCanCapture: formation.canCapture !== false,
       captured: false,
-      duelUsed: false
+      duelUsed: false,
+      lastStandUsed: false
     };
   });
 }
@@ -458,15 +459,15 @@ function resolveBattle(deckA, deckB, opts) {
     const rolled = [];
     for (const a of attacks) {
       if (!a.tgt) continue;
-      if (a.att.skillUsed && a.att.cat !== 'support' && (a.att.skillCount || 0) < 2 && !a.att.skillAwakened && a.att.hp > 0 && (a.att.hp / a.att.hpMax) < 0.4) {
+      if (a.att.skillUsed && a.att.cat !== 'support' && (a.att.skillCount || 0) < 2 && !a.att.skillAwakened && a.att.hp > 0 && (a.att.hp / a.att.hpMax) < 0.45) {
         a.att.skillAwakened = true;
         a.att.skillAwakenedReady = true;
       }
-      const skillModifiers = getSkillAttackModifiers(a.att, a.tgt, vOpts.phase, terrain);
+      const skillModifiers = getSkillAttackModifiers(a.att, a.tgt, vOpts.phase, terrain, vOpts.round ?? 2);
       const statusHitMod = (a.att.statuses?.confuse > 0 ? -0.06 : 0) + (S[a.att.side].bondHit || 0);
       const p = clamp(a.hit + skillModifiers.hit + statusHitMod + (S[a.att.side].skillHit || 0) - (S[a.att.side].skillHitPen || 0), 0.08, 0.96);
       const ok = rng() < p;
-      const skillProc = Boolean(ok && canTriggerUnitSkill(a.att, vOpts.phase));
+      const skillProc = Boolean(ok && canTriggerUnitSkill(a.att, vOpts.phase, vOpts.round ?? 2));
       const ambushProc = Boolean(ok && !a.att.ambushUsed && a.att.traits.includes('AMBUSH') && (a.tgt.cost >= a.att.cost + 2 || (a.att.cost >= 4 && a.tgt.cost >= 4)));
       if (skillProc) {
         a.att.skillUsed = true;
@@ -477,7 +478,7 @@ function resolveBattle(deckA, deckB, opts) {
       const tacticProc = ok && a.att.formationTacticChance > 0 && rng() < a.att.formationTacticChance;
       const canDuel = vOpts.allowDuels && ok && ['air', 'armor', 'naval'].includes(a.att.cat) && ['air', 'armor', 'naval'].includes(a.tgt.cat)
         && !a.att.formationDuelImmune && !a.tgt.formationDuelImmune && !a.att.duelUsed && !a.tgt.duelUsed;
-      const duelProc = Boolean(canDuel && rng() < 0.12);
+      const duelProc = Boolean(canDuel && rng() < 0.20);
       if (duelProc) {
         a.att.duelUsed = true;
         a.tgt.duelUsed = true;
@@ -604,8 +605,17 @@ function resolveBattle(deckA, deckB, opts) {
       const defAfterPierce = effectiveDef * (1 - pierceFrac * (1 - heavyFloor));
       const skillPierceBonus = hasTrueAndSkillPierce ? (1 + skillArmorPierce * 0.20) : 1;
       const effectiveGuard = Math.max(t.skillGuard, S[t.side].skillGuard || 0) * (1 - (S[t.side].guardSuppress || 0));
-      const d = r.raw * skillPierceBonus * markMult * (1 - defAfterPierce) * S[t.side].taken * t.formationDamageTaken * (1 - effectiveGuard);
+      const dailyMult = (vOpts.dailyBuffer && t.side === 'A' && (vOpts.phase < 3 || (vOpts.round || 1) <= 4)) ? 0.75 : 1.0;
+      const d = r.raw * skillPierceBonus * markMult * (1 - defAfterPierce) * S[t.side].taken * t.formationDamageTaken * (1 - effectiveGuard) * dailyMult;
+      const hpBeforeHit = t.hp;
       t.hp -= d;
+      let triggeredLastStand = false;
+      if (t.cat === 'armor' && !t.lastStandUsed && t.hp <= 0 && hpBeforeHit >= t.hpMax * 0.25) {
+        t.lastStandUsed = true;
+        triggeredLastStand = true;
+        t.blocks++;
+        t.hp = Math.max(1, Math.round(t.hpMax * 0.06));
+      }
       t.dmgTaken += d;
       at.dmgDone += d;
       if (r.skillProc) at.skillDmg += d;
@@ -616,7 +626,7 @@ function resolveBattle(deckA, deckB, opts) {
         lifestealAmt = Math.round(at.hp - beforeHeal);
         at.healed += Math.max(0, at.hp - beforeHeal);
       }
-      if (t.hp <= 0) {
+      if (t.hp <= 0 && !triggeredLastStand) {
         t.hp = 0; t.alive = false; t.killedBy = at;
         const captured = at.formationCanCapture && rng() < 0.18;
         t.captured = captured;
@@ -670,13 +680,14 @@ function resolveBattle(deckA, deckB, opts) {
         lines.push({
           side: at.side,
           kind: 'hit',
-          matchup,
+          matchup: triggeredLastStand ? '重甲死守殘陣' : matchup,
           duel: r.duelProc,
+          lastStand: triggeredLastStand,
           auid: at.uid,
           tuid: t.uid,
           formation: at.formation,
           formationTactic: r.tacticProc,
-          brevity: r.duelProc ? '一騎單挑' : brv,
+          brevity: triggeredLastStand ? '死守殘陣' : (r.duelProc ? '一騎單挑' : brv),
           skillTriggered: Boolean(r.skillProc),
           ambushTriggered: Boolean(r.ambushProc),
           skillFx: fxMeta.fx,
@@ -684,15 +695,20 @@ function resolveBattle(deckA, deckB, opts) {
           skillFxIcon: fxMeta.fxIcon,
           skillTag: skillTag || null,
           ammoTier: tier,
-          sfxOverride: meta.sfxOverride,
+          sfxOverride: triggeredLastStand ? 'shield_block' : meta.sfxOverride,
           dmg: Math.round(d),
           hpHealed: lifestealAmt,
           attackerHpAfter: lifestealAmt > 0 ? Math.round(at.hp) : undefined,
-          text: r.duelProc
+          text: triggeredLastStand
+            ? `[死守殘陣] ${t.name} 拼死撐住重甲防線，強忍 ${at.name} 重創留存一息戰力（剩餘 ${Math.round(t.hp / t.hpMax * 100)}%）！${stealNote}`
+            : r.duelProc
             ? `[一騎單挑] ${at.name} 與 ${t.name} 近身交鋒：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）${stealNote}`
             : `[${brv}] ${at.name} ${hitArrow} ${t.name}：重創 −${Math.round(d / t.hpMax * 100)}%（剩餘 ${Math.round(t.hp / t.hpMax * 100)}% 戰力）${stealNote}`,
           hpAfter: Math.round(t.hp)
         });
+        if (triggeredLastStand) {
+          addKey(4, `${t.name} 觸發死守殘陣硬扛致死一擊，穩住前線`, t.side);
+        }
         if (r.skillProc && at.skill?.effects?.multiHit > 0 && t.alive && d > 0) {
           const d2 = d * at.skill.effects.multiHit;
           t.hp -= d2;
@@ -817,7 +833,7 @@ function resolveBattle(deckA, deckB, opts) {
   if (Math.abs(ewA - ewB) >= 10) {
     advSide = ewA > ewB ? 'A' : 'B';
     const ratio = clamp(Math.abs(ewA - ewB) / 45, 0, 1);
-    const pen = 0.09 * ratio, boost = 0.07 * ratio;
+    const pen = 0.10 * ratio, boost = 0.08 * ratio;
     S[other(advSide)].hitPen += pen;
     S[advSide].atkAll = (S[advSide].atkAll || 1) * (1 + boost);
     l1.push({ side: advSide, kind: 'info', text: `${advSide === 'A' ? '我方' : '敵方'}運籌決勝取得謀略先機：對手命中率 −${Math.round(pen * 100)}%，己方全軍戰意 +${Math.round(boost * 100)}%。` });
@@ -838,6 +854,9 @@ function resolveBattle(deckA, deckB, opts) {
         if (u.statuses) u.statuses.rally = 0;
       }
     }
+  }
+  if (opts.dailyBuffer) {
+    l1.push({ side: 'A', kind: 'info', brevity: '以逸待勞', text: '[以逸待勞] 面對超標精銳，我軍構築前沿拒馬守勢，前段與白刃前四輪承受傷害 −25%。' });
   }
   pushFrame(1, '階段一 · 軍師謀略博弈', l1);
 
@@ -864,11 +883,11 @@ function resolveBattle(deckA, deckB, opts) {
           att: u, tgt: t, ammoTier: ammo.tier,
           hit: hitP(u, t, 0.82, 0.55, ammo.hitMod + passiveIrPen),
           trueDmg: unitHasTrueAt(u, ammo),
-          dmg: u.atk * 1.5 * S[s].atkEarly * ammo.dmgMult
+          dmg: u.atk * 1.80 * S[s].atkEarly * ammo.dmgMult
         });
       }
     }
-    pushFrame(1, '階段一 · 先制破陣（斬首／奇襲破陣）', volley(at, { allowAbm: true, phase: 1 }));
+    pushFrame(1, '階段一 · 先制破陣（斬首／奇襲破陣）', volley(at, { allowAbm: true, phase: 1, dailyBuffer: Boolean(opts.dailyBuffer) }));
   }
 
   /* ===== 階段二：神射攔截、先鋒爭先與先登奇兵對決 ===== */
@@ -886,10 +905,10 @@ function resolveBattle(deckA, deckB, opts) {
         u.shots++;
         const f = u.cat === 'air_defense' ? 1 : 0.55;
         const hit = hitP(u, t, 0.82 + (u.traits.includes('AA_LONG') ? 0.08 : 0) + S[s].adHit, 0.56, m.airHit + ammo.hitMod);
-        at.push({ att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt, hit, dmg: u.atk * 2.5 * f * S[s].atkEarly * ammo.dmgMult });
+        at.push({ att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt, hit, dmg: u.atk * 1.75 * f * S[s].atkEarly * ammo.dmgMult });
       }
     }
-    pushFrame(2, '階段二 · 神射箭雨攔截', volley(at, { phase: 2 }));
+    pushFrame(2, '階段二 · 神射箭雨攔截', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
   }
   if (!over()) {
     // 2-2 奔雷突騎交鋒（爭奪先機權 10 分）
@@ -909,7 +928,7 @@ function resolveBattle(deckA, deckB, opts) {
         }
       }
     }
-    pushFrame(2, '階段二 · 奔雷突騎爭先', volley(at, { phase: 2 }));
+    pushFrame(2, '階段二 · 奔雷突騎爭先', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
   }
   if (!over()) {
     // 2-3 先登奇兵對決（虎賁破陣 vs 潛行夜襲，爭奪先登權 5 分）
@@ -940,7 +959,7 @@ function resolveBattle(deckA, deckB, opts) {
         }
       }
     }
-    pushFrame(2, '階段二 · 先登奇兵交鋒', volley(at, { phase: 2 }));
+    pushFrame(2, '階段二 · 先登奇兵交鋒', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
   }
 
   /* ===== 階段三：中軍主力決戰與氣力三階消耗（上限 10 輪，未全殲則鳴金收兵由戰功 VP 裁定） ===== */
@@ -953,6 +972,19 @@ function resolveBattle(deckA, deckB, opts) {
     const stealthScale = r >= 6 ? 0.75 : 1.0;
     const lockBonus = r >= 6 ? 0.05 : 0.0;
 
+    if (r === 4) {
+      const hpRatio = side => T[side].reduce((sum, u) => sum + Math.max(0, u.hp), 0) / Math.max(1, T[side].reduce((sum, u) => sum + u.hpMax, 0));
+      const rA = hpRatio('A'), rB = hpRatio('B');
+      if (Math.abs(rA - rB) >= 0.12) {
+        const under = rA < rB ? 'A' : 'B';
+        S[under].atkAll = (S[under].atkAll || 1) * 1.07;
+        S[other(under)].hitPen = (S[other(under)].hitPen || 0) + 0.03;
+        prefixLines.push({
+          side: under, kind: 'info', brevity: '背水奮戰', moraleShift: true,
+          text: `${under === 'A' ? '我軍' : '敵軍'}見前線吃緊激發背水死志：全軍攻擊 +7%，敵軍命中 −3%！`
+        });
+      }
+    }
     if (r === 6) {
       prefixLines.push({
         side: 'N', kind: 'info', brevity: '短兵相接',
@@ -1051,7 +1083,7 @@ function resolveBattle(deckA, deckB, opts) {
           at.push({
             att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
             hit: hitP(u, t, 0.85, 0.2, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-            dmg: u.atk * (isTrueAt ? 1.54 : 1.46) * S[s].landMult * m.armorDmg * vsFactor * ammo.dmgMult
+            dmg: u.atk * (isTrueAt ? 1.46 : 1.38) * S[s].landMult * m.armorDmg * vsFactor * ammo.dmgMult
           });
         } else if (u.cat === 'support') {
           // 軍師奇計／火器攻城
@@ -1066,7 +1098,7 @@ function resolveBattle(deckA, deckB, opts) {
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.78, 0.35, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
                 trueDmg: isTrueAt,
-                dmg: u.atk * 1.50 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.8 : 1) * ammo.dmgMult
+                dmg: u.atk * 1.65 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.8 : 1) * ammo.dmgMult
               });
             }
           } else if (u.traits.includes('ARTY')) {
@@ -1076,7 +1108,7 @@ function resolveBattle(deckA, deckB, opts) {
               at.push({
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.78, 0.3, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                dmg: u.atk * 1.14 * (ts.length > 1 ? 0.75 : 1) * S[s].landMult * m.artyDmg * spot * droneScale * ammo.dmgMult
+                dmg: u.atk * 1.22 * (ts.length > 1 ? 0.75 : 1) * S[s].landMult * m.artyDmg * spot * droneScale * ammo.dmgMult
               });
             }
           } else {
@@ -1086,7 +1118,7 @@ function resolveBattle(deckA, deckB, opts) {
               at.push({
                 att: u, tgt: t, ammoTier: ammo.tier,
                 hit: hitP(u, t, 0.80, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                dmg: u.atk * (0.92 + Math.max(0, u.ew - 60) * 0.006) * supScale * spot * ammo.dmgMult
+                dmg: u.atk * (1.12 + Math.max(0, u.ew - 60) * 0.006) * supScale * spot * ammo.dmgMult
               });
             }
           }
@@ -1104,7 +1136,7 @@ function resolveBattle(deckA, deckB, opts) {
                 at.push({
                   att: u, tgt: airTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
                   hit: hitP(u, airTgt, 0.88 + (u.traits.includes('AA_LONG') ? 0.06 : 0) + S[s].adHit, 0.36, m.airHit + lockBonus + ammo.hitMod, stealthScale),
-                  dmg: u.atk * 2.10 * (ts.length > 1 ? 0.75 : 1) * droneScale * ammo.dmgMult
+                  dmg: u.atk * 1.85 * (ts.length > 1 ? 0.75 : 1) * droneScale * ammo.dmgMult
                 });
               }
             }
@@ -1114,7 +1146,7 @@ function resolveBattle(deckA, deckB, opts) {
               const ammo = getAmmoProfile(u);
               const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [t];
               const isTrueAt = unitHasTrueAt(u, ammo);
-              const abmScale = hasRoleFlag(u, 'FORMATION_SHIELD') ? 0.50 : 0.7;
+              const abmScale = hasRoleFlag(u, 'FORMATION_SHIELD') ? 0.56 : 0.78;
               u.shots++;
               for (const gTgt of ts) {
                 if (!gTgt) continue;
@@ -1129,15 +1161,15 @@ function resolveBattle(deckA, deckB, opts) {
         }
       }
     }
-    const phaseLabel = r <= 5
-      ? `階段三 · 中軍死鬥合圍（第 ${r} 輪）`
-      : (r <= 7 ? `階段三 · 短兵相接鏖戰（第 ${r} 輪）` : `階段三 · 氣力見底苦戰（第 ${r} 輪）`);
-    const roundLines = volley(at, { prefixLines, allowDuels: true, phase: 3 });
+    const phaseLabel = r === 1
+      ? `階段三 · 先鋒接陣試探（第 1 輪）`
+      : (r <= 5 ? `階段三 · 中軍死鬥合圍（第 ${r} 輪）` : (r <= 7 ? `階段三 · 短兵相接鏖戰（第 ${r} 輪）` : `階段三 · 氣力見底苦戰（第 ${r} 輪）`));
+    const roundLines = volley(at, { prefixLines, allowDuels: true, phase: 3, round: r, dailyBuffer: Boolean(opts.dailyBuffer) });
     for (const sideKey of ['A', 'B']) {
       for (const u of T[sideKey]) {
         if (!u.alive || !u.statuses) continue;
         if (u.statuses.burn > 0) {
-          const burnDmg = Math.max(8, Math.round(u.hpMax * 0.04));
+          const burnDmg = Math.max(10, Math.round(u.hpMax * 0.05));
           u.hp -= burnDmg;
           u.dmgTaken += burnDmg;
           const caster = u.statuses.burnCaster;

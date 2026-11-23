@@ -279,16 +279,17 @@
     state.timers.push(setTimeout(finishCard, total));
   }
 
-  function play({ uid, side = 'A', fxKey = 'overlord_cleave', tempo = 1, focusToken = null } = {}) {
+  function play({ uid, side = 'A', fxKey = 'overlord_cleave', tempo = 1, focusToken = null, cooldownKey = null } = {}) {
     if (!uid || mode === 'off') return Promise.resolve();
     const now = performance.now();
-    const st = playStats.get(uid) || { count: 0, lastAt: 0 };
+    const statKey = cooldownKey || `${side}:${uid}`;
+    const st = playStats.get(statKey) || { count: 0, lastAt: 0 };
     if (st.count >= MAX_CUTINS_PER_UNIT) return Promise.resolve();
     if (st.lastAt > 0 && now - st.lastAt < CUTIN_UNIT_COOLDOWN_MS) return Promise.resolve();
     const btnSkip = document.getElementById('btnSkip');
     if (btnSkip && btnSkip.disabled) return Promise.resolve();
 
-    playStats.set(uid, { count: st.count + 1, lastAt: now });
+    playStats.set(statKey, { count: st.count + 1, lastAt: now });
     return new Promise(resolve => {
       const activeCount = (activeBySide.A ? 1 : 0) + (activeBySide.B ? 1 : 0);
       runItem({ uid, side, fxKey, tempo, focusToken, activeCount, resolve });

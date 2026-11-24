@@ -4,6 +4,18 @@
 
 ---
 
+## [7.15.1] - 2026-11-24
+
+### Improved (20 位武將 Q 版頭像重繪、精修與滿版去框統一)
+- **13 位名將 2.5D 賽璐珞 Q 版頭像無字滿版重繪 (`assets/warlords/*.jpg`)**：
+  - 消除浮水印、誤植文字與時代穿越：`HANBEI`（移除英文浮水印）、`KUKI`（重繪為 16 世紀木造安宅船與無字軍扇）、`MENGTIAN`（移除大字置中）、`ZHANGLIANG`（移除卷軸現代標語）。
+  - 移除白色圓角 App Icon 外框：`HUANGZHONG`、`CAOBIN`、`HANXIN`（同步清除象棋文字）、`MACHO`。
+  - 修正兵種武器錯位與統一 2.5 頭身 Q 版比例：`ZHOUYAFU`（修正為重甲長戟與塔盾）、`LUXUN`（修正為剛毅男性東吳都督儒將）、`HUO`、`BAIQI`、`XIANGYU`。
+- **Canvas 精修與滿版去框裁切 (`assets/warlords/*.jpg`)**：
+  - `SANADAMASA`：清除軍扇崩壞漢字並重繪為六文錢徽記，同步完成外框滿版裁切。
+  - 滿版去框裁切去除矩形內框：`CHENQINGZHI`、`YUKIMURA`、`LIMU`、`DENGAI`、`JIANGWEI`、`SIMAYI`。
+- **快取版本同步**：執行 `tools/bump_version.py 7.15.1` 更新 Service Worker 與靜態資源快取版本號。
+
 ## [7.15.0] - 2026-11-23
 ### Overhauled (方案 A：完整戰鬥節奏與拉鋸感重構 · 6–8 輪酣戰體驗升級)
 

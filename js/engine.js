@@ -1295,6 +1295,17 @@ function resolveBattle(deckA, deckB, opts) {
   return { seed, winner, wipeout, ammoDepleted, finale, vp, frames, key, mvp, ev, docs, ewA, ewB, advSide, syn, bonds, terrain, formationDefs: BATTLE_FORMATION_DEFS, final: T };
 }
 
+/* ---------- 戰果指紋：同一組輸入必得同一指紋，用於回歸快照與線上兩端結果比對 ---------- */
+function battleFingerprint(res) {
+  if (!res || !res.final) return '';
+  const parts = [res.winner, res.frames ? res.frames.length : 0, res.wipeout ? 1 : 0];
+  for (const s of ['A', 'B']) {
+    for (const u of res.final[s] || []) parts.push(`${u.uid}:${Math.round(u.hp)}:${Math.round(u.dmgDone || 0)}`);
+  }
+  if (res.vp) parts.push(res.vp.A.total.toFixed(2), res.vp.B.total.toFixed(2));
+  return hashStr(parts.join('|')).toString(16).padStart(8, '0');
+}
+
 /* ---------- 陣容驗證 / 代碼 ---------- */
 function deckCost(ids) {
   return (ids || []).reduce((x, id) => x + (id && UNIT_MAP[id] ? UNIT_MAP[id].cost : 0), 0);

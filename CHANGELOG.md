@@ -4,6 +4,16 @@
 
 ---
 
+## [7.15.3] - 2026-11-26
+### Added & Improved (戰鬥引擎回歸快照、線上戰果比對、3D WebGL 情境遺失防護)
+
+- **戰鬥引擎固定種子回歸快照 (`test/test_engine_golden.js`, `test/golden/engine_snapshot.json`)**：以固定種子產生 240 場對戰（輪替戰場事件／教條／陣形／地形），比對每場戰果指紋並列出勝負翻轉場數；全域傷害僅調整 1% 即可偵測。刻意的平衡調整請執行 `node test/test_engine_golden.js --update` 並於 CHANGELOG 註明。已納入 CI。
+- **戰果指紋 `battleFingerprint(res)` (`js/engine.js`)**：以勝負、輪數、全軍殘餘兵力與輸出、VP 計算 32-bit 指紋。
+- **線上兩端戰果比對 (`js/app.js`, `js/online-pvp.js`)**：開戰推演後互傳 `RESULT_HASH`，雙方指紋不一致時提示「推演結果不一致」並記錄 console，便於追查版本或快取分歧。
+- **3D WebGL 情境遺失防護 (`js/battle-3d.js`, `js/app.js`)**：監聽 `webglcontextlost / webglcontextrestored`，遺失時停止渲染迴圈並自動切換為 2D 戰報（避免行動裝置整片黑畫面），恢復後提示可切回 3D；`renderFrame()` 於情境遺失期間不再呼叫 GPU。
+- **渲染解析度自動降級 (`js/battle-3d.js`)**：特效畫質已自動降級後，若戰鬥中仍持續低於約 28fps，將渲染像素比降為 1（僅一次）。
+- **測試**：新增 `test/test_3d_context_loss.py` 並納入 CI；`test/test_pvp_integrity.py` 補上戰果指紋互傳情境。
+
 ## [7.15.2] - 2026-11-26
 ### Security (線上真人對戰公平性修正：Commit-Reveal 強制驗證、雙方共同種子、版本握手)
 

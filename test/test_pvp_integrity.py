@@ -7,7 +7,8 @@
 4. 隨機種子由雙方鹽值共同推導，房主送出的種子不符 → 中斷
 5. 戰場事件只接受官方 EVENTS（偽造的 mod 數值無效）
 6. 房主忽略任何來自挑戰者的 COMBAT_SYNC
-7. 握手攜帶版本號並於不一致時拒絕連線（靜態檢查）
+7. 戰果指紋互傳與不一致偵測
+8. 握手攜帶版本號並於不一致時拒絕連線（靜態檢查）
 """
 import sys
 import time
@@ -195,6 +196,14 @@ try:
         assert not host_res["hasGuestDeck"] and host_res["eventIsId"], f"COMBAT_SYNC 不應夾帶 guestDeck／完整事件物件：{host_res}"
         assert host_res["a"] == decks["myDeck"] and host_res["b"] == decks["oppDeck"], f"房主端陣營配置錯誤：{host_res}"
         print("[PASS] 房主以共同種子開戰，COMBAT_SYNC 僅含房主自身陣容與事件 id")
+        fp_res = page.evaluate("""() => {
+          const sent = window.__sent.find(p => p.type === 'RESULT_HASH');
+          recordOnlinePvpResultFingerprint(1, 'theirs', 'deadbeef');
+          return { sentFp: sent && sent.payload.fp, entry: state.pvpResultFp[1] };
+        }""")
+        assert fp_res["sentFp"] and fp_res["sentFp"] == fp_res["entry"]["mine"], f"應送出本局戰果指紋：{fp_res}"
+        assert fp_res["entry"]["checked"] and fp_res["entry"]["match"] is False, f"指紋不一致應被偵測：{fp_res}"
+        print("[PASS] 開戰後互傳戰果指紋，兩端不一致可被偵測")
 
         # ---------- 情境 D：握手版本比對（行為面由 test_full_gameplay.py 的 PvP 流程驗證，此處確保邏輯存在） ----------
         # 引擎未公開內部 handler，改以靜態檢查確保版本比對存在

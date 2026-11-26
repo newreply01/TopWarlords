@@ -33,6 +33,7 @@ jobs:
         run: |
           node test/test_battle_figures.js
           node test/test_spatial_audio.js
+          node test/test_engine_golden.js
           python3 tools/verify_integrity.py
           node tools/balance.js
 
@@ -46,3 +47,4 @@ jobs:
           python3 test/test_warlords_engine.py
           python3 test/test_armory.py
           python3 test/test_pvp_integrity.py
+          python3 test/test_3d_context_loss.py

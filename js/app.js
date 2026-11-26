@@ -3205,6 +3205,20 @@ $('#btnToggle3DView')?.addEventListener('click', () => {
   syncBattleIntelMode();
 });
 
+/* WebGL 情境遺失（行動裝置常見）：自動退回 2D 戰報，避免整片黑畫面；恢復後提示可切回 3D */
+let autoFellBackTo2D = false;
+window.addEventListener('battle3d:contextlost', () => {
+  if (!is3DVisible) return;
+  autoFellBackTo2D = true;
+  $('#btnToggle3DView')?.click();
+  toast('⚠️ 3D 繪圖資源被系統回收，已自動切換為 2D 戰報；戰鬥進度不受影響。');
+});
+window.addEventListener('battle3d:contextrestored', () => {
+  if (!autoFellBackTo2D) return;
+  autoFellBackTo2D = false;
+  toast('✅ 3D 繪圖已恢復，可點擊「切換至 3D」返回沙盤。');
+});
+
 /* ---------- 模式切換與預算修剪 ---------- */
 $('#battlePanelTabs')?.addEventListener('click', event => {
   const button = event.target.closest('[data-battle-panel]');
@@ -7978,6 +7992,7 @@ function resetOnlinePvpSessionState(opp = null, opts = {}) {
   state.pvpCombatSyncSentRound = 0;
   state.pvpPendingPackets = [];
   state.pvpPendingSeriesEnd = null;
+  state.pvpResultFp = {};
   PvPTimerManager.stop();
   PvPTimerManager.resetStreak();
 
@@ -8127,8 +8142,30 @@ function startOnlinePvpBattle(seed, event) {
     terrain: battleTerrain
   });
   state.lastRes = res;
+  recordOnlinePvpResultFingerprint(Number(state.bo3.round || 1), 'mine', battleFingerprint(res));
   showBattle(res);
 }
+
+/* 線上兩端戰果比對：各自推演後互傳戰果指紋，不一致代表版本、資料或狀態分歧 */
+function recordOnlinePvpResultFingerprint(round, who, fp) {
+  if (!state.pvpResultFp) state.pvpResultFp = {};
+  const entry = state.pvpResultFp[round] || (state.pvpResultFp[round] = {});
+  entry[who] = fp;
+  if (who === 'mine') OnlinePvPEngine.sendPacket('RESULT_HASH', { round, fp });
+  if (entry.mine && entry.theirs && !entry.checked) {
+    entry.checked = true;
+    entry.match = entry.mine === entry.theirs;
+    if (!entry.match) {
+      console.error('[PvP] 兩端推演結果不一致', { round, mine: entry.mine, theirs: entry.theirs });
+      toast('⚠️ 偵測到雙方推演結果不一致（可能版本或快取不同），本局結果可能有爭議，建議雙方重新整理後再戰。');
+    }
+  }
+}
+
+OnlinePvPEngine.on('opponent_result_hash', payload => {
+  if (!state.isOnlinePvp || !payload || typeof payload.fp !== 'string') return;
+  recordOnlinePvpResultFingerprint(Number(payload.round) || 1, 'theirs', payload.fp);
+});
 
 OnlinePvPEngine.on('game_session_started', payload => {
   const opp = OnlinePvPEngine.getOpponent();
@@ -11189,7 +11226,7 @@ function setupCloudSyncModal() {
 
 window.__db15 = { state, startBattle, showBattle, fastForwardBattle, setMode, getGhostPool, applyTheme, toggleTheme, LadderEngine, renderLadderView, OnlinePvPEngine, getTournamentPlayerProfile, buildReplayShareUrl, openCloudSyncModal, CloudSync: (typeof CloudSync !== 'undefined' ? CloudSync : null), handleBo3RoundEnd, getBo3WinsNeeded, getBo3BanCount, randomDeck, openBo3CounterModal, renderTournamentView, handleTournamentRoundEnd, PvPTimerManager, startPvpDeploymentTimer, handlePlayerForfeit, autoFillAndSubmitPvpDeck };
 /* 線上對戰公平性測試掛鉤（test/test_pvp_integrity.py） */
-window.__db15.pvp = { resetOnlinePvpSessionState, handleOnlinePvpSubmit, handleOpponentDeckCommittedPacket, handleOpponentDeckReadyPacket, handleCombatStartSyncPacket, enqueuePvpInbound, deriveOnlinePvpSeed, normalizeFormations, budgetLimit };
+window.__db15.pvp = { recordOnlinePvpResultFingerprint, resetOnlinePvpSessionState, handleOnlinePvpSubmit, handleOpponentDeckCommittedPacket, handleOpponentDeckReadyPacket, handleCombatStartSyncPacket, enqueuePvpInbound, deriveOnlinePvpSeed, normalizeFormations, budgetLimit };
 })();
 
 // 全域點擊外部與 Esc 鍵自動關閉戰場自選選單

@@ -757,6 +757,10 @@ const OnlinePvPEngine = (function () {
         emit('series_end_received', data.payload);
         break;
 
+      case 'RESULT_HASH':
+        emit('opponent_result_hash', data.payload);
+        break;
+
       case 'EMOTE':
         emit('emote_received', data.payload);
         break;
@@ -780,7 +784,8 @@ const OnlinePvPEngine = (function () {
     'BAN_COMMIT',
     'COMBAT_SYNC',
     'PLAYER_FORFEIT',
-    'SERIES_END'
+    'SERIES_END',
+    'RESULT_HASH'
   ]);
 
   /* 發送封包 */

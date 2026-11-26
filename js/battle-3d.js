@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.15.2';
+  const ASSET_VER = '7.15.3';
   const MODEL_DIR = 'assets/models/';
   const PORTRAIT_DIR = 'assets/warlords/';
 
@@ -19,6 +19,8 @@ const Battle3DEngine = (function () {
   };
 
   let isEnabled = true;
+  let contextLost = false;
+  let perfAccumTime = 0, perfAccumFrames = 0, rendererDowngraded = false; // 渲染解析度自動降級（特效降至「低」後仍嚴重掉幀時）          // WebGL 情境遺失（行動裝置切換 App / GPU 記憶體不足）
   let container = null;
   let scene = null;
   let camera = null;
@@ -520,6 +522,8 @@ const Battle3DEngine = (function () {
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
+    renderer.domElement.addEventListener('webglcontextlost', onWebglContextLost, false);
+    renderer.domElement.addEventListener('webglcontextrestored', onWebglContextRestored, false);
     window.MusouVfx?.initBloom?.({ renderer, scene, camera, width, height, isLowPowerDevice });
 
     setupLighting();
@@ -4526,6 +4530,7 @@ const Battle3DEngine = (function () {
   }
 
   function renderFrame() {
+    if (contextLost || (renderer && renderer.getContext().isContextLost())) return;
     if (!renderer || !scene || !camera) return;
     if (window.MusouVfx?.renderFrame) {
       window.MusouVfx.renderFrame(renderer, scene, camera);
@@ -5120,16 +5125,59 @@ const Battle3DEngine = (function () {
   }
 
   /* ----------------------------------------------------
+     WebGL 情境遺失／恢復：遺失時停止渲染並通知介面退回 2D，恢復後由 Three.js 重建 GL 狀態並重繪
+     ---------------------------------------------------- */
+  /* 特效畫質已自動降級後仍持續低於約 28fps：將渲染像素比降為 1（僅降一次，不重編譯材質） */
+  function monitorRendererPerf(_frameCpuMs, isBattleRunning) {
+    if (rendererDowngraded || !isBattleRunning || !renderer) return;
+    if ((window.MusouVfx?.getQuality?.() || 'high') === 'high') return; // 先讓特效自動降級生效
+    const now = performance.now();
+    if (!monitorRendererPerf.last) { monitorRendererPerf.last = now; return; }
+    const wallDt = (now - monitorRendererPerf.last) / 1000;
+    monitorRendererPerf.last = now;
+    if (wallDt <= 0 || wallDt > 0.5) return;
+    perfAccumTime += wallDt;
+    perfAccumFrames++;
+    if (perfAccumTime < 3) return;
+    const avgFps = perfAccumFrames / perfAccumTime;
+    perfAccumTime = 0;
+    perfAccumFrames = 0;
+    if (avgFps < 28 && renderer.getPixelRatio() > 1) {
+      rendererDowngraded = true;
+      renderer.setPixelRatio(1);
+      onWindowResize();
+      console.info(`[Battle3D] 平均 ${avgFps.toFixed(1)}fps，渲染像素比已降為 1。`);
+    }
+  }
+
+  function onWebglContextLost(event) {
+    event.preventDefault(); // 允許瀏覽器稍後恢復情境
+    contextLost = true;
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    if (animFrameTimer) { clearTimeout(animFrameTimer); animFrameTimer = null; }
+    console.warn('[Battle3D] WebGL context lost — 已暫停 3D 渲染並退回 2D 戰報。');
+    try { window.dispatchEvent(new CustomEvent('battle3d:contextlost')); } catch (_) { }
+  }
+
+  function onWebglContextRestored() {
+    contextLost = false;
+    console.info('[Battle3D] WebGL context restored.');
+    lastTimestamp = combatNow();
+    startAnimationLoop();
+    try { window.dispatchEvent(new CustomEvent('battle3d:contextrestored')); } catch (_) { }
+  }
+
+  /* ----------------------------------------------------
      8. 主渲染與骨骼動畫更新迴圈
      ---------------------------------------------------- */
   function startAnimationLoop() {
-    if (isAnimationPaused) return;
+    if (isAnimationPaused || contextLost) return;
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     if (animFrameTimer) { clearTimeout(animFrameTimer); animFrameTimer = null; }
     let lastBrazierSmokeAt = 0;
 
     function scheduleNextFrame(frameMs = 0) {
-      if (isAnimationPaused) return;
+      if (isAnimationPaused || contextLost) return;
       if (frameMs > 80) {
         animFrameId = null;
         animFrameTimer = setTimeout(() => {
@@ -5161,6 +5209,7 @@ const Battle3DEngine = (function () {
       lastTimestamp = now;
       window.MusouVfx?.tick?.(performance.now());
       window.MusouVfx?.recordFrameDt?.(dt, battleMotionActive && !cutinFrozen);
+      monitorRendererPerf(performance.now() - frameStart, battleMotionActive && !cutinFrozen);
       const elapsed = now * 0.001;
       bannerWindUniform.value = now < finaleCelebrationUntil ? elapsed * 2.15 : elapsed;
       const inHitStop = now < hitStopUntil || cutinFrozen;
@@ -5961,6 +6010,9 @@ const Battle3DEngine = (function () {
     return {
       isInitialized,
       isEnabled,
+      contextLost,
+      rendererDowngraded,
+      pixelRatio: renderer ? renderer.getPixelRatio() : 0,
       cameraView,
       cameraShakeEnabled,
       unitLabels: showUnitLabels,

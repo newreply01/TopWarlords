@@ -12,6 +12,16 @@
 - **CSP 與連線白名單**：[vercel.json](../vercel.json) 新增完整 `Content-Security-Policy` 標頭，限制 `script-src`、`connect-src`（僅允許 Firebase RTDB / PeerJS / Google Analytics / 本域）與 `frame-ancestors 'none'`，並將專案 `name` 正名為 `topwarlords`。
 - **建議 RTDB Security Rules 加固**：於 Firebase Console 針對 `global_stats/warlords/summary`、`players` 建議限制欄位型別與非負整數範圍；對 `pvp_rooms/WL_*` 限制寫入內容大小與必須攜帶 `gameId === 'topwarlords'`。
 
+## 0-1. v7.15.7 存檔隱私修正（停止公開鏡像備份）
+
+- **問題**：舊版 `writeCommanderCloudRecord()` 會把完整存檔（含 Google 帳號 email；舊版代號帳號另含 `passHash`、`authToken`）同時寫入 `global_stats/warlords/commanders/${uid}`，而 `global_stats` 為公開統計區，任何人皆可讀取。私有節點寫入失敗時更會只寫公開路徑。
+- **修正**：存檔只寫入私有節點 `commanders/${uid}/warlords`，失敗即回報錯誤、不再退回公開路徑；上傳與讀回的紀錄一律剔除 `email`；同步成功後刪除本人在 `global_stats/warlords/commanders/${uid}` 的舊副本；舊版代號帳號（無 Firebase 登入身分）停止雲端同步。
+- **仍需在 Firebase Console 處理**：
+  1. 清除既有的公開副本：未再登入同步的玩家，其舊副本仍留在 `global_stats/warlords/commanders`，需以管理員權限刪除整個節點（存檔已在私有節點者不受影響；僅存在於公開副本的舊版代號帳號會失去雲端備份）。
+  2. Security Rules 建議：`global_stats/warlords/commanders` 設為 `".read": false`，`$uid` 子節點僅允許 `".write": "auth != null && auth.uid === $uid"` 且只允許刪除（`!newData.exists()`），遷移期結束後整段改為 `".write": false`。
+  3. 確認 `commanders/$uid` 規則為 `".read"/".write": "auth != null && auth.uid === $uid"`。
+- **測試**：`test/test_cloud_sync_privacy.js`（已納入 CI）。
+
 ---
 
 ## 1. 背景與架構選型（方案 A + B 混合架構）
@@ -26,7 +36,7 @@
 
 | 頂層節點 / 儲存層 | 負責模組 | TopWarlords（名將版）寫入規格 | 跨專案讀取／寫入隔離防衛 |
 | :--- | :--- | :--- | :--- |
-| **`commanders/${uid}/warlords`** | [js/cloud-sync.js](../js/cloud-sync.js) | 主讀寫 `commanders/${uid}/warlords`，並鏡像備份於 `global_stats/warlords/commanders/${uid}`；帶 `gameId: 'topwarlords'` 與獨立密碼鹽 `_TOPWARLORDS_SALT_2026` | 絕不覆寫 `commanders/${uid}` 根物件；`collectLocalSaveData()` 攜帶 `gameId`，`restoreSaveDataToLocal()` 拒絕 `gameId !== 'topwarlords'` 存檔；帳號快取鍵使用 `wl15_cloud_account`。 |
+| **`commanders/${uid}/warlords`** | [js/cloud-sync.js](../js/cloud-sync.js) | **僅**讀寫私有節點 `commanders/${uid}/warlords`（v7.15.7 起不再鏡像備份至公開統計區）；帶 `gameId: 'topwarlords'` 與獨立密碼鹽 `_TOPWARLORDS_SALT_2026`；上傳內容不含 email | 絕不覆寫 `commanders/${uid}` 根物件；`collectLocalSaveData()` 攜帶 `gameId`，`restoreSaveDataToLocal()` 拒絕 `gameId !== 'topwarlords'` 存檔；帳號快取鍵使用 `wl15_cloud_account`。舊版 `global_stats/warlords/commanders/${uid}` 僅供讀取遷移，玩家同步成功後自動刪除本人副本。 |
 | **LocalStorage / SessionStorage** | 全域瀏覽器儲存 | 僅讀寫 `wl15_*`、`topwarlords_*` 命名空間（唯讀向下相容 `topwarlords_ladder_v1`） | 全面清除誤植的 `db15_*`、`topclash_*`、`topbattle_*` 鍵名，與 `TopClash` 在同網域（如 `*.github.io`）下完全隔離。 |
 | **`tournaments/WL_${code}`** | [js/firebase-tourney.js](../js/firebase-tourney.js) | RTDB 鍵名統一加上 `WL_` 前綴，UI 顯示維持 6 碼；`roomPayload` 帶入 `gameId: 'topwarlords'` | `listenPublicRooms()`、`quickMatch()` 配合索引 `.orderByChild('status').equalTo('waiting').limitToLast(30)` 並過濾 `TC_` 與異專案 `gameId`；`joinRoom()` 主動阻擋 `TC_` 前綴或異專案 `gameId`。 |
 | **`pvp_rooms/WL_${code}` & PeerJS** | [js/online-pvp.js](../js/online-pvp.js) | PeerJS `ROOM_PREFIX = 'TOPWARLORDS-BO5-'`；中繼路徑 `pvp_rooms/WL_${code}` 帶 `gameId: 'topwarlords'` | `attachFirebaseRelay()` 與 `joinRoom()` 主動攔截 `TC_` / `TOPCLASH-BO5-` 代碼；所有 `HANDSHAKE` 必帶 `gameId: 'topwarlords'`，`handleIncomingPacket()` 發現不符立即斷線並提示錯誤。 |

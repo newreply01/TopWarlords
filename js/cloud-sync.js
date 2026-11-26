@@ -62,27 +62,41 @@ const CloudSync = (() => {
     }
   }
 
+  /* 存檔只寫入私有節點 commanders/${uid}/warlords。
+     舊版曾把含 email 的完整存檔「鏡像備份」到公開統計區 global_stats/warlords/commanders/${uid}，
+     該路徑現僅供讀取舊資料以便遷移；成功寫入私有節點後會刪除本人的舊公開副本。 */
+  const PRIVATE_RECORD_PATH = id => `commanders/${id}/warlords`;
+  const LEGACY_PUBLIC_MIRROR_PATH = id => `global_stats/warlords/commanders/${id}`;
+
+  function stripPersonalFields(record) {
+    if (!record || typeof record !== 'object') return record;
+    const clean = { ...record };
+    delete clean.email;
+    return clean;
+  }
+
+  function readLegacyPublicMirror(database, id) {
+    return database.ref(LEGACY_PUBLIC_MIRROR_PATH(id)).once('value')
+      .then(mirrorSnap => (mirrorSnap.exists() ? stripPersonalFields(mirrorSnap.val()) : null))
+      .catch(() => null);
+  }
+
   function readCommanderCloudRecord(database, id) {
-    return database.ref(`commanders/${id}/warlords`).once('value').then(primarySnap => {
-      if (primarySnap.exists()) return primarySnap.val();
-      return database.ref(`global_stats/warlords/commanders/${id}`).once('value').then(mirrorSnap => {
-        return mirrorSnap.exists() ? mirrorSnap.val() : null;
-      }).catch(() => null);
-    }).catch(() => {
-      return database.ref(`global_stats/warlords/commanders/${id}`).once('value').then(mirrorSnap => {
-        return mirrorSnap.exists() ? mirrorSnap.val() : null;
-      }).catch(() => null);
-    });
+    return database.ref(PRIVATE_RECORD_PATH(id)).once('value').then(primarySnap => {
+      if (primarySnap.exists()) return stripPersonalFields(primarySnap.val());
+      return readLegacyPublicMirror(database, id);
+    }).catch(() => readLegacyPublicMirror(database, id));
   }
 
   async function writeCommanderCloudRecord(database, id, payload) {
+    // 寫入失敗即拋出錯誤由呼叫端處理；不再退回寫入公開路徑
+    await database.ref(PRIVATE_RECORD_PATH(id)).set(stripPersonalFields(payload));
+    // 清除舊版留在公開統計區的本人存檔副本（含 email）；失敗不影響本次同步
     try {
-      await database.ref(`commanders/${id}/warlords`).set(payload);
+      await database.ref(LEGACY_PUBLIC_MIRROR_PATH(id)).remove();
     } catch (e) {
-      await database.ref(`global_stats/warlords/commanders/${id}`).set(payload);
-      return true;
+      console.warn('[CloudSync] 清除舊版公開存檔副本失敗:', e?.message || e);
     }
-    database.ref(`global_stats/warlords/commanders/${id}`).set(payload).catch(() => {});
     return true;
   }
 
@@ -334,6 +348,12 @@ const CloudSync = (() => {
       return false;
     }
 
+    // 舊版代號／密碼帳號沒有 Firebase 登入身分，過去只能寫入公開路徑（連同 passHash、authToken），已停止雲端同步
+    if (!account.isGoogle) {
+      setStatus('error', '舊版代號帳號已停止雲端同步，請改用 Google 登入以保護存檔');
+      return false;
+    }
+
     const database = initFirebase();
     if (!database) {
       setStatus('error', '雲端資料庫未連線');
@@ -368,7 +388,6 @@ const CloudSync = (() => {
       gameId: 'topwarlords',
       id: account.id,
       displayId: account.displayId,
-      email: account.email || '',
       updatedAt: now,
       nickname: localData.nickname || account.nickname || '虎步先鋒鐵騎營',
       flag: localData.flag || account.flag || '🇹🇼',

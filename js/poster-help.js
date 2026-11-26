@@ -89,7 +89,7 @@
     const appVer = (() => {
       const src = document.querySelector('script[src*="poster-help.js"]')?.getAttribute('src') || '';
       const m = src.match(/[?&]v=([^&]+)/);
-      return m ? m[1] : '7.15.6';
+      return m ? m[1] : '7.15.7';
     })();
 
     $('#helpCard').innerHTML = `

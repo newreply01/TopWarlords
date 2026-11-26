@@ -4,6 +4,15 @@
 
 ---
 
+## [7.15.7] - 2026-11-26
+### Security (停止將含 email 的存檔備份寫入公開位置)
+
+- **雲端存檔不再鏡像備份至公開統計區 (`js/cloud-sync.js`)**：舊版 `writeCommanderCloudRecord()` 會把完整存檔（含 Google 帳號 email；舊版代號帳號另含 `passHash`、`authToken`）同時寫入公開的 `global_stats/warlords/commanders/${uid}`，私有節點寫入失敗時更會只寫公開路徑。現改為只寫入私有節點 `commanders/${uid}/warlords`，失敗即回報錯誤、不退回公開路徑。
+- **上傳存檔移除 email**：`syncToCloud()` 的 payload 不再包含 `email`（雲端從未讀取此欄位；介面顯示的 email 取自本機 Google 登入狀態）；讀回的紀錄亦剔除 `email`。
+- **清除舊公開副本**：同步成功後自動刪除本人在 `global_stats/warlords/commanders/${uid}` 的舊副本；舊副本仍可讀回以便遷移存檔。
+- **舊版代號／密碼帳號停止雲端同步**：此類帳號無 Firebase 登入身分，過去只能寫入公開路徑，現提示改用 Google 登入。
+- **測試與文件**：新增 `test/test_cloud_sync_privacy.js`（已納入 CI；以舊版程式驗證會失敗）；`docs/FIREBASE_ISOLATION_SPEC.md` 補充 Firebase Console 需執行的既有資料清除與 Security Rules 建議。
+
 ## [7.15.6] - 2026-11-26
 ### Refactored (3D 引擎拆檔第 2 步：GLTF 模型載入模組獨立＋3D 視覺回歸比對工具，畫面零變動)
 

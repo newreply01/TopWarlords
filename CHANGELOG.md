@@ -4,6 +4,12 @@
 
 ---
 
+## [7.15.4] - 2026-11-26
+### Refactored (戰鬥引擎結構整理，戰果零變動)
+
+- **`resolveBattle()` 三階段拆分 (`js/engine.js`)**：階段一／二／三抽出為內部函式 `runPhase1()`（回傳 `ewA / ewB / advSide`）、`runPhase2()`、`runPhase3()`，主流程僅保留初始化 → 三階段 → VP 結算，便於後續個別調整與測試；`test/test_engine_golden.js` 240 場固定種子戰果與快照完全一致。
+- **舊命名對照表**：於 `engine.js` 檔頭註明沿用自 TopClash 的內部識別碼（`air` / `naval` / `droneDmg` / `cec` 等）與古戰場兵種、羈絆的對應關係，資料與存檔格式不變。
+
 ## [7.15.3] - 2026-11-26
 ### Added & Improved (戰鬥引擎回歸快照、線上戰果比對、3D WebGL 情境遺失防護)
 

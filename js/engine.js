@@ -2,6 +2,19 @@
 /* =====================================================
    戰鬥引擎：確定性（種子化）三階段古戰場推演 (TopWarlords)
    同一組輸入（兩副名將陣容 + 戰場 + 教條 + 種子）永遠得到相同結果
+
+   【命名對照】本引擎沿用前作 TopClash（現代軍武）的內部識別碼，與存檔、天梯資料、
+   all_warlords.json 相容，故不改名。閱讀與調整數值時請依下表對照：
+     兵種 cat：air=⚡奔雷突騎　armor=🛡️重甲陷陣　air_defense=🏹神射強弩
+               naval=⚔️先登奇兵　support=📜軍師奇謀
+     能力值：ew=謀略值　stealth=隱匿　navHit/navMult=先登命中／傷害
+             droneMult=奇謀火計傷害　landMult=陸戰主力傷害　adHit=神射命中
+     戰場事件 mod：armorDmg=重甲傷害　navalDmg=先登傷害　artyDmg=攻城火砲傷害
+             droneDmg=奇謀火計／忍軍傷害　airHit=突騎／神射命中修正　ewMult=謀略倍率
+     陣法羈絆 id：cec=八陣神機網　mumt=奇正相生陣　asw_net=水陸伏波破暗陣
+             iron_fist=步騎火砲合圍
+     教條 id：舊值 electronic → deception、air_sup → strike（normDoc 自動轉換）
+   修改數值後請執行 node test/test_engine_golden.js 檢視戰果變化。
    ===================================================== */
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const other = s => (s === 'A' ? 'B' : 'A');
@@ -811,396 +824,10 @@ function resolveBattle(deckA, deckB, opts) {
     return lines;
   }
 
-  /* ===== 階段一：軍師謀略博弈與先制奇襲 ===== */
-  const ewOf = s => (alive(s).reduce((x, u) => x + u.ew, 0) + S[s].ewBonus) * S[s].ewMult * m.ewMult;
-  const ewA = ewOf('A'), ewB = ewOf('B');
-  let advSide = null;
-  const l1 = [];
-  const terrainName = BATTLE_TERRAINS.find(item => item.id === terrain).name;
-  const formatTeamDeployment = team => {
-    const unique = new Set(team.map(unit => unit.formationName));
-    if (unique.size === 1) return team.map(unit => unit.formationName).join('、');
-    return team.map(unit => `${unit.name}【${unit.formationName}】`).join('、');
-  };
-  l1.push({ side: 'N', kind: 'info', text: `戰場地形：${terrainName}` });
-  l1.push({ side: 'A', kind: 'info', text: `我軍布陣：${formatTeamDeployment(T.A)}` });
-  l1.push({ side: 'B', kind: 'info', text: `敵軍布陣：${formatTeamDeployment(T.B)}` });
-  if (syn.A.length) l1.push({ side: 'A', kind: 'info', text: `我方啟動軍陣協同體系：${syn.A.map(x => x.icon + ' ' + x.name).join('、')}` });
-  if (syn.B.length) l1.push({ side: 'B', kind: 'info', text: `敵方啟動軍陣協同體系：${syn.B.map(x => x.icon + ' ' + x.name).join('、')}` });
-  if (bonds.A.length) l1.push({ side: 'A', kind: 'info', text: `我方名將共鳴：${bonds.A.map(x => x.icon + ' ' + x.name).join('、')}` });
-  if (bonds.B.length) l1.push({ side: 'B', kind: 'info', text: `敵方名將共鳴：${bonds.B.map(x => x.icon + ' ' + x.name).join('、')}` });
-  l1.push({ side: 'N', kind: 'info', text: `全軍謀略值：我方 ${ewA.toFixed(0)} ／ 敵方 ${ewB.toFixed(0)}` });
-  if (Math.abs(ewA - ewB) >= 10) {
-    advSide = ewA > ewB ? 'A' : 'B';
-    const ratio = clamp(Math.abs(ewA - ewB) / 45, 0, 1);
-    const pen = 0.10 * ratio, boost = 0.08 * ratio;
-    S[other(advSide)].hitPen += pen;
-    S[advSide].atkAll = (S[advSide].atkAll || 1) * (1 + boost);
-    l1.push({ side: advSide, kind: 'info', text: `${advSide === 'A' ? '我方' : '敵方'}運籌決勝取得謀略先機：對手命中率 −${Math.round(pen * 100)}%，己方全軍戰意 +${Math.round(boost * 100)}%。` });
-    if (ratio >= 0.5) addKey(4, `${advSide === 'A' ? '我方' : '敵方'}智勝一籌取得戰局先手（謀略 ${ewA.toFixed(0)} vs ${ewB.toFixed(0)}）`, advSide);
-  } else {
-    l1.push({ side: 'N', kind: 'info', text: '雙方軍師旗鼓相當，謀略互不相讓。' });
-  }
-
-  for (const s of ['A', 'B']) {
-    for (const commander of alive(s, unit => hasRoleFlag(unit, 'STRATEGIST') && unit.skill?.phase === 'P1' && !unit.skillUsed)) {
-      commander.skillUsed = true;
-      applySkillEffects(commander, l1);
-    }
-  }
-  for (const s of ['A', 'B']) {
-    if ((S[s].guardSuppress || 0) > 0) {
-      for (const u of alive(s)) {
-        if (u.statuses) u.statuses.rally = 0;
-      }
-    }
-  }
-  if (opts.dailyBuffer) {
-    l1.push({ side: 'A', kind: 'info', brevity: '以逸待勞', text: '[以逸待勞] 面對超標精銳，我軍構築前沿拒馬守勢，前段與白刃前四輪承受傷害 −25%。' });
-  }
-  pushFrame(1, '階段一 · 軍師謀略博弈', l1);
-
-  {
-    const at = [];
-    for (const s of ['A', 'B']) {
-      const e = other(s);
-      for (const u of alive(s, x => x.traits.includes('SEAD') || x.traits.includes('DEEP'))) {
-        let t;
-        let passiveIrPen = 0;
-        if (u.traits.includes('DEEP')) {
-          t = pickTop(alive(e));
-        } else {
-          // 先制破陣：優先鎖定敵方神射箭陣；隱蔽伏弩名將不顯軍旗，難以直接被點殺
-          const radarAds = alive(e, x => x.cat === 'air_defense' && !hasRoleFlag(x, 'PASSIVE_VOLLEY'));
-          const radarEmitters = alive(e, x => x.traits.includes('AEGIS') || x.ew >= 15);
-          t = pickTop(radarAds) || pickTop(radarEmitters) || pickTop(alive(e, x => x.cat === 'naval')) || pickTop(alive(e));
-          if (t && hasRoleFlag(t, 'PASSIVE_VOLLEY')) passiveIrPen = -0.18;
-        }
-        if (!t) continue;
-        const ammo = getAmmoProfile(u);
-        u.shots++;
-        at.push({
-          att: u, tgt: t, ammoTier: ammo.tier,
-          hit: hitP(u, t, 0.82, 0.55, ammo.hitMod + passiveIrPen),
-          trueDmg: unitHasTrueAt(u, ammo),
-          dmg: u.atk * 1.80 * S[s].atkEarly * ammo.dmgMult
-        });
-      }
-    }
-    pushFrame(1, '階段一 · 先制破陣（斬首／奇襲破陣）', volley(at, { allowAbm: true, phase: 1, dailyBuffer: Boolean(opts.dailyBuffer) }));
-  }
-
-  /* ===== 階段二：神射攔截、先鋒爭先與先登奇兵對決 ===== */
-  if (!over()) {
-    // 2-1 神射弩陣萬箭齊發，攔截敵方奔雷突騎
-    const at = [];
-    for (const s of ['A', 'B']) {
-      const e = other(s);
-      const shooters = alive(s, x => x.cat === 'air_defense' || x.traits.includes('AEGIS'));
-      for (const u of shooters) {
-        const t = pickTop(alive(e, x => x.cat === 'air'));
-        if (!t) continue;
-        const ammo = getAmmoProfile(u);
-        const isTrueAt = unitHasTrueAt(u, ammo);
-        u.shots++;
-        const f = u.cat === 'air_defense' ? 1 : 0.55;
-        const hit = hitP(u, t, 0.82 + (u.traits.includes('AA_LONG') ? 0.08 : 0) + S[s].adHit, 0.56, m.airHit + ammo.hitMod);
-        at.push({ att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt, hit, dmg: u.atk * 1.75 * f * S[s].atkEarly * ammo.dmgMult });
-      }
-    }
-    pushFrame(2, '階段二 · 神射箭雨攔截', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
-  }
-  if (!over()) {
-    // 2-2 奔雷突騎交鋒（爭奪先機權 10 分）
-    const at = [];
-    for (const s of ['A', 'B']) {
-      const e = other(s);
-      for (const u of alive(s, x => x.cat === 'air')) {
-        const airPool = alive(e, x => x.cat === 'air');
-        if (!airPool.length) continue;
-        const ammo = getAmmoProfile(u);
-        const tgts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(airPool, 2) : [pickTop(airPool)];
-        u.shots++;
-        for (const t of tgts) {
-          if (!t) continue;
-          const hit = hitP(u, t, 0.66 + (u.traits.includes('LR') ? 0.06 : 0) + (u.stealth - t.stealth) / 250, 0.3, m.airHit + ammo.hitMod);
-          at.push({ att: u, tgt: t, ammoTier: ammo.tier, hit, dmg: u.atk * 1.10 * (tgts.length > 1 ? 0.75 : 1) * S[s].atkEarly * ammo.dmgMult });
-        }
-      }
-    }
-    pushFrame(2, '階段二 · 奔雷突騎爭先', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
-  }
-  if (!over()) {
-    // 2-3 先登奇兵對決（虎賁破陣 vs 潛行夜襲，爭奪先登權 5 分）
-    const at = [];
-    for (const s of ['A', 'B']) {
-      const e = other(s);
-      for (const u of alive(s, x => x.cat === 'naval')) {
-        const navs = alive(e, x => x.cat === 'naval');
-        const pool = navs.length ? navs : alive(e, x => x.cat === 'armor');
-        if (!pool.length) continue;
-        const ammo = getAmmoProfile(u);
-        const tgts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
-        const isTrueAt = unitHasTrueAt(u, ammo);
-        u.shots++;
-        for (const t of tgts) {
-          if (!t) continue;
-          let mult = (navs.length ? 0.90 : 0.75);
-          // ASW 看破反伏專精：專剋潛行夜襲 (SUB) 造成 1.6 倍傷害
-          if (t.traits.includes('SUB') && u.traits.includes('ASW')) mult *= 1.6;
-          // SUB 潛行夜襲：對未設防目標造成 1.3 倍傷害
-          if (u.traits.includes('SUB') && !t.traits.includes('SUB')) mult *= 1.3;
-          if (tgts.length > 1) mult *= 0.6;
-          at.push({
-            att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
-            hit: hitP(u, t, 0.76 + S[s].navHit, 0.45, ammo.hitMod),
-            dmg: u.atk * mult * S[s].navMult * m.navalDmg * S[s].atkEarly * ammo.dmgMult
-          });
-        }
-      }
-    }
-    pushFrame(2, '階段二 · 先登奇兵交鋒', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
-  }
-
-  /* ===== 階段三：中軍主力決戰與氣力三階消耗（上限 10 輪，未全殲則鳴金收兵由戰功 VP 裁定） ===== */
-  let r = 1;
-  const MAX_ROUNDS = 10;
-  while (!over() && r <= MAX_ROUNDS) {
-    const at = [];
-    const prefixLines = [];
-    // 第 6 輪起：陣形拉鋸方位盡露，展開死鬥合圍（微幅提升命中，不虛胖攻擊力）
-    const stealthScale = r >= 6 ? 0.75 : 1.0;
-    const lockBonus = r >= 6 ? 0.05 : 0.0;
-
-    if (r === 4) {
-      const hpRatio = side => T[side].reduce((sum, u) => sum + Math.max(0, u.hp), 0) / Math.max(1, T[side].reduce((sum, u) => sum + u.hpMax, 0));
-      const rA = hpRatio('A'), rB = hpRatio('B');
-      if (Math.abs(rA - rB) >= 0.12) {
-        const under = rA < rB ? 'A' : 'B';
-        S[under].atkAll = (S[under].atkAll || 1) * 1.07;
-        S[other(under)].hitPen = (S[other(under)].hitPen || 0) + 0.03;
-        prefixLines.push({
-          side: under, kind: 'info', brevity: '背水奮戰', moraleShift: true,
-          text: `${under === 'A' ? '我軍' : '敵軍'}見前線吃緊激發背水死志：全軍攻擊 +7%，敵軍命中 −3%！`
-        });
-      }
-    }
-    if (r === 6) {
-      prefixLines.push({
-        side: 'N', kind: 'info', brevity: '短兵相接',
-        text: '兩軍大陣徹底咬合，近身死鬥展開（隱匿效果降低，命中率提升）！'
-      });
-    } else if (r === 8) {
-      prefixLines.push({
-        side: 'N', kind: 'info', brevity: '氣力漸竭',
-        text: '戰局進入白熱化，主力名將氣力見底，拔出佩刀短匕展開最後死鬥！'
-      });
-    }
-
-    for (const s of ['A', 'B']) {
-      const e = other(s);
-      const enemyAlive = alive(e);
-      if (!enemyAlive.length) continue;
-
-      const myAlive = alive(s);
-      const enemyArmor = alive(e, x => x.cat === 'armor');
-      const enemyAir = alive(e, x => x.cat === 'air');
-      const enemyNaval = alive(e, x => x.cat === 'naval');
-      const frontlineGround = enemyArmor.length ? enemyArmor : enemyAlive;
-      const rearGround = alive(e, x => x.cat === 'support' || x.cat === 'air_defense');
-      const adAlive = alive(e, x => x.cat === 'air_defense').length;
-      
-      const hasIdleAbmRadar = !enemyAir.length && myAlive.some(x => hasRoleFlag(x, 'FORMATION_SHIELD'));
-      const spot = (myAlive.some(x => x.traits.includes('SPOT')) || hasIdleAbmRadar) ? 1.15 : 1;
-      const abmTrackBonus = hasIdleAbmRadar ? 0.04 : 0;
-      const ciws = alive(e, x => x.traits.includes('CIWS')).length > 0;
-      if (r === 1 && myAlive.some(unit => unit.formation === 'cone') && !S[e].supplyCut) {
-        S[e].atkAll = (typeof S[e].atkAll === 'number' ? S[e].atkAll : 1) * 0.92;
-        S[e].supplyCut = true;
-        prefixLines.push({
-          side: s,
-          kind: 'info',
-          brevity: '截斷糧道',
-          text: `${s === 'A' ? '我軍' : '敵軍'}錐行部隊高速穿插敵後，截斷糧道！敵軍全軍攻勢減弱 8%。`
-        });
-        addKey(3, `${s === 'A' ? '我軍' : '敵軍'}錐行部隊截斷敵軍糧道，削弱其持續作戰能力`, s);
-      }
-
-      const isSwarmOrDrone = u => (typeof DRONE_IDS !== 'undefined' && DRONE_IDS.has(u.id)) || u.traits.includes('SWARM');
-
-      for (const u of myAlive) {
-        const ground = u.cat === 'air_defense' && u.formationRanged && rearGround.length
-          ? rearGround
-          : frontlineGround;
-        const droneScale = isSwarmOrDrone(u) ? S[s].droneMult * m.droneDmg * (ciws ? 0.85 : 1) : 1;
-        if (u.cat === 'air') {
-          // 突騎繞後側翼包抄重甲（霍去病、源義經優先穿插敵方後陣）
-          const isRearRaider = u.id === 'HUO' || u.id === 'YOSHITSUNE';
-          const airPool = isRearRaider && rearGround.length ? rearGround : ground;
-          const ammo = getAmmoProfile(u);
-          const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(airPool, 2) : [pickTop(airPool)];
-          const isTrueAt = unitHasTrueAt(u, ammo);
-          const mult = u.traits.includes('CAS') ? 1.74 : (isTrueAt ? 1.60 : 1.15);
-          u.shots++;
-          for (const t of ts) {
-            if (!t) continue;
-            at.push({
-              att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
-              hit: hitP(u, t, 0.82 - Math.min(0.3, adAlive * 0.07), 0.15, m.airHit + lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-              dmg: u.atk * mult * (ts.length > 1 ? 0.75 : 1) * (t.cat === 'armor' ? (isTrueAt ? 1.25 : 1.1) : 0.86) * ammo.dmgMult
-            });
-          }
-        } else if (u.cat === 'naval') {
-          // 先登奇兵進攻
-          const ammo = getAmmoProfile(u);
-          const pool = !u.formationRanged && enemyNaval.length ? enemyNaval : ground;
-          const ts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
-          const isTrueAt = unitHasTrueAt(u, ammo);
-          u.shots++;
-          for (const t of ts) {
-            if (!t) continue;
-            let nMult = 0.80 * S[s].navMult;
-            if (t.traits.includes('SUB') && u.traits.includes('ASW')) nMult *= 1.35;
-            if (ts.length > 1) nMult *= 0.65;
-            at.push({
-              att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
-              hit: hitP(u, t, 0.78 + S[s].navHit, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-              dmg: u.atk * nMult * m.navalDmg * droneScale * ammo.dmgMult
-            });
-          }
-        } else if (u.cat === 'armor') {
-          // 重甲中軍正面對決（楊業、岳飛優先迎擊敵方突騎）
-          const isAntiAirArmor = u.id === 'YANGYE' || u.id === 'YUEFEI';
-          const armorPool = (isAntiAirArmor && enemyAir.length) ? enemyAir : ground;
-          const t = pickTop(armorPool);
-          if (!t) continue;
-          const ammo = getAmmoProfile(u);
-          const isTrueAt = unitHasTrueAt(u, ammo);
-          u.shots++;
-          const vsFactor = t.cat === 'armor'
-            ? (isTrueAt ? 1.16 : 1.1)
-            : (isAntiAirArmor && t.cat === 'air' ? 1.05 : 0.9);
-          at.push({
-            att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
-            hit: hitP(u, t, 0.85, 0.2, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-            dmg: u.atk * (isTrueAt ? 1.46 : 1.38) * S[s].landMult * m.armorDmg * vsFactor * ammo.dmgMult
-          });
-        } else if (u.cat === 'support') {
-          // 軍師奇計／火器攻城
-          const ammo = getAmmoProfile(u);
-          u.shots++;
-          if (u.traits.includes('TRUE_AT') || hasRoleFlag(u, 'HEAVY_AP')) {
-            const isTrueAt = ammo.canTrueAt;
-            const ts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(ground, 2) : [pickTop(ground)];
-            for (const t of ts) {
-              if (!t) continue;
-              at.push({
-                att: u, tgt: t, ammoTier: ammo.tier,
-                hit: hitP(u, t, 0.78, 0.35, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                trueDmg: isTrueAt,
-                dmg: u.atk * 1.65 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.8 : 1) * ammo.dmgMult
-              });
-            }
-          } else if (u.traits.includes('ARTY')) {
-            const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [pickTop(ground)];
-            for (const t of ts) {
-              if (!t) continue;
-              at.push({
-                att: u, tgt: t, ammoTier: ammo.tier,
-                hit: hitP(u, t, 0.78, 0.3, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                dmg: u.atk * 1.22 * (ts.length > 1 ? 0.75 : 1) * S[s].landMult * m.artyDmg * spot * droneScale * ammo.dmgMult
-              });
-            }
-          } else {
-            const t = pickTop(ground);
-            if (t) {
-              const supScale = isSwarmOrDrone(u) ? droneScale : S[s].droneMult;
-              at.push({
-                att: u, tgt: t, ammoTier: ammo.tier,
-                hit: hitP(u, t, 0.80, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
-                dmg: u.atk * (1.12 + Math.max(0, u.ew - 60) * 0.006) * supScale * spot * ammo.dmgMult
-              });
-            }
-          }
-        } else if (u.cat === 'air_defense') {
-          // 神射弩陣平射支援
-          if (enemyAir.length) {
-            const t = pickTop(enemyAir);
-            if (t) {
-              const ammo = getAmmoProfile(u);
-              const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(enemyAir, 2) : [t];
-              const isTrueAt = unitHasTrueAt(u, ammo);
-              u.shots++;
-              for (const airTgt of ts) {
-                if (!airTgt) continue;
-                at.push({
-                  att: u, tgt: airTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
-                  hit: hitP(u, airTgt, 0.88 + (u.traits.includes('AA_LONG') ? 0.06 : 0) + S[s].adHit, 0.36, m.airHit + lockBonus + ammo.hitMod, stealthScale),
-                  dmg: u.atk * 1.85 * (ts.length > 1 ? 0.75 : 1) * droneScale * ammo.dmgMult
-                });
-              }
-            }
-          } else {
-            const t = pickTop(ground);
-            if (t) {
-              const ammo = getAmmoProfile(u);
-              const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [t];
-              const isTrueAt = unitHasTrueAt(u, ammo);
-              const abmScale = hasRoleFlag(u, 'FORMATION_SHIELD') ? 0.56 : 0.78;
-              u.shots++;
-              for (const gTgt of ts) {
-                if (!gTgt) continue;
-                at.push({
-                  att: u, tgt: gTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
-                  hit: clamp(0.72 + lockBonus + ammo.hitMod, 0.08, 0.96),
-                  dmg: u.atk * abmScale * (ts.length > 1 ? 0.75 : 1) * droneScale * ammo.dmgMult
-                });
-              }
-            }
-          }
-        }
-      }
-    }
-    const phaseLabel = r === 1
-      ? `階段三 · 先鋒接陣試探（第 1 輪）`
-      : (r <= 5 ? `階段三 · 中軍死鬥合圍（第 ${r} 輪）` : (r <= 7 ? `階段三 · 短兵相接鏖戰（第 ${r} 輪）` : `階段三 · 氣力見底苦戰（第 ${r} 輪）`));
-    const roundLines = volley(at, { prefixLines, allowDuels: true, phase: 3, round: r, dailyBuffer: Boolean(opts.dailyBuffer) });
-    for (const sideKey of ['A', 'B']) {
-      for (const u of T[sideKey]) {
-        if (!u.alive || !u.statuses) continue;
-        if (u.statuses.burn > 0) {
-          const burnDmg = Math.max(10, Math.round(u.hpMax * 0.05));
-          u.hp -= burnDmg;
-          u.dmgTaken += burnDmg;
-          const caster = u.statuses.burnCaster;
-          if (caster) {
-            caster.dmgDone += burnDmg;
-            caster.statusDmg += burnDmg;
-          }
-          if (u.hp <= 0) {
-            u.hp = 0; u.alive = false; u.killedBy = caster || u.killedBy;
-            roundLines.push({
-              side: caster ? caster.side : other(sideKey), kind: 'kill', auid: caster?.uid, tuid: u.uid,
-              brevity: '烈焰灼燒', dmg: burnDmg, text: `[烈焰灼燒] ${u.name} 遭火攻持續焚傷潰滅！`, hpAfter: 0
-            });
-          } else {
-            roundLines.push({
-              side: caster ? caster.side : other(sideKey), kind: 'hit', auid: caster?.uid, tuid: u.uid,
-              brevity: '灼燒蔓延', dmg: burnDmg, text: `[灼燒] ${u.name} 受火勢持續損傷 -${burnDmg}`, hpAfter: Math.round(u.hp)
-            });
-          }
-          u.statuses.burn--;
-        }
-        if (u.statuses.sunder > 0) u.statuses.sunder--;
-        if (u.statuses.confuse > 0) u.statuses.confuse--;
-        if (u.statuses.rally > 0) u.statuses.rally--;
-        if (u.statuses.stagger > 0) u.statuses.stagger--;
-        if (u.statuses.mark > 0) u.statuses.mark--;
-      }
-    }
-    pushFrame(3, phaseLabel, roundLines);
-    r++;
-  }
+  /* ===== 三階段推演（各階段實作見下方 runPhase1/2/3，共享本函式閉包中的戰況狀態） ===== */
+  const { ewA, ewB, advSide } = runPhase1();
+  runPhase2();
+  runPhase3();
 
   /* ===== 戰功與勝負裁定 (VP 結算) ===== */
   const airPow = t => t.filter(u => u.cat === 'air').reduce((x, u) => x + u.cost * u.hp / u.hpMax, 0);
@@ -1293,6 +920,404 @@ function resolveBattle(deckA, deckB, opts) {
   const key = keys.slice().sort((a, b) => b.imp - a.imp).slice(0, 4).sort((a, b) => a.frame - b.frame);
 
   return { seed, winner, wipeout, ammoDepleted, finale, vp, frames, key, mvp, ev, docs, ewA, ewB, advSide, syn, bonds, terrain, formationDefs: BATTLE_FORMATION_DEFS, final: T };
+
+  /* ===== 階段一：軍師謀略博弈與先制奇襲 ===== */
+  function runPhase1() {
+    const ewOf = s => (alive(s).reduce((x, u) => x + u.ew, 0) + S[s].ewBonus) * S[s].ewMult * m.ewMult;
+    const ewA = ewOf('A'), ewB = ewOf('B');
+    let advSide = null;
+    const l1 = [];
+    const terrainName = BATTLE_TERRAINS.find(item => item.id === terrain).name;
+    const formatTeamDeployment = team => {
+      const unique = new Set(team.map(unit => unit.formationName));
+      if (unique.size === 1) return team.map(unit => unit.formationName).join('、');
+      return team.map(unit => `${unit.name}【${unit.formationName}】`).join('、');
+    };
+    l1.push({ side: 'N', kind: 'info', text: `戰場地形：${terrainName}` });
+    l1.push({ side: 'A', kind: 'info', text: `我軍布陣：${formatTeamDeployment(T.A)}` });
+    l1.push({ side: 'B', kind: 'info', text: `敵軍布陣：${formatTeamDeployment(T.B)}` });
+    if (syn.A.length) l1.push({ side: 'A', kind: 'info', text: `我方啟動軍陣協同體系：${syn.A.map(x => x.icon + ' ' + x.name).join('、')}` });
+    if (syn.B.length) l1.push({ side: 'B', kind: 'info', text: `敵方啟動軍陣協同體系：${syn.B.map(x => x.icon + ' ' + x.name).join('、')}` });
+    if (bonds.A.length) l1.push({ side: 'A', kind: 'info', text: `我方名將共鳴：${bonds.A.map(x => x.icon + ' ' + x.name).join('、')}` });
+    if (bonds.B.length) l1.push({ side: 'B', kind: 'info', text: `敵方名將共鳴：${bonds.B.map(x => x.icon + ' ' + x.name).join('、')}` });
+    l1.push({ side: 'N', kind: 'info', text: `全軍謀略值：我方 ${ewA.toFixed(0)} ／ 敵方 ${ewB.toFixed(0)}` });
+    if (Math.abs(ewA - ewB) >= 10) {
+      advSide = ewA > ewB ? 'A' : 'B';
+      const ratio = clamp(Math.abs(ewA - ewB) / 45, 0, 1);
+      const pen = 0.10 * ratio, boost = 0.08 * ratio;
+      S[other(advSide)].hitPen += pen;
+      S[advSide].atkAll = (S[advSide].atkAll || 1) * (1 + boost);
+      l1.push({ side: advSide, kind: 'info', text: `${advSide === 'A' ? '我方' : '敵方'}運籌決勝取得謀略先機：對手命中率 −${Math.round(pen * 100)}%，己方全軍戰意 +${Math.round(boost * 100)}%。` });
+      if (ratio >= 0.5) addKey(4, `${advSide === 'A' ? '我方' : '敵方'}智勝一籌取得戰局先手（謀略 ${ewA.toFixed(0)} vs ${ewB.toFixed(0)}）`, advSide);
+    } else {
+      l1.push({ side: 'N', kind: 'info', text: '雙方軍師旗鼓相當，謀略互不相讓。' });
+    }
+
+    for (const s of ['A', 'B']) {
+      for (const commander of alive(s, unit => hasRoleFlag(unit, 'STRATEGIST') && unit.skill?.phase === 'P1' && !unit.skillUsed)) {
+        commander.skillUsed = true;
+        applySkillEffects(commander, l1);
+      }
+    }
+    for (const s of ['A', 'B']) {
+      if ((S[s].guardSuppress || 0) > 0) {
+        for (const u of alive(s)) {
+          if (u.statuses) u.statuses.rally = 0;
+        }
+      }
+    }
+    if (opts.dailyBuffer) {
+      l1.push({ side: 'A', kind: 'info', brevity: '以逸待勞', text: '[以逸待勞] 面對超標精銳，我軍構築前沿拒馬守勢，前段與白刃前四輪承受傷害 −25%。' });
+    }
+    pushFrame(1, '階段一 · 軍師謀略博弈', l1);
+
+    {
+      const at = [];
+      for (const s of ['A', 'B']) {
+        const e = other(s);
+        for (const u of alive(s, x => x.traits.includes('SEAD') || x.traits.includes('DEEP'))) {
+          let t;
+          let passiveIrPen = 0;
+          if (u.traits.includes('DEEP')) {
+            t = pickTop(alive(e));
+          } else {
+            // 先制破陣：優先鎖定敵方神射箭陣；隱蔽伏弩名將不顯軍旗，難以直接被點殺
+            const radarAds = alive(e, x => x.cat === 'air_defense' && !hasRoleFlag(x, 'PASSIVE_VOLLEY'));
+            const radarEmitters = alive(e, x => x.traits.includes('AEGIS') || x.ew >= 15);
+            t = pickTop(radarAds) || pickTop(radarEmitters) || pickTop(alive(e, x => x.cat === 'naval')) || pickTop(alive(e));
+            if (t && hasRoleFlag(t, 'PASSIVE_VOLLEY')) passiveIrPen = -0.18;
+          }
+          if (!t) continue;
+          const ammo = getAmmoProfile(u);
+          u.shots++;
+          at.push({
+            att: u, tgt: t, ammoTier: ammo.tier,
+            hit: hitP(u, t, 0.82, 0.55, ammo.hitMod + passiveIrPen),
+            trueDmg: unitHasTrueAt(u, ammo),
+            dmg: u.atk * 1.80 * S[s].atkEarly * ammo.dmgMult
+          });
+        }
+      }
+      pushFrame(1, '階段一 · 先制破陣（斬首／奇襲破陣）', volley(at, { allowAbm: true, phase: 1, dailyBuffer: Boolean(opts.dailyBuffer) }));
+    }
+    return { ewA, ewB, advSide };
+  }
+
+  /* ===== 階段二：神射攔截、先鋒爭先與先登奇兵對決 ===== */
+  function runPhase2() {
+    if (!over()) {
+      // 2-1 神射弩陣萬箭齊發，攔截敵方奔雷突騎
+      const at = [];
+      for (const s of ['A', 'B']) {
+        const e = other(s);
+        const shooters = alive(s, x => x.cat === 'air_defense' || x.traits.includes('AEGIS'));
+        for (const u of shooters) {
+          const t = pickTop(alive(e, x => x.cat === 'air'));
+          if (!t) continue;
+          const ammo = getAmmoProfile(u);
+          const isTrueAt = unitHasTrueAt(u, ammo);
+          u.shots++;
+          const f = u.cat === 'air_defense' ? 1 : 0.55;
+          const hit = hitP(u, t, 0.82 + (u.traits.includes('AA_LONG') ? 0.08 : 0) + S[s].adHit, 0.56, m.airHit + ammo.hitMod);
+          at.push({ att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt, hit, dmg: u.atk * 1.75 * f * S[s].atkEarly * ammo.dmgMult });
+        }
+      }
+      pushFrame(2, '階段二 · 神射箭雨攔截', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
+    }
+    if (!over()) {
+      // 2-2 奔雷突騎交鋒（爭奪先機權 10 分）
+      const at = [];
+      for (const s of ['A', 'B']) {
+        const e = other(s);
+        for (const u of alive(s, x => x.cat === 'air')) {
+          const airPool = alive(e, x => x.cat === 'air');
+          if (!airPool.length) continue;
+          const ammo = getAmmoProfile(u);
+          const tgts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(airPool, 2) : [pickTop(airPool)];
+          u.shots++;
+          for (const t of tgts) {
+            if (!t) continue;
+            const hit = hitP(u, t, 0.66 + (u.traits.includes('LR') ? 0.06 : 0) + (u.stealth - t.stealth) / 250, 0.3, m.airHit + ammo.hitMod);
+            at.push({ att: u, tgt: t, ammoTier: ammo.tier, hit, dmg: u.atk * 1.10 * (tgts.length > 1 ? 0.75 : 1) * S[s].atkEarly * ammo.dmgMult });
+          }
+        }
+      }
+      pushFrame(2, '階段二 · 奔雷突騎爭先', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
+    }
+    if (!over()) {
+      // 2-3 先登奇兵對決（虎賁破陣 vs 潛行夜襲，爭奪先登權 5 分）
+      const at = [];
+      for (const s of ['A', 'B']) {
+        const e = other(s);
+        for (const u of alive(s, x => x.cat === 'naval')) {
+          const navs = alive(e, x => x.cat === 'naval');
+          const pool = navs.length ? navs : alive(e, x => x.cat === 'armor');
+          if (!pool.length) continue;
+          const ammo = getAmmoProfile(u);
+          const tgts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
+          const isTrueAt = unitHasTrueAt(u, ammo);
+          u.shots++;
+          for (const t of tgts) {
+            if (!t) continue;
+            let mult = (navs.length ? 0.90 : 0.75);
+            // ASW 看破反伏專精：專剋潛行夜襲 (SUB) 造成 1.6 倍傷害
+            if (t.traits.includes('SUB') && u.traits.includes('ASW')) mult *= 1.6;
+            // SUB 潛行夜襲：對未設防目標造成 1.3 倍傷害
+            if (u.traits.includes('SUB') && !t.traits.includes('SUB')) mult *= 1.3;
+            if (tgts.length > 1) mult *= 0.6;
+            at.push({
+              att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
+              hit: hitP(u, t, 0.76 + S[s].navHit, 0.45, ammo.hitMod),
+              dmg: u.atk * mult * S[s].navMult * m.navalDmg * S[s].atkEarly * ammo.dmgMult
+            });
+          }
+        }
+      }
+      pushFrame(2, '階段二 · 先登奇兵交鋒', volley(at, { phase: 2, dailyBuffer: Boolean(opts.dailyBuffer) }));
+    }
+  }
+
+  /* ===== 階段三：中軍主力決戰與氣力三階消耗（上限 10 輪，未全殲則鳴金收兵由戰功 VP 裁定） ===== */
+  function runPhase3() {
+    let r = 1;
+    const MAX_ROUNDS = 10;
+    while (!over() && r <= MAX_ROUNDS) {
+      const at = [];
+      const prefixLines = [];
+      // 第 6 輪起：陣形拉鋸方位盡露，展開死鬥合圍（微幅提升命中，不虛胖攻擊力）
+      const stealthScale = r >= 6 ? 0.75 : 1.0;
+      const lockBonus = r >= 6 ? 0.05 : 0.0;
+
+      if (r === 4) {
+        const hpRatio = side => T[side].reduce((sum, u) => sum + Math.max(0, u.hp), 0) / Math.max(1, T[side].reduce((sum, u) => sum + u.hpMax, 0));
+        const rA = hpRatio('A'), rB = hpRatio('B');
+        if (Math.abs(rA - rB) >= 0.12) {
+          const under = rA < rB ? 'A' : 'B';
+          S[under].atkAll = (S[under].atkAll || 1) * 1.07;
+          S[other(under)].hitPen = (S[other(under)].hitPen || 0) + 0.03;
+          prefixLines.push({
+            side: under, kind: 'info', brevity: '背水奮戰', moraleShift: true,
+            text: `${under === 'A' ? '我軍' : '敵軍'}見前線吃緊激發背水死志：全軍攻擊 +7%，敵軍命中 −3%！`
+          });
+        }
+      }
+      if (r === 6) {
+        prefixLines.push({
+          side: 'N', kind: 'info', brevity: '短兵相接',
+          text: '兩軍大陣徹底咬合，近身死鬥展開（隱匿效果降低，命中率提升）！'
+        });
+      } else if (r === 8) {
+        prefixLines.push({
+          side: 'N', kind: 'info', brevity: '氣力漸竭',
+          text: '戰局進入白熱化，主力名將氣力見底，拔出佩刀短匕展開最後死鬥！'
+        });
+      }
+
+      for (const s of ['A', 'B']) {
+        const e = other(s);
+        const enemyAlive = alive(e);
+        if (!enemyAlive.length) continue;
+
+        const myAlive = alive(s);
+        const enemyArmor = alive(e, x => x.cat === 'armor');
+        const enemyAir = alive(e, x => x.cat === 'air');
+        const enemyNaval = alive(e, x => x.cat === 'naval');
+        const frontlineGround = enemyArmor.length ? enemyArmor : enemyAlive;
+        const rearGround = alive(e, x => x.cat === 'support' || x.cat === 'air_defense');
+        const adAlive = alive(e, x => x.cat === 'air_defense').length;
+      
+        const hasIdleAbmRadar = !enemyAir.length && myAlive.some(x => hasRoleFlag(x, 'FORMATION_SHIELD'));
+        const spot = (myAlive.some(x => x.traits.includes('SPOT')) || hasIdleAbmRadar) ? 1.15 : 1;
+        const abmTrackBonus = hasIdleAbmRadar ? 0.04 : 0;
+        const ciws = alive(e, x => x.traits.includes('CIWS')).length > 0;
+        if (r === 1 && myAlive.some(unit => unit.formation === 'cone') && !S[e].supplyCut) {
+          S[e].atkAll = (typeof S[e].atkAll === 'number' ? S[e].atkAll : 1) * 0.92;
+          S[e].supplyCut = true;
+          prefixLines.push({
+            side: s,
+            kind: 'info',
+            brevity: '截斷糧道',
+            text: `${s === 'A' ? '我軍' : '敵軍'}錐行部隊高速穿插敵後，截斷糧道！敵軍全軍攻勢減弱 8%。`
+          });
+          addKey(3, `${s === 'A' ? '我軍' : '敵軍'}錐行部隊截斷敵軍糧道，削弱其持續作戰能力`, s);
+        }
+
+        const isSwarmOrDrone = u => (typeof DRONE_IDS !== 'undefined' && DRONE_IDS.has(u.id)) || u.traits.includes('SWARM');
+
+        for (const u of myAlive) {
+          const ground = u.cat === 'air_defense' && u.formationRanged && rearGround.length
+            ? rearGround
+            : frontlineGround;
+          const droneScale = isSwarmOrDrone(u) ? S[s].droneMult * m.droneDmg * (ciws ? 0.85 : 1) : 1;
+          if (u.cat === 'air') {
+            // 突騎繞後側翼包抄重甲（霍去病、源義經優先穿插敵方後陣）
+            const isRearRaider = u.id === 'HUO' || u.id === 'YOSHITSUNE';
+            const airPool = isRearRaider && rearGround.length ? rearGround : ground;
+            const ammo = getAmmoProfile(u);
+            const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(airPool, 2) : [pickTop(airPool)];
+            const isTrueAt = unitHasTrueAt(u, ammo);
+            const mult = u.traits.includes('CAS') ? 1.74 : (isTrueAt ? 1.60 : 1.15);
+            u.shots++;
+            for (const t of ts) {
+              if (!t) continue;
+              at.push({
+                att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
+                hit: hitP(u, t, 0.82 - Math.min(0.3, adAlive * 0.07), 0.15, m.airHit + lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
+                dmg: u.atk * mult * (ts.length > 1 ? 0.75 : 1) * (t.cat === 'armor' ? (isTrueAt ? 1.25 : 1.1) : 0.86) * ammo.dmgMult
+              });
+            }
+          } else if (u.cat === 'naval') {
+            // 先登奇兵進攻
+            const ammo = getAmmoProfile(u);
+            const pool = !u.formationRanged && enemyNaval.length ? enemyNaval : ground;
+            const ts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(pool, 2) : [pickTop(pool)];
+            const isTrueAt = unitHasTrueAt(u, ammo);
+            u.shots++;
+            for (const t of ts) {
+              if (!t) continue;
+              let nMult = 0.80 * S[s].navMult;
+              if (t.traits.includes('SUB') && u.traits.includes('ASW')) nMult *= 1.35;
+              if (ts.length > 1) nMult *= 0.65;
+              at.push({
+                att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
+                hit: hitP(u, t, 0.78 + S[s].navHit, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
+                dmg: u.atk * nMult * m.navalDmg * droneScale * ammo.dmgMult
+              });
+            }
+          } else if (u.cat === 'armor') {
+            // 重甲中軍正面對決（楊業、岳飛優先迎擊敵方突騎）
+            const isAntiAirArmor = u.id === 'YANGYE' || u.id === 'YUEFEI';
+            const armorPool = (isAntiAirArmor && enemyAir.length) ? enemyAir : ground;
+            const t = pickTop(armorPool);
+            if (!t) continue;
+            const ammo = getAmmoProfile(u);
+            const isTrueAt = unitHasTrueAt(u, ammo);
+            u.shots++;
+            const vsFactor = t.cat === 'armor'
+              ? (isTrueAt ? 1.16 : 1.1)
+              : (isAntiAirArmor && t.cat === 'air' ? 1.05 : 0.9);
+            at.push({
+              att: u, tgt: t, ammoTier: ammo.tier, trueDmg: isTrueAt,
+              hit: hitP(u, t, 0.85, 0.2, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
+              dmg: u.atk * (isTrueAt ? 1.46 : 1.38) * S[s].landMult * m.armorDmg * vsFactor * ammo.dmgMult
+            });
+          } else if (u.cat === 'support') {
+            // 軍師奇計／火器攻城
+            const ammo = getAmmoProfile(u);
+            u.shots++;
+            if (u.traits.includes('TRUE_AT') || hasRoleFlag(u, 'HEAVY_AP')) {
+              const isTrueAt = ammo.canTrueAt;
+              const ts = (u.traits.includes('SWARM') && ammo.canSwarm) ? pickN(ground, 2) : [pickTop(ground)];
+              for (const t of ts) {
+                if (!t) continue;
+                at.push({
+                  att: u, tgt: t, ammoTier: ammo.tier,
+                  hit: hitP(u, t, 0.78, 0.35, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
+                  trueDmg: isTrueAt,
+                  dmg: u.atk * 1.65 * (ts.length > 1 ? 0.65 : 1) * S[s].droneMult * m.droneDmg * (ciws ? 0.8 : 1) * ammo.dmgMult
+                });
+              }
+            } else if (u.traits.includes('ARTY')) {
+              const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [pickTop(ground)];
+              for (const t of ts) {
+                if (!t) continue;
+                at.push({
+                  att: u, tgt: t, ammoTier: ammo.tier,
+                  hit: hitP(u, t, 0.78, 0.3, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
+                  dmg: u.atk * 1.22 * (ts.length > 1 ? 0.75 : 1) * S[s].landMult * m.artyDmg * spot * droneScale * ammo.dmgMult
+                });
+              }
+            } else {
+              const t = pickTop(ground);
+              if (t) {
+                const supScale = isSwarmOrDrone(u) ? droneScale : S[s].droneMult;
+                at.push({
+                  att: u, tgt: t, ammoTier: ammo.tier,
+                  hit: hitP(u, t, 0.80, 0.25, lockBonus + abmTrackBonus + ammo.hitMod, stealthScale),
+                  dmg: u.atk * (1.12 + Math.max(0, u.ew - 60) * 0.006) * supScale * spot * ammo.dmgMult
+                });
+              }
+            }
+          } else if (u.cat === 'air_defense') {
+            // 神射弩陣平射支援
+            if (enemyAir.length) {
+              const t = pickTop(enemyAir);
+              if (t) {
+                const ammo = getAmmoProfile(u);
+                const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(enemyAir, 2) : [t];
+                const isTrueAt = unitHasTrueAt(u, ammo);
+                u.shots++;
+                for (const airTgt of ts) {
+                  if (!airTgt) continue;
+                  at.push({
+                    att: u, tgt: airTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
+                    hit: hitP(u, airTgt, 0.88 + (u.traits.includes('AA_LONG') ? 0.06 : 0) + S[s].adHit, 0.36, m.airHit + lockBonus + ammo.hitMod, stealthScale),
+                    dmg: u.atk * 1.85 * (ts.length > 1 ? 0.75 : 1) * droneScale * ammo.dmgMult
+                  });
+                }
+              }
+            } else {
+              const t = pickTop(ground);
+              if (t) {
+                const ammo = getAmmoProfile(u);
+                const ts = (u.traits.includes('SAT') && ammo.canSat) ? pickN(ground, 2) : [t];
+                const isTrueAt = unitHasTrueAt(u, ammo);
+                const abmScale = hasRoleFlag(u, 'FORMATION_SHIELD') ? 0.56 : 0.78;
+                u.shots++;
+                for (const gTgt of ts) {
+                  if (!gTgt) continue;
+                  at.push({
+                    att: u, tgt: gTgt, ammoTier: ammo.tier, trueDmg: isTrueAt,
+                    hit: clamp(0.72 + lockBonus + ammo.hitMod, 0.08, 0.96),
+                    dmg: u.atk * abmScale * (ts.length > 1 ? 0.75 : 1) * droneScale * ammo.dmgMult
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+      const phaseLabel = r === 1
+        ? `階段三 · 先鋒接陣試探（第 1 輪）`
+        : (r <= 5 ? `階段三 · 中軍死鬥合圍（第 ${r} 輪）` : (r <= 7 ? `階段三 · 短兵相接鏖戰（第 ${r} 輪）` : `階段三 · 氣力見底苦戰（第 ${r} 輪）`));
+      const roundLines = volley(at, { prefixLines, allowDuels: true, phase: 3, round: r, dailyBuffer: Boolean(opts.dailyBuffer) });
+      for (const sideKey of ['A', 'B']) {
+        for (const u of T[sideKey]) {
+          if (!u.alive || !u.statuses) continue;
+          if (u.statuses.burn > 0) {
+            const burnDmg = Math.max(10, Math.round(u.hpMax * 0.05));
+            u.hp -= burnDmg;
+            u.dmgTaken += burnDmg;
+            const caster = u.statuses.burnCaster;
+            if (caster) {
+              caster.dmgDone += burnDmg;
+              caster.statusDmg += burnDmg;
+            }
+            if (u.hp <= 0) {
+              u.hp = 0; u.alive = false; u.killedBy = caster || u.killedBy;
+              roundLines.push({
+                side: caster ? caster.side : other(sideKey), kind: 'kill', auid: caster?.uid, tuid: u.uid,
+                brevity: '烈焰灼燒', dmg: burnDmg, text: `[烈焰灼燒] ${u.name} 遭火攻持續焚傷潰滅！`, hpAfter: 0
+              });
+            } else {
+              roundLines.push({
+                side: caster ? caster.side : other(sideKey), kind: 'hit', auid: caster?.uid, tuid: u.uid,
+                brevity: '灼燒蔓延', dmg: burnDmg, text: `[灼燒] ${u.name} 受火勢持續損傷 -${burnDmg}`, hpAfter: Math.round(u.hp)
+              });
+            }
+            u.statuses.burn--;
+          }
+          if (u.statuses.sunder > 0) u.statuses.sunder--;
+          if (u.statuses.confuse > 0) u.statuses.confuse--;
+          if (u.statuses.rally > 0) u.statuses.rally--;
+          if (u.statuses.stagger > 0) u.statuses.stagger--;
+          if (u.statuses.mark > 0) u.statuses.mark--;
+        }
+      }
+      pushFrame(3, phaseLabel, roundLines);
+      r++;
+    }
+  }
 }
 
 /* ---------- 戰果指紋：同一組輸入必得同一指紋，用於回歸快照與線上兩端結果比對 ---------- */

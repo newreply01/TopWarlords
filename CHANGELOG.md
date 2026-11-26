@@ -4,6 +4,13 @@
 
 ---
 
+## [7.15.6] - 2026-11-26
+### Refactored (3D 引擎拆檔第 2 步：GLTF 模型載入模組獨立＋3D 視覺回歸比對工具，畫面零變動)
+
+- **新增 `tools/compare_3d_visual.py`**：以固定種子 `Math.random` 與 Playwright `page.clock` 假時鐘重現同一場戰局，開戰後立即暫停並隱藏 DOM 浮層，只截取 WebGL 畫布（布陣靜態場景、開啟軍旗資訊標籤），將指定 git 版本與目前工作目錄逐像素比對；自檢雜訊 < 0.02%，地表貼圖輕微改色即可偵測（0.55%）。因不同 GPU 算繪略有差異，不納入 CI，於重構 3D 前後在本機執行：`python tools/compare_3d_visual.py --ref <版本>`。
+- **新增 `js/battle-3d-models.js`（`Battle3DModels`）**：自 `battle-3d.js` 抽出 GLTF 模型清單、預載（併發佇列）、骨骼邊界正規化與實例化（`findClip`、`computeTrueWorldBox`、`ensureModelsLoaded`、`spawnModelInstance`），模型快取與載入計數改由模組持有；具骨骼動畫的實例回傳 `animCtrl`，由 `battle-3d.js` 註冊至渲染迴圈。`battle-3d.js` 降為約 5,020 行。
+- 3D 視覺比對（對照拆分前版本）通過；新檔已加入 `index.html` 與 `sw.js` 的 `CORE_ASSETS`。
+
 ## [7.15.5] - 2026-11-26
 ### Refactored (3D 引擎拆檔第 1 步：程序化貼圖模組獨立，畫面零變動)
 

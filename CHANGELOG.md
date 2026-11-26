@@ -4,6 +4,12 @@
 
 ---
 
+## [7.15.5] - 2026-11-26
+### Refactored (3D 引擎拆檔第 1 步：程序化貼圖模組獨立，畫面零變動)
+
+- **新增 `js/battle-3d-textures.js`（`Battle3DTextures`）**：自 `js/battle-3d.js` 抽出 12 個僅依賴 THREE 與 Canvas 2D、不讀寫引擎戰況狀態的函式與常數（天空／河流／地表／營寨旗幟／軍旗／八卦陣／傷痕／戰塵貼圖、`VFX_PALETTES` 技能特效配色與 `getSkillVfxTexture()`、`mergeStaticGeos()`、`roundRectPath()`）及其快取，約 880 行；`battle-3d.js` 由 6,123 行降為約 5,250 行。
+- 搬移後的 12 個函式與原始碼逐字元比對完全相同；`battle-3d.js` 以解構方式引用，呼叫端不變。新檔已加入 `index.html`（於 `battle-3d.js` 之前載入）與 `sw.js` 的 `CORE_ASSETS`。
+
 ## [7.15.4] - 2026-11-26
 ### Refactored (戰鬥引擎結構整理，戰果零變動)
 

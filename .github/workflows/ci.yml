@@ -34,6 +34,7 @@ jobs:
           node test/test_battle_figures.js
           node test/test_spatial_audio.js
           node test/test_engine_golden.js
+          node test/test_cloud_sync_privacy.js
           python3 tools/verify_integrity.py
           node tools/balance.js
 

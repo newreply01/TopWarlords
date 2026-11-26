@@ -597,6 +597,7 @@ try:
                                 type: 'HANDSHAKE',
                                 payload: {
                                     gameId: 'topwarlords',
+                                    appVersion: (typeof OnlinePvPEngine !== 'undefined') ? OnlinePvPEngine.getAppVersion() : null,
                                     senderId: 'HOST-PUB888',
                                     name: '織田信長公開房',
                                     uid: 'CMD-PUB888',
@@ -788,7 +789,7 @@ try:
                 packet: {
                     id: 'GUEST-RACE-01:hs',
                     type: 'HANDSHAKE',
-                    payload: { gameId: 'topwarlords', senderId: 'GUEST-RACE-01', name: '模擬對手', uid: 'CMD-GUEST', flag: '🇹🇼', isHost: false }
+                    payload: { gameId: 'topwarlords', appVersion: OnlinePvPEngine.getAppVersion(), senderId: 'GUEST-RACE-01', name: '模擬對手', uid: 'CMD-GUEST', flag: '🇹🇼', isHost: false }
                 },
                 ts: Date.now()
             });
@@ -815,7 +816,7 @@ try:
             sameGuestConn._emit('data', {
                 id: 'GUEST-RACE-01:p2p-hs',
                 type: 'HANDSHAKE',
-                payload: { gameId: 'topwarlords', senderId: 'GUEST-RACE-01', name: '模擬對手', uid: 'CMD-GUEST', flag: '🇹🇼', isHost: false }
+                payload: { gameId: 'topwarlords', appVersion: OnlinePvPEngine.getAppVersion(), senderId: 'GUEST-RACE-01', name: '模擬對手', uid: 'CMD-GUEST', flag: '🇹🇼', isHost: false }
             });
 
             const intruderConn = makeIncoming('INTRUDER-99', true);

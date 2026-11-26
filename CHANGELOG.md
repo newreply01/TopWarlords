@@ -4,6 +4,18 @@
 
 ---
 
+## [7.15.2] - 2026-11-26
+### Security (線上真人對戰公平性修正：Commit-Reveal 強制驗證、雙方共同種子、版本握手)
+
+- **Commit-Reveal 強制驗證 (`js/app.js`)**：對手揭曉的陣容／教條／陣形／地形／鹽值若與先前 `DECK_COMMIT` 雜湊不符，或同一局重送不同內容，立即中斷線上對戰（原本僅 `console.warn` 仍照常開戰，先鎖定方可在看到對手陣容後換牌）；缺少有效雜湊的 `DECK_COMMIT` 不再視為就緒，避免誘使我方先行揭曉。
+- **鎖定陣容快照 (`state.pvpMyLocked`)**：Commit、Reveal、`COMBAT_SYNC` 與推演一律採用鎖定當下的快照，修正挑戰者地形被房主地形覆蓋後揭曉內容與 Commit 不一致的問題。
+- **挑戰者陣容不再可被房主代改**：`COMBAT_SYNC` 移除 `guestDeck / guestDoctrine / guestFormations`，挑戰者一律以本機鎖定陣容參戰；房主陣容必須與已揭曉並驗證過的陣容一致，否則中斷。房主端忽略任何來自挑戰者的 `COMBAT_SYNC`。
+- **雙方共同隨機種子**：種子改為 `hashStr(hostSalt | guestSalt | round)`，兩個鹽值皆在對方揭曉前已被 Commit 鎖定，房主無法再於本機試算挑選有利種子；挑戰者端重新推導並比對。
+- **戰場事件僅接受官方定義**：`COMBAT_SYNC` 只傳事件 `id`，挑戰者以 `EVENTS` 對照，杜絕偽造天候數值加成（`mod`）。
+- **入站封包序列化**：COMMIT → REVEAL → COMBAT_SYNC 經 `enqueuePvpInbound()` 依序處理，確保非同步 SHA-256 驗證完成後才開戰。
+- **握手版本比對 (`js/online-pvp.js`)**：`HANDSHAKE` 攜帶 `appVersion`（取自 script `?v=`），雙方版本不一致時拒絕連線並提示重新整理，避免 Service Worker 快取舊版造成兩端推演結果分歧。
+- **測試**：新增 `test/test_pvp_integrity.py`（10 項攻擊情境）並納入 CI；`test/test_full_gameplay.py` 模擬握手補上 `appVersion`。
+
 ## [7.15.1] - 2026-11-24
 
 ### Improved (20 位武將 Q 版頭像重繪、精修與滿版去框統一)

@@ -7,6 +7,16 @@
 const OnlinePvPEngine = (function () {
   const PEERJS_CDN = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
   const ROOM_PREFIX = 'TOPWARLORDS-BO5-';
+  /* 對戰協定版本：取自本檔 ?v= 版本號。雙方版本不同時戰鬥引擎數值可能不同，兩端推演結果會分歧，因此握手時強制比對。 */
+  const APP_VERSION = (() => {
+    try {
+      const el = (typeof document !== 'undefined') && (document.currentScript || document.querySelector('script[src*="online-pvp.js"]'));
+      const m = ((el && el.getAttribute('src')) || '').match(/[?&]v=([^&]+)/);
+      return m ? m[1] : 'dev';
+    } catch (_) {
+      return 'dev';
+    }
+  })();
 
   let peer = null;
   let conn = null;
@@ -102,6 +112,7 @@ const OnlinePvPEngine = (function () {
   function buildHandshakePayload(playerProfile, hostFlag) {
     return {
       gameId: 'topwarlords',
+      appVersion: APP_VERSION,
       senderId,
       name: (playerProfile && playerProfile.name) || (hostFlag ? '主帥本陣' : '挑戰軍團'),
       uid: (playerProfile && playerProfile.uid) || 'WL-ONLINE',
@@ -669,6 +680,15 @@ const OnlinePvPEngine = (function () {
           emit('error', '對手來自不同遊戲專案，已自動中斷連線');
           return;
         }
+        if (!data.payload || data.payload.appVersion !== APP_VERSION) {
+          const theirs = (data.payload && data.payload.appVersion) || '舊版';
+          const msg = `雙方遊戲版本不一致（我方 v${APP_VERSION}、對手 v${theirs}），請雙方重新整理頁面更新至最新版後再連線`;
+          const rejectJoin = pendingJoinReject;
+          closeConnection();
+          if (rejectJoin) rejectJoin(new Error(msg));
+          emit('error', msg);
+          return;
+        }
         if (isHost) {
           const pktSender = data.payload && data.payload.senderId;
           if ((opponentInfo || activeGuestSenderId || roomHasStarted) && activeGuestSenderId && pktSender && pktSender !== activeGuestSenderId) {
@@ -1021,6 +1041,7 @@ const OnlinePvPEngine = (function () {
     getState: () => pvpState,
     getOpponent: () => opponentInfo,
     isHostUser: () => isHost,
-    getCurrentRoomCode: () => currentRoomId
+    getCurrentRoomCode: () => currentRoomId,
+    getAppVersion: () => APP_VERSION
   };
 })();

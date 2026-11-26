@@ -132,6 +132,9 @@ const state = {
   pvpMySalt: null,
   pvpMyCommitHash: null,
   pvpOpponentCommitHash: null,
+  pvpOpponentSalt: null,
+  pvpOpponentRevealKey: null,
+  pvpMyLocked: null,
   pvpCombatSyncSentRound: 0,
   pvpPendingPackets: [],
   pvpPendingSeriesEnd: null,
@@ -6233,7 +6236,10 @@ function handleBo3RoundEnd(res, opts = {}) {
     state.pvpMyRevealed = false;
     state.pvpMySalt = null;
     state.pvpMyCommitHash = null;
+    state.pvpMyLocked = null;
     state.pvpOpponentCommitHash = null;
+    state.pvpOpponentSalt = null;
+    state.pvpOpponentRevealKey = null;
     state.pvpCombatSyncSentRound = 0;
     flushPendingPvpPacketsForRound(nextRound);
     if (state.pvpPendingSeriesEnd) {
@@ -6595,6 +6601,7 @@ $('#bo3CounterConfirm').onclick = () => {
     state.pvpMyRevealed = false;
     state.pvpMySalt = null;
     state.pvpMyCommitHash = null;
+    state.pvpMyLocked = null;
     renderAll();
     const refitSec = (state.bo3.marketMode === 'free') ? 60 : 45;
     startPvpDeploymentTimer(refitSec);
@@ -7786,13 +7793,86 @@ function getOnlinePvpLoadout() {
   };
 }
 
-function sendOnlinePvpDeckReveal() {
+/* 鎖定當下的陣容快照：Commit 雜湊、Reveal 明文、COMBAT_SYNC 與推演皆以此為準，
+   避免鎖定後 UI 變動（例如挑戰者地形被房主地形覆蓋）造成雜湊不符或兩端分歧。 */
+function snapshotOnlinePvpLoadout() {
   const loadout = getOnlinePvpLoadout();
-  OnlinePvPEngine.sendPacket('DECK_SUBMIT', {
+  return {
     deck: state.deck.slice(),
     doctrine: state.doctrine,
     formations: loadout.formations,
-    terrain: loadout.terrain,
+    terrain: loadout.terrain
+  };
+}
+
+function getMyPvpLocked() {
+  return state.pvpMyLocked || snapshotOnlinePvpLoadout();
+}
+
+function getPvpRevealKey(p) {
+  return JSON.stringify([
+    Array.isArray(p && p.deck) ? p.deck : [],
+    (p && p.doctrine) || 'defense',
+    Array.isArray(p && p.formations) ? p.formations : [],
+    (p && p.terrain) || 'plain',
+    (p && p.salt) || ''
+  ]);
+}
+
+/* 雙方共同決定的隨機種子：兩個鹽值皆在對方揭曉前已被 Commit 鎖定，任一方都無法單獨挑選有利種子。 */
+function deriveOnlinePvpSeed(hostSalt, guestSalt, round) {
+  return hashStr(`TW-PVP|${hostSalt || ''}|${guestSalt || ''}|${Number(round) || 1}`) >>> 0;
+}
+
+/* 戰場事件只接受官方 EVENTS 定義（以 id 對照），杜絕封包偽造天候數值加成。 */
+function resolveOnlinePvpEvent(evt) {
+  const id = evt && typeof evt === 'object' ? evt.id : evt;
+  return EVENTS.find(e => e.id === id) || null;
+}
+
+/* 驗證對手揭曉的陣容：須與先前 Commit 雜湊一致，且同一局重送的揭曉不得變更內容。回傳錯誤訊息或 null。 */
+async function verifyOnlinePvpReveal(payload) {
+  if (!payload || !Array.isArray(payload.deck) || !payload.salt) return '揭曉封包缺少陣容或鹽值';
+  if (state.pvpOpponentRevealKey && state.pvpOpponentRevealKey !== getPvpRevealKey(payload)) {
+    return '對手於同一局重送了不同的陣容';
+  }
+  const committed = state.pvpOpponentCommitHash;
+  if (!committed) return null;
+  const isSha = String(committed).startsWith('sha256:');
+  if (isSha && !(typeof crypto !== 'undefined' && crypto.subtle)) {
+    console.warn('[Security] 目前環境不支援 Web Crypto（非 HTTPS），無法驗證 SHA-256 Commit。');
+    return null;
+  }
+  let verifyHash = null;
+  try {
+    verifyHash = isSha
+      ? await OnlinePvPEngine.computeCommitHashAsync(payload.deck, payload.doctrine, payload.salt, payload.formations, payload.terrain)
+      : OnlinePvPEngine.computeCommitHash(payload.deck, payload.doctrine, payload.salt, payload.formations, payload.terrain);
+  } catch (_) {
+    verifyHash = null;
+  }
+  return verifyHash === committed ? null : '對手揭曉的陣容與先前加密承諾不符';
+}
+
+/* 偵測到竄改：中斷連線並回到常規模式 */
+function abortOnlinePvpForCheat(reason) {
+  console.warn('[Security] PvP integrity violation:', reason);
+  PvPTimerManager.stop();
+  try { closeBattle(); } catch (_) { }
+  try { OnlinePvPEngine.closeConnection(); } catch (_) { }
+  resetOnlinePvpSessionState(null, { keepSettings: true, activate: false });
+  initBo3Series();
+  renderAll();
+  toast(`🚫 偵測到對戰資料遭竄改（${reason}），已中斷本場線上對戰。`);
+}
+
+function sendOnlinePvpDeckReveal() {
+  const locked = getMyPvpLocked();
+  OnlinePvPEngine.sendPacket('DECK_SUBMIT', {
+    deck: locked.deck.slice(),
+    doctrine: locked.doctrine,
+    formations: locked.formations,
+    terrain: locked.terrain,
     salt: state.pvpMySalt,
     commitHash: state.pvpMyCommitHash,
     round: state.bo3.round
@@ -7833,17 +7913,18 @@ async function handleOnlinePvpSubmit() {
   state.pvpMySalt = (typeof OnlinePvPEngine.generateSecureSalt === 'function')
     ? OnlinePvPEngine.generateSecureSalt()
     : Math.random().toString(36).slice(2, 12);
-  const loadout = getOnlinePvpLoadout();
-  const fallbackHash = OnlinePvPEngine.computeCommitHash(state.deck, state.doctrine, state.pvpMySalt, loadout.formations, loadout.terrain);
+  const locked = snapshotOnlinePvpLoadout();
+  state.pvpMyLocked = locked;
+  const fallbackHash = OnlinePvPEngine.computeCommitHash(locked.deck, locked.doctrine, state.pvpMySalt, locked.formations, locked.terrain);
   state.pvpMyCommitHash = fallbackHash;
   if (typeof OnlinePvPEngine.computeCommitHashAsync === 'function') {
     try {
       state.pvpMyCommitHash = await OnlinePvPEngine.computeCommitHashAsync(
-        state.deck,
-        state.doctrine,
+        locked.deck,
+        locked.doctrine,
         state.pvpMySalt,
-        loadout.formations,
-        loadout.terrain
+        locked.formations,
+        locked.terrain
       ) || fallbackHash;
     } catch (_) {
       state.pvpMyCommitHash = fallbackHash;
@@ -7890,7 +7971,10 @@ function resetOnlinePvpSessionState(opp = null, opts = {}) {
   state.pvpMyRevealed = false;
   state.pvpMySalt = null;
   state.pvpMyCommitHash = null;
+  state.pvpMyLocked = null;
   state.pvpOpponentCommitHash = null;
+  state.pvpOpponentSalt = null;
+  state.pvpOpponentRevealKey = null;
   state.pvpCombatSyncSentRound = 0;
   state.pvpPendingPackets = [];
   state.pvpPendingSeriesEnd = null;
@@ -7937,6 +8021,8 @@ function checkBothReadyAndStartCombat() {
       state.pvpOpponentFormations = null;
       state.pvpOpponentTerrain = null;
       state.pvpOpponentCommitHash = null;
+      state.pvpOpponentSalt = null;
+      state.pvpOpponentRevealKey = null;
       renderCommandDeck();
       renderMissionBar();
       OnlinePvPEngine.sendPacket('DECK_UNREADY', { round, reason: oppErrs[0] });
@@ -7944,13 +8030,14 @@ function checkBothReadyAndStartCombat() {
       return;
     }
 
-    const myErrs = validateDeck(state.deck, budgetLimit(), currentBanned());
+    const myErrs = validateDeck(getMyPvpLocked().deck, budgetLimit(), currentBanned());
     if (myErrs.length > 0) {
       const round = Number(state.bo3.round || 1);
       state.pvpMyReady = false;
       state.pvpMyRevealed = false;
       state.pvpMySalt = null;
       state.pvpMyCommitHash = null;
+      state.pvpMyLocked = null;
       renderAll();
       OnlinePvPEngine.sendPacket('DECK_UNREADY', { round, reason: myErrs[0] });
       toast(`⚠️ 你的陣容不符合規則（${myErrs[0]}），請重新挑選！`);
@@ -7961,11 +8048,11 @@ function checkBothReadyAndStartCombat() {
     if (state.pvpCombatSyncSentRound === currentRound) return;
     state.pvpCombatSyncSentRound = currentRound;
 
-    // 房主生成同一個公平隨機種子與動態戰場事件 (優先使用下局預告事件)
-    const seed = (Math.random() * 4294967296) >>> 0;
-    const event = state.bo3.nextEvent || pick(EVENTS.filter(e => !state.event || e.id !== state.event.id));
+    // 隨機種子由雙方已 Commit 的鹽值共同推導，房主無法事後挑選有利種子；戰場事件只傳 id（優先使用下局預告事件）
+    const seed = deriveOnlinePvpSeed(state.pvpMySalt, state.pvpOpponentSalt, currentRound);
+    const event = resolveOnlinePvpEvent(state.bo3.nextEvent) || pick(EVENTS.filter(e => !state.event || e.id !== state.event.id));
     state.bo3.nextEvent = null;
-    const hostLoadout = getOnlinePvpLoadout();
+    const hostLocked = getMyPvpLocked();
     const syncPayload = {
       round: currentRound,
       maxGames: state.bo3.maxGames || 5,
@@ -7975,36 +8062,39 @@ function checkBothReadyAndStartCombat() {
       bannedListA: (state.bo3.bannedListA || []).slice(),
       bannedListB: (state.bo3.bannedListB || []).slice(),
       seed,
-      event,
-      deck: state.deck.slice(),
-      doctrine: state.doctrine,
-      formations: hostLoadout.formations,
-      terrain: hostLoadout.terrain,
-      guestDeck: state.pvpOpponentDeck.slice(),
-      guestDoctrine: state.pvpOpponentDoc || 'defense',
-      guestFormations: normalizeFormations(state.pvpOpponentFormations),
+      eventId: event.id,
+      event: { id: event.id },
+      deck: hostLocked.deck.slice(),
+      doctrine: hostLocked.doctrine,
+      formations: hostLocked.formations,
+      terrain: hostLocked.terrain,
       salt: state.pvpMySalt,
       commitHash: state.pvpMyCommitHash
     };
-    // 同時在 COMBAT_SYNC 攜帶完整雙方陣容與賽況，徹底杜絕網路延遲與兩端狀態分歧
+    // COMBAT_SYNC 僅攜帶房主自身已揭曉的陣容；挑戰者一律以自己本機鎖定的陣容參戰，房主無法代改
     OnlinePvPEngine.sendPacket('COMBAT_SYNC', syncPayload);
-    startOnlinePvpBattle(seed, event, syncPayload);
+    startOnlinePvpBattle(seed, event);
   }
 }
 
-function startOnlinePvpBattle(seed, event, syncPayload = null) {
+/* 依「已驗證」的雙方陣容啟動推演：房主固定 Side A、挑戰者固定 Side B。
+   我方一律取本機鎖定快照，對方一律取已通過 Commit-Reveal 驗證的揭曉資料。 */
+function startOnlinePvpBattle(seed, event) {
   const isHost = OnlinePvPEngine.isHostUser();
-  const hasSyncHostDeck = (!isHost && syncPayload && Array.isArray(syncPayload.deck) && syncPayload.deck.length === 5);
-  if (!state.pvpOpponentDeck && !hasSyncHostDeck) {
+  if (!state.pvpOpponentDeck || state.pvpOpponentDeck.length !== 5) {
     toast('⚠️ 戰術資料同步中，請稍候...');
     return;
   }
-  if (hasSyncHostDeck) {
-    state.pvpOpponentDeck = syncPayload.deck.slice();
-    state.pvpOpponentDoc = syncPayload.doctrine || 'defense';
-    if (Array.isArray(syncPayload.formations)) state.pvpOpponentFormations = normalizeFormations(syncPayload.formations);
-    if (syncPayload.terrain) state.pvpOpponentTerrain = normalizeTerrain(syncPayload.terrain);
-  }
+  const mine = getMyPvpLocked();
+  const theirs = {
+    deck: state.pvpOpponentDeck.slice(),
+    doctrine: state.pvpOpponentDoc || 'defense',
+    formations: normalizeFormations(state.pvpOpponentFormations),
+    terrain: normalizeTerrain(state.pvpOpponentTerrain)
+  };
+  const host = isHost ? mine : theirs;
+  const guest = isHost ? theirs : mine;
+
   $('#onlinePvpModal').hidden = true;
   $('#resultModal').hidden = true;
   $('#bo3CounterModal').hidden = true;
@@ -8012,20 +8102,11 @@ function startOnlinePvpBattle(seed, event, syncPayload = null) {
   currentActiveModal = null;
   state.event = event;
 
-  // 核心對稱保證：房主固定在左 (Side A), 挑戰者固定在右 (Side B)
-  const hostDeck = (isHost ? state.deck : (hasSyncHostDeck ? syncPayload.deck : state.pvpOpponentDeck)).slice();
-  const guestDeck = (isHost ? state.pvpOpponentDeck : (syncPayload && Array.isArray(syncPayload.guestDeck) && syncPayload.guestDeck.length === 5 ? syncPayload.guestDeck : state.deck)).slice();
-  const hostDoc = isHost ? state.doctrine : ((syncPayload && syncPayload.doctrine) || state.pvpOpponentDoc || 'defense');
-  const guestDoc = isHost ? (state.pvpOpponentDoc || 'defense') : ((syncPayload && syncPayload.guestDoctrine) || state.doctrine);
-  const hostFormations = isHost
-    ? normalizeFormations(state.formations)
-    : normalizeFormations((syncPayload && Array.isArray(syncPayload.formations)) ? syncPayload.formations : state.pvpOpponentFormations);
-  const guestFormations = isHost
-    ? normalizeFormations(state.pvpOpponentFormations)
-    : normalizeFormations((syncPayload && Array.isArray(syncPayload.guestFormations)) ? syncPayload.guestFormations : state.formations);
-  const battleTerrain = isHost
-    ? normalizeTerrain(state.terrain)
-    : normalizeTerrain((syncPayload && syncPayload.terrain) || state.pvpOpponentTerrain || state.terrain);
+  const hostDeck = host.deck.slice();
+  const guestDeck = guest.deck.slice();
+  const hostDoc = host.doctrine || 'defense';
+  const guestDoc = guest.doctrine || 'defense';
+  const battleTerrain = normalizeTerrain(host.terrain);
 
   const opp = OnlinePvPEngine.getOpponent();
   state.enemy = (isHost ? guestDeck : hostDeck).slice();
@@ -8041,8 +8122,8 @@ function startOnlinePvpBattle(seed, event, syncPayload = null) {
     event: state.event,
     docA: hostDoc,
     docB: guestDoc,
-    formationsA: hostFormations,
-    formationsB: guestFormations,
+    formationsA: normalizeFormations(host.formations),
+    formationsB: normalizeFormations(guest.formations),
     terrain: battleTerrain
   });
   state.lastRes = res;
@@ -8079,6 +8160,13 @@ OnlinePvPEngine.on('room_settings_updated', payload => {
   }
 });
 
+/* 線上對戰入站封包序列化：揭曉驗證為非同步（SHA-256），須確保 COMMIT → REVEAL → COMBAT_SYNC 依序處理完成 */
+let pvpInboundChain = Promise.resolve();
+function enqueuePvpInbound(fn) {
+  pvpInboundChain = pvpInboundChain.then(fn).catch(err => console.error('[PvP] inbound packet error', err));
+  return pvpInboundChain;
+}
+
 function queuePendingPvpPacket(type, round, payload) {
   if (!Array.isArray(state.pvpPendingPackets)) state.pvpPendingPackets = [];
   state.pvpPendingPackets.push({ type, round: Number(round), payload });
@@ -8095,9 +8183,9 @@ function flushPendingPvpPacketsForRound(targetRound) {
   state.pvpPendingPackets = remaining;
   due.forEach(entry => {
     if (entry.type === 'opponent_ban_committed') handleOpponentBanCommittedPacket(entry.payload, true);
-    else if (entry.type === 'opponent_deck_committed') handleOpponentDeckCommittedPacket(entry.payload, true);
-    else if (entry.type === 'opponent_deck_ready') handleOpponentDeckReadyPacket(entry.payload, true);
-    else if (entry.type === 'combat_start_sync') handleCombatStartSyncPacket(entry.payload, true);
+    else if (entry.type === 'opponent_deck_committed') enqueuePvpInbound(() => handleOpponentDeckCommittedPacket(entry.payload, true));
+    else if (entry.type === 'opponent_deck_ready') enqueuePvpInbound(() => handleOpponentDeckReadyPacket(entry.payload, true));
+    else if (entry.type === 'combat_start_sync') enqueuePvpInbound(() => handleCombatStartSyncPacket(entry.payload, true));
   });
 }
 
@@ -8111,7 +8199,17 @@ function handleOpponentDeckCommittedPacket(payload, fromQueue = false) {
   }
   if (pktRound < curRound) return;
 
-  state.pvpOpponentCommitHash = payload && payload.commitHash ? payload.commitHash : null;
+  const commitHash = payload && typeof payload.commitHash === 'string' ? payload.commitHash : '';
+  if (!/^(sha256:[0-9a-f]{64}|[0-9a-f]{16})$/.test(commitHash)) {
+    // 沒有有效雜湊的「鎖定」不可被視為就緒，否則對手可先誘使我方揭曉陣容再任意出牌
+    console.warn('[Security] 忽略缺少有效雜湊的 DECK_COMMIT');
+    return;
+  }
+  if (state.pvpOpponentRevealKey) {
+    // 本局對手陣容已揭曉並通過驗證，不接受事後改換承諾
+    return;
+  }
+  state.pvpOpponentCommitHash = commitHash;
   state.pvpOpponentReady = true;
 
   renderCommandDeck();
@@ -8128,7 +8226,7 @@ function handleOpponentDeckCommittedPacket(payload, fromQueue = false) {
   }
 }
 
-function handleOpponentDeckReadyPacket(payload, fromQueue = false) {
+async function handleOpponentDeckReadyPacket(payload, fromQueue = false) {
   if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
   const curRound = Number(state.bo3.round || 1);
   const pktRound = Number((payload && payload.round) || curRound);
@@ -8138,19 +8236,18 @@ function handleOpponentDeckReadyPacket(payload, fromQueue = false) {
   }
   if (pktRound < curRound) return;
 
-  if (state.pvpOpponentCommitHash && payload.salt) {
-    if (String(state.pvpOpponentCommitHash).startsWith('sha256:') && typeof OnlinePvPEngine.computeCommitHashAsync === 'function') {
-      OnlinePvPEngine.computeCommitHashAsync(payload.deck, payload.doctrine, payload.salt, payload.formations, payload.terrain).then(verifyHash => {
-        if (verifyHash !== state.pvpOpponentCommitHash) {
-          console.warn('[Security] PvP SHA-256 Commit-Reveal hash mismatch detected!');
-        }
-      });
-    } else {
-      const verifyHash = OnlinePvPEngine.computeCommitHash(payload.deck, payload.doctrine, payload.salt, payload.formations, payload.terrain);
-      if (verifyHash !== state.pvpOpponentCommitHash) {
-        console.warn('[Security] PvP Commit-Reveal hash mismatch detected!');
-      }
-    }
+  // Commit-Reveal 強制驗證：雜湊不符即視為竄改並中斷，不再只是寫入 console 警告
+  const revealErr = await verifyOnlinePvpReveal(payload);
+  if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished || Number(state.bo3.round || 1) !== curRound) return;
+  if (revealErr) {
+    abortOnlinePvpForCheat(revealErr);
+    return;
+  }
+  const revealKey = getPvpRevealKey(payload);
+  if (state.pvpOpponentRevealKey === revealKey && state.pvpOpponentDeck) {
+    // 重送的相同揭曉封包：已處理過，僅在雙方皆就緒時補觸發開戰檢查
+    if (state.pvpMyReady) checkBothReadyAndStartCombat();
+    return;
   }
 
   const oppBanned = Array.isArray(state.bo3.bannedListA) ? state.bo3.bannedListA : [];
@@ -8164,6 +8261,8 @@ function handleOpponentDeckReadyPacket(payload, fromQueue = false) {
     state.pvpOpponentFormations = null;
     state.pvpOpponentTerrain = null;
     state.pvpOpponentCommitHash = null;
+    state.pvpOpponentSalt = null;
+    state.pvpOpponentRevealKey = null;
     renderCommandDeck();
     renderMissionBar();
     OnlinePvPEngine.sendPacket('DECK_UNREADY', { round: curRound, reason: oppErrs[0] });
@@ -8175,6 +8274,8 @@ function handleOpponentDeckReadyPacket(payload, fromQueue = false) {
   state.pvpOpponentDoc = payload.doctrine || 'defense';
   state.pvpOpponentFormations = normalizeFormations(payload.formations);
   state.pvpOpponentTerrain = normalizeTerrain(payload.terrain);
+  state.pvpOpponentSalt = payload.salt;
+  state.pvpOpponentRevealKey = revealKey;
   if (!OnlinePvPEngine.isHostUser()) {
     state.terrain = state.pvpOpponentTerrain;
     syncActiveDeck();
@@ -8196,8 +8297,10 @@ function handleOpponentDeckReadyPacket(payload, fromQueue = false) {
   }
 }
 
-function handleCombatStartSyncPacket(payload, fromQueue = false) {
+async function handleCombatStartSyncPacket(payload, fromQueue = false) {
   if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished) return;
+  // 只有房主有權下達開戰同步；房主收到的 COMBAT_SYNC 一律忽略（防止挑戰者偽造開戰）
+  if (OnlinePvPEngine.isHostUser()) return;
   const curRound = Number(state.bo3.round || 1);
   const pktRound = Number((payload && payload.round) || curRound);
   if (pktRound > curRound) {
@@ -8205,24 +8308,51 @@ function handleCombatStartSyncPacket(payload, fromQueue = false) {
     return;
   }
   if (pktRound < curRound) return;
-
-  if (!OnlinePvPEngine.isHostUser()) {
-    if ([3, 5, 7].includes(Number(payload.maxGames))) state.bo3.maxGames = Number(payload.maxGames);
-    if (payload.marketMode === 'free' || payload.marketMode === 'locked') state.bo3.marketMode = payload.marketMode;
-    if (typeof payload.winsA === 'number') state.bo3.winsA = payload.winsA;
-    if (typeof payload.winsB === 'number') state.bo3.winsB = payload.winsB;
-    if (Array.isArray(payload.bannedListA)) state.bo3.bannedListB = payload.bannedListA.slice();
-    if (Array.isArray(payload.bannedListB)) state.bo3.bannedListA = payload.bannedListB.slice();
+  if (state.pvpCombatSyncSentRound === curRound) return;
+  if (!state.pvpMyReady || !state.pvpMySalt) {
+    console.warn('[PvP] 尚未鎖定陣容即收到 COMBAT_SYNC，已忽略');
+    return;
   }
 
-  if (payload.deck && (!state.pvpOpponentDeck || !state.pvpOpponentDeck.length)) {
-    state.pvpOpponentDeck = payload.deck.slice();
-    state.pvpOpponentDoc = payload.doctrine || 'defense';
-    state.pvpOpponentReady = true;
+  // 房主陣容：若尚未收到揭曉封包，將 COMBAT_SYNC 內的房主陣容視為揭曉並走完整 Commit-Reveal 驗證
+  const hostReveal = {
+    round: curRound,
+    deck: payload && payload.deck,
+    doctrine: payload && payload.doctrine,
+    formations: payload && payload.formations,
+    terrain: payload && payload.terrain,
+    salt: payload && payload.salt,
+    commitHash: payload && payload.commitHash
+  };
+  if (!state.pvpOpponentRevealKey) {
+    await handleOpponentDeckReadyPacket(hostReveal, true);
+    if (!state.isOnlinePvp || !state.bo3 || state.bo3.finished || Number(state.bo3.round || 1) !== curRound) return;
+    if (!state.pvpOpponentRevealKey) return;
+  } else if (state.pvpOpponentRevealKey !== getPvpRevealKey(hostReveal)) {
+    abortOnlinePvpForCheat('開戰同步的房主陣容與已揭曉陣容不一致');
+    return;
   }
-  if (Array.isArray(payload.formations)) state.pvpOpponentFormations = normalizeFormations(payload.formations);
-  if (payload.terrain) state.pvpOpponentTerrain = normalizeTerrain(payload.terrain);
-  startOnlinePvpBattle(payload.seed, payload.event, payload);
+
+  const seed = deriveOnlinePvpSeed(state.pvpOpponentSalt, state.pvpMySalt, curRound);
+  if (payload.seed != null && (Number(payload.seed) >>> 0) !== seed) {
+    abortOnlinePvpForCheat('開戰隨機種子與雙方鹽值推導結果不符');
+    return;
+  }
+  const event = resolveOnlinePvpEvent(payload.eventId || payload.event);
+  if (!event) {
+    abortOnlinePvpForCheat('未知的戰場事件');
+    return;
+  }
+
+  if ([3, 5, 7].includes(Number(payload.maxGames))) state.bo3.maxGames = Number(payload.maxGames);
+  if (payload.marketMode === 'free' || payload.marketMode === 'locked') state.bo3.marketMode = payload.marketMode;
+  if (typeof payload.winsA === 'number') state.bo3.winsA = payload.winsA;
+  if (typeof payload.winsB === 'number') state.bo3.winsB = payload.winsB;
+  if (Array.isArray(payload.bannedListA)) state.bo3.bannedListB = payload.bannedListA.slice();
+  if (Array.isArray(payload.bannedListB)) state.bo3.bannedListA = payload.bannedListB.slice();
+
+  state.pvpCombatSyncSentRound = curRound;
+  startOnlinePvpBattle(seed, event);
 }
 
 function handleOpponentBanCommittedPacket(payload, fromQueue = false) {
@@ -8266,6 +8396,7 @@ function handleOpponentBanCommittedPacket(payload, fromQueue = false) {
     state.pvpMyRevealed = false;
     state.pvpMySalt = null;
     state.pvpMyCommitHash = null;
+    state.pvpMyLocked = null;
     if (wasReady) {
       OnlinePvPEngine.sendPacket('DECK_UNREADY', { round: curRound, reason: 'banned_unit_unmounted' });
     }
@@ -8306,9 +8437,9 @@ function applyOnlinePvpSeriesEnd(payload) {
   showBo3SeriesResult(isSeriesWon);
 }
 
-OnlinePvPEngine.on('opponent_deck_committed', payload => handleOpponentDeckCommittedPacket(payload));
-OnlinePvPEngine.on('opponent_deck_ready', payload => handleOpponentDeckReadyPacket(payload));
-OnlinePvPEngine.on('combat_start_sync', payload => handleCombatStartSyncPacket(payload));
+OnlinePvPEngine.on('opponent_deck_committed', payload => enqueuePvpInbound(() => handleOpponentDeckCommittedPacket(payload)));
+OnlinePvPEngine.on('opponent_deck_ready', payload => enqueuePvpInbound(() => handleOpponentDeckReadyPacket(payload)));
+OnlinePvPEngine.on('combat_start_sync', payload => enqueuePvpInbound(() => handleCombatStartSyncPacket(payload)));
 OnlinePvPEngine.on('opponent_ban_committed', payload => handleOpponentBanCommittedPacket(payload));
 
 OnlinePvPEngine.on('opponent_deck_unready', payload => {
@@ -8319,6 +8450,7 @@ OnlinePvPEngine.on('opponent_deck_unready', payload => {
   state.pvpMyRevealed = false;
   state.pvpMySalt = null;
   state.pvpMyCommitHash = null;
+  state.pvpMyLocked = null;
   const allBanned = currentBanned();
   state.deck.forEach((id, idx) => {
     if (id && allBanned.includes(id)) {
@@ -11056,6 +11188,8 @@ function setupCloudSyncModal() {
 
 
 window.__db15 = { state, startBattle, showBattle, fastForwardBattle, setMode, getGhostPool, applyTheme, toggleTheme, LadderEngine, renderLadderView, OnlinePvPEngine, getTournamentPlayerProfile, buildReplayShareUrl, openCloudSyncModal, CloudSync: (typeof CloudSync !== 'undefined' ? CloudSync : null), handleBo3RoundEnd, getBo3WinsNeeded, getBo3BanCount, randomDeck, openBo3CounterModal, renderTournamentView, handleTournamentRoundEnd, PvPTimerManager, startPvpDeploymentTimer, handlePlayerForfeit, autoFillAndSubmitPvpDeck };
+/* 線上對戰公平性測試掛鉤（test/test_pvp_integrity.py） */
+window.__db15.pvp = { resetOnlinePvpSessionState, handleOnlinePvpSubmit, handleOpponentDeckCommittedPacket, handleOpponentDeckReadyPacket, handleCombatStartSyncPacket, enqueuePvpInbound, deriveOnlinePvpSeed, normalizeFormations, budgetLimit };
 })();
 
 // 全域點擊外部與 Esc 鍵自動關閉戰場自選選單

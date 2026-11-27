@@ -37,6 +37,7 @@ jobs:
           node test/test_cloud_sync_privacy.js
           python3 tools/verify_integrity.py
           node tools/balance.js
+          node tools/balance_guard.js
 
       - name: Install Playwright & Chromium
         run: |

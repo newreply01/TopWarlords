@@ -1529,6 +1529,7 @@ function renderUnitSkillBox(u, extraStyle = '') {
   return `<div class="u-tt-skill"${extraStyle ? ` style="${extraStyle}"` : ''}>
     <div class="u-tt-skill-head"><strong>${esc(u.skill.name)}</strong><span class="m-skill-phase phase-${phase.toLowerCase()}">${esc(phase)}</span></div>
     <div class="u-tt-skill-meta">${esc(phaseDesc)} · 每戰一次</div>
+    ${u.skill.lore ? `<p class="u-tt-skill-lore">${esc(u.skill.lore)}</p>` : ''}
     <p>${esc(u.skill.desc)}</p>
   </div>`;
 }

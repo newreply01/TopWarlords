@@ -10,7 +10,7 @@ const MUSOU_MOVES = {
   YOSHITSUNE: { name: '鵯越逆落・八艘飛', tag: '九郎判官', sig: 'yoshitsune_cliff_dive' }, // 源義經
   SHINGEN: { name: '風林火山・甲斐之虎', tag: '疾如風', sig: 'shingen_furinkazan' }, // 武田信玄
   GAISUWEN: { name: '五刀飛斬・莫離支', tag: '高句麗雄霸', sig: 'gaisuwen_sig' }, // 淵蓋蘇文
-  ZHAOYUN: { name: '長坂七進七出・龍膽一身', tag: '常山子龍', sig: 'zhaoyun_seven_charges' }, // 趙雲
+  ZHAOYUN: { name: '長坂護主・漢水空營', tag: '一身是膽', sig: 'zhaoyun_seven_charges' }, // 趙雲
   MACHO: { name: '錦馬超・西涼鐵騎突', tag: '神威天將軍', sig: 'macho_sig' }, // 馬超
   ZHANGLIAO: { name: '威震逍遙津・八百破十萬', tag: '遼來來', sig: 'zhangliao_xiaoyao' }, // 張遼
   CHENQINGZHI: { name: '白袍神兵・千軍萬馬避白袍', tag: '名師大將', sig: 'chen_white_robe' }, // 陳慶之
@@ -52,7 +52,7 @@ const MUSOU_MOVES = {
   CAOREN: { name: '樊城天人・鐵壁固守', tag: '天人之勇', sig: 'caoren_sig' }, // 曹仁
   ZHOUTAI: { name: '膚如刻畫・以身護主', tag: '幼平', sig: 'zhoutai_sig' }, // 周泰
   IINAOMASA: { name: '井伊赤鬼・赤備突陣', tag: '德川四天王', sig: 'iinaomasa_sig' }, // 井伊直政
-  KATOKIYOMASA: { name: '片鎌槍・蔚山籠城', tag: '肥後之虎', sig: 'katokiyomasa_sig' }, // 加藤清正
+  KATOKIYOMASA: { name: '肥後之虎・片鎌槍', tag: '肥後之虎', sig: 'katokiyomasa_sig' }, // 加藤清正
   YUJIN: { name: '毅重持節・死守營陣', tag: '五子良將', sig: 'yujin_sig' }, // 于禁
   LIGUANG: { name: '射石沒羽・飛將神弓', tag: '漢之飛將', sig: 'liguang_stone_arrow' }, // 李廣
   YANGYOUJI: { name: '百步穿楊・七札一矢', tag: '楚國神射', sig: 'yangyouji_seven_layers' }, // 養由基
@@ -109,8 +109,8 @@ const MUSOU_MOVES = {
   HANXIN: { name: '十面埋伏・四面楚歌', tag: '兵仙', sig: 'hanxin_ten_sides' }, // 韓信
   ZHANGLIANG: { name: '運籌帷幄・決勝千里', tag: '謀聖', sig: 'zhangliang_scroll' }, // 張良
   SIMAYI: { name: '鷹視狼顧・高平陵', tag: '冢虎', sig: 'simayi_sig' }, // 司馬懿
-  TOYOTOMI: { name: '天下人・一夜城', tag: '太閤', sig: 'toyotomi_one_night' }, // 豐臣秀吉
-  CAOCAO: { name: '官渡奇襲・烏巢焚糧', tag: '魏武帝', sig: 'caocao_wuchao' }, // 曹操
+  TOYOTOMI: { name: '太閤天下・一夜城', tag: '太閤', sig: 'toyotomi_one_night' }, // 豐臣秀吉
+  CAOCAO: { name: '孟德奇謀・烏巢焚糧', tag: '魏武帝', sig: 'caocao_wuchao' }, // 曹操
   HANBEI: { name: '今孔明・十六騎奪城', tag: '天才軍師', sig: 'hanbei_sig' }, // 竹中半兵衛
   KANBEI: { name: '備中水攻・中國大返還', tag: '如水', sig: 'kanbei_sig' }, // 黑田官兵衛
   KANGGAMCHAN: { name: '龜州大捷・決堤水攻', tag: '高麗護國名相', sig: 'kanggamchan_sig' }, // 姜邯贊

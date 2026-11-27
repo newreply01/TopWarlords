@@ -96,12 +96,14 @@
     } catch (_) {}
   }
 
-  function computeDurationMs(tempo = 1, activeCount = 0) {
+  // compact：$1～$3 武將即使在完整模式也採精簡節奏，完整演出保留給 $4～$5 名將
+  function computeDurationMs(tempo = 1, activeCount = 0, compact = false) {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return { total: 900, lead: 200 };
     }
-    let total = (mode === 'lite' || activeCount >= 2) ? 1600 : 2400;
-    let lead = (mode === 'lite' || activeCount >= 2) ? 260 : 420;
+    const lite = mode === 'lite' || compact || activeCount >= 2;
+    let total = lite ? 1600 : 2400;
+    let lead = lite ? 260 : 420;
     if (tempo >= 3) {
       total = Math.min(total, 1300);
       lead = Math.min(lead, 220);
@@ -158,7 +160,8 @@
     const move = (typeof getMusouMove === 'function') ? getMusouMove(uid) : null;
     const pal = ARCHETYPE_PALETTES[fxKey] || ARCHETYPE_PALETTES.overlord_cleave;
 
-    const { total, lead } = computeDurationMs(tempo, activeCount);
+    const compact = !!(unit && unit.cost <= 3);
+    const { total, lead } = computeDurationMs(tempo, activeCount, compact);
     const scale = total / 1500;
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
@@ -203,7 +206,9 @@
     const subEl = document.createElement('div');
     subEl.className = 'musou-cutin-sub';
     const sideLabel = sideKey === 'B' ? '敵將無雙' : '我軍無雙';
-    subEl.textContent = `${sideLabel} · ${unit?.name || uid}｜${move?.tag || '名將奧義'}`;
+    // 副標顯示卡片上的戰法名，與部隊頭頂卷軸一致，讓玩家把切入招式與戰法對上
+    const skillName = unit?.skill?.name;
+    subEl.textContent = `${sideLabel} · ${unit?.name || uid}｜${skillName ? `戰法「${skillName}」` : (move?.tag || '名將奧義')}`;
 
     const titleRow = document.createElement('div');
     titleRow.className = 'musou-cutin-title-row';

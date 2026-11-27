@@ -16,6 +16,19 @@ import subprocess
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
+
+def wait_js(page, expr, timeout=15000):
+    """以測試端輪詢 page.evaluate 等待條件成立。
+    Playwright 頁面內輪詢在戰鬥開始後頁面忙碌時可能延遲偵測，導致條件已成立仍逾時；
+    page.evaluate 不受此影響。"""
+    deadline = time.time() + timeout / 1000
+    while True:
+        if page.evaluate(expr):
+            return
+        if time.time() > deadline:
+            raise TimeoutError(f"等待逾時（{timeout}ms）：{expr}")
+        time.sleep(0.1)
+
 sys.stdout.reconfigure(encoding='utf-8')
 ROOT = Path(__file__).resolve().parents[1]
 PORT = 8147
@@ -81,7 +94,7 @@ try:
         # ---------- 情境 A：挑戰者先鎖定 → 房主 Commit → 房主揭曉竄改陣容 ----------
         decks = page.evaluate(SETUP_JS, "guest")
         page.evaluate("() => handleOnlinePvpSubmit()")
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
         host_salt = "a" * 32
         host_formations = page.evaluate("() => normalizeFormations(null)")
         host_commit = page.evaluate(OPP_COMMIT_JS, {"deck": decks["oppDeck"], "salt": host_salt, "doctrine": "defense", "formations": host_formations, "terrain": "plain"})
@@ -95,7 +108,7 @@ try:
 
         # A-2：有效 Commit → 我方揭曉
         page.evaluate("(h) => enqueuePvpInbound(() => handleOpponentDeckCommittedPacket({ round: 1, commitHash: h }))", host_commit)
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
         my_reveal = page.evaluate("() => window.__sent.find(p => p.type === 'DECK_SUBMIT').payload")
         assert my_reveal["deck"] == decks["myDeck"], "揭曉陣容應為鎖定快照"
         # 我方揭曉內容必須能通過自己的 Commit 驗證（快照一致性）
@@ -107,43 +120,43 @@ try:
         tampered = list(decks["myDeck"])  # 換成剋制我方的陣容（此處用不同的合法陣容代表）
         page.evaluate("""(args) => enqueuePvpInbound(() => handleOpponentDeckReadyPacket({ round: 1, deck: args.deck, doctrine: 'defense', formations: args.f, terrain: 'plain', salt: args.salt }))""",
                       {"deck": tampered, "f": host_formations, "salt": host_salt})
-        page.wait_for_function("() => state.isOnlinePvp === false", timeout=5000)
+        wait_js(page, "() => state.isOnlinePvp === false", timeout=5000)
         print("[PASS] 揭曉陣容與 Commit 不符 → 已中斷線上對戰")
 
         # ---------- 情境 B：正常流程 + 偽造的 COMBAT_SYNC ----------
         decks = page.evaluate(SETUP_JS, "guest")
         page.evaluate("() => handleOnlinePvpSubmit()")
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
         host_commit = page.evaluate(OPP_COMMIT_JS, {"deck": decks["oppDeck"], "salt": host_salt, "doctrine": "defense", "formations": host_formations, "terrain": "plain"})
         page.evaluate("(h) => enqueuePvpInbound(() => handleOpponentDeckCommittedPacket({ round: 1, commitHash: h }))", host_commit)
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
         page.evaluate("""(args) => enqueuePvpInbound(() => handleOpponentDeckReadyPacket({ round: 1, deck: args.deck, doctrine: 'defense', formations: args.f, terrain: 'plain', salt: args.salt }))""",
                       {"deck": decks["oppDeck"], "f": host_formations, "salt": host_salt})
-        page.wait_for_function("() => !!state.pvpOpponentRevealKey")
+        wait_js(page, "() => !!state.pvpOpponentRevealKey")
         expected_seed = page.evaluate("(hs) => deriveOnlinePvpSeed(hs, state.pvpMySalt, 1)", host_salt)
 
         # B-1：錯誤種子 → 中斷
         sync_base = {"round": 1, "deck": decks["oppDeck"], "doctrine": "defense", "formations": host_formations, "terrain": "plain", "salt": host_salt, "commitHash": host_commit, "eventId": "plain", "event": {"id": "plain"}}
         bad = dict(sync_base, seed=(expected_seed + 1) % 4294967296)
         page.evaluate("(pl) => enqueuePvpInbound(() => handleCombatStartSyncPacket(pl))", bad)
-        page.wait_for_function("() => state.isOnlinePvp === false", timeout=5000)
+        wait_js(page, "() => state.isOnlinePvp === false", timeout=5000)
         assert page.evaluate("() => window.__battles.length") == 0, "錯誤種子不得開戰"
         print("[PASS] 房主送出的種子與雙方鹽值推導不符 → 已中斷")
 
         # B-2：重建同一局，送出夾帶偽造 guestDeck 與偽造天候數值的同步封包
         decks = page.evaluate(SETUP_JS, "guest")
         page.evaluate("() => handleOnlinePvpSubmit()")
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
         host_commit = page.evaluate(OPP_COMMIT_JS, {"deck": decks["oppDeck"], "salt": host_salt, "doctrine": "defense", "formations": host_formations, "terrain": "plain"})
         page.evaluate("(h) => enqueuePvpInbound(() => handleOpponentDeckCommittedPacket({ round: 1, commitHash: h }))", host_commit)
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
         # 不先送揭曉，直接以 COMBAT_SYNC 夾帶房主陣容（亦須通過 Commit 驗證）
         expected_seed = page.evaluate("(hs) => deriveOnlinePvpSeed(hs, state.pvpMySalt, 1)", host_salt)
         forged = dict(sync_base, commitHash=host_commit, seed=expected_seed,
                       guestDeck=decks["oppDeck"], guestDoctrine="defense",
                       eventId="storm", event={"id": "storm", "mod": {"armorDmg": 9, "airHit": 5}})
         page.evaluate("(pl) => enqueuePvpInbound(() => handleCombatStartSyncPacket(pl))", forged)
-        page.wait_for_function("() => window.__battles.length === 1", timeout=5000)
+        wait_js(page, "() => window.__battles.length === 1", timeout=5000)
         battle = page.evaluate("() => { const b = window.__battles[0]; return { a: b.a, b: b.b, seed: b.seed, docB: b.docB, canonical: b.event === EVENTS.find(e => e.id === 'storm'), mod: b.event.mod }; }")
         assert battle["a"] == decks["oppDeck"], f"Side A 應為已驗證的房主陣容：{battle}"
         assert battle["b"] == decks["myDeck"], f"Side B 應為挑戰者本機鎖定陣容，而非 guestDeck：{battle}"
@@ -155,23 +168,23 @@ try:
         # B-3：COMBAT_SYNC 的房主陣容與已揭曉陣容不一致 → 中斷
         decks = page.evaluate(SETUP_JS, "guest")
         page.evaluate("() => handleOnlinePvpSubmit()")
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
         host_commit = page.evaluate(OPP_COMMIT_JS, {"deck": decks["oppDeck"], "salt": host_salt, "doctrine": "defense", "formations": host_formations, "terrain": "plain"})
         page.evaluate("(h) => enqueuePvpInbound(() => handleOpponentDeckCommittedPacket({ round: 1, commitHash: h }))", host_commit)
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
         page.evaluate("""(args) => enqueuePvpInbound(() => handleOpponentDeckReadyPacket({ round: 1, deck: args.deck, doctrine: 'defense', formations: args.f, terrain: 'plain', salt: args.salt }))""",
                       {"deck": decks["oppDeck"], "f": host_formations, "salt": host_salt})
-        page.wait_for_function("() => !!state.pvpOpponentRevealKey")
+        wait_js(page, "() => !!state.pvpOpponentRevealKey")
         expected_seed = page.evaluate("(hs) => deriveOnlinePvpSeed(hs, state.pvpMySalt, 1)", host_salt)
         swapped = dict(sync_base, deck=decks["myDeck"], seed=expected_seed)
         page.evaluate("(pl) => enqueuePvpInbound(() => handleCombatStartSyncPacket(pl))", swapped)
-        page.wait_for_function("() => state.isOnlinePvp === false", timeout=5000)
+        wait_js(page, "() => state.isOnlinePvp === false", timeout=5000)
         print("[PASS] 開戰同步的房主陣容與已揭曉陣容不一致 → 已中斷")
 
         # ---------- 情境 C：房主端 ----------
         decks = page.evaluate(SETUP_JS, "host")
         page.evaluate("() => handleOnlinePvpSubmit()")
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_COMMIT')")
         guest_salt = "b" * 32
         guest_formations = host_formations
         guest_commit = page.evaluate(OPP_COMMIT_JS, {"deck": decks["oppDeck"], "salt": guest_salt, "doctrine": "defense", "formations": guest_formations, "terrain": "plain"})
@@ -182,10 +195,10 @@ try:
         print("[PASS] 房主忽略來自挑戰者的 COMBAT_SYNC")
         # C-2：正常流程 → 房主以共同種子開戰，COMBAT_SYNC 不再夾帶 guestDeck
         page.evaluate("(h) => enqueuePvpInbound(() => handleOpponentDeckCommittedPacket({ round: 1, commitHash: h }))", guest_commit)
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
+        wait_js(page, "() => window.__sent.some(p => p.type === 'DECK_SUBMIT')")
         page.evaluate("""(args) => enqueuePvpInbound(() => handleOpponentDeckReadyPacket({ round: 1, deck: args.deck, doctrine: 'defense', formations: args.f, terrain: 'plain', salt: args.salt }))""",
                       {"deck": decks["oppDeck"], "f": guest_formations, "salt": guest_salt})
-        page.wait_for_function("() => window.__sent.some(p => p.type === 'COMBAT_SYNC') && window.__battles.length === 1", timeout=5000)
+        wait_js(page, "() => window.__sent.some(p => p.type === 'COMBAT_SYNC') && window.__battles.length === 1", timeout=5000)
         host_res = page.evaluate("""(gs) => {
           const sync = window.__sent.find(p => p.type === 'COMBAT_SYNC').payload;
           const b = window.__battles[0];

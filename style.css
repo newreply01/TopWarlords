@@ -28146,6 +28146,12 @@ html:not([data-theme="light"]) .formation-slot-row {
   margin: 4px 0 0;
 }
 
+.u-tt-skill p.u-tt-skill-lore {
+  font-style: italic;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .u-tt-role {
   font-size: 12px;
   color: var(--muted);

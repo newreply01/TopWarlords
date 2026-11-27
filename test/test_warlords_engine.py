@@ -192,7 +192,8 @@ try:
             skillTarget.hp = skillTarget.hpMax / 2;
             if (Math.abs(getSkillAttackModifiers(executioner, skillTarget, 3).damage - 1.32) > 1e-9) errs.push('斬殺未按目標缺失兵力計算');
             if (getSkillAttackModifiers(skillAttacker('LIGUANG'), skillTarget, 2).armorPierce !== 0.45) errs.push('神射穿甲效果缺漏');
-            if (Math.abs(getSkillAttackModifiers(skillAttacker('ZHANGLIAO'), skillTarget, 3).damage - 1.38) > 1e-9) errs.push('越級技能未按費用判定');
+            const zlFx = UNIT_MAP.ZHANGLIAO.skill.effects;
+            if (Math.abs(getSkillAttackModifiers(skillAttacker('ZHANGLIAO'), skillTarget, 3).damage - (zlFx.damage + zlFx.highCostDamage)) > 1e-9) errs.push('越級技能未按費用判定');
             const terrainFighter = skillAttacker('MENGHUO');
             if (Math.abs(getSkillAttackModifiers(terrainFighter, skillTarget, 3, 'forest').damage - getSkillAttackModifiers(terrainFighter, skillTarget, 3, 'plain').damage - 0.14) > 1e-9) errs.push('地形技能未生效');
             if (Math.abs(getSkillAttackModifiers(skillAttacker('YANGYE'), skillAttacker('HUO'), 3).damage - 1.49) > 1e-9) errs.push('反騎技能未按軍種判定');

@@ -7,6 +7,7 @@
 // 門檻（預設每位 1200 場，單一武將抽樣誤差約 ±1.4%）：
 //   - 每位武將勝率須落在 UNIT_MIN～UNIT_MAX
 //   - 每個「槽位 × 費用」五人平均須落在 TIER_MIN～TIER_MAX
+//   - 同槽位中，每位武將的 HP／ATK 須介於低一價位平均與高一價位平均之間（無數值倒掛）
 // 任一不符即以結束碼 1 失敗。--plans 另外列出全部 $15 費用分配方案的強弱（較慢，不列入門檻）。
 'use strict';
 const fs = require('fs');
@@ -49,6 +50,24 @@ for (const u of E.UNITS) {
 }
 
 const failures = [];
+
+// 數值倒掛檢查（不需模擬）：同槽位中，每位武將的 HP 與 ATK 須介於「低一價位平均」與「高一價位平均」之間，
+// 避免玩家看到低價武將的面板數值高於高價武將。
+const tierAvg = {};
+for (const c of CATS) for (let k = 1; k <= 5; k++) {
+  const g = E.UNITS.filter(u => u.cat === c && u.cost === k);
+  tierAvg[c + k] = { hp: g.reduce((s, u) => s + u.hp, 0) / g.length, atk: g.reduce((s, u) => s + u.atk, 0) / g.length };
+}
+const inversions = [];
+for (const u of E.UNITS) {
+  const lo = tierAvg[u.cat + (u.cost - 1)], hi = tierAvg[u.cat + (u.cost + 1)];
+  for (const key of ['hp', 'atk']) {
+    if (hi && u[key] > hi[key] + 1e-9) inversions.push(`${LABEL[u.cat]} $${u.cost} ${u.name} ${key.toUpperCase()} ${u[key]} 高於 $${u.cost + 1} 平均 ${hi[key].toFixed(1)}`);
+    if (lo && u[key] < lo[key] - 1e-9) inversions.push(`${LABEL[u.cat]} $${u.cost} ${u.name} ${key.toUpperCase()} ${u[key]} 低於 $${u.cost - 1} 平均 ${lo[key].toFixed(1)}`);
+  }
+}
+failures.push(...inversions.map(s => '數值倒掛：' + s));
+
 console.log(`=== 武將定價平衡檢查（每位 ${GAMES} 場）===`);
 console.log('槽位   ' + [1, 2, 3, 4, 5].map(k => `   $${k}  `).join(''));
 for (const c of CATS) {

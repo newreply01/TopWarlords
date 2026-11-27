@@ -348,7 +348,7 @@ function resolveBattle(deckA, deckB, opts) {
   };
   for (const s of ['A', 'B']) {
     for (const sy of syn[s]) {
-      if (sy.id === 'cec') { S[s].ewBonus += 12; S[s].adHit += 0.06; }
+      if (sy.id === 'cec') { S[s].ewBonus += 8; S[s].adHit += 0.04; }
       if (sy.id === 'mumt') { S[s].droneMult *= 1.15; T[s].forEach(u => { u.stealth += 5; }); }
       if (sy.id === 'asw_net') { S[s].navHit += 0.06; S[s].navMult *= 1.12; }
       if (sy.id === 'iron_fist') { S[s].landMult *= 1.10; }
@@ -1367,7 +1367,7 @@ const ARCHETYPES = [
   { id: 'hedgehog', name: '固守待援', desc: '神射強弩連陣加先登死士，專打防守反擊。',   plan: [['air', 2], ['armor', 3], ['air_defense', 5], ['naval', 3], ['support', 2]] },
   { id: 'balanced', name: '五行兼備', desc: '五大兵種均衡配置，各司其職無明顯弱點。',   plan: [['air', 3], ['armor', 3], ['air_defense', 3], ['naval', 3], ['support', 3]] },
   { id: 'naval',    name: '先登奇襲', desc: '以先登鬥將與水陸夜襲為核心，以小博大。',   plan: [['air', 3], ['armor', 2], ['air_defense', 2], ['naval', 5], ['support', 3]] },
-  { id: 'ew',       name: '智聖奇謀', desc: '頂尖軍師運籌帷幄，死士奇兵暗襲破局。',   plan: [['air', 2], ['armor', 3], ['air_defense', 2], ['naval', 3], ['support', 5]] }
+  { id: 'ew',       name: '智聖奇謀', desc: '頂尖軍師運籌帷幄，騎甲穩住正面再以奇兵破局。', plan: [['air', 3], ['armor', 3], ['air_defense', 2], ['naval', 2], ['support', 5]] }
 ];
 
 /* 精選破局（每日挑戰）：對手預算 $19~$25 元超標階梯配置（玩家僅 $15，以小博大破局挑戰） */

@@ -39,7 +39,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7.15.9">
+<link rel="stylesheet" href="style.css?v=7.15.10">
 <link rel="manifest" href="manifest.json">
 <style>
 /* =====================================================
@@ -1081,9 +1081,9 @@ body {
 </div>
 
 <!-- 腳本引入 -->
-<script defer src="js/historical-audit.js?v=7.15.9"></script>
-<script defer src="js/data.js?v=7.15.9"></script>
-<script defer src="js/armory.js?v=7.15.9"></script>
+<script defer src="js/historical-audit.js?v=7.15.10"></script>
+<script defer src="js/data.js?v=7.15.10"></script>
+<script defer src="js/armory.js?v=7.15.10"></script>
 <script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   const hadController = Boolean(navigator.serviceWorker.controller);
@@ -1095,7 +1095,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     }
   });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=7.15.9').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('./sw.js?v=7.15.10').then(r => r.update()).catch(() => {});
   });
 }
 </script>

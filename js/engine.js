@@ -348,8 +348,8 @@ function resolveBattle(deckA, deckB, opts) {
   };
   for (const s of ['A', 'B']) {
     for (const sy of syn[s]) {
-      if (sy.id === 'cec') { S[s].ewBonus += 8; S[s].adHit += 0.04; }
-      if (sy.id === 'mumt') { S[s].droneMult *= 1.15; T[s].forEach(u => { u.stealth += 5; }); }
+      if (sy.id === 'cec') { S[s].ewBonus += 4; S[s].adHit += 0.02; }
+      if (sy.id === 'mumt') { S[s].droneMult *= 1.07; T[s].forEach(u => { u.stealth += 3; }); }
       if (sy.id === 'asw_net') { S[s].navHit += 0.06; S[s].navMult *= 1.12; }
       if (sy.id === 'iron_fist') { S[s].landMult *= 1.10; }
     }

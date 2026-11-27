@@ -89,7 +89,7 @@
     const appVer = (() => {
       const src = document.querySelector('script[src*="poster-help.js"]')?.getAttribute('src') || '';
       const m = src.match(/[?&]v=([^&]+)/);
-      return m ? m[1] : '7.15.9';
+      return m ? m[1] : '7.15.10';
     })();
 
     $('#helpCard').innerHTML = `
@@ -191,47 +191,53 @@
       <div class="help-row">
         <div class="help-badge">🌪 疾如風</div>
         <div class="help-desc">
-          階段一、二攻擊火力 <b>+26%</b>、階段三攻擊火力 <b>+21%</b>，但承受傷害 <b>+3.5%</b>（兵貴神速，適合突騎千里奔襲與猛攻速決）。
+          階段一、二攻擊火力 <b>+19%</b>、階段三攻擊火力 <b>+16%</b>，但承受傷害 <b>+3%</b>（兵貴神速，適合突騎千里奔襲與猛攻速決）。
         </div>
       </div>
       <div class="help-row">
         <div class="help-badge">🏔 不動如山</div>
         <div class="help-desc">
-          全軍承受傷害 <b>−12%</b>，神射攔截突騎命中率 <b>+6%</b>（玄甲厚鎧堅壁清野，適合步兵陣地防守反擊與消耗戰）。
+          全軍承受傷害 <b>−11%</b>，神射攔截突騎命中率 <b>+6%</b>（玄甲厚鎧堅壁清野，適合步兵陣地防守反擊與消耗戰）。
         </div>
       </div>
       <div class="help-row">
         <div class="help-badge">🌑 難知如陰</div>
         <div class="help-desc">
-          全軍謀略值 <b>×1.2 倍</b>（強化奪取陣法先機機會），並使敵方全體命中率 <b>−3%</b>（神鬼莫測，適合奇謀算計與規避敵軍重擊）。
+          全軍謀略值 <b>×1.13 倍</b>（強化奪取陣法先機機會），並使敵方全體命中率 <b>−2.3%</b>（神鬼莫測，適合奇謀算計與規避敵軍重擊）。
         </div>
       </div>
     </div>
 
-    <h3>五、古代五大軍陣協同體系</h3>
+    <h3>五、陣法羈絆與史實羈絆（錦上添花）</h3>
     <div class="help-grid-list">
       <div class="help-row">
-        <div class="help-badge">🏹 弓弩連環</div>
+        <div class="help-badge">📜 八陣神機網</div>
         <div class="help-desc">
-          高階軍師 (謀略≥50) ＋ 神射強弩／投石火砲 ➔ 啟動全軍謀略 <b>+12</b>、箭雨命中率 <b>+6%</b>。
+          頂級謀聖（謀略≥78）＋ $4+ 神射強弩／斷騎護將／弓騎突將 ➔ 全軍謀略 <b>+4</b>、神射命中 <b>+2%</b>。
         </div>
       </div>
       <div class="help-row">
-        <div class="help-badge">🐎 鐵騎穿插</div>
+        <div class="help-badge">⚡ 奇正相生陣</div>
         <div class="help-desc">
-          $5 傳世突騎 ＋ 先登死士 ➔ 突騎與死士衝鋒傷害 <b>+15%</b>、全軍隱匿 <b>+5</b>。
+          $4+ 精銳突騎 ＋ 先登奇兵／死士／火攻隊 ➔ 奇兵傷害 <b>+7%</b>、全軍隱匿 <b>+3</b>。
         </div>
       </div>
       <div class="help-row">
-        <div class="help-badge">🌊 水陸連環</div>
+        <div class="help-badge">⚔️ 水陸伏波破暗陣</div>
         <div class="help-desc">
-          先登奇兵／水師 ＋ 奇謀軍師 (謀略≥15 或登高觀瞻) ➔ 水戰與奇襲命中率 <b>+6%</b>、部隊傷害 <b>+12%</b>。
+          反伏（ASW）或潛行（SUB）先登 ＋ 觀瞻名將或謀略≥72 軍師 ➔ 先登命中 <b>+6%</b>、先登傷害 <b>+12%</b>。
         </div>
       </div>
       <div class="help-row">
-        <div class="help-badge">🛡 步騎並進</div>
+        <div class="help-badge">🛡️ 步騎火砲合圍</div>
         <div class="help-desc">
-          重甲陷陣／大盾鋼牆 ＋ 攻城巨砲／先登戰械 ➔ 階段三重甲與破陣傷害 <b>+10%</b>。
+          $3+ 重甲陷陣 ＋ 攻城器械或 $3+ 觀瞻軍師 ➔ 階段三重甲與砲火傷害 <b>+10%</b>。
+        </div>
+      </div>
+      <div class="help-row">
+        <div class="help-badge">🏯 史實羈絆</div>
+        <div class="help-desc">
+          同陣營名將同陣即觸發，共 10 種：蜀漢英烈、曹魏五子霸府、江東都督英傑、戰國主從齊心、三韓護國精忠、戰國兵家名帥、大漢天威、大宋忠烈、源氏屋島奇襲、北齊雙璧。每種提供全軍攻擊、命中、減傷約 <b>1%～2%</b> 的小幅加成（江東都督英傑另加謀略 +4），可疊加。
         </div>
       </div>
       <div class="help-row">

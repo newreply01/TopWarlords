@@ -5,7 +5,7 @@
 'use strict';
 
 const Battle3DEngine = (function () {
-  const ASSET_VER = '7.15.9';
+  const ASSET_VER = '7.15.10';
   const PORTRAIT_DIR = 'assets/warlords/';
   // 程序化貼圖、配色與靜態幾何合併：獨立於引擎狀態，見 js/battle-3d-textures.js
   const {

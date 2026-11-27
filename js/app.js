@@ -4891,9 +4891,9 @@ async function showBattle(res, opts = {}) {
     if (btnExitTxt) btnExitTxt.textContent = '⚔️ 返回鏖戰';
     if (btnBack) { btnBack.className = 'btn amber sm'; btnBack.title = '隨時返回多局鏖戰系列賽'; }
   } else {
-    if (btnBackTxt) btnBackTxt.textContent = '✕ 退出演習';
+    if (btnBackTxt) btnBackTxt.textContent = '✕ 鳴金收兵';
     if (btnExitTxt) btnExitTxt.textContent = '返回陣容編組';
-    if (btnBack) { btnBack.className = 'btn ghost sm'; btnBack.title = '退出當前戰術演習'; }
+    if (btnBack) { btnBack.className = 'btn ghost sm'; btnBack.title = '結束本場，返回陣容編組'; }
   }
   const fxLayer = $('#combatFxLayer');
   if (fxLayer) fxLayer.innerHTML = '';
@@ -5029,7 +5029,7 @@ async function showBattle(res, opts = {}) {
   } else if (state.mode === 'ladder') {
     metaHtml = `<span class="chip-match-mode">🎖️ 天梯攻防決戰 ▪ 排位競逐</span>` + metaHtml;
   } else {
-    metaHtml = `<span class="chip-match-mode">⚡ 戰術演習 ▪ 實兵對抗推演</span>` + metaHtml;
+    metaHtml = `<span class="chip-match-mode">⚡ 沙場點兵 ▪ 實兵對抗推演</span>` + metaHtml;
   }
   $('#battleMeta').innerHTML = metaHtml;
   document.querySelectorAll('.ph').forEach(p => p.className = 'ph');

@@ -89,7 +89,7 @@
     const appVer = (() => {
       const src = document.querySelector('script[src*="poster-help.js"]')?.getAttribute('src') || '';
       const m = src.match(/[?&]v=([^&]+)/);
-      return m ? m[1] : '7.15.7';
+      return m ? m[1] : '7.15.8';
     })();
 
     $('#helpCard').innerHTML = `
@@ -130,10 +130,10 @@
       <li><b>收錄 125 位日韓中純歷史名將</b>：每個槽位提供 $1～$5 五種價位、每種價位各有 A～E 共 5 款不同特性名將與兵器。可隨時點擊右上角「點將調撥兵符」重新召集候選名將。</li>
     </ul>
 
-    <h3>二、四大核心演習模式</h3>
+    <h3>二、四大核心作戰模式</h3>
     <div class="help-grid-list">
       <div class="help-row">
-        <div class="help-badge">⚡ 戰術演習</div>
+        <div class="help-badge">⚡ 沙場點兵</div>
         <div class="help-desc">
           <b>單人演訓模式</b>：內含 <b>⚡ 快速交鋒</b>（迎戰 7 大 AI 名將流派風格，並可自由切換 6 種古戰場天候場景）、<b>🎯 精選破局</b>（以 $15 標準預算挑戰 $19~$25 超標 BOSS 殘局）與 <b>🧪 沙盒模擬</b>（一鍵推演 100~300 場蒙地卡羅大數據檢驗全天候勝率與戰損）。
         </div>

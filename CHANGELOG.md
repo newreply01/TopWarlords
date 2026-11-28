@@ -4,6 +4,12 @@
 
 ---
 
+## [7.15.14] - 2026-11-28
+### Changed (主站改為 Vercel)
+
+- **停用 GitHub Pages**：主站改為 https://topwarlords.vercel.app/，Firebase 授權網域已同步移除 `newreply01.github.io`（舊網址不再提供服務）。
+- **分享預覽改指向 Vercel (`index.html`、`armory.html`)**：`og:url`、`og:image`、`twitter:image` 原指向已停用的 github.io，社群分享預覽圖會失效。
+
 ## [7.15.13] - 2026-11-28
 ### Fixed (Vercel 部署)
 

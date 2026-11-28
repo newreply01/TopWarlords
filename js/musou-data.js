@@ -6,12 +6,12 @@
 const MUSOU_MOVES = {
   HUO: { name: '封狼居胥・千里奔襲', tag: '冠軍侯', sig: 'huo_wolf_raid' }, // 霍去病
   WEI: { name: '武剛車陣・龍城七捷', tag: '大將軍', sig: 'wei_wugang_wall' }, // 衛青
-  LUBU: { name: '天下無雙・方天畫戟', tag: '人中呂布', sig: 'lubu_sky_halberd' }, // 呂布
+  LUBU: { name: '轅門射戟・飛將無雙', tag: '人中呂布', sig: 'lubu_sky_halberd' }, // 呂布
   YOSHITSUNE: { name: '鵯越逆落・八艘飛', tag: '九郎判官', sig: 'yoshitsune_cliff_dive' }, // 源義經
   SHINGEN: { name: '風林火山・甲斐之虎', tag: '疾如風', sig: 'shingen_furinkazan' }, // 武田信玄
   GAISUWEN: { name: '五刀飛斬・莫離支', tag: '高句麗雄霸', sig: 'gaisuwen_sig' }, // 淵蓋蘇文
   ZHAOYUN: { name: '長坂護主・漢水空營', tag: '一身是膽', sig: 'zhaoyun_seven_charges' }, // 趙雲
-  MACHO: { name: '錦馬超・西涼鐵騎突', tag: '神威天將軍', sig: 'macho_sig' }, // 馬超
+  MACHO: { name: '錦馬超・西涼鐵騎突', tag: '驃騎將軍', sig: 'macho_sig' }, // 馬超
   ZHANGLIAO: { name: '威震逍遙津・八百破十萬', tag: '遼來來', sig: 'zhangliao_xiaoyao' }, // 張遼
   CHENQINGZHI: { name: '白袍神兵・千軍萬馬避白袍', tag: '名師大將', sig: 'chen_white_robe' }, // 陳慶之
   KENSHIN: { name: '毘沙門天・車懸之陣', tag: '越後之龍', sig: 'kenshin_bishamon' }, // 上杉謙信
@@ -23,11 +23,11 @@ const MUSOU_MOVES = {
   MADAI: { name: '西涼追襲・斬叛一擊', tag: '平北將軍', sig: 'madai_sig' }, // 馬岱
   DATE: { name: '獨眼龍・騎馬鐵砲', tag: '奧州筆頭', sig: 'date_sig' }, // 伊達政宗
   EULJI: { name: '薩水大捷・誘敵千里', tag: '高句麗名將', sig: 'eulji_sig' }, // 乙支文德
-  WANGSHUANG: { name: '流星飛錘・陳倉猛追', tag: '萬夫莫當', sig: 'wangshuang_sig' }, // 王雙
+  WANGSHUANG: { name: '陳倉追擊・驍騎疾追', tag: '曹魏驍騎', sig: 'wangshuang_sig' }, // 王雙
   YAMAGATA: { name: '赤備先驅・甲州猛衝', tag: '武田四天王', sig: 'yamagata_sig' }, // 山縣昌景
   TACHIBANA: { name: '西國無雙・雷切疾風', tag: '鎮西之雄', sig: 'tachibana_sig' }, // 立花宗茂
   ZHAOSHE: { name: '狹路相逢勇者勝', tag: '馬服君', sig: 'zhaoshe_sig' }, // 趙奢
-  PANGDE: { name: '抬櫬決死・白馬射關', tag: '白馬將軍', sig: 'pangde_sig' }, // 龐德
+  PANGDE: { name: '白馬將軍・射羽中額', tag: '白馬將軍', sig: 'pangde_sig' }, // 龐德
   MAEDATOSHI: { name: '槍之又左・赤母衣突擊', tag: '加賀百萬石', sig: 'maedatoshi_sig' }, // 前田利家
   BAIQI: { name: '武安君・長平殲滅', tag: '人屠', sig: 'baiqi_changping' }, // 白起
   XIANGYU: { name: '破釜沉舟・力拔山兮', tag: '西楚霸王', sig: 'xiangyu_pofu' }, // 項羽
@@ -40,15 +40,15 @@ const MUSOU_MOVES = {
   GUANYU: { name: '威震華夏・水淹七軍', tag: '武聖', sig: 'guanyu_dragon_flood' }, // 關羽
   ZHANGFEI: { name: '當陽斷橋・燕人一喝', tag: '萬人敵', sig: 'zhangfei_roar' }, // 張飛
   HOJO_UJIYASU: { name: '相模之獅・河越夜戰', tag: '小田原城主', sig: 'hojo_ujiyasu_sig' }, // 北條氏康
-  XIAHOU_DUN: { name: '拔矢啖睛・父精母血', tag: '獨眼將軍', sig: 'xiahou_dun_sig' }, // 夏侯惇
+  XIAHOU_DUN: { name: '流矢傷目・剛烈不屈', tag: '獨眼將軍', sig: 'xiahou_dun_sig' }, // 夏侯惇
   TACHIBANAD: { name: '雷神道雪・斬雷一閃', tag: '鬼道雪', sig: 'tachibanad_sig' }, // 立花道雪
   CHOIYOUNG: { name: '視金如石・高麗柱石', tag: '鐵原崔氏', sig: 'choiyoung_sig' }, // 崔瑩
   DIANWEI: { name: '古之惡來・雙戟死守', tag: '宛城護主', sig: 'dianwei_sig' }, // 典韋
-  XUCHU: { name: '虎癡裸衣・倒拖雙牛', tag: '虎侯', sig: 'xuchu_sig' }, // 許褚
+  XUCHU: { name: '虎癡護衛・倒拖牛尾', tag: '虎侯', sig: 'xuchu_sig' }, // 許褚
   SHIMAZUY: { name: '鬼石曼子・關原背進', tag: '鬼島津', sig: 'shimazu_retreat_charge' }, // 島津義弘
   SUNJIAN: { name: '江東猛虎・古錠刀', tag: '破虜將軍', sig: 'sunjian_sig' }, // 孫堅
   GYEBAEK: { name: '黃山伐・五千決死', tag: '百濟忠魂', sig: 'gyebaek_sig' }, // 階伯
-  YANGYE: { name: '金刀楊無敵・雁門破遼', tag: '楊家將', sig: 'yangye_sig' }, // 楊業
+  YANGYE: { name: '楊無敵・雁門破遼', tag: '楊家將', sig: 'yangye_sig' }, // 楊業
   CAOREN: { name: '樊城天人・鐵壁固守', tag: '天人之勇', sig: 'caoren_sig' }, // 曹仁
   ZHOUTAI: { name: '膚如刻畫・以身護主', tag: '幼平', sig: 'zhoutai_sig' }, // 周泰
   IINAOMASA: { name: '井伊赤鬼・赤備突陣', tag: '德川四天王', sig: 'iinaomasa_sig' }, // 井伊直政
@@ -87,7 +87,7 @@ const MUSOU_MOVES = {
   YUNGWAN: { name: '別武班・東北九城', tag: '高麗元帥', sig: 'yungwan_sig' }, // 尹瓘
   LUMENG: { name: '白衣渡江・襲取荊州', tag: '吳下阿蒙', sig: 'lumeng_white_robe' }, // 呂蒙
   GANNING: { name: '錦帆百騎劫營', tag: '錦帆賊', sig: 'ganning_sig' }, // 甘寧
-  HUANGGAI: { name: '苦肉計・赤壁火船', tag: '東吳宿將', sig: 'huanggai_sig' }, // 黃蓋
+  HUANGGAI: { name: '詐降・赤壁火船', tag: '東吳宿將', sig: 'huanggai_sig' }, // 黃蓋
   JIANGWEI: { name: '天水麒麟・九伐中原', tag: '諸葛傳人', sig: 'jiangwei_sig' }, // 姜維
   LIJING: { name: '雪夜襲陰山・衛公兵法', tag: '大唐軍神', sig: 'lijing_snow_raid' }, // 李靖
   DENGAI: { name: '陰平天降・裹氈滾崖', tag: '滅蜀之功', sig: 'dengai_cliff_drop' }, // 鄧艾
@@ -99,13 +99,13 @@ const MUSOU_MOVES = {
   HATTORI: { name: '鬼半藏・伊賀影縫', tag: '伊賀忍軍頭領', sig: 'hattori_sig' }, // 服部半藏
   JEONGJI: { name: '觀音浦・艦砲斬寇', tag: '高麗水軍', sig: 'jeongji_sig' }, // 鄭地
   YUEJIN: { name: '每戰先登・無堅不陷', tag: '五子良將', sig: 'yuejin_sig' }, // 樂進
-  MENGHUO: { name: '南蠻王・藤甲象兵', tag: '南中渠帥', sig: 'menghuo_sig' }, // 孟獲
+  MENGHUO: { name: '南中渠帥・據險山林', tag: '南中渠帥', sig: 'menghuo_sig' }, // 孟獲
   XUHUANG: { name: '長驅直入・破十重圍', tag: '周亞夫之風', sig: 'xuhuang_ten_rings' }, // 徐晃
   WAKIZAKA: { name: '賤岳七本槍・淡路水軍', tag: '淡路水軍頭領', sig: 'wakizaka_sig' }, // 脇坂安治
   TOUDO: { name: '築城名人・水城鐵壁', tag: '歷事七主', sig: 'toudo_sig' }, // 藤堂高虎
   ZHANGHE: { name: '巧變斷汲・街亭奇兵', tag: '五子良將', sig: 'zhanghe_sig' }, // 張郃
   CAOBIN: { name: '浮橋渡江・平定江南', tag: '北宋良將', sig: 'caobin_sig' }, // 曹彬
-  ZHUGELIANG: { name: '八陣圖・石兵八陣', tag: '臥龍', sig: 'zhuge_bazhen' }, // 諸葛亮
+  ZHUGELIANG: { name: '隆中對・推演八陣', tag: '臥龍', sig: 'zhuge_bazhen' }, // 諸葛亮
   HANXIN: { name: '十面埋伏・四面楚歌', tag: '兵仙', sig: 'hanxin_ten_sides' }, // 韓信
   ZHANGLIANG: { name: '運籌帷幄・決勝千里', tag: '謀聖', sig: 'zhangliang_scroll' }, // 張良
   SIMAYI: { name: '鷹視狼顧・高平陵', tag: '冢虎', sig: 'simayi_sig' }, // 司馬懿
@@ -117,10 +117,10 @@ const MUSOU_MOVES = {
   SUNBIN: { name: '圍魏救趙・馬陵伏弩', tag: '兵家宗師', sig: 'sunbin_sig' }, // 孫臏
   WUQI: { name: '魏武卒・七十六戰不敗', tag: '兵家亞聖', sig: 'wuqi_wuzu' }, // 吳起
   GUOJIA: { name: '十勝十敗・鬼謀遺計', tag: '鬼才', sig: 'guojia_sig' }, // 郭嘉
-  XUNYU: { name: '王佐之才・驅虎吞狼', tag: '王佐', sig: 'xunyu_sig' }, // 荀彧
+  XUNYU: { name: '王佐之才・居中持重', tag: '王佐', sig: 'xunyu_sig' }, // 荀彧
   JIAXU: { name: '亂武・毒士離間', tag: '算無遺策', sig: 'jiaxu_sig' }, // 賈詡
   SHIMAZU_YOSHIHISA: { name: '薩摩釣野伏', tag: '九州統帥', sig: 'shimazu_yoshihisa_sig' }, // 島津義久
-  PANGTONG: { name: '鳳雛・連環計', tag: '鳳雛', sig: 'pangtong_sig' }, // 龐統
+  PANGTONG: { name: '鳳雛・入蜀三策', tag: '鳳雛', sig: 'pangtong_sig' }, // 龐統
   FAZHENG: { name: '定軍山・居高指旗', tag: '翼侯', sig: 'fazheng_sig' }, // 法正
   SANADAMASA: { name: '表裏比興・上田城', tag: '智謀之將', sig: 'sanadamasa_sig' }, // 真田昌幸
   LUSU: { name: '榻上策・孫劉同盟', tag: '東吳柱石', sig: 'lusu_sig' }, // 魯肅

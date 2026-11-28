@@ -4,6 +4,12 @@
 
 ---
 
+## [7.15.13] - 2026-11-28
+### Fixed (Vercel 部署)
+
+- **新增 Vercel 部署（topwarlords.vercel.app）**：先前僅部署於 GitHub Pages，`vercel.json` 的安全標頭從未實際生效。
+- **CSP 放行 `blob:`／`data:` 連線 (`vercel.json`)**：3D 模型載入內嵌材質時以 `fetch` 讀取 `blob:` 網址，原 `connect-src` 未放行，在 Vercel 上產生 CSP 違規。修正後實測完整進入 3D 戰場（10 座將台、216 名士兵）無任何 CSP 違規。GitHub Pages 不套用 `vercel.json`，不受影響。
+
 ## [7.15.12] - 2026-11-28
 ### Fixed (三國武將史實校正：移除《三國演義》虛構情節)
 
